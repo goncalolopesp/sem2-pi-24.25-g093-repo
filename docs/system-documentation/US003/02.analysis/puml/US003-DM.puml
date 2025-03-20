@@ -13,27 +13,25 @@ hide methods
 'title Domain Model
 
 class Map {
-    +name: String
-    +sizeX: int
-    +sizeY: int
-    +cities: List<City>
-    +industries: List<Industry>
+    name
+    sizeX
+    sizeY
   }
 
   class City {
-    +name: String
-    +positionX: int
-    +positionY: int
-    +numHouseBlocks: int
+    name
+    positionX
+    positionY
+    numHouseBlocks
   }
 
   class Industry {
-    +type: String
-    +positionX: int
-    +positionY: int
+    type
+    positionX
+    positionY
   }
 
-  Map "1" o-- "*" City : contains
-  Map "1" o-- "*" Industry : contains
+  Map "1"--"*" City : contains
+  Map "1"--"*" Industry : contains
 }
 @enduml

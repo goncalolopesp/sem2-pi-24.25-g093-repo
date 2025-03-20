@@ -13,17 +13,16 @@ hide methods
 'title Domain Model
 
 class Map {
-    - name: String
-    - sizeX: int
-    - sizeY: int
-    + setName(name: String)
-    + setSize(sizeX: int, sizeY: int)
+     name
+     sizeX
+     sizeY
+
 }
 
 class Editor {
     + createMap(name: String, width: int, height: int)
 }
 
-Editor --|> Map : creates
+Editor "1"--"*" Map : creates
 
 @enduml

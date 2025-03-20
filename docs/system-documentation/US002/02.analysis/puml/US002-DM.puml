@@ -14,25 +14,18 @@ hide methods
 
 
 class Map {
-    - name: String
-    - sizeX: int
-    - sizeY: int
-    + addIndustry(industry: Industry, x: int, y: int)
+    name
+    sizeX
+    sizeY
 }
 
 class Industry {
-    - type: String
-    - positionX: int
-    - positionY: int
-    + setType(type: String)
-    + setPosition(x: int, y: int)
+    type
+    positionX
+    positionY
 }
 
-class Editor {
-    + placeIndustry(map: Map, industry: Industry, x: int, y: int)
-}
-
-Editor --|> Map : modifies
-Map *-- Industry : contains
+Editor "1"--"*" Map : modifies
+Map "1"--"*" Industry : contains
 
 @enduml
