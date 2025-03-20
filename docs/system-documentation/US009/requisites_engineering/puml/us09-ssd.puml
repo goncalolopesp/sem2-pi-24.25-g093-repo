@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+actor "Map Editor" as MapEditor
+
+activate Player
+
+    Player -> MapEditor : I want to buy a train
+    deactivate Player
+    activate MapEditor
+
+    MapEditor -> Player : Shows the available trains
+    deactivate MapEditor
+    activate Player
+
+    Player -> MapEditor : Chooses a train
+    deactivate Player
+    activate MapEditor
+
+    MapEditor -> Player : Shows successful message
+    deactivate MapEditor
+    activate Player
+
+@enduml
