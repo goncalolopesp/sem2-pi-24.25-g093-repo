@@ -1,0 +1,28 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "Map Editor" as System
+
+activate Player
+
+    Player -> System : I want to build a station
+    deactivate Player
+    activate System
+
+    System -> Player : Requests Inputs (coordinates and type of station)
+    deactivate System
+    activate Player
+
+    Player -> System : Enters requested data
+    deactivate Player
+    activate System
+
+    System -> Player : Output success message and updates the map
+
+@enduml
