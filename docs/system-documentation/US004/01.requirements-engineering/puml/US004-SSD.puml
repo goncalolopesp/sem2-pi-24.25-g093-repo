@@ -1,0 +1,27 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":System" as System
+
+activate Employee
+
+Employee -> System : asks to create a new scenario
+activate System
+System --> Employee : requests map selection
+deactivate System
+
+Employee -> System : selects map
+activate System
+System --> Employee : requests for time period, technological and historical restrictions
+deactivate System
+
+Employee -> System : inputs requested data
+activate System
+System --> Employee : displays operation success
+deactivate System
+@enduml
