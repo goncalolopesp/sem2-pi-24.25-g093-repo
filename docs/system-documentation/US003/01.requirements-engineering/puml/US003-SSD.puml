@@ -1,0 +1,41 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":System" as System
+
+activate Employee
+
+Employee -> System : asks to create a new city
+activate System
+System --> Employee : requests map name
+deactivate System
+
+Employee -> System : types map name
+activate System
+System --> Employee : requests city name and coordinates
+deactivate System
+
+Employee -> System : types city name and coordinates
+activate System
+System --> Employee : requests if manual or automatic house blocks
+deactivate System
+
+Employee -> System : chooses manual/automatic
+activate System
+System --> Employee : requests house block number (if manual)
+deactivate System
+
+Employee -> System : types house block number (if manual)
+activate System
+System --> Employee : displays operation success
+deactivate System
+
+
+deactivate System
+
+@enduml
