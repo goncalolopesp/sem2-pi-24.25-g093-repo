@@ -1,0 +1,28 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "Map Editor" as System
+
+activate Player
+
+    Player -> System : I want to upgrade a station
+    deactivate Player
+    activate System
+
+    System -> Player : Requests Inputs (which station and what building is to be placed)
+    deactivate System
+    activate Player
+
+    Player -> System : Enters requested data
+    deactivate Player
+    activate System
+
+    System -> Player : Output success message, updates the map and the station's attributes
+
+@enduml
