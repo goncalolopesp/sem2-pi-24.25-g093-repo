@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":System" as System
+
+activate Employee
+
+
+    Employee -> System :aks to add an industry
+        activate System
+        System --> Employee : requests map name
+    deactivate System
+
+    Employee -> System :  types requested data
+    activate System
+
+        System --> Employee : requests map coordinates
+    deactivate System
+
+    Employee -> System : types requested data
+    activate System
+
+        System --> Employee : displays operation success
+    deactivate System
+
+@enduml

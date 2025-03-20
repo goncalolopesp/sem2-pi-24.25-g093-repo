@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+'left to right direction
+
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+'title Domain Model
+
+
+class Map {
+    - name: String
+    - sizeX: int
+    - sizeY: int
+    + addIndustry(industry: Industry, x: int, y: int)
+}
+
+class Industry {
+    - type: String
+    - positionX: int
+    - positionY: int
+    + setType(type: String)
+    + setPosition(x: int, y: int)
+}
+
+class Editor {
+    + placeIndustry(map: Map, industry: Industry, x: int, y: int)
+}
+
+Editor --|> Map : modifies
+Map *-- Industry : contains
+
+@enduml
