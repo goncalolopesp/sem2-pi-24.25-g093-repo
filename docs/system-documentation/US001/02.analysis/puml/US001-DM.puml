@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+'left to right direction
+
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+'title Domain Model
+
+class Map {
+    - name: String
+    - sizeX: int
+    - sizeY: int
+    + setName(name: String)
+    + setSize(sizeX: int, sizeY: int)
+}
+
+class Editor {
+    + createMap(name: String, width: int, height: int)
+}
+
+Editor --|> Map : creates
+
+@enduml
