@@ -1,0 +1,27 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "Simulator" as Simulator
+
+activate Player
+
+Player -> Simulator : asks to assign a selected train to a route
+activate Simulator
+Simulator --> Player : requests train selection
+deactivate Simulator
+
+Player -> Simulator : selects train
+activate Simulator
+Simulator --> Player : requests for route and list of cargoes to be picked up
+deactivate Simulator
+
+Player -> Simulator : inputs requested data
+activate Simulator
+Simulator --> Player : displays operation success
+deactivate Simulator
+@enduml
