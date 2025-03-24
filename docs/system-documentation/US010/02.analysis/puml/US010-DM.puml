@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+class Player {
+}
+
+class Train {
+    locomotiveType
+    cargoType
+}
+
+class Route {
+    stations
+}
+
+class Station {
+    type
+    location
+}
+
+Player "1" -- "*" Train : owns
+Train "1" -- "1" Route : assigned to
+Route "*" -- "*" Station : includes
+
+@enduml
