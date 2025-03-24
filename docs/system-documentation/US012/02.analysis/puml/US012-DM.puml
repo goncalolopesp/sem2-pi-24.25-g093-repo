@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+class ProductOwner {
+}
+
+class Simulator {
+    status
+    cargoGenerationRate
+}
+
+class Station {
+    type
+    location
+}
+
+class Cargo {
+    type
+}
+
+ProductOwner "1" -- "1" Simulator : controls
+Simulator "1" -- "*" Station : manages
+Station "*" -- "*" Cargo : stores
+
+@enduml
