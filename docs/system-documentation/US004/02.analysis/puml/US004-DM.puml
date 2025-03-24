@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+class Editor {
+}
+
+class Scenario {
+    map
+    timeRestrictions
+    techRestrictions
+    historicalEvents
+}
+
+class Map {
+    name
+    sizeX
+    sizeY
+}
+
+Editor "1" -- "*" Scenario : creates
+Scenario "1" -- "1" Map : based on
+
+@enduml
