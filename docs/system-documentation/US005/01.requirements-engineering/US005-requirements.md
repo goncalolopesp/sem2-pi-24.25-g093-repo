@@ -35,6 +35,6 @@ A.C 1 : Overbuilding is not possible.
 ### 1.6. System Sequence Diagram (SSD)
 
 
-![US05_SSD](svg/US05_SSD.svg)
+![US005-SSD](svg/US005-SSD.svg)
 
 ### 1.7 Other Relevant Remarks

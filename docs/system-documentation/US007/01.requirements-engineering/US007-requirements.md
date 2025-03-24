@@ -31,6 +31,6 @@ The buildings include telegraphs, cafés, customs, post offices, hotels (that ca
 ### 1.6. System Sequence Diagram (SSD)
 
 
-![US07-SSD](svg/us07-ssd.svg)
+![US007-SSD](svg/US007-SSD.svg)
 
 ### 1.7 Other Relevant Remarks

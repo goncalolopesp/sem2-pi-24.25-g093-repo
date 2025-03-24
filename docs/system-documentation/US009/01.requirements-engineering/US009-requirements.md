@@ -30,6 +30,6 @@ As a Player, I want to buy a train.
 ### 1.6. System Sequence Diagram (SSD)
 
 
-![US09-SSD](svg/us09-ssd.svg)
+![US09-SSD](svg/US009-SSD.svg)
 
 ### 1.7 Other Relevant Remarks

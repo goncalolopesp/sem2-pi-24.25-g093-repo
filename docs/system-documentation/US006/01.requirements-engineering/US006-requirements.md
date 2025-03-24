@@ -36,6 +36,6 @@ There are no acceptance criteria on this US.
 
 ### 1.6. System Sequence Diagram (SSD)
 
-![US06_SSD](svg/US06_SSD.svg)
+![US006-SSD](svg/US006-SSD.svg)
 
 ### 1.7 Other Relevant Remarks
