@@ -1,4 +1,4 @@
-# US05 - Build  Station
+# US05 - Build a Station
 
 ## 1. Requirements Engineering
 
