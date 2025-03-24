@@ -1,0 +1,16 @@
+@startuml
+
+actor ProductOwner
+participant "Simulator System" as Simulator
+
+ProductOwner -> Simulator: startSimulation()
+Simulator -> Simulator: Validate Existing Data
+Simulator -> Simulator: Generate Cargo at Stations
+Simulator -> Simulator: Update Station Cargo Status
+Simulator -> ProductOwner: Display Simulation Status
+
+ProductOwner -> Simulator: pauseSimulation()
+Simulator -> Simulator: Stop Cargo Generation
+Simulator -> ProductOwner: Display Paused Status
+
+@enduml
