@@ -1,0 +1,41 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+class train{
+    locomotives
+    carriages
+}
+
+class Locomotive{
+    typeOfFuel
+    requiredRail
+    power
+    acceleration
+    topSpeed
+    startYearOfOperation
+    price
+}
+
+class Carriage{
+    typeOfCargo
+}
+
+class Player{
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+}
+
+Player "1"--"*" train : Chooses
+
+train "*"--"*" Locomotive : Contains
+
+train "*"--"*" Carriage : Contains
+
+@enduml

@@ -10,7 +10,7 @@ As a Player, I want to buy a train.
 
 **From the specifications document:**
 
-> Different trains have different fuel consumption, namely electricity, steam and diesel. <br>Also, Some types of trains require special rails to operate.
+> The player should choose a train from a list of available trains. <br>Different trains have different fuel consumption, namely electricity, steam and diesel. <br>Also, Some types of trains require special rails to operate.
 
 
 ### 1.3. Acceptance Criteria
@@ -19,13 +19,17 @@ As a Player, I want to buy a train.
 
 ### 1.4. Found out Dependencies
 
-* This User Story has no requirements.
+* This User Store requires the US01. In order to buy a train, the player needs to have a map and a railway.
 
 ### 1.5 Input and Output Data
 
+**Input Data:**
+
+- Train type
+
 **Output Data:**
 
-- Listing of all the trains.
+- Success Message
 
 ### 1.6. System Sequence Diagram (SSD)
 
