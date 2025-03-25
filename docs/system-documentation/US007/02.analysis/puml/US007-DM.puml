@@ -1,0 +1,28 @@
+@startuml
+
+class Player{
+
+}
+
+class Station{
+    type
+    building
+    cargo
+}
+
+class Building{
+    type
+    upgrade
+}
+
+class Cargo{
+    type
+    status
+}
+
+Player "1"--"*" Station : Lists
+
+Station "*"--"*" Building : Has
+Station "*"--"*" Cargo : Has
+
+@enduml
