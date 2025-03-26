@@ -13,7 +13,8 @@ As an Editor, I want to create a map with a size and a name.
 - The editor should be able to specify these attributes during creation.
 
 ### 1.3. Acceptance Criteria
-- In this version there is no acceptance criteria.
+- **AC1:** The maps dimensions are positive integers.
+- **AC2:** Map name should be a valid file name.
 
 ### 1.4. Found Dependencies
 - None.
