@@ -12,10 +12,10 @@ activate Employee
 
 Employee -> System : asks to create a new city
 activate System
-System --> Employee : requests map name
+System --> Employee : shows list of maps
 deactivate System
 
-Employee -> System : types map name
+Employee -> System : chooses one map
 activate System
 System --> Employee : requests city name and coordinates
 deactivate System

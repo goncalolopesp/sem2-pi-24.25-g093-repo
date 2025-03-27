@@ -34,6 +34,7 @@ As an Editor, I want to add a city in a position XY of the selected map, with a 
 
 ### 1.6. System Sequence Diagram (SSD)
 ![System Sequence Diagram](svg/US003-SSD.svg)
+
 **_Other alternatives might exist._**
 
 ### 1.7 Other Relevant Remarks
