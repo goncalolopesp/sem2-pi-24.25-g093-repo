@@ -7,22 +7,36 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "Map Editor" as System
+participant "Railway Simulation System" as System
 
 activate Player
 
-    Player -> System : I want to build a station
-    deactivate Player
+    Player -> System : Requests list of available maps
     activate System
 
-    System -> Player : Requests Inputs (coordinates and type of station)
+    System -> Player : Displays list of available maps
+
+    System -> Player : Requests selected map
+
+    Player -> System : Selects a map
+
+    System -> Player : Displays selected map
     deactivate System
-    activate Player
 
-    Player -> System : Enters requested data
-    deactivate Player
+    Player -> System : Selects location for the station
     activate System
 
-    System -> Player : Output success message and updates the map
+    System -> System : Validates placement (check overbuilding and budget)
+
+    System -> Player : Requests station type (Depot, Station, Terminal)
+
+    Player -> System : Provides station type
+
+    System -> Player : Requests station's center (if the station requires it)
+
+    Player -> System : Inserts station's center (NE,SE,NW,SW)
+
+    System -> Player : Shows success message and updates the map
+    deactivate System
 
 @enduml
