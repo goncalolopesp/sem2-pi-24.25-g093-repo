@@ -4,14 +4,15 @@
 
 ### 1.1. User Story Description
 
-As a Player, I want to upgrade a selected station with a building.
+As a Player, I want to upgrade a selected station with a building.Each type of station improvement has a date from which it is available.
+Some equipments are mutually exclusive, while some equipments/buildings replace others.
 
 ### 1.2. Customer Specifications and Clarifications
 
 **From the specifications document:**
 
 > The player should be able to select an existing station and upgrade it with available buildings (telegraph [later telephone], café [small or large], customs, post
-office, hotel [small or large], silo, liquid storage). The main goal of these buildings are to improve train operation, facilitate train manoeuvers, and increase the lifespan of cargo stored at the station.
+office, hotel [small or large], silo, liquid storage). The main goal of these buildings are to improve train operation, facilitate train manoeuvers, and increase the lifespan of cargo stored at the station. Not only that, some equipments/buildings are mutually exclusive (small and grand hotels, for example) and some equipments/buildings replace others.
 
 
 ### 1.3. Acceptance Criteria
@@ -30,7 +31,7 @@ There are no acceptance criteria on this US.
 
 **Output Data:**
 
-- Success message;
+- Success or failure message;
 - Update the map;
 - Update the station's attributes;
 
