@@ -1,0 +1,30 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+
+hide circle
+hide methods
+
+class Station {
+    name
+    location
+    type
+}
+
+class Building {
+    name
+    availability
+}
+
+class Equipment {
+    name
+    mutuallyExclusivity
+    replaces
+}
+
+Building --|> Equipment
+Station "1" -- "1" Building : can be upgraded with
+
+@enduml
