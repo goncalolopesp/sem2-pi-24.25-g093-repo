@@ -16,7 +16,6 @@ class Map {
      name
      sizeX
      sizeY
-
 }
 
 class Editor {

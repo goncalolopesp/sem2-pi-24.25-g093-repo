@@ -11,19 +11,14 @@ actor "Map Editor" as MapEditor
 activate Player
 
     Player -> MapEditor : I want to buy a train
-    deactivate Player
     activate MapEditor
 
     MapEditor -> Player : Shows the available trains
-    deactivate MapEditor
-    activate Player
+    MapEditor -> Player : Asks the chosen train
 
     Player -> MapEditor : Chooses a train
-    deactivate Player
-    activate MapEditor
 
     MapEditor -> Player : Shows successful message
     deactivate MapEditor
-    activate Player
 
 @enduml

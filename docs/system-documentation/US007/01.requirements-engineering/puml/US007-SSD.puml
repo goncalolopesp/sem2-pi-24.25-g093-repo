@@ -11,19 +11,15 @@ participant "Map Editor" as MapEditor
 activate Player
 
     Player -> MapEditor : I want to see all the stations
-    deactivate Player
     activate MapEditor
 
     MapEditor -> Player : Displays all the stations
     deactivate MapEditor
-    activate Player
 
     Player -> MapEditor : I want to see the details of a specific station
-    deactivate Player
     activate MapEditor
 
     MapEditor -> Player : Displays the information about a station, including the buildings and the cargo
     deactivate MapEditor
-    activate Player
 
 @enduml
