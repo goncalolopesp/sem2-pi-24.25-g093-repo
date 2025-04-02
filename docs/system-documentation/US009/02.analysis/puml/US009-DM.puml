@@ -9,7 +9,7 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class train{
+class Train{
     locomotives
     carriages
 }
@@ -32,10 +32,8 @@ class Player{
     + buyTrain(carriage: Carriage, locomotive: Locomotive)
 }
 
-Player "1"--"*" train : Chooses
-
-train "*"--"*" Locomotive : Contains
-
-train "*"--"*" Carriage : Contains
+Player "1"--"*" Train : Chooses
+Train "*"--"*" Locomotive : Contains
+Train "*"--"*" Carriage : Contains
 
 @enduml

@@ -13,25 +13,122 @@ hide methods
 'title Domain Model
 
 class Map {
-    name
-    sizeX
-    sizeY
-  }
+     name
+     sizeX
+     sizeY
+}
 
-  class City {
+class Industry {
+    type
+    positionX
+    positionY
+}
+
+class City {
     name
     positionX
     positionY
     numHouseBlocks
-  }
-
-  class Industry {
-    type
-    positionX
-    positionY
-  }
-
-  Map "1"--"*" City : contains
-  Map "1"--"*" Industry : contains
 }
+
+class Scenario {
+    map
+    timeRestrictions
+    techRestrictions
+    historicalEvents
+}
+
+class Station {
+    name
+    location
+    type
+    building
+    cargo
+}
+
+class Building {
+    name
+    availability
+    type
+    upgrade
+}
+
+class Cargo{
+    type
+    status
+}
+
+class Equipment {
+    name
+    mutuallyExclusivity
+    replaces
+}
+
+class Train{
+    locomotives
+    carriages
+    cargoType
+}
+
+class Route {
+    stations
+}
+
+class Locomotive{
+    typeOfFuel
+    requiredRail
+    power
+    acceleration
+    topSpeed
+    startYearOfOperation
+    price
+}
+
+class Carriage{
+    typeOfCargo
+}
+
+class Simulator {
+    status
+    cargoGenerationRate
+}
+
+class Editor {
+    + createMap(name: String, width: int, height: int)
+}
+
+class ProductOwner {
+}
+
+class Player {
+    id
+    username
+    password
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+}
+
+Editor "1" -- "*" Scenario : creates
+Scenario "1" -- "1" Map : based on
+Editor "1"--"*" Map : creates
+Editor "1"--"*" Map : modifies
+Map "1"--"*" Industry : contains
+Map "1"--"*" City : contains
+Station "*" -- "1" Map : located in
+Station "*" -- "1" City : closest to
+Player "1" -- "*" Station : can build
+Building --|> Equipment
+Station "1" -- "1" Building : can be upgraded with
+Player "1"--"*" Station : Lists
+Station "*"--"*" Building : Has
+Station "*"--"*" Cargo : Has
+Player "1"--"*" Train : Chooses
+Train "*"--"*" Locomotive : Contains
+Train "*"--"*" Carriage : Contains
+Player "1" -- "*" Train : owns
+Train "1" -- "1" Route : assigned to
+Route "*" -- "*" Station : includes
+ProductOwner "1" -- "1" Simulator : controls
+Simulator "1" -- "*" Station : manages
+Station "*" -- "*" Cargo : stores
+
 @enduml
