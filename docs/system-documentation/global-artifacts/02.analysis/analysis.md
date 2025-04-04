@@ -10,67 +10,85 @@ To identify domain conceptual classes, start by making a list of candidate conce
 
 **Business Transactions**
 
-* 
+* Purchase of Trains
+* Transport of Cargo
+* Building of Station
 
 ---
 
 **Transaction Line Items**
 
-* 
+* Shipment of Cargo
 
 ---
 
 **Product/Service related to a Transaction or Transaction Line Item**
 
-* 
+* Train Service
+* Cargo
 
 ---
 
 **Transaction Records**
 
-* 
+* Purchase of Trains
+* Delivery of Cargo
+* Building of Station
 
 ---  
 
 **Roles of People or Organizations**
 
-* 
+* Editor
+* Player
 
 ---
 
 **Places**
 
-* 
+* Map
+* City
+* Station
+* Industry
 
 ---
 
 **Noteworthy Events**
 
-* 
+* Cargo Generation
+* Historical Events
 
 ---
 
 **Physical Objects**
 
-* 
+* Train
+* Locomotive
+* Railway Line
+* Station
 
 ---
 
 **Descriptions of Things**
 
-* 
+* City Description
+* Industry Description
+* Locomotive Specifications
 
 ---
 
 **Catalogs**
 
-* 
+* Locomotive Catalog
+* Station Catalog
 
 ---
 
 **Containers**
 
-* 
+* Map
+* Station
+* Train
 
 ---
 
@@ -137,4 +155,4 @@ An association is a relationship between instances of objects that indicates a r
 
 **Insert the Domain Model diagram in SVG format below.**
 
-![Domain Model](svg/DM.svg)
+![Domain Model](svg/analysis.svg)
