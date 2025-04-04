@@ -7,7 +7,6 @@ As a Player, I want to assign a selected train to a route with a valid station a
 
 ### 1.2. Customer Specifications and Clarifications
 
-
 #### From the customer's clarifications:
 > Question: When a train reaches the end of the route does it come back through the same path? What if the route ends at the starting point? Or alternatively should routes always be circular?
 > Answer:
