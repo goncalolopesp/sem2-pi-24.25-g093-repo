@@ -7,6 +7,36 @@ As an Editor, I want to create a scenario for a selected map.
 
 ### 1.2. Customer Specifications and Clarifications
 
+#### From the customer's clarifications
+> Question: Can scenarios be modified after creation, or are they immutable?
+> Answer:
+>
+> Question: What happens if an Editor tries to set conflicting restrictions (for example allowing a locomotive that wasn’t invented yet)?
+> Answer:
+> 
+> Question: What elements are included in a scenario? For example, cities, industries, or specific objectives by default?
+> Answer:
+> 
+> Question: Are there predefined scenarios, or should users be able to create custom ones from scratch?
+> Answer:
+> 
+> Question: How should scenarios be linked to a selected map? Can one map have multiple scenarios?
+> Answer:
+> 
+> Question: What is the process for selecting a map when creating a scenario?
+> Answer:
+> 
+> Question: Should scenarios include time-based components, such as start and end dates or time-specific events?
+> Answer:
+> 
+> Question: Are there any historical elements or themes that need to be incorporated into scenarios?
+> Answer:
+>
+> Question: What level of customization should be available to users when creating scenarios?
+> Answer:
+>
+> Question: Could you specify the information that needs to be stored about each scenario?
+> Answer:
 #### From the specifications document:
 > The Scenario Editor must allow the user to define the restrictions and
 conditions for using a given map, namely:
@@ -24,7 +54,9 @@ this context, the goods that the Ports import and export are also de-
 fined.
 
 ### 1.3. Acceptance Criteria
-- In this version there is no acceptance criteria.
+AC1: Definition of the behaviour of ports, which cargoes they import/export and/or transform;
+AC2: Definition of the available locomotion types (steam, diesel, and/or electric).
+AC3: (Re)Definition of the factors that alter the generation (frequency) of generating industries
 
 ### 1.4. Found Dependencies
 - This user story has a dependency with US001 - "Create a map" as there has to exist a map for a scenario to be made.
