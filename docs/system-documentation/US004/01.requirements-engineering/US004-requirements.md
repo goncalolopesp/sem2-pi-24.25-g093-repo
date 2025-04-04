@@ -7,7 +7,7 @@ As an Editor, I want to create a scenario for a selected map.
 
 ### 1.2. Customer Specifications and Clarifications
 
-#### From the customer's clarifications
+#### From the customer's clarifications:
 > Question: Can scenarios be modified after creation, or are they immutable?
 > Answer:
 >

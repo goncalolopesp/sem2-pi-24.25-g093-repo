@@ -7,6 +7,26 @@ As a Player, I want to assign a selected train to a route with a valid station a
 
 ### 1.2. Customer Specifications and Clarifications
 
+
+#### From the customer's clarifications:
+> Question: When a train reaches the end of the route does it come back through the same path? What if the route ends at the starting point? Or alternatively should routes always be circular?
+> Answer:
+> 
+> Question: Should the route be defined one station at a time, or through a list of stations and cargo changes?
+> Answer:
+> 
+> Question: Should we be able to assign multiple trains to the same route?
+> Answer:
+> 
+> Question: What happens if the trains pick up resources that aren't needed at the next station?
+> Answer:
+> 
+> Question: A route is a list of stations where the train passes. If there are many stations but no railway lines, are we able to create a route?
+> Answer: If there is no path between any pair of consecutive points of the route, the player should be warned, then the player can opt between cancel/proceed.
+> 
+> Question: Can multiple cargo types be assigned to the same train? Does a route have a limit of stations that can be assigned?
+> Answer: Yes; No.
+
 #### From the specifications document:
 > Railway Lines allow the connection of two stations. In the context of this
 project, it is not intended to make a detailed graphical edition of the route,
