@@ -11,8 +11,11 @@ To identify domain conceptual classes, start by making a list of candidate conce
 **Business Transactions**
 
 * Purchase of Trains
+* Purchase of Locomotives
 * Transport of Cargo
 * Building of Station
+* Station Upgrade
+* Building of Railway Line
 
 ---
 
@@ -25,15 +28,18 @@ To identify domain conceptual classes, start by making a list of candidate conce
 **Product/Service related to a Transaction or Transaction Line Item**
 
 * Train Service
-* Cargo
+* Cargo Generation
 
 ---
 
 **Transaction Records**
 
 * Purchase of Trains
+* Purchase of Locomotives
 * Delivery of Cargo
 * Building of Station
+* Station Upgrade
+* Building of Railway Line
 
 ---  
 
@@ -94,7 +100,10 @@ To identify domain conceptual classes, start by making a list of candidate conce
 
 **Elements of Containers**
 
-* 
+* Cities
+* Industries
+* Stations
+* Cargo
 
 ---
 
@@ -112,13 +121,18 @@ To identify domain conceptual classes, start by making a list of candidate conce
 
 **Records of finance, work, contracts, legal matters**
 
-* 
+* Player Budget
+* Train Pricings
+* Locomotive Pricings
+* Station Building Pricings
+* Station Upgrade Pricings
+* Railway Line Building Pricings
 
 ---
 
 **Financial Instruments**
 
-* 
+* Player Budget
 
 ---
 
