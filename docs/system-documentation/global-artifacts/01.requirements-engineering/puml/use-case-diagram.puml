@@ -1,0 +1,61 @@
+@startuml
+left to right direction
+
+actor Editor
+actor Player
+actor "Product Owner" as PO
+
+    Editor --> (US01: Create Map)
+    Editor --> (US02: Add Industry)
+    Editor --> (US03: Add City)
+    Editor --> (US04: Create Scenario)
+
+
+
+    Player --> (US05: Build Station)
+    Player --> (US06: Upgrade Station)
+    Player --> (US07: View Station Details)
+    Player --> (US09: Buy Locomotive)
+    Player --> (US10: Assign Train to Route)
+
+
+
+    PO --> (US12: Run Cargo Simulator)
+
+
+note right of (US01: Create Map)
+AC1: The maps dimensions are positive integers.
+AC2: Map name should be a valid file name.
+end note
+
+note right of (US03: Add City)
+AC1: A city name cannot have special characters or digits.
+AC2: The house blocks can be assigned manually or automatically
+(randomly around the city tag position accordingly to normal distribu-
+tion)
+end note
+
+note right of (US04: Create Scenario)
+AC1: Definition of the behaviour of ports, which cargoes they im-
+port/export and/or transform;
+AC2: Definition of the available locomotion types (steam, diesel, and/or
+electric).
+AC3: (Re)Definition of the factors that alter the generation (frequency)
+of generating industries
+end note
+
+note right of (US05: Build Station)
+AC1: Overbuilding is not possible
+end note
+
+note right of (US09: Buy Locomotive)
+AC1: The player should choose the locomotive from a list of available
+locomotives for the scenario as well as a current date.
+end note
+
+note right of (US12: Run Cargo Simulator)
+ AC1: This simulator should
+provide options for start/pause.
+end note
+
+@enduml

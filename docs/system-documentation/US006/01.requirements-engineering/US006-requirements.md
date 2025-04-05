@@ -14,6 +14,8 @@ Some equipments are mutually exclusive, while some equipments/buildings replace 
 > The player should be able to select an existing station and upgrade it with available buildings (telegraph [later telephone], café [small or large], customs, post
 office, hotel [small or large], silo, liquid storage). The main goal of these buildings are to improve train operation, facilitate train manoeuvers, and increase the lifespan of cargo stored at the station. Not only that, some equipments/buildings are mutually exclusive (small and grand hotels, for example) and some equipments/buildings replace others.
 
+**From the customer's clarifications:**
+> There are no automatic updates. When a new building is available, the player can buy it and then the previous building is replaced.
 
 ### 1.3. Acceptance Criteria
 There are no acceptance criteria on this US.
@@ -40,3 +42,4 @@ There are no acceptance criteria on this US.
 ![US006-SSD](svg/US006-SSD.svg)
 
 ### 1.7 Other Relevant Remarks
+- None
