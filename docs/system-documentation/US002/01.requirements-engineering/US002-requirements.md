@@ -7,6 +7,19 @@ As an Editor, I want to add an industry in a position (X, Y) of the selected map
 
 ### 1.2. Customer Specifications and Clarifications
 
+#### From the customer's clarifications:
+> Question: When adding a new industry to a map, is there any other necessary input aside from position and industry type?
+>
+> Answer: No.
+
+> Question: For US2, is it possible to select more than one industry at the same time to be placed on the map?
+> 
+> Answer: This is more a question of UX/UI than of how the US itself works, so the teams are free to decide.
+
+>Question: As an editor, when adding a new factory, do I need to check for overbuild?
+>
+> Answer: yes.
+
 #### From the specifications document:
 - An industry must be placed at a specific (X, Y) position on an existing map.
 - Each industry belongs to a predefined industry type.
