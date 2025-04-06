@@ -109,13 +109,13 @@ To identify domain conceptual classes, start by making a list of candidate conce
 
 **(Other) Organizations**
 
-* 
+* Industries (manufacturing, agriculture, mining, ...)
 
 ---
 
 **Other (External/Collaborating) Systems**
 
-* 
+* Simulator
 
 ---
 
@@ -138,7 +138,10 @@ To identify domain conceptual classes, start by making a list of candidate conce
 
 **Documents mentioned/used to perform some work**
 
-* 
+* Scenario
+* Routes
+* Trains
+* Pricings
 
 ---
 
@@ -156,10 +159,35 @@ An association is a relationship between instances of objects that indicates a r
 * etc.
 
 
-| Concept (A) 		|  Association   	|  Concept (B) |
-|----------	   		|:-------------:		|------:       |
-| C1  	| verb1    		 	| C2  |
-| ...  	| ...    		 	| ...  |
+| Concept (A) 		  |       Association   	       |               Concept (B) |
+|-----------------|:---------------------------:|--------------------------:|
+| Editor  	       |       creates    		 	       |                       Map |
+| Editor  	       |       creates    		 	       |                  Scenario |
+| Map  	          |      contains    		 	       |                    Cities |
+| Map  	          |      contains    		 	       |                Industries |
+| Map  	          |      contains    		 	       |                  Stations |
+| Map  	          |      contains    		 	       |              RailwayLines |
+| Scenario  	     |    is assigned to   		 	    |                       Map |
+| Scenario  	     |      contains    		 	       |          TimeRestrictions |
+| Scenario  	     |      contains    		 	       | TechnologicalRestrictions |
+| Scenario  	     |      contains    		 	       |    HistoricalRestrictions |
+| Industry  	     |        is a    		 	         |     PrimarySectorIndustry |
+| Industry  	     |        is a    		 	         |      TransformingIndustry |
+| Industry  	     |        is a    		 	         |             MixedIndustry |
+| Depot  	      |        is a    		 	         |                   Station |
+| Terminal  	      |        is a    		 	         |                   Station |
+| Station  	      |       stores    		 	        |                     Cargo |
+| RailwayLines  	 |       connect    		 	       |                  Stations |
+| Player  	       |       builds    		 	        |                  Stations |
+| Player  	       |      upgrades    		 	       |                  Stations |
+| Player  	       |       builds    		 	        |              RailwayLines |
+| Player  	       |        buys    		 	         |                    Trains |
+| Player  	       |        buys    		 	         |               Locomotives |
+| Train  	        |         has    		 	         |                Locomotive |
+| Train  	        |   is assigned to    		 	    |                     Route |
+| Route  	        |      includes    		 	       |                  Stations |
+| City  	         | generates/consumes    		 	  |                     Cargo |
+| Industry  	     | generates/processes    		 	 |                     Cargo |
 
 
 
