@@ -13,6 +13,12 @@ also propose the name for the station based on the closest city and type of stat
 
 > The player should be able to build a station at any location on the map (the location should be validated beforehand). Overbuilding is not allowed (a station cannot be built on top of another station). The station's type have different costs and economic radius. Stations should also be able to connect to other stations by routes.
 
+**From the customer's clarifications:**
+> - Overbuilding in the Editor is possible, the existing building is replaced for a new one.
+> - Overbuilding in the Simulator isn't possible, a warning needs to appear and the player continues to play.
+> - The only types of stations the player can build are depots, stations and terminal, nothing more.
+> - The budget for the building option represents just a generic currency.
+
 ### 1.3. Acceptance Criteria
 A.C 1 : Overbuilding is not possible.
 

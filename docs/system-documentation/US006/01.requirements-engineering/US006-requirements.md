@@ -15,14 +15,19 @@ Some equipments are mutually exclusive, while some equipments/buildings replace 
 office, hotel [small or large], silo, liquid storage). The main goal of these buildings are to improve train operation, facilitate train manoeuvers, and increase the lifespan of cargo stored at the station. Not only that, some equipments/buildings are mutually exclusive (small and grand hotels, for example) and some equipments/buildings replace others.
 
 **From the customer's clarifications:**
-> There are no automatic updates. When a new building is available, the player can buy it and then the previous building is replaced.
+> - There isn't a limited number of buildings a station can be upgraded with.
+> - There are no automatic updates. When a new building is available, the player can buy it and then the previous building is replaced.
+> - There are buildings mutually exclusive, like the small and big restaurant.
+> - There are buildings that when they start to exist, the previous one can't be bougth anymore (for example,when the telephone becomes available, the telegraph cannot be bought anymore).
+> - There can't be multiple identical buildings.
 
 ### 1.3. Acceptance Criteria
 There are no acceptance criteria on this US.
 
 ### 1.4. Found out Dependencies
 
-* This User Story has a dependency with US05 "Create a Map" because it is necessary for a station to exist, in order to upgrade it.
+* This User Story has a dependency with US04 "Create a Scenario", because US06 mentions "dates of availability", which will be defined in the creation of the scenario.
+* This User Story has a dependency with US05 "Build a Station", because it is necessary for a station to exist, in order to upgrade it.
 
 ### 1.5 Input and Output Data
 
