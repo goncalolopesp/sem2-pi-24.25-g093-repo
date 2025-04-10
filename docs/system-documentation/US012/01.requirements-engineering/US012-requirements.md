@@ -69,6 +69,7 @@ scenario can be played by multiple players simultaneously.
 
 ### 1.6. System Sequence Diagram (SSD)
 ![System Sequence Diagram](svg/US012-SSD.svg)
+
 **_Other alternatives might exist._**
 
 ### 1.7. Other Relevant Remarks
