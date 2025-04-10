@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant "System" as System
+
+activate Employee
+
+Employee -> System : asks to create a new scenario
+activate System
+System --> Employee : requests scenario name
+deactivate System
+
+Employee -> System : types invalid scenario name
+activate System
+System --> Employee : displays error message: "Error. Invalid Name. Name shouldn't start with special characters.\nMust be under 15 characters. Must have, at least, one upper case character."
+System --> Employee : requests for valid scenario name
+deactivate System
+
+Employee -> System : types valid scenario name
+activate System
+System --> Employee : requests map selection
+deactivate System
+
+Employee -> System : selects map
+activate System
+System --> Employee : requests for time period, technological and historical restrictions
+deactivate System
+
+Employee -> System : selects time period, technological restrictions and historical restrictions
+activate System
+System --> Employee : displays operation success message: "Scenario created successfully."
+deactivate System
+@enduml
