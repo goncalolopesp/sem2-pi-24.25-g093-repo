@@ -28,7 +28,7 @@ _Refers to the integrity, compliance and interoperability of the software. The r
 
 - **Failure Recovery:** Data will persist through object serialization for continuous system use;
 - **Unit Testing:** Using JUnit 5 framework, unit tests will be created to verify if the software is working as intended to;
-- **Security:** The software will use user authentication in order to increase secyrity;
+- **Security:** The software will use user authentication in order to increase security;
 
 ## Performance
 
@@ -52,7 +52,7 @@ configurability, installability, scalability and more._
 _Specifies or constraints the system design process. Examples may include: programming languages, software process, mandatory standards/patterns, use of development tools, class library, etc._
 
 - **Programming Language:** Java is mandatory to program the software;
-- **Development Methodology:** Usage of SCRUM famework;
+- **Development Methodology:** Usage of SCRUM framework;
 - **Coding Standards:** Usage of CamelCase and JavaDoc for documentation;
 - **Version Control:** Mandatory use of Github repository feature;
 
