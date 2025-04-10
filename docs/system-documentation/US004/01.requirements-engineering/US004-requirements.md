@@ -82,6 +82,7 @@ AC3: (Re)Definition of the factors that alter the generation (frequency) of gene
 ![System Sequence Diagram](svg/US004-SSD.svg)
 ![System Sequence Diagram](svg/US004-SSD-invalidScenarioName.svg)
 ![System Sequence Diagram](svg/US004-SSD-invalidTechnologicalRestriction.svg)
+![System Sequence Diagram](svg/US004-SSD-invalidTimePeriod.svg)
 
 **_Other alternatives might exist._**
 
