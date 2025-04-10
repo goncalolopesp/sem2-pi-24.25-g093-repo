@@ -1,16 +1,18 @@
 @startuml
 
 actor ProductOwner
-participant "Simulator System" as Simulator
+participant "System" as System
 
-ProductOwner -> Simulator: startSimulation()
-Simulator -> Simulator: Validate Existing Data
-Simulator -> Simulator: Generate Cargo at Stations
-Simulator -> Simulator: Update Station Cargo Status
-Simulator -> ProductOwner: Display Simulation Status
+activate ProductOwner
 
-ProductOwner -> Simulator: pauseSimulation()
-Simulator -> Simulator: Stop Cargo Generation
-Simulator -> ProductOwner: Display Paused Status
+ProductOwner -> System: startSimulation()
+activate System
+System -> ProductOwner: Display Simulation Status
+deactivate System
+
+ProductOwner -> System: pauseSimulation()
+activate System
+System -> ProductOwner: Display Paused Status
+deactivate System
 
 @enduml
