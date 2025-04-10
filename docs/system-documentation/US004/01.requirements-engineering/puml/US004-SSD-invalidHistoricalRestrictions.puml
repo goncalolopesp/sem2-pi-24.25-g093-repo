@@ -25,13 +25,13 @@ activate System
 System --> Employee : requests for time period, technological and historical restrictions
 deactivate System
 
-Employee -> System : selects time period, historical restrictions and invalid technological restrictions
+Employee -> System : selects time period, technological restrictions and invalid historical restrictions
 activate System
-System --> Employee : displays error message: "Error. Technological Restrictions must match map and historical restrictions."
-System --> Employee : requests for valid technological restrictions
+System --> Employee : displays error message: "Error. Historical Restrictions must match selected map."
+System --> Employee : requests for valid historical restrictions
 deactivate System
 
-Employee -> System : selects valid technological restrictions
+Employee -> System : selects valid historical restrictions
 activate System
 System --> Employee : displays operation success message: "Scenario created successfully."
 deactivate System

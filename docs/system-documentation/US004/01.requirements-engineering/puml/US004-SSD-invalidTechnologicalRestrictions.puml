@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant "System" as System
+
+activate Employee
+
+Employee -> System : asks to create a new scenario
+activate System
+System --> Employee : requests scenario name
+deactivate System
+
+Employee -> System : types scenario name
+activate System
+System --> Employee : requests map selection
+deactivate System
+
+Employee -> System : selects map
+activate System
+System --> Employee : requests for time period, technological and historical restrictions
+deactivate System
+
+Employee -> System : selects time period, historical restrictions and invalid technological restrictions
+activate System
+System --> Employee : displays error message: "Error. Technological Restrictions must match selected map\nand historical restrictions."
+System --> Employee : requests for valid technological restrictions
+deactivate System
+
+Employee -> System : selects valid technological restrictions
+activate System
+System --> Employee : displays operation success message: "Scenario created successfully."
+deactivate System
+@enduml
