@@ -47,5 +47,4 @@ A.C 1 : Overbuilding is not possible.
 ![US005-SSD](svg/US005-SSD.svg)
 
 ### 1.7 Other Relevant Remarks
-- The map should offer real-time feedback regarding the 'building station' option;
-- The software should correctly generate the station's name;
+- None

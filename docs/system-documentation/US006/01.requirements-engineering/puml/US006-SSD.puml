@@ -7,18 +7,16 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "Railway Simulation System" as System
+participant "System" as System
 
 activate Player
 
     Player -> System : Selects a station to upgrade
     activate System
-    System -> System : Validates the station selection
     System -> Player : Requests available building options
     deactivate System
     Player -> System : Chooses a building
     activate System
-    System -> System : Validates the building selection
     System -> Player : Upgrades the station and updates the map
     deactivate System
 
