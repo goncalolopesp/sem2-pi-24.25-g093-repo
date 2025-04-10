@@ -82,6 +82,7 @@ class Locomotive{
     topSpeed
     startYearOfOperation
     price
+    type
 }
 
 class Carriage{
@@ -116,7 +117,7 @@ Map "1"--"*" City : contains
 Station "*" -- "1" Map : located in
 Station "*" -- "1" City : closest to
 Player "1" -- "*" Station : can build
-Building --|> Equipment
+Equipment --|> Building
 Station "1" -- "1" Building : can be upgraded with
 Player "1"--"*" Station : Lists
 Station "*"--"*" Building : Has
@@ -130,5 +131,6 @@ Route "*" -- "*" Station : includes
 ProductOwner "1" -- "1" Simulator : controls
 Simulator "1" -- "*" Station : manages
 Station "*" -- "*" Cargo : stores
+Scenario -- Locomotive
 
 @enduml
