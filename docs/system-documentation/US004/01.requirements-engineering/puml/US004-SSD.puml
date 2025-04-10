@@ -6,11 +6,16 @@ skinparam shadowing false
 autonumber
 
 actor "Editor" as Employee
-participant ":System" as System
+participant "System" as System
 
 activate Employee
 
 Employee -> System : asks to create a new scenario
+activate System
+System --> Employee : requests scenario name
+deactivate System
+
+Employee -> System : types scenario name
 activate System
 System --> Employee : requests map selection
 deactivate System
@@ -20,8 +25,8 @@ activate System
 System --> Employee : requests for time period, technological and historical restrictions
 deactivate System
 
-Employee -> System : inputs requested data
+Employee -> System : selects time period, technological and historical restrictions
 activate System
-System --> Employee : displays operation success
+System --> Employee : displays operation success message: "Scenario created successfully."
 deactivate System
 @enduml

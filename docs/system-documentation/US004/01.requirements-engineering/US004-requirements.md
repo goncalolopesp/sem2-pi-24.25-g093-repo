@@ -64,10 +64,15 @@ AC3: (Re)Definition of the factors that alter the generation (frequency) of gene
 ### 1.5. Input and Output Data
 
 #### Input Data:
-- Map selection
-- Time Period
-- Technological Restrictions
-- Historical Restrictions
+- Typed Data:
+  - Scenario name
+
+
+- Selected Data:
+  - Map selection
+  - Time Period
+  - Technological Restrictions
+  - Historical Restrictions
 
 #### Output Data:
 - Confirmation of successful scenario creation
@@ -75,6 +80,7 @@ AC3: (Re)Definition of the factors that alter the generation (frequency) of gene
 
 ### 1.6. System Sequence Diagram (SSD)
 ![System Sequence Diagram](svg/US004-SSD.svg)
+
 **_Other alternatives might exist._**
 
 ### 1.7. Other Relevant Remarks
