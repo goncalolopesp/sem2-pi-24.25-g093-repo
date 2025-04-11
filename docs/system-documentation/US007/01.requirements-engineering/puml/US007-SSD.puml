@@ -6,20 +6,20 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "Map Editor" as MapEditor
+participant "System" as System
 
 activate Player
 
-    Player -> MapEditor : I want to see all the stations
-    activate MapEditor
+    Player -> System : I want to see all the stations
+    activate System
 
-    MapEditor -> Player : Displays all the stations
-    deactivate MapEditor
+    System -> Player : Displays all the stations
+    deactivate System
 
-    Player -> MapEditor : I want to see the details of a specific station
-    activate MapEditor
+    Player -> System : I want to see the details of a specific station
+    activate System
 
-    MapEditor -> Player : Displays the information about a station, including the buildings and the cargo
-    deactivate MapEditor
+    System -> Player : Displays the information about a station, including the buildings and the cargo
+    deactivate System
 
 @enduml
