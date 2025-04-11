@@ -64,3 +64,5 @@ As a Player, I want to buy a locomotive.
 ![US09-SSD](svg/US009-SSD.svg)
 
 ### 1.7 Other Relevant Remarks
+
+- None

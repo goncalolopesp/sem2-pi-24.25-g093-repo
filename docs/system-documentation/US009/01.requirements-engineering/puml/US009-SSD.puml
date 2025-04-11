@@ -13,12 +13,14 @@ activate Player
     Player -> System : I want to buy a locomotive
     activate System
 
-    System -> Player : Shows the available locomotives
-    System -> Player : Asks the chosen locomotive
+    System --> Player : Shows the available locomotives
+    System --> Player : Asks the chosen locomotive
+    deactivate System
 
     Player -> System : Chooses a locomotive
+    activate System
 
-    System -> Player : Shows successful message
+    System --> Player : Shows successful message
     deactivate System
 
 @enduml

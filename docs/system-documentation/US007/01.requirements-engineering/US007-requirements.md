@@ -46,3 +46,5 @@ The buildings include telegraphs, cafés, customs, post offices, hotels (that ca
 ![US007-SSD](svg/US007-SSD.svg)
 
 ### 1.7 Other Relevant Remarks
+
+- None

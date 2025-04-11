@@ -13,13 +13,13 @@ activate Player
     Player -> System : I want to see all the stations
     activate System
 
-    System -> Player : Displays all the stations
+    System --> Player : Displays all the stations
     deactivate System
 
     Player -> System : I want to see the details of a specific station
     activate System
 
-    System -> Player : Displays the information about a station, including the buildings and the cargo
+    System --> Player : Displays the information about a station, including the buildings and the cargo
     deactivate System
 
 @enduml
