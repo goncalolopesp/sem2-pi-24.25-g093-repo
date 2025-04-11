@@ -7,34 +7,35 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "System" as System
+participant ":System" as System
 
 activate Player
 
     Player -> System : Requests list of available maps
     activate System
 
-    System -> Player : Displays list of available maps
+    System --> Player : Displays list of available maps
 
-    System -> Player : Requests selected map
+    System --> Player : Requests selected map
 
     Player -> System : Selects a map
 
-    System -> Player : Displays selected map
+    System --> Player : Displays selected map
     deactivate System
 
     Player -> System : Selects location for the station
     activate System
 
-    System -> Player : Requests station type (Depot, Station, Terminal)
+    System --> Player : Requests station type (Depot, Station, Terminal)
 
     Player -> System : Provides station type
 
-    System -> Player : Requests station's center (if the station requires it)
+    System --> Player : Requests station's center (if the station requires it)
 
     Player -> System : Inserts station's center (NE,SE,NW,SW)
 
-    System -> Player : Shows success message and updates the map
+    System --> Player : Shows success message "Station created with success."
+    System --> Player : Updates the map
     deactivate System
 
 @enduml
