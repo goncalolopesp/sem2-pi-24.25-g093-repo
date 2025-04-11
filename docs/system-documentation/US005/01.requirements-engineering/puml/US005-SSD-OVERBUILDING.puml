@@ -26,7 +26,7 @@ activate Player
     Player -> System : Selects an *invalid* location for the station
     activate System
 
-    System --> Player : displays error message: "Error. Oberbuilding is not allowed. Please, select another location"
+    System --> Player : Shows error message: "Error. Overbuilding is not allowed. Please, select another location"
     System --> Player : requests for valid location for the station
 
     Player -> System : Selects valid location for the station

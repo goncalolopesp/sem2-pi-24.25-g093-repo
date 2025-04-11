@@ -68,7 +68,11 @@ There are no acceptance criteria on this US.
 
 ### 1.6. System Sequence Diagram (SSD)
 
+#### Success Case
 ![US006-SSD](svg/US006-SSD.svg)
+
+#### Input Error: Building not available (Scenario Rules)
+![US006-SSD](svg/US006-SSD-SCENARIO-RULES.svg)
 
 ### 1.7 Other Relevant Remarks
 - None

@@ -13,11 +13,12 @@ activate Player
 
     Player -> System : Selects a station to upgrade
     activate System
-    System -> Player : Requests available building options
+    System --> Player : Requests available building options
     deactivate System
     Player -> System : Chooses a building
     activate System
-    System -> Player : Upgrades the station and updates the map
+    System --> Player : Show success message "Station upgraded with success."
+    System --> Player : Updates the map and the station
     deactivate System
 
 @enduml
