@@ -6,19 +6,19 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-actor "Map Editor" as MapEditor
+participant "System" as System
 
 activate Player
 
-    Player -> MapEditor : I want to buy a train
-    activate MapEditor
+    Player -> System : I want to buy a locomotive
+    activate System
 
-    MapEditor -> Player : Shows the available trains
-    MapEditor -> Player : Asks the chosen train
+    System -> Player : Shows the available locomotives
+    System -> Player : Asks the chosen locomotive
 
-    Player -> MapEditor : Chooses a train
+    Player -> System : Chooses a locomotive
 
-    MapEditor -> Player : Shows successful message
-    deactivate MapEditor
+    System -> Player : Shows successful message
+    deactivate System
 
 @enduml

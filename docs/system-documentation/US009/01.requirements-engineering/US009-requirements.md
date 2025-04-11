@@ -4,7 +4,7 @@
 
 ### 1.1. User Story Description
 
-As a Player, I want to buy a train.
+As a Player, I want to buy a locomotive.
 
 ### 1.2. Customer Specifications and Clarifications
 
@@ -51,7 +51,8 @@ As a Player, I want to buy a train.
 
 **Input Data:**
 
-- Train type
+- Selected Data:
+  - Train type
 
 **Output Data:**
 
