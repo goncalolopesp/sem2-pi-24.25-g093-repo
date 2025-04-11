@@ -74,6 +74,9 @@ There are no acceptance criteria on this US.
 #### Input Error: Building not available (Scenario Rules)
 ![US006-SSD-SCENARIO](svg/US006-SSD-SCENARIO-RULES.svg)
 
+#### Input Error: Already existing Building
+![US006-SSD-SCENARIO](svg/US006-SSD-MULTIPLE-BUILDINGS.svg)
+
 #### Action Error: Not Enough Budget
 ![US006-SSD-BUDGET](svg/US006-SSD-BUDGET.svg)
 

@@ -1,0 +1,29 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "System" as System
+
+activate Player
+
+    Player -> System : Selects a station to upgrade
+    activate System
+    System --> Player : Requests available building options
+    deactivate System
+    Player -> System : Selects an *already existing building* (according to the scenario)
+    activate System
+    System --> Player : Shows error message: "Error. There can be only one building of each kind. Please select another building."
+    System --> Player : Requests valid building
+    deactivate System
+    Player -> System : Selects valid building
+    activate System
+    System --> Player : Show success message "Station upgraded with success."
+    System --> Player : Updates the map and the station
+    deactivate System
+
+@enduml
