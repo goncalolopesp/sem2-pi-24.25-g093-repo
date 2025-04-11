@@ -66,6 +66,9 @@ AC3: (Re)Definition of the factors that alter the generation (frequency) of gene
 #### Input Data:
 - Typed Data:
   - Scenario name
+  - Time Period
+  - Technological Restrictions
+  - Historical Restrictions
 
 
 - Selected Data:
@@ -79,10 +82,15 @@ AC3: (Re)Definition of the factors that alter the generation (frequency) of gene
 - Error message if creation fails (e.g., invalid map)
 
 ### 1.6. System Sequence Diagram (SSD)
+Successful System Sequence Diagram
 ![System Sequence Diagram](svg/US004-SSD.svg)
+Invalid Historial Restrictions System Sequence Diagram
 ![System Sequence Diagram](svg/US004-SSD-invalidHistoricalRestrictions.svg)
+Invalid Scenario Name System Sequence Diagram
 ![System Sequence Diagram](svg/US004-SSD-invalidScenarioName.svg)
+Invalid Technological Restriction System Sequence Diagram
 ![System Sequence Diagram](svg/US004-SSD-invalidTechnologicalRestrictions.svg)
+Invalid Time Period System Sequence Diagram
 ![System Sequence Diagram](svg/US004-SSD-invalidTimePeriod.svg)
 
 **_Other alternatives might exist._**
