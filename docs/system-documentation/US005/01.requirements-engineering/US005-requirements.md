@@ -50,8 +50,12 @@ A.C 1 : Overbuilding is not possible.
 
 ### 1.6. System Sequence Diagram (SSD)
 
-
+#### Success Case
 ![US005-SSD](svg/US005-SSD.svg)
+
+#### Input Error: Overbuilding
+![US005-SSD-OVERBUILDING](svg/US005-SSD-OVERBUILDING.svg)
+
 
 ### 1.7 Other Relevant Remarks
 - None
