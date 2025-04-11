@@ -9,15 +9,22 @@ also propose the name for the station based on the closest city and type of stat
 
 ### 1.2. Customer Specifications and Clarifications
 
+**From the customer's clarifications:**
+> Question:
+What is the input data for the user story 5? Is there any input besides the type of the station?
+>
+> Answer: Position; Station type (Terminal, Station or Depot) and, in the case of the station, the center must be filled in. If the proposed is not accepted an alternative one must be entered.
+
+> Question:
+Is the budget the only concern to build a station, or does the player also needs to have other specific resources, like steel, etc.? Are resources included on the budget, or the budget represent only the player's monetary value?
+>
+> Answer: Just the budget in a generic currency.
+
+
 **From the specifications document:**
 
 > The player should be able to build a station at any location on the map (the location should be validated beforehand). Overbuilding is not allowed (a station cannot be built on top of another station). The station's type have different costs and economic radius. Stations should also be able to connect to other stations by routes.
 
-**From the customer's clarifications:**
-> - Overbuilding in the Editor is possible, the existing building is replaced for a new one.
-> - Overbuilding in the Simulator isn't possible, a warning needs to appear and the player continues to play.
-> - The only types of stations the player can build are depots, stations and terminal, nothing more.
-> - The budget for the building option represents just a generic currency.
 
 ### 1.3. Acceptance Criteria
 A.C 1 : Overbuilding is not possible.
