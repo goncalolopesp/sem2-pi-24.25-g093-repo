@@ -20,8 +20,8 @@ activate Simulator
 Simulator --> Player : requests for route and list of cargoes to be picked up
 deactivate Simulator
 
-Player -> Simulator : inputs requested data
+Player -> Simulator : selects route and list of cargoes to be picked up
 activate Simulator
-Simulator --> Player : displays operation success
+Simulator --> Player : displays operation success: "Train successfully assigned to route."
 deactivate Simulator
 @enduml

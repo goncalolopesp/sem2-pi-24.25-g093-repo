@@ -51,9 +51,10 @@ end).
 ### 1.5. Input and Output Data
 
 #### Input Data:
-- Selected train
-- Route
-- List of cargoes to be picked up
+- Selected Data:
+  - Selected train
+  - Route
+  - List of cargoes to be picked up
 
 #### Output Data:
 - Confirmation of successful operation
@@ -61,6 +62,7 @@ end).
 
 ### 1.6. System Sequence Diagram (SSD)
 ![System Sequence Diagram](svg/US010-SSD.svg)
+
 **_Other alternatives might exist._**
 
 ### 1.7. Other Relevant Remarks
