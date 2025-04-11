@@ -56,6 +56,10 @@ A.C 1 : Overbuilding is not possible.
 #### Input Error: Overbuilding
 ![US005-SSD-OVERBUILDING](svg/US005-SSD-OVERBUILDING.svg)
 
+#### Action Error: Not Enough Budget
+
+![US005-SSD-BUDGET](svg/US005-SSD-BUDGET.svg)
+
 
 ### 1.7 Other Relevant Remarks
 - None
