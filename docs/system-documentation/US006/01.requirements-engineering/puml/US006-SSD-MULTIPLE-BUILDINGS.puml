@@ -7,7 +7,7 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "System" as System
+participant ":System" as System
 
 activate Player
 
