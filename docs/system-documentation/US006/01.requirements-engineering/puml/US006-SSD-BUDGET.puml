@@ -1,0 +1,23 @@
+@startuml
+
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "System" as System
+
+activate Player
+
+    Player -> System : Selects a station to upgrade
+    activate System
+    System --> Player : Requests available building options
+    deactivate System
+    Player -> System : Chooses a building (*not enough budget*)
+    activate System
+    System --> Player : Show error message "Not enough budget to build the station, please try again later."
+    deactivate System
+
+@enduml
