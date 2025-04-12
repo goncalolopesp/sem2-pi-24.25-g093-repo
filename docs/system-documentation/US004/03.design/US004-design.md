@@ -43,4 +43,4 @@ _In this section, it is suggested to present an UML dynamic view representing th
 
 _In this section, it is suggested to present an UML static view representing the main related software classes that are involved in fulfilling the requirements as well as their relations, attributes and methods._
 
-![USXXX-CD](svg/USXXX-CD.svg)
+![US004-CD](svg/US004-CD.svg)

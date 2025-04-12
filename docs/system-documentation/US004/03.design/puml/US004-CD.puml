@@ -1,0 +1,37 @@
+@startuml
+
+class Editor {
+
+}
+
+class Scenario {
+    -scenarioName: String
+    -selectedMap: int
+    -timePeriod: int
+    -techRestriction: String
+    -historicalRestriction: int
+    +validateInputs()
+}
+
+class ScenarioRepository {
+    +createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    +verifyIfExistsAndSave(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+}
+
+class CreateScenarioUI {
+    +getInput()
+    +showSuccess()
+    +showError()
+}
+
+class CreateScenarioController {
+    +createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+}
+
+Editor --> Scenario : creates >
+CreateScenarioController --> Scenario : creates >
+CreateScenarioController --> ScenarioRepository : uses
+CreateScenarioController --> Editor : gets current user
+CreateScenarioUI --> CreateScenarioController : interacts
+
+@enduml

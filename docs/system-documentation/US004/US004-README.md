@@ -6,6 +6,6 @@
 
 [Analysis](02.analysis/US004-analysis.md)
 
-[Design](03.design/USXXX-design.md)
+[Design](03.design/US004-design.md)
 
 [Tests & Implementation](04.tests-and-implementation/USXXX-tests-and-implementation.md)
