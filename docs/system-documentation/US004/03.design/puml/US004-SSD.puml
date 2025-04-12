@@ -1,0 +1,75 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":CreateScenarioUI" as CreateScenarioUI
+
+
+activate Employee
+
+Employee -> CreateScenarioUI : asks to create a new scenario
+activate CreateScenarioUI
+
+create ":CreateScenarioController" as CreateScenarioController
+
+CreateScenarioUI --> CreateScenarioController : create
+CreateScenarioUI --> Employee : requests scenario name
+deactivate CreateScenarioUI
+
+participant ":Repositories" as Repositories
+participant "repositories\n:Repositories" as Repo
+participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+
+Employee -> CreateScenarioUI : types scenario name
+activate CreateScenarioUI
+
+CreateScenarioUI --> CreateScenarioUI : keepName(scenarioName)
+CreateScenarioUI --> Employee : requests map selection
+deactivate CreateScenarioUI
+
+Employee -> CreateScenarioUI : selects map
+activate CreateScenarioUI
+
+CreateScenarioUI --> CreateScenarioUI : keepMap(selectedMap)
+CreateScenarioUI --> Employee : requests for time period, technological and historical restrictions
+deactivate CreateScenarioUI
+
+Employee -> CreateScenarioUI : selects time period, technological and historical restrictions
+activate CreateScenarioUI
+
+CreateScenarioUI --> CreateScenarioUI : keepData(timePeriod, techRestriction, historicalRestriction)
+CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+activate CreateScenarioController
+
+CreateScenarioController --> Repositories : getInstance()
+activate Repositories
+
+Repositories --> CreateScenarioController : repositories
+deactivate Repositories
+
+CreateScenarioController --> Repo : getScenarioRepository()
+activate Repo
+
+Repo --> CreateScenarioController : scenarioRepository
+deactivate Repo
+
+CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+activate scenarioRepository
+
+create "scenario\n:Scenario" as Scenario
+
+scenarioRepository --> Scenario : create()
+scenarioRepository --> scenarioRepository : verifyIfExistsAndSave(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+scenarioRepository --> CreateScenarioController : scenarioData
+deactivate scenarioRepository
+
+CreateScenarioController --> CreateScenarioUI : scenarioData
+deactivate CreateScenarioController
+
+CreateScenarioUI --> Employee : displays operation success message: "Scenario created successfully."
+deactivate CreateScenarioUI
+@enduml
