@@ -6,11 +6,19 @@
 
 **The rationale grounds on the SSD interactions and the identified input/output data.**
 
-| Interaction ID                           | Question: Which class is responsible for...                                                                                                                                                                                                                                                                   | Answer                                                                                                                                                            | Justification (with patterns)                                                                                |
-|:-----------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------|
-| Step 1 - Asks to create a new scenario		 | ...instantiating the class that handles the UI?						                                                                                                                                                                                                                                                         | CreateScenarioUI                                                                                                                                                  | Pure Fabrication                                                                                             |
-| Step 2 - Requests user data		            | ...displaying the form for the actor to input data?						                                                                                                                                                                                                                                                     | CreateScenarioUI                                                                                                                                                  | Pure Fabrication                                                                                             |
-| Step 3 - Types/selects user data  		     | ...validating typed/selected data?<br/>...temporarily keeping the data?<br/>...get instances of repositories?<br/>...get scenario repository?<br/>...creating the Scenario Object?<br/>...validating the data locally?<br/>...return the scenario's data?<br/>...displaying operation success message?							 | CreateScenarioUI<br/>CreateScenarioUI<br/>Repositories<br/>Repositories<br/>ScenarioRepository<br/>Scenario<br/>ScenarioRepository<br/>CreateScenarioUI | Pure Fabrication<br/>Pure Fabrication<br/><br/><br/>Creator<br/>Information Expert<br/><br/>Pure Fabrication |
+| Interaction ID                              | Question: Which class is responsible for...                                                                                                                                                                                                                                                                   | Answer                   | Justification (with patterns)        |
+|:--------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------|:-------------------------------------|
+| Step 1 - Asks to create a new scenario		    | ...instantiating the class that handles the UI?						                                                                                                                                                                                                                                                         | CreateScenarioUI         | Pure Fabrication                     |
+| 		                                          |... coordinating the US?							 | CreateScenarioController | Controller                           |
+| Step 2 - Requests user data		               | ...displaying the form for the actor to input data?						                                                                                                                                                                                                                                                     | CreateScenarioUI         | Pure Fabrication                     |
+| Step 3 - Types/selects user data  		        | ...validating typed/selected data?| CreateScenarioUI         | Pure Fabrication                     |
+| 		                                          |...temporarily keeping the data?							 | CreateScenarioUI         | Pure Fabrication                     |
+| 		                                          |...get instances of repositories?							 | Repositories             | Information Expert, Pure Fabrication |
+| 		                                          |...get scenario repository?							 | Repositories             | Information Expert, Pure Fabrication |
+| 		                                          |...creating the Scenario Object?							 | ScenarioRepository       | Creator                              |
+| 		                                          |...validating the data locally?							 | Scenario                 | Information Expert                   |
+| 		                                          |...return the scenario's data?							 | ScenarioRepository       | Information Expert, Pure Fabrication |
+| 		                                          |...displaying operation success message?							 | CreateScenarioUI         | Pure Fabrication                     |
 
 ### Systematization ##
 
@@ -29,7 +37,7 @@ Other software classes (i.e. Pure Fabrication) identified:
 
 _In this section, it is suggested to present an UML dynamic view representing the sequence of interactions between software objects that allows to fulfill the requirements._
 
-![USXXX-SD](svg/USXXX-SD.svg)
+![US004-SD](svg/US004-SD.svg)
 
 ## 3.3. Class Diagram (CD)
 
