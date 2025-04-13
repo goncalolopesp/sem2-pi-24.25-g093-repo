@@ -1,0 +1,16 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+
+create "scenario\n:Scenario" as Scenario
+
+scenarioRepository --> Scenario : create()
+scenarioRepository --> scenarioRepository : verifyIfExistsAndSave(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+deactivate scenarioRepository
+
+@enduml
