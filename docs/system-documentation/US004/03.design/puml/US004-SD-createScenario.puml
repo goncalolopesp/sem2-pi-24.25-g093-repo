@@ -1,0 +1,42 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+participant ":CreateScenarioUI" as CreateScenarioUI
+
+create ":CreateScenarioController" as CreateScenarioController
+
+CreateScenarioUI --> CreateScenarioController : create
+deactivate CreateScenarioUI
+
+participant ":Repositories" as Repositories
+participant "repositories\n:Repositories" as Repo
+participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+
+CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+activate CreateScenarioController
+
+CreateScenarioController --> Repositories : getInstance()
+activate Repositories
+
+Repositories --> CreateScenarioController : repositories
+deactivate Repositories
+
+CreateScenarioController --> Repo : getScenarioRepository()
+activate Repo
+
+Repo --> CreateScenarioController : scenarioRepository
+deactivate Repo
+
+CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+activate scenarioRepository
+
+create "scenario\n:Scenario" as Scenario
+
+scenarioRepository --> Scenario : create()
+deactivate scenarioRepository
+
+@enduml

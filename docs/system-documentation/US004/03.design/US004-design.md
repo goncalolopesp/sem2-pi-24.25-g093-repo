@@ -53,6 +53,10 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 ![Sequence Diagram - Partial - Get Input](svg/US004-SD-getInput.svg)
 
+**Create Scenario Partial SD**
+
+![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-createScenario.svg)
+
 ## 3.3. Class Diagram (CD)
 
 _In this section, it is suggested to present an UML static view representing the main related software classes that are involved in fulfilling the requirements as well as their relations, attributes and methods._
