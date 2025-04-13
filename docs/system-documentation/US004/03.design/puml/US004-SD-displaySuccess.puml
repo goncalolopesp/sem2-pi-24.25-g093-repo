@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":CreateScenarioUI" as CreateScenarioUI
+
+
+activate Employee
+
+Employee -> CreateScenarioUI : asks to create a new scenario
+activate CreateScenarioUI
+
+create ":CreateScenarioController" as CreateScenarioController
+
+CreateScenarioUI --> CreateScenarioController : create
+deactivate CreateScenarioUI
+
+
+scenarioRepository --> CreateScenarioController : scenarioData
+deactivate scenarioRepository
+
+CreateScenarioController --> CreateScenarioUI : scenarioData
+deactivate CreateScenarioController
+
+CreateScenarioUI --> Employee : displays operation success message: "Scenario created successfully."
+deactivate CreateScenarioUI
+@enduml
