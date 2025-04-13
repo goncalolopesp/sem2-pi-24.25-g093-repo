@@ -37,7 +37,21 @@ Other software classes (i.e. Pure Fabrication) identified:
 
 _In this section, it is suggested to present an UML dynamic view representing the sequence of interactions between software objects that allows to fulfill the requirements._
 
+### Full Diagram
+
+This diagram shows the full sequence of interactions between the classes involved in the realization of this user story.
+
 ![US004-SD](svg/US004-SD.svg)
+
+### Split Diagrams
+
+The following diagram shows the same sequence of interactions between the classes involved in the realization of this user story, but it is split in partial diagrams to better illustrate the interactions between the classes.
+
+It uses Interaction Occurrence (a.k.a. Interaction Use).
+
+**Get Input Partial SD**
+
+![Sequence Diagram - Partial - Get Input](svg/US004-SD-getInput.svg)
 
 ## 3.3. Class Diagram (CD)
 
