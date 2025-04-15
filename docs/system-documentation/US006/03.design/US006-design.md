@@ -1,22 +1,20 @@
-# US006 - Upgrade a Station
-
 ## 3. Design
 
 ### 3.1. Rationale
 
 **The rationale grounds on the SSD interactions and the identified input/output data.**
 
-| Interaction ID                              | Question: Which class is responsible for...                                                                                                                                                                                                                                                                    | Answer                   | Justification (with patterns)        |
-|:--------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------|:-------------------------------------|
-| Step 1 - Requests to upgrade a station      | ...instantiating the class that handles the UI?                                                                                                                                                                                                                                                                | UpgradeStationUI         | Pure Fabrication                     |
-|                                               | ...coordinating the US?                              | UpgradeStationController  | Controller                           |
-| Step 2 - Selects station and upgrade option | ...displaying form options to upgrade?                                                                                                                                                                                                                                  | UpgradeStationUI         | Pure Fabrication                     |
-|                                               | ...validating selected building?                    | UpgradeStationUI         | Pure Fabrication                     |
-|                                               | ...loading available building types?               | BuildingRepository        | Information Expert                   |
-|                                               | ...checking building restrictions?                 | Building                 | Information Expert                   |
-|                                               | ...ensuring building does not conflict (exclusivity)? | Station                | Information Expert                   |
-|                                               | ...applying the upgrade?                            | StationRepository         | Creator                              |
-|                                               | ...displaying success message?                      | UpgradeStationUI         | Pure Fabrication                     |
+| Interaction ID                         | Question: Which class is responsible for...                        | Answer                   | Justification (with patterns) |
+|:---------------------------------------|:-------------------------------------------------------------------|:-------------------------|:------------------------------|
+| **Step 1 - Request Upgrade**           | ...instantiating the class that handles the UI?                    | UpgradeStationUI         | Pure Fabrication              |
+|                                        | ...coordinating the US?                                            | UpgradeStationController | Controller                    |
+| **Step 2 - Select Station and Option** | ...displaying the form/options for the actor to select an upgrade? | UpgradeStationUI         | Pure Fabrication              |
+|                                        | ...validating the selected building upgrade?                       | UpgradeStationUI         | Pure Fabrication              |
+|                                        | ...loading the available building types?                           | BuildingRepository       | Information Expert            |
+|                                        | ...checking building restrictions and compatibility?               | Building                 | Information Expert            |
+|                                        | ...ensuring there is no conflict in upgrade exclusivity?           | Station                  | Information Expert            |
+| **Step 3 - Apply Upgrade**             | ...applying the upgrade (adding the building to the station)?      | StationRepository        | Creator                       |
+|                                        | ...displaying the operation success message?                       | UpgradeStationUI         | Pure Fabrication              |
 
 ### Systematization ##
 
@@ -36,13 +34,13 @@ Other software classes (i.e. Pure Fabrication) identified:
 
 ## 3.2. Sequence Diagram (SD)
 
-_In this section, it is suggested to present an UML dynamic view representing the sequence of interactions between software objects that allows to fulfill the requirements._
+_In this section, it is suggested to present a UML dynamic view representing the sequence of interactions between software objects that allows to fulfill the requirements._
 
 ### Full Diagram
 
 This diagram shows the full sequence of interactions between the classes involved in the realization of this user story.
 
-![US004-SD](svg/US004-SD.svg)
+![US006-SD](svg/US006-SD.svg)
 
 ### Split Diagrams
 
