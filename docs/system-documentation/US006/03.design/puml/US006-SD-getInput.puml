@@ -8,7 +8,7 @@ autonumber
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeUI
 
-Player -> UpgradeUI : requests upgrade (select station)
-UpgradeUI --> Player : displays upgrade options form
+Player -> UpgradeUI : Requests an upgrade (select station)
+UpgradeUI --> Player : Displays upgrade/building options form
 
 @enduml

@@ -12,25 +12,25 @@ participant ":StationRepository" as StationRepo
 
 activate Player
 
-Player -> UpgradeUI: requests upgrade for station
+Player -> UpgradeUI: Requests upgrade for station
 activate UpgradeUI
 
 UpgradeUI --> UpgradeController: create
 UpgradeUI --> UpgradeController: upgradeRequest()
 activate UpgradeController
 
-UpgradeController --> UpgradeUI: request building selection
+UpgradeController --> UpgradeUI: Request building selection
 deactivate UpgradeController
-UpgradeUI --> Player: show building upgrade options
+UpgradeUI --> Player: Shows building options
 deactivate UpgradeUI
 
-Player -> UpgradeUI: selects desired building upgrade
+Player -> UpgradeUI: Selects desired building
 activate UpgradeUI
 UpgradeUI --> UpgradeUI: storeUpgradeData()
-UpgradeUI --> Player: show upgrade confirmation
+UpgradeUI --> Player: Show upgrade confirmation
 deactivate UpgradeUI
 
-Player -> UpgradeUI: confirms upgrade action
+Player -> UpgradeUI: Confirms upgrade action
 activate UpgradeUI
 UpgradeUI --> UpgradeController: applyUpgrade()
 activate UpgradeController
@@ -54,7 +54,7 @@ deactivate StationRepo
 UpgradeController --> UpgradeUI: upgradeResult
 deactivate UpgradeController
 
-UpgradeUI --> Player: display "Upgrade applied successfully"
+UpgradeUI --> Player: Shows success message "Upgrade applied successfully"
 deactivate UpgradeUI
 deactivate Player
 @enduml

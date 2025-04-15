@@ -52,17 +52,14 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 ![Sequence Diagram - Partial - Get Input](svg/US006-SD-getInput.svg)
 
-**Create Scenario Partial SD**
+**Validate Upgrade Partial SD**
 
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-createScenario.svg)
+![Sequence Diagram - Partial - Validate Upgrade](svg/US006-SD-validateUpgrade.svg)
 
-**Verify if Scenario exists Partial SD**
+**Apply Upgrade and Display Success Partial SD**
 
 ![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-verify.svg)
 
-**Display Success Message Partial SD**
-
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-displaySuccess.svg)
 
 ## 3.3. Class Diagram (CD)
 
