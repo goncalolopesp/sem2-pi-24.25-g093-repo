@@ -10,12 +10,12 @@ participant ":UpgradeStationController" as Controller
 participant ":BuildingRepository" as BuildingRepo
 
 Player -> UpgradeUI : Selects building option
-UpgradeUI -> Controller : Validates building selection
+UpgradeUI --> Controller : Validates building selection
 activate Controller
-Controller -> BuildingRepo : Loads selected building details
+Controller --> BuildingRepo : Loads selected building details
 BuildingRepo --> Controller : Returns building data
-Controller -> Controller : verifyTimeConstraints(building)
-Controller -> Controller : verifyBudget(player, building)
+Controller --> Controller : verifyTimeConstraints(building)
+Controller --> Controller : verifyBudget(player, building)
 Controller --> UpgradeUI : Returns validation result
 deactivate Controller
 @enduml

@@ -58,7 +58,7 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 **Apply Upgrade and Display Success Partial SD**
 
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-verify.svg)
+![Sequence Diagram - Partial - Create Scenario](svg/US006-SD-applyAndSuccess.svg)
 
 
 ## 3.3. Class Diagram (CD)
