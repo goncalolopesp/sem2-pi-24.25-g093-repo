@@ -15,46 +15,46 @@ activate Player
 Player -> UpgradeUI: requests upgrade for station
 activate UpgradeUI
 
-UpgradeUI -> UpgradeController: create
-UpgradeUI -> UpgradeController: upgradeRequest()
+UpgradeUI --> UpgradeController: create
+UpgradeUI --> UpgradeController: upgradeRequest()
 activate UpgradeController
 
 UpgradeController --> UpgradeUI: request building selection
 deactivate UpgradeController
-UpgradeUI -> Player: show building upgrade options
+UpgradeUI --> Player: show building upgrade options
 deactivate UpgradeUI
 
 Player -> UpgradeUI: selects desired building upgrade
 activate UpgradeUI
-UpgradeUI -> UpgradeUI: storeUpgradeData()
-UpgradeUI -> Player: show upgrade confirmation
+UpgradeUI --> UpgradeUI: storeUpgradeData()
+UpgradeUI --> Player: show upgrade confirmation
 deactivate UpgradeUI
 
 Player -> UpgradeUI: confirms upgrade action
 activate UpgradeUI
-UpgradeUI -> UpgradeController: applyUpgrade()
+UpgradeUI --> UpgradeController: applyUpgrade()
 activate UpgradeController
 
-UpgradeController -> BuildingRepo: getAvailableBuildings()
+UpgradeController --> BuildingRepo: getAvailableBuildings()
 activate BuildingRepo
 BuildingRepo --> UpgradeController: availableBuildings
 deactivate BuildingRepo
 
-UpgradeController -> StationRepo: getStationData()
+UpgradeController --> StationRepo: getStationData()
 activate StationRepo
 StationRepo --> UpgradeController: stationData
 deactivate StationRepo
 
-UpgradeController -> StationRepo: applyUpgrade()
+UpgradeController --> StationRepo: applyUpgrade()
 activate StationRepo
-StationRepo -> StationRepo: verifyUpgradeConstraints()
+StationRepo --> StationRepo: verifyUpgradeConstraints()
 StationRepo --> UpgradeController: upgradeResult
 deactivate StationRepo
 
 UpgradeController --> UpgradeUI: upgradeResult
 deactivate UpgradeController
 
-UpgradeUI -> Player: display "Upgrade applied successfully"
+UpgradeUI --> Player: display "Upgrade applied successfully"
 deactivate UpgradeUI
 deactivate Player
 @enduml

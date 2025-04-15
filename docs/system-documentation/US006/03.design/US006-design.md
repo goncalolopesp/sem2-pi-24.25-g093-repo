@@ -50,7 +50,7 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 **Get Input Partial SD**
 
-![Sequence Diagram - Partial - Get Input](svg/US004-SD-getInput.svg)
+![Sequence Diagram - Partial - Get Input](svg/US006-SD-getInput.svg)
 
 **Create Scenario Partial SD**
 

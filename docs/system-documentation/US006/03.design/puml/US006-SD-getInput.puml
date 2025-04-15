@@ -1,0 +1,14 @@
+@startuml US006-SD-getInput
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant ":UpgradeStationUI" as UpgradeUI
+
+Player -> UpgradeUI : requests upgrade (select station)
+UpgradeUI --> Player : displays upgrade options form
+
+@enduml
