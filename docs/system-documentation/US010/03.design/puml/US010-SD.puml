@@ -1,0 +1,67 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "AssignTrainUI" as ATUI
+
+activate Player
+
+Player -> ATUI : asks to assign a selected train to a route
+activate ATUI
+
+create ":AssignTrainController" as ATC
+
+participant ":Repositories" as REPO
+participant "repositories\n:Repositories" as repo
+participant "assignedTrainsRepository\n:AssignedTrainsRepository" as ATREPO
+
+ATUI --> ATC : create()
+ATUI --> Player : requests train selection
+deactivate ATUI
+
+Player -> ATUI : selects train
+activate ATUI
+
+ATUI --> ATUI : keepSelectedTrain(selectedTrain)
+ATUI --> Player : requests for route and list of cargoes to be picked up
+deactivate ATUI
+
+Player -> ATUI : selects route and list of cargoes to be picked up
+activate ATUI
+
+ATUI --> ATUI : keepData(selectedRoute, cargoesList)
+ATUI --> ATC : assignTrain(selectedTrain, selectedRoute, cargoesList)
+activate ATC
+
+ATC --> REPO : getInstance()
+activate REPO
+
+REPO --> ATC : repositories
+deactivate REPO
+
+ATC --> repo : getATRepository()
+activate repo
+
+repo --> ATC : ATRepository
+deactivate repo
+
+ATC --> ATREPO : assignTrain(selectedTrain, selectedRoute, cargoesList)
+activate ATREPO
+
+create "assignedTrain\n:AssignedTrain" as AT
+
+ATREPO --> AT : create()
+ATREPO --> ATREPO : verifyIfAssignedAndSaves(selectedTrain, selectedRoute, cargoesList)
+ATREPO --> ATC : ATData
+deactivate ATREPO
+
+ATC --> ATUI : ATData
+deactivate ATC
+
+ATUI --> Player : displays operation success: "Train successfully assigned to route."
+deactivate ATUI
+@enduml
