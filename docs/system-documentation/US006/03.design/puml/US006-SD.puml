@@ -1,0 +1,60 @@
+@startuml US006-SD
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+autonumber
+
+actor "Player" as Player
+participant ":UpgradeStationUI" as UpgradeUI
+participant ":UpgradeStationController" as UpgradeController
+participant ":BuildingRepository" as BuildingRepo
+participant ":StationRepository" as StationRepo
+
+activate Player
+
+Player -> UpgradeUI: Requests upgrade for station
+activate UpgradeUI
+
+UpgradeUI --> UpgradeController: create
+UpgradeUI --> UpgradeController: upgradeRequest()
+activate UpgradeController
+
+UpgradeController --> UpgradeUI: Request building selection
+deactivate UpgradeController
+UpgradeUI --> Player: Shows building options
+deactivate UpgradeUI
+
+Player -> UpgradeUI: Selects desired building
+activate UpgradeUI
+UpgradeUI --> UpgradeUI: storeUpgradeData()
+UpgradeUI --> Player: Show upgrade confirmation
+deactivate UpgradeUI
+
+Player -> UpgradeUI: Confirms upgrade action
+activate UpgradeUI
+UpgradeUI --> UpgradeController: applyUpgrade()
+activate UpgradeController
+
+UpgradeController --> BuildingRepo: getAvailableBuildings()
+activate BuildingRepo
+BuildingRepo --> UpgradeController: availableBuildings
+deactivate BuildingRepo
+
+UpgradeController --> StationRepo: getStationData()
+activate StationRepo
+StationRepo --> UpgradeController: stationData
+deactivate StationRepo
+
+UpgradeController --> StationRepo: applyUpgrade()
+activate StationRepo
+StationRepo --> StationRepo: verifyUpgradeConstraints()
+StationRepo --> UpgradeController: upgradeResult
+deactivate StationRepo
+
+UpgradeController --> UpgradeUI: upgradeResult
+deactivate UpgradeController
+
+UpgradeUI --> Player: Shows success message "Upgrade applied successfully"
+deactivate UpgradeUI
+deactivate Player
+@enduml

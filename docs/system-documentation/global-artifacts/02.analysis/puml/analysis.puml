@@ -12,28 +12,35 @@ hide methods
 
 'title Domain Model
 
+class Location {
+    positionX
+    positionY
+}
+
 class Map {
      name
      sizeX
      sizeY
+     location
 }
 
 class Industry {
     type
-    positionX
-    positionY
+    Location
 }
 
 class City {
     name
-    positionX
-    positionY
+    Location
     numHouseBlocks
 }
 
 class Scenario {
     map
-    timeRestrictions
+    timePeriod
+}
+
+class TimePeriod {
     techRestrictions
     historicalEvents
 }
@@ -75,14 +82,37 @@ class Route {
 }
 
 class Locomotive{
+    locomotiveType
+}
+
+class SteamLocomotive{
     typeOfFuel
     requiredRail
+    price
+    startYearOfOperation
     power
     acceleration
     topSpeed
-    startYearOfOperation
+}
+
+class DieselLocomotive{
+    typeOfFuel
+    requiredRail
     price
-    type
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
+}
+
+class ElectricLocomotive{
+    typeOfFuel
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
 }
 
 class Carriage{
@@ -102,35 +132,50 @@ class ProductOwner {
 }
 
 class Player {
-    id
     username
     password
     + buyTrain(carriage: Carriage, locomotive: Locomotive)
 }
 
-Editor "1" -- "*" Scenario : creates
-Scenario "1" -- "1" Map : based on
-Editor "1"--"*" Map : creates
-Editor "1"--"*" Map : modifies
-Map "1"--"*" Industry : contains
-Map "1"--"*" City : contains
-Station "*" -- "1" Map : located in
-Station "*" -- "1" City : closest to
-Player "1" -- "*" Station : can build
-Equipment --|> Building
-Station "1" -- "1" Building : can be upgraded with
-Player "1"--"*" Station : Lists
-Station "*"--"*" Building : Has
-Station "*"--"*" Cargo : Has
-Player "1"--"*" Train : Chooses
-Train "*"--"*" Locomotive : Contains
-Train "*"--"*" Carriage : Contains
-Player "1" -- "*" Train : owns
-Train "1" -- "1" Route : assigned to
-Route "*" -- "*" Station : includes
-ProductOwner "1" -- "1" Simulator : controls
-Simulator "1" -- "*" Station : manages
-Station "*" -- "*" Cargo : stores
+Editor "1" -- "*" Scenario
+Editor "1"--"*" Map
+
+Map "1"--"*" Industry
+Map "1"--"*" City
+
+Station "*" -- "1" Map
+Station "1" -- "1" City
+Station "1" -- "*" Building
+Station "*" -- "*" Cargo
+
+Player "1"--"*" Train
+Player "1"--"*" Station
+
+Train "*"--"*" Locomotive
+Train "*"--"*" Carriage
+Train "1" -- "1" Route
+
+Route "*" -- "*" Station
+
+ProductOwner "1" -- "1" Simulator
+
+Simulator "1" -- "*" Station
+
 Scenario -- Locomotive
+Scenario "1" -- "1" Map
+
+
+TimePeriod --|> Scenario
+
+Equipment --|> Building
+
+Location --|> Map
+Location --|> City
+Location --|> Station
+Location --|> Industry
+
+SteamLocomotive --|> Locomotive
+DieselLocomotive --|> Locomotive
+ElectricLocomotive --|> Locomotive
 
 @enduml

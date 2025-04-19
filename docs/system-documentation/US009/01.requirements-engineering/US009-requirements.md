@@ -60,8 +60,12 @@ As a Player, I want to buy a locomotive.
 
 ### 1.6. System Sequence Diagram (SSD)
 
-
+#### Success Case
 ![US09-SSD](svg/US009-SSD.svg)
+
+#### Action Error: Not Enough Budget
+
+![US009-SSD-budget](svg/US009-SSD-budget.svg)
 
 ### 1.7 Other Relevant Remarks
 
