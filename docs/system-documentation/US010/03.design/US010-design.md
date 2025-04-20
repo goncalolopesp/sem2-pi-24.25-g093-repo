@@ -6,26 +6,27 @@
 
 **The rationale grounds on the SSD interactions and the identified input/output data.**
 
-| Interaction ID | Question: Which class is responsible for... | Answer  | Justification (with patterns)  |
-|:-------------  |:--------------------- |:------------|:---------------------------- |
-| Step 1  		 |							 |             |                              |
-| Step 2  		 |							 |             |                              |
-| Step 3  		 |							 |             |                              |
-| Step 4  		 |							 |             |                              |
-| Step 5  		 |							 |             |                              |
-| Step 6  		 |							 |             |                              |              
-| Step 7  		 |							 |             |                              |
-| Step 8  		 |							 |             |                              |
-| Step 9  		 |							 |             |                              |
-| Step 10  		 |							 |             |                              |  
+| Interaction ID                           | Question: Which class is responsible for...                | Answer                   | Justification (with patterns)        |
+|:-----------------------------------------|:-----------------------------------------------------------|:-------------------------|:-------------------------------------|
+| Step 1 - Asks to assign train to route		 | ...instantiating the class that handles the UI?							     | AssignTrainUI            | Pure Fabrication                     |
+| 		                                       | ...coordinating the US?							                             | AssignTrainController    | Controller                           |
+| Step 2 - Requests user data  		          | ...displaying the form for the actor to input data?							 | AssignTrainUI            | Pure Fabrication                     |
+| Step 3 - Types/selects user data  		                               | ...validating typed/selected data?							                  | AssignTrainUI            | Pure Fabrication                     |
+| 		                               | ...temporarily keeping the data?							                    | AssignTrainUI            | Pure Fabrication                     |
+|  		                               | ...getting instances of repositories?							               | Repositories             | Information Expert, Pure Fabrication |              
+|   		                               | ...get assigned trains repository?							                  | Repositories             | Information Expert, Pure Fabrication |
+|   		                               | ...creating the assignedTrain Object?							               | AssignedTrainsRepository | Creator                              |
+|  		                               | ...validating the data locally?							                     | AssignedTrain            | Information Expert                   |
+|  		                              | ...return the assigned train's data?							                | AssignedTrainsRepository | Information Expert, Pure Fabrication |  
+|  		                              | ...displaying operation success message?							                | AssignTrainUI            | Pure Fabrication |  
 
 ### Systematization ##
 
 According to the taken rationale, the conceptual classes promoted to software classes are:
 
-* Class1
-* Class2
-* Class3
+* Repositories
+* AssignedTrainsRepository
+* AssignedTrain
 
 Other software classes (i.e. Pure Fabrication) identified:
 
