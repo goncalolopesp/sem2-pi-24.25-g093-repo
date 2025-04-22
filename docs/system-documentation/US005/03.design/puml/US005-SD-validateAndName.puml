@@ -1,0 +1,28 @@
+@startuml US005-SD-validateAndName
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+autonumber
+
+participant ":BuildStationController" as BuildController
+participant ":MapRepository" as MapRepo
+participant ":CityRepository" as CityRepo
+participant ":Station" as Station
+
+BuildController -> MapRepo: findMap(map)
+activate MapRepo
+MapRepo --> BuildController: map
+deactivate MapRepo
+
+BuildController -> CityRepo: findClosestCity(map, x, y)
+activate CityRepo
+CityRepo --> BuildController: city
+deactivate CityRepo
+
+BuildController -> Station: validateData(type, x, y)
+activate Station
+Station --> BuildController: valid?
+deactivate Station
+
+BuildController -> BuildController: generateName(city, type)
+@enduml
