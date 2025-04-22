@@ -1,0 +1,19 @@
+@startuml US005-SD-getInput
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+autonumber
+
+actor "Player" as Player
+participant ":BuildStationUI" as BuildUI
+
+activate Player
+Player -> BuildUI: openBuildStationForm()
+activate BuildUI
+BuildUI --> Player: displayForm()
+Player -> BuildUI: enterData(map, type, x, y)
+BuildUI --> BuildUI: validateAndStoreInput(map, type, x, y)
+BuildUI --> BuildController: buildStation(map, type, x, y)
+deactivate BuildUI
+deactivate Player
+@enduml
