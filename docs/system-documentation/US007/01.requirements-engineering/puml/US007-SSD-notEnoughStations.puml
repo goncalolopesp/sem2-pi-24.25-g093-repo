@@ -1,0 +1,20 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "System" as System
+
+activate Player
+
+    Player -> System : I want to see all the stations ("Number of Stations is 0")
+    activate System
+
+    System --> Player : Shows error message "No stations available"
+    deactivate System
+
+
+@enduml

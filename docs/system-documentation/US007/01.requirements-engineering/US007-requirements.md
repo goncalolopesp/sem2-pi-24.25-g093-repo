@@ -42,8 +42,13 @@ The buildings include telegraphs, cafés, customs, post offices, hotels (that ca
 
 ### 1.6. System Sequence Diagram (SSD)
 
+#### Success Case
 
 ![US007-SSD](svg/US007-SSD.svg)
+
+#### Action Error: Not Enough Budget
+
+![US007-SSD-notEnoughStations](svg/US007-SSD-notEnoughStations.svg)
 
 ### 1.7 Other Relevant Remarks
 
