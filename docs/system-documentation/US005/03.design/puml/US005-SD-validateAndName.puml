@@ -7,22 +7,27 @@ autonumber
 participant ":BuildStationController" as BuildController
 participant ":MapRepository" as MapRepo
 participant ":CityRepository" as CityRepo
-participant ":Station" as Station
+participant ":StationRepository" as StationRepo
 
-BuildController -> MapRepo: findMap(map)
+activate BuildController
+
+BuildController -> MapRepo: findMap(mapId)
 activate MapRepo
-MapRepo --> BuildController: map
+MapRepo --> BuildController: Map
 deactivate MapRepo
 
-BuildController -> CityRepo: findClosestCity(map, x, y)
+BuildController -> CityRepo: findClosestCity(Map, x, y)
 activate CityRepo
-CityRepo --> BuildController: city
+CityRepo --> BuildController: City
 deactivate CityRepo
 
-BuildController -> Station: validateData(type, x, y)
-activate Station
-Station --> BuildController: valid?
-deactivate Station
+BuildController -> StationRepo: isLocationAvailable(Map, x, y)
+activate StationRepo
+StationRepo --> BuildController: available?
+deactivate StationRepo
 
-BuildController -> BuildController: generateName(city, type)
+BuildController -> BuildController: generateName(City, type)
+BuildController --> BuildController: stationName
+
+deactivate BuildController
 @enduml

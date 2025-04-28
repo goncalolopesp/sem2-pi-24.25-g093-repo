@@ -10,41 +10,35 @@ participant ":BuildStationController" as BuildController
 participant ":MapRepository" as MapRepo
 participant ":CityRepository" as CityRepo
 participant ":StationRepository" as StationRepo
-participant ":Station" as Station
 
 activate Player
 Player -> BuildUI: openBuildStationForm()
 activate BuildUI
 BuildUI --> Player: displayForm()
-deactivate BuildUI
 
 Player -> BuildUI: enterData(map, type, x, y)
-activate BuildUI
-BuildUI --> BuildController: buildStation(map, type, x, y)
-deactivate BuildUI
-
+BuildUI -> BuildController: buildStation(map, type, x, y)
 activate BuildController
-BuildController --> MapRepo: findMap(map)
+
+BuildController -> MapRepo: findMap(map)
 activate MapRepo
-MapRepo --> BuildController: map
+MapRepo --> BuildController: Map
 deactivate MapRepo
 
-BuildController --> CityRepo: findClosestCity(map, x, y)
+BuildController -> CityRepo: findClosestCity(map, x, y)
 activate CityRepo
-CityRepo --> BuildController: city
+CityRepo --> BuildController: City
 deactivate CityRepo
 
 BuildController -> StationRepo: createStation(name, type, x, y, map)
 activate StationRepo
-StationRepo --> Station: «create» Station(name, type, location, map)
-activate Station
-Station --> StationRepo: station
-deactivate Station
+StationRepo --> BuildController: Station
 deactivate StationRepo
 
-BuildController --> BuildUI: showSuccess(station)
+BuildController --> BuildUI: showSuccess(Station)
 deactivate BuildController
 
 BuildUI --> Player: displaySuccess()
+deactivate BuildUI
 deactivate Player
 @enduml

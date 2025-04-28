@@ -5,19 +5,23 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
+participant ":BuildStationUI" as BuildUI
 participant ":BuildStationController" as BuildController
 participant ":StationRepository" as StationRepo
-participant ":BuildStationUI" as BuildUI
-participant ":Station" as Station
+activate Player
+activate BuildUI
+
+BuildUI -> BuildController: buildStation(name, type, x, y, map)
+activate BuildController
 
 BuildController -> StationRepo: createStation(name, type, x, y, map)
 activate StationRepo
-StationRepo -> Station: «create» Station(name, type, location, map)
-activate Station
-Station --> StationRepo: station
-deactivate Station
+StationRepo --> BuildController: Station
 deactivate StationRepo
 
-BuildController --> BuildUI: showSuccess(station)
+BuildController --> BuildUI: showSuccess(Station)
+deactivate BuildController
+
 BuildUI --> Player: displaySuccess()
+deactivate BuildUI
 @enduml
