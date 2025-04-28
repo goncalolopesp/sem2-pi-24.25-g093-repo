@@ -2,18 +2,26 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
-
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationController" as UpgradeController
+participant ":UpgradeStationUI" as UpgradeUI
+participant ":UpgradeStationController" as Controller
 participant ":StationRepository" as StationRepo
-participant "UpgradeStationUI" as UpgradeUI
 
-UpgradeController --> StationRepo : Applies the building
-StationRepo --> selectedStation : updateUpgrade(upgradeData)
-StationRepo --> UpgradeController : upgradeConfirmation
-UpgradeController --> UpgradeUI : Returns upgradeConfirmation
-UpgradeUI --> Player : Shows success message "Upgrade applied successfully."
+activate Player
+activate UpgradeUI
+UpgradeUI -> Controller: applyUpgrade(station, buildingType)
+activate Controller
 
+Controller -> StationRepo: upgradeStation(station, buildingType)
+activate StationRepo
+StationRepo --> Controller: updatedStation
+deactivate StationRepo
+
+Controller --> UpgradeUI: showSuccess()
+deactivate Controller
+
+UpgradeUI --> Player: displaySuccess()
+deactivate UpgradeUI
 @enduml

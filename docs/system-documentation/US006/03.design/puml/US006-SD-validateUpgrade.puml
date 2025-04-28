@@ -7,15 +7,32 @@ autonumber
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeUI
 participant ":UpgradeStationController" as Controller
+participant ":StationRepository" as StationRepo
 participant ":BuildingRepository" as BuildingRepo
 
-Player -> UpgradeUI : Selects building option
-UpgradeUI --> Controller : Validates building selection
+activate Player
+Player -> UpgradeUI: chooseBuilding(buildingType)
+activate UpgradeUI
+
+UpgradeUI -> Controller: validateUpgrade(station, buildingType)
 activate Controller
-Controller --> BuildingRepo : Loads selected building details
-BuildingRepo --> Controller : Returns building data
-Controller --> Controller : verifyTimeConstraints(building)
-Controller --> Controller : verifyBudget(player, building)
-Controller --> UpgradeUI : Returns validation result
+
+Controller -> StationRepo: findStation(station)
+activate StationRepo
+StationRepo --> Controller: Station
+deactivate StationRepo
+
+Controller -> BuildingRepo: findBuilding(buildingType)
+activate BuildingRepo
+BuildingRepo --> Controller: Building
+deactivate BuildingRepo
+
+Controller -> Controller: verifyTimeConstraints(Building, currentDate)
+Controller -> Controller: verifyBudget(player, Building)
+
+Controller --> UpgradeUI: displayValidationResult(ValidationResult)
 deactivate Controller
+UpgradeUI --> Player: showValidationResult(ValidationResult)
+deactivate UpgradeUI
+deactivate Player
 @enduml

@@ -2,13 +2,25 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
-
 autonumber
 
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeUI
 
-Player -> UpgradeUI : Requests an upgrade (select station)
-UpgradeUI --> Player : Displays upgrade/building options form
+activate Player
+Player -> UpgradeUI: openUpgradeStationForm()
+activate UpgradeUI
 
+UpgradeUI --> Player: displayStationList(listOfStations)
+
+Player -> UpgradeUI: selectStation(station)
+
+UpgradeUI --> Player: displayBuildingOptions(buildingOptions)
+
+Player -> UpgradeUI: chooseBuilding(buildingType)
+
+UpgradeUI -> UpgradeUI: validateAndStoreInput(station, buildingType)
+
+deactivate UpgradeUI
+deactivate Player
 @enduml
