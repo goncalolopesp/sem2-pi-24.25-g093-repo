@@ -1,0 +1,17 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+
+participant "assignedTrainsRepository\n:AssignedTrainsRepository" as ATREPO
+
+create "assignedTrain\n:AssignedTrain" as AT
+activate ATREPO
+
+ATREPO --> AT : create()
+ATREPO --> ATREPO : verifyIfAssignedAndSaves(selectedTrain, selectedRoute, cargoesList)
+
+@enduml
