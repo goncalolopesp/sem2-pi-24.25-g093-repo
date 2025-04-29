@@ -1,0 +1,29 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "AssignTrainUI" as ATUI
+
+activate Player
+
+activate ATUI
+
+create ":AssignTrainController" as ATC
+
+participant ":Repositories" as REPO
+participant "repositories\n:Repositories" as repo
+participant "assignedTrainsRepository\n:AssignedTrainsRepository" as ATREPO
+
+ATREPO --> ATC : ATData
+deactivate ATREPO
+
+ATC --> ATUI : ATData
+deactivate ATC
+
+ATUI --> Player : displays operation success: "Train successfully assigned to route."
+deactivate ATUI
+@enduml
