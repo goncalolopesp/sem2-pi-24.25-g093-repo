@@ -1,0 +1,58 @@
+@startuml US005-CD
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+
+class BuildStationUI {
+  + openBuildStationForm()
+  + displayForm()
+  + enterData(map, type, x, y)
+  + showSuccess(station: Station)
+  + displaySuccess()
+}
+
+class BuildStationController {
+  + buildStation(map: String, type: String, x: int, y: int): Station
+}
+
+class MapRepository {
+  + findMap(map: String): Map
+}
+
+class CityRepository {
+  + findClosestCity(map: Map, x: int, y: int): City
+}
+
+class StationRepository {
+  + createStation(name: String, type: String, x: int, y: int, map: Map): Station
+}
+
+class Map {
+  - id: int
+  - name: String
+}
+
+class City {
+  - id: int
+  - name: String
+}
+
+class Station {
+  - id: int
+  - name: String
+  - type: String
+  - x: int
+  - y: int
+}
+
+BuildStationUI ..> BuildStationController : uses
+BuildStationController ..> MapRepository    : uses
+BuildStationController ..> CityRepository   : uses
+BuildStationController ..> StationRepository: uses
+
+MapRepository --> Map : returns
+CityRepository --> City : returns
+StationRepository --> Station : creates
+
+@enduml
