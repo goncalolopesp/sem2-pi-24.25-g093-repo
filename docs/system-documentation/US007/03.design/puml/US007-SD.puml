@@ -22,6 +22,7 @@ StationsListUI --> StationsListController : create
 participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
 participant "stationRepository\n:StationRepository" as stationRepository
+participant "stationRepository\n:BuildingRepository" as buildingRepository
 
 StationsListController --> Repositories : getInstance()
 activate StationsListController
@@ -66,6 +67,18 @@ StationsListController --> stationRepository : asks for the details of a specifi
 activate stationRepository
 stationRepository --> StationsListController : returns the details of said station
 deactivate stationRepository
+StationsListController --> Repositories : getInstance()
+activate Repositories
+Repositories --> StationsListController : repositories
+deactivate Repositories
+StationsListController --> Repo : getBuildingRepository()
+activate Repo
+Repo --> StationsListController : buildingRepository
+deactivate Repo
+StationsListController --> buildingRepository : asks for the details of the building(s) associated with the requested station
+activate buildingRepository
+buildingRepository --> StationsListController : returns the details of the building(s)
+deactivate buildingRepository
 StationsListController --> StationsListUI : returns the details
 deactivate StationsListController
 StationsListUI --> Employee : shows the details
