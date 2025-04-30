@@ -1,0 +1,34 @@
+@startuml
+
+class Player {
+
+}
+
+class AssignedTrain {
+    -selectedTrain: int
+    -selectedRoute: String[]
+    -cargoList: String[]
+    +validateInputs()
+}
+
+class AssignedTrainRepository {
+    +assignTrain(selectedTrain, selectedRoute, cargoesList)
+    +verifyIfAssignedAndSaves(selectedTrain, selectedRoute, cargoesList)
+}
+
+class AssignedTrainUI {
+    +getInput()
+    +showSuccess()
+    +showError()
+}
+
+class AssignedTrainController {
+    +assignTrain(selectedTrain, selectedRoute, cargoesList)
+}
+
+AssignedTrainRepository --> AssignedTrain : creates >
+AssignedTrainController --> AssignedTrainRepository : uses
+AssignedTrainController --> Player : gets current user
+AssignedTrainUI --> AssignedTrainController : interacts
+
+@enduml
