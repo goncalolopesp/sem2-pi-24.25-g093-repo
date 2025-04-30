@@ -12,10 +12,24 @@ hide methods
 
 'title Domain Model
 
-class Location {
-    positionX
-    positionY
+'User Related
+
+class User{
+    username
+    password
 }
+
+class Editor {
+    + createMap(name: String, width: int, height: int)
+}
+
+class Player {
+    username
+    password
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+}
+
+'Map Related
 
 class Map {
      name
@@ -24,9 +38,17 @@ class Map {
      location
 }
 
-class Industry {
+class Location {
+    positionX
+    positionY
+}
+
+class Station {
+    name
+    location
     type
-    Location
+    building
+    cargo
 }
 
 class City {
@@ -40,17 +62,19 @@ class Scenario {
     timePeriod
 }
 
-class TimePeriod {
-    techRestrictions
-    historicalEvents
+class Route {
+    stations
 }
 
-class Station {
-    name
-    location
+class HouseBlocks{
+
+}
+
+' Industry Related
+
+class Industry {
     type
-    building
-    cargo
+    Location
 }
 
 class Building {
@@ -65,11 +89,23 @@ class Cargo{
     status
 }
 
-class Equipment {
-    name
-    mutuallyExclusivity
-    replaces
+class Cost{
+
 }
+
+' Simulator Related
+
+class TimePeriod {
+    techRestrictions
+    historicalEvents
+}
+
+class Simulator {
+    status
+    cargoGenerationRate
+}
+
+' Train Related
 
 class Train{
     locomotives
@@ -77,16 +113,12 @@ class Train{
     cargoType
 }
 
-class Route {
-    stations
-}
-
 class Locomotive{
+    typeOfFuel
     locomotiveType
 }
 
 class SteamLocomotive{
-    typeOfFuel
     requiredRail
     price
     startYearOfOperation
@@ -96,7 +128,6 @@ class SteamLocomotive{
 }
 
 class DieselLocomotive{
-    typeOfFuel
     requiredRail
     price
     startYearOfOperation
@@ -106,7 +137,6 @@ class DieselLocomotive{
 }
 
 class ElectricLocomotive{
-    typeOfFuel
     requiredRail
     price
     startYearOfOperation
@@ -119,63 +149,72 @@ class Carriage{
     typeOfCargo
 }
 
-class Simulator {
-    status
-    cargoGenerationRate
+' Travel Related
+
+class Travel{
+
 }
 
-class Editor {
-    + createMap(name: String, width: int, height: int)
+class Departure{
+
 }
 
-class ProductOwner {
+class Arrival{
+
 }
 
-class Player {
-    username
-    password
-    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+class Time{
+
 }
 
-Editor "1" -- "*" Scenario
-Editor "1"--"*" Map
 
-Map "1"--"*" Industry
-Map "1"--"*" City
-
-Station "*" -- "1" Map
-Station "1" -- "1" City
-Station "1" -- "*" Building
-Station "*" -- "*" Cargo
-
-Player "1"--"*" Train
-Player "1"--"*" Station
-
-Train "*"--"*" Locomotive
-Train "*"--"*" Carriage
-Train "1" -- "1" Route
-
-Route "*" -- "*" Station
-
-ProductOwner "1" -- "1" Simulator
-
-Simulator "1" -- "*" Station
-
-Scenario -- Locomotive
-Scenario "1" -- "1" Map
-
-
+Cost --|> Station
+Cost --|> Building
+Cost --|> Industry
+Depot --|> Station
+Station --|> Station
+Terminal --|> Station
+PrimarySectorIndustries --|> Industry
+TransformingIndustries --|> Industry
+MixedIndustries --|> Industry
 TimePeriod --|> Scenario
-
-Equipment --|> Building
-
 Location --|> Map
 Location --|> City
 Location --|> Station
 Location --|> Industry
-
 SteamLocomotive --|> Locomotive
 DieselLocomotive --|> Locomotive
 ElectricLocomotive --|> Locomotive
+Player --|> User
+Editor --|> User
+
+Travel o-- Cost
+Travel o-- Departure
+Travel o-- Arrival
+Travel o-- Time
+Travel o-- Train
+Route o-- Station
+Editor o-- Scenario
+Station o-- Cargo
+Train o-- Carriage
+
+Route *-- Travel
+Train *-- Locomotive
+Editor *-- Map
+City *-- HouseBlocks
+Map *-- Industry
+Map *-- City
+Map *-- Station
+Player *-- Station
+Player *-- Train
+Station *-- Building
+Simulator *-- Station
+Scenario *-- Map
+Editor *-- City
+
+Station "1" -- "1" City
+Train "1" -- "1" Route
+Editor "1" -- "1" Simulator
+Scenario "1"--"*" Locomotive
 
 @enduml
