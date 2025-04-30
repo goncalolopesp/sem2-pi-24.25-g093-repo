@@ -1,0 +1,75 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Employee
+participant ":StationsListUI" as StationsListUI
+
+activate Employee
+
+Employee -> StationsListUI : asks to list the stations
+activate StationsListUI
+
+create ":StationsListController" as StationsListController
+
+StationsListUI --> StationsListController : create
+
+
+
+participant ":Repositories" as Repositories
+participant "repositories\n:Repositories" as Repo
+participant "stationRepository\n:StationRepository" as stationRepository
+
+StationsListController --> Repositories : getInstance()
+activate StationsListController
+activate Repositories
+
+Repositories --> StationsListController : repositories
+
+deactivate Repositories
+
+StationsListController --> Repo : getStationRepository()
+activate Repo
+
+Repo --> StationsListController : stationRepository
+deactivate Repo
+
+
+StationsListController --> stationRepository : asks for list of stations
+activate stationRepository
+stationRepository --> StationsListController : lists
+deactivate stationRepository
+StationsListController --> StationsListUI : lists
+
+deactivate StationsListController
+
+StationsListUI --> Employee : lists all the stations
+StationsListUI --> Employee : asks the selected station
+deactivate StationsListUI
+
+Employee -> StationsListUI : selects a station
+activate StationsListUI
+StationsListUI --> StationsListController : asks for the station details
+activate StationsListController
+StationsListController --> Repositories : getInstance()
+activate Repositories
+Repositories --> StationsListController : repositories
+deactivate Repositories
+StationsListController --> Repo : getStationRepository()
+activate Repo
+Repo --> StationsListController : stationRepository
+deactivate Repo
+StationsListController --> stationRepository : asks for the details of a specific station
+activate stationRepository
+stationRepository --> StationsListController : returns the details of said station
+deactivate stationRepository
+StationsListController --> StationsListUI : returns the details
+deactivate StationsListController
+StationsListUI --> Employee : shows the details
+deactivate StationsListUI
+
+
+@enduml
