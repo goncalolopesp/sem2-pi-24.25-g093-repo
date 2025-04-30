@@ -1,0 +1,48 @@
+@startuml US006-CD
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+
+class UpgradeStationUI {
+  + requestUpgrade(stationId: int)
+  + showBuildingOptions(buildings: List<Building>)
+  + storeUpgradeData(building: Building)
+  + showConfirmation()
+  + showSuccess(message: String)
+}
+
+class UpgradeStationController {
+  + upgradeRequest(stationId: int)
+  + applyUpgrade(stationId: int, building: Building): boolean
+}
+
+class BuildingRepository {
+  + getAvailableBuildings(): List<Building>
+}
+
+class StationRepository {
+  + getStationData(stationId: int): Station
+  + applyUpgrade(station: Station, building: Building): boolean
+}
+
+class Building {
+  - id: int
+  - name: String
+  - cost: int
+}
+
+class Station {
+  - id: int
+  - level: int
+  - building: Building
+}
+
+UpgradeStationUI ..> UpgradeStationController     : uses
+UpgradeStationController ..> BuildingRepository   : uses
+UpgradeStationController ..> StationRepository    : uses
+
+BuildingRepository --> Building    : returns
+StationRepository  --> Station     : returns
+
+@enduml
