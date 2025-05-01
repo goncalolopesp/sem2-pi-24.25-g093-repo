@@ -49,6 +49,22 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+**Get Input Partial SD**
+
+![Sequence Diagram - Partial - Get Input](svg/US012-SD-getInput.svg)
+
+**Start Simulation Partial SD**
+
+![Sequence Diagram - Partial - Start Simulation](svg/US012-SD-startSimulation.svg)
+
+**Verify if simulation exists Partial SD**
+
+![Sequence Diagram - Partial - Verification](svg/US012-SD-verify.svg)
+
+**Display Success Message Partial SD**
+
+![Sequence Diagram - Partial - Display Success](svg/US012-SD-displaySuccess.svg)
+
 ## 3.3. Class Diagram (CD)
 
 _In this section, it is suggested to present an UML static view representing the main related software classes that are involved in fulfilling the requirements as well as their relations, attributes and methods._

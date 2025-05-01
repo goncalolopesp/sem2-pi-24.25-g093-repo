@@ -1,0 +1,30 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "SimulationUI" as ATUI
+
+activate Player
+activate ATUI
+
+create ":SimulationController" as ATC
+
+participant "simulationRepository\n:SimulationRepository" as ATREPO
+
+ATUI --> ATC : create()
+deactivate ATUI
+
+ATREPO --> ATC : SimulationData
+deactivate ATREPO
+
+ATC --> ATUI : SimulationData
+activate ATUI
+deactivate ATC
+
+ATUI --> Player : displays operation success: "Train successfully assigned to route."
+deactivate ATUI
+@enduml
