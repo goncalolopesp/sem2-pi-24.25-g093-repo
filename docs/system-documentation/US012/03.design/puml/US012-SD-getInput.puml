@@ -1,0 +1,31 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "SimulationUI" as ATUI
+
+activate Player
+
+Player -> ATUI : asks to create a simulator
+activate ATUI
+
+ATUI --> Player : requests map selection
+deactivate ATUI
+
+Player -> ATUI : selects map
+activate ATUI
+
+ATUI --> ATUI : keepSelectedMap(selectedMap)
+ATUI --> Player : provides option to start the simulation
+deactivate ATUI
+
+Player -> ATUI : starts the simulation
+activate ATUI
+
+ATUI --> Player : provides option to pause or leave the simulation
+deactivate ATUI
+@enduml
