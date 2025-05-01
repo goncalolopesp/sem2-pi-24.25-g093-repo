@@ -5,7 +5,6 @@ skinparam shadowing false
 
 autonumber
 
-
 participant "assignedTrainsRepository\n:AssignedTrainsRepository" as ATREPO
 
 create "assignedTrain\n:AssignedTrain" as AT

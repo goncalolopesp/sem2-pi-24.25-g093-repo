@@ -14,11 +14,13 @@ activate ATUI
 
 create ":AssignTrainController" as ATC
 
-participant ":Repositories" as REPO
-participant "repositories\n:Repositories" as repo
 participant "assignedTrainsRepository\n:AssignedTrainsRepository" as ATREPO
 
+ATUI --> ATC : create()
+deactivate ATUI
+
 ATREPO --> ATC : ATData
+activate ATUI
 deactivate ATREPO
 
 ATC --> ATUI : ATData

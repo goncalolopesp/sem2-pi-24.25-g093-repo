@@ -25,6 +25,6 @@ ATC --> ATUI : SimulationData
 activate ATUI
 deactivate ATC
 
-ATUI --> Player : displays operation success: "Train successfully assigned to route."
+ATUI --> Player : displays operation success and shows simulation progression
 deactivate ATUI
 @enduml
