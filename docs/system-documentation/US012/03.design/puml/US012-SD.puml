@@ -1,0 +1,67 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant "SimulationUI" as ATUI
+
+activate Player
+
+Player -> ATUI : asks to create a simulator
+activate ATUI
+
+create ":SimulationController" as ATC
+
+participant ":Repositories" as REPO
+participant "repositories\n:Repositories" as repo
+participant "simulationRepository\n:SimulationRepository" as ATREPO
+
+ATUI --> ATC : create()
+ATUI --> Player : requests map selection
+deactivate ATUI
+
+Player -> ATUI : selects map
+activate ATUI
+
+ATUI --> ATUI : keepSelectedMap(selectedMap)
+ATUI --> Player : provides option to start the simulation
+deactivate ATUI
+
+Player -> ATUI : starts the simulation
+activate ATUI
+
+ATUI --> ATC : startSimulation(selectedMap)
+activate ATC
+
+ATC --> REPO : getInstance()
+activate REPO
+
+REPO --> ATC : repositories
+deactivate REPO
+
+ATC --> repo : getSimulationRepository()
+activate repo
+
+repo --> ATC : SimulationRepository
+deactivate repo
+
+ATC --> ATREPO : startSimulation(selectedMap)
+activate ATREPO
+
+create "simulation\n:Simulation" as AT
+
+ATREPO --> AT : create()
+ATREPO --> ATREPO : verifyIfExistsAndSaves(selectedMap)
+ATREPO --> ATC : SimulationData
+deactivate ATREPO
+
+ATC --> ATUI : SimulationData
+deactivate ATC
+
+ATUI --> Player : displays operation success and shows simulation progression
+ATUI --> Player : provides option to pause or leave the simulation
+deactivate ATUI
+@enduml
