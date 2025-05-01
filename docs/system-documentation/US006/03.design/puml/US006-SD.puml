@@ -2,59 +2,64 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeUI
-participant ":UpgradeStationController" as UpgradeController
-participant ":BuildingRepository" as BuildingRepo
-participant ":StationRepository" as StationRepo
+participant ":UpgradeStationUI" as UpgradeStationUI
 
 activate Player
 
-Player -> UpgradeUI: Requests upgrade for station
-activate UpgradeUI
+Player -> UpgradeStationUI : requests station upgrade
+activate UpgradeStationUI
 
-UpgradeUI --> UpgradeController: create
-UpgradeUI --> UpgradeController: upgradeRequest()
-activate UpgradeController
+create ":UpgradeStationController" as UpgradeStationController
+UpgradeStationUI -> UpgradeStationController : «create»
+activate UpgradeStationController
 
-UpgradeController --> UpgradeUI: Request building selection
-deactivate UpgradeController
-UpgradeUI --> Player: Shows building options
-deactivate UpgradeUI
+UpgradeStationUI --> Player : requests station and upgrade option
+deactivate UpgradeStationUI
 
-Player -> UpgradeUI: Selects desired building
-activate UpgradeUI
-UpgradeUI --> UpgradeUI: storeUpgradeData()
-UpgradeUI --> Player: Show upgrade confirmation
-deactivate UpgradeUI
+Player -> UpgradeStationUI : selects station and building
+activate UpgradeStationUI
 
-Player -> UpgradeUI: Confirms upgrade action
-activate UpgradeUI
-UpgradeUI --> UpgradeController: applyUpgrade()
-activate UpgradeController
+UpgradeStationUI --> UpgradeStationUI : keepSelection(station, buildingType)
 
-UpgradeController --> BuildingRepo: getAvailableBuildings()
-activate BuildingRepo
-BuildingRepo --> UpgradeController: availableBuildings
-deactivate BuildingRepo
+participant "repositories\n:Repositories" as Repo
+participant "buildingRepository\n:BuildingRepository" as buildingRepository
+participant "stationRepository\n:StationRepository" as stationRepository
 
-UpgradeController --> StationRepo: getStationData()
-activate StationRepo
-StationRepo --> UpgradeController: stationData
-deactivate StationRepo
+UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
 
-UpgradeController --> StationRepo: applyUpgrade()
-activate StationRepo
-StationRepo --> StationRepo: verifyUpgradeConstraints()
-StationRepo --> UpgradeController: upgradeResult
-deactivate StationRepo
+UpgradeStationController -> Repo : getInstance()
+activate Repo
+Repo --> UpgradeStationController : repositories
+deactivate Repo
 
-UpgradeController --> UpgradeUI: upgradeResult
-deactivate UpgradeController
+UpgradeStationController -> buildingRepository : findBuilding(buildingType)
+activate buildingRepository
+buildingRepository --> UpgradeStationController : building
 
-UpgradeUI --> Player: Shows success message "Upgrade applied successfully"
-deactivate UpgradeUI
-deactivate Player
+UpgradeStationController -> buildingRepository : checkAvailability(currentDate)
+buildingRepository --> UpgradeStationController : availabilityOk
+UpgradeStationController -> buildingRepository : checkBudget(buildingType)
+buildingRepository --> UpgradeStationController: budgetOk
+deactivate buildingRepository
+
+
+UpgradeStationController -> stationRepository : findStation(station)
+activate stationRepository
+stationRepository --> UpgradeStationController : station
+
+UpgradeStationController -> stationRepository : validateUpgrade(buildingType)
+stationRepository --> UpgradeStationController : upgradeAllowed
+UpgradeStationController -> stationRepository : applyUpgrade(station, buildingType)
+stationRepository --> UpgradeStationController : upgradedStation
+deactivate stationRepository
+
+UpgradeStationController --> UpgradeStationUI : upgradedStation
+deactivate UpgradeStationController
+
+UpgradeStationUI --> Player : display "Upgrade applied successfully."
+deactivate UpgradeStationUI
 @enduml

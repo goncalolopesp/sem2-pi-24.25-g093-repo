@@ -5,10 +5,9 @@ skinparam shadowing false
 
 autonumber
 participant ":BuildStationController" as BuildController
-participant ":MapRepository" as MapRepo
-participant ":CityRepository" as CityRepo
-participant ":StationRepository" as StationRepo
-participant ":Repositories" as Repositories
+participant "mapRepository\n::MapRepository" as MapRepo
+participant "cityRepository\n::CityRepository" as CityRepo
+participant "stationRepository\n::StationRepository" as StationRepo
 
 activate BuildController
 

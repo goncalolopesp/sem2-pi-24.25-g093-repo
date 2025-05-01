@@ -5,23 +5,27 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeUI
-participant ":UpgradeStationController" as Controller
-participant ":StationRepository" as StationRepo
+participant ":UpgradeStationUI" as UpgradeStationUI
+
 
 activate Player
-activate UpgradeUI
-UpgradeUI -> Controller: applyUpgrade(station, buildingType)
-activate Controller
+activate UpgradeStationUI
+create ":UpgradeStationController" as UpgradeStationController
+UpgradeStationUI -> UpgradeStationController : «create»
+activate UpgradeStationController
+participant "stationRepository\n:StationRepository" as stationRepository
+UpgradeStationController -> stationRepository : findStation(station)
+activate stationRepository
+stationRepository --> UpgradeStationController : station
 
-Controller -> StationRepo: upgradeStation(station, buildingType)
-activate StationRepo
-StationRepo --> Controller: updatedStation
-deactivate StationRepo
 
-Controller --> UpgradeUI: showSuccess()
-deactivate Controller
+UpgradeStationController -> stationRepository : applyUpgrade(station, buildingType)
+stationRepository --> UpgradeStationController : upgradedStation
+deactivate stationRepository
 
-UpgradeUI --> Player: displaySuccess()
-deactivate UpgradeUI
+UpgradeStationController --> UpgradeStationUI : upgradedStation
+deactivate UpgradeStationController
+
+UpgradeStationUI --> Player : display "Upgrade applied successfully."
+deactivate UpgradeStationUI
 @enduml

@@ -34,12 +34,16 @@ BuildStationController -> Repositories : getInstance()
 activate Repositories
 Repositories --> BuildStationController : repositories
 deactivate Repositories
-BuildStationController --> BuildStationUI : repositories
+
+BuildStationController -> MapRepository: findMap(map)
+activate MapRepository
+MapRepository -> BuildStationController: map
+deactivate MapRepository
 
 BuildStationUI --> Player : request station location
-deactivate BuildStationUI
+
 Player -> BuildStationUI : select location
-activate BuildStationUI
+
 BuildStationUI --> BuildStationUI : keepLocation(location)
 
 BuildStationUI -> BuildStationController : checkOverbuild(location)
@@ -48,7 +52,6 @@ activate StationRepository
 StationRepository --> BuildStationController : noConflict
 deactivate StationRepository
 
-BuildStationController --> BuildStationUI : proceed
 deactivate BuildStationController
 BuildStationUI --> Player : request station type (Depot/Station/Terminal)
 deactivate BuildStationUI
@@ -63,19 +66,20 @@ BuildStationController -> StationRepository : verifyBudget(type)
 activate StationRepository
 StationRepository --> BuildStationController : budgetOK
 deactivate StationRepository
-BuildStationController --> BuildStationUI : budgetOK
 
 
 
-BuildStationUI -> MapRepository : getClosestCity(location)
-activate MapRepository
-MapRepository --> BuildStationUI : cityName
-deactivate MapRepository
-BuildStationUI --> StationRepository : proposeName(cityName, type)
+BuildStationUI -> BuildStationController : getClosestCity(location)
+BuildStationController -> CityRepository: getClosestCity(location)
+activate CityRepository
+CityRepository --> BuildStationController : cityName
+deactivate CityRepository
+BuildStationUI -> BuildStationController : proposeName(cityName, type)
+BuildStationController -> StationRepository : proposeName(cityName,type)
 activate StationRepository
-StationRepository --> BuildStationUI : proposedName
+StationRepository --> BuildStationController : proposedName
 deactivate StationRepository
-BuildStationUI --> Player : display proposedName
+
 
 alt type == "Depot" or type == "Terminal"
   BuildStationUI --> Player : request center (geometric)

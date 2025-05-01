@@ -4,35 +4,30 @@ skinparam packageStyle rectangle
 skinparam shadowing false
 autonumber
 
-actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeUI
-participant ":UpgradeStationController" as Controller
-participant ":StationRepository" as StationRepo
-participant ":BuildingRepository" as BuildingRepo
+participant ":UpgradeStationController" as UpgradeStationController
+participant "buildingRepository\n:BuildingRepository" as buildingRepository
+participant "stationRepository\n:StationRepository" as stationRepository
 
-activate Player
-Player -> UpgradeUI: chooseBuilding(buildingType)
-activate UpgradeUI
+activate UpgradeStationController
 
-UpgradeUI -> Controller: validateUpgrade(station, buildingType)
-activate Controller
+UpgradeStationController -> buildingRepository : findBuilding(buildingType)
+activate buildingRepository
+buildingRepository --> UpgradeStationController : building
 
-Controller -> StationRepo: findStation(station)
-activate StationRepo
-StationRepo --> Controller: Station
-deactivate StationRepo
 
-Controller -> BuildingRepo: findBuilding(buildingType)
-activate BuildingRepo
-BuildingRepo --> Controller: Building
-deactivate BuildingRepo
+UpgradeStationController -> buildingRepository : checkAvailability(currentDate)
+buildingRepository --> UpgradeStationController : availabilityOk
 
-Controller -> Controller: verifyTimeConstraints(Building, currentDate)
-Controller -> Controller: verifyBudget(player, Building)
+UpgradeStationController -> buildingRepository : checkBudget(buildingType)
+buildingRepository --> UpgradeStationController : budgetOk
+deactivate buildingRepository
+UpgradeStationController -> stationRepository : findStation(station)
+activate stationRepository
+stationRepository --> UpgradeStationController : station
 
-Controller --> UpgradeUI: displayValidationResult(ValidationResult)
-deactivate Controller
-UpgradeUI --> Player: showValidationResult(ValidationResult)
-deactivate UpgradeUI
-deactivate Player
+UpgradeStationController -> stationRepository : validateUpgrade(buildingType)
+stationRepository --> UpgradeStationController : upgradeAllowed
+UpgradeStationController --> UpgradeStationController: proceed
+deactivate stationRepository
+
 @enduml
