@@ -2,32 +2,37 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
-autonumber
 
+autonumber
 participant ":BuildStationController" as BuildController
 participant ":MapRepository" as MapRepo
 participant ":CityRepository" as CityRepo
 participant ":StationRepository" as StationRepo
+participant ":Repositories" as Repositories
 
 activate BuildController
 
-BuildController -> MapRepo: findMap(mapId)
+BuildController -> MapRepo : findMap(map)
 activate MapRepo
-MapRepo --> BuildController: Map
+MapRepo --> BuildController : map
 deactivate MapRepo
 
-BuildController -> CityRepo: findClosestCity(Map, x, y)
+BuildController -> CityRepo : findClosestCity(map, x, y)
 activate CityRepo
-CityRepo --> BuildController: City
+CityRepo --> BuildController : city
 deactivate CityRepo
 
-BuildController -> StationRepo: isLocationAvailable(Map, x, y)
+BuildController -> StationRepo : verifyNoOverbuild(map, x, y)
 activate StationRepo
-StationRepo --> BuildController: available?
+StationRepo --> BuildController : noConflict
 deactivate StationRepo
 
-BuildController -> BuildController: generateName(City, type)
-BuildController --> BuildController: stationName
+BuildController -> StationRepo : verifyBudget(type)
+activate StationRepo
+StationRepo --> BuildController : budgetOK
+deactivate StationRepo
 
-deactivate BuildController
+BuildController -> BuildController : generateName(City, type)
+BuildController --> BuildController : stationName
+
 @enduml

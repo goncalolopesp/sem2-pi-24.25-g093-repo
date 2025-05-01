@@ -2,26 +2,37 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
 actor "Player" as Player
 participant ":BuildStationUI" as BuildUI
-participant ":BuildStationController" as BuildController
-participant ":StationRepository" as StationRepo
+
 activate Player
+Player -> BuildUI : buildStationRequest()
 activate BuildUI
-
-BuildUI -> BuildController: buildStation(name, type, x, y, map)
+create ":BuildStationController" as BuildController
+BuildUI -> BuildController : «create»()
 activate BuildController
+participant "repositories\n:Repositories" as Repositories
+participant "stationRepository\n:StationRepository" as StationRepo
 
-BuildController -> StationRepo: createStation(name, type, x, y, map)
+BuildController -> Repositories : getInstance()
+activate Repositories
+Repositories --> BuildController : repositories
+deactivate Repositories
+BuildController -> StationRepo : createStation(map,name, location, type, center)
 activate StationRepo
-StationRepo --> BuildController: Station
+
+create "station\n:Station" as Station
+StationRepo -> Station         : «create»()
+StationRepo -> StationRepo     : saveStation(Station)
+StationRepo --> BuildController : stationData
 deactivate StationRepo
 
-BuildController --> BuildUI: showSuccess(Station)
+BuildController --> BuildUI : stationData
 deactivate BuildController
 
-BuildUI --> Player: displaySuccess()
+BuildUI --> Player : displaySuccess()
 deactivate BuildUI
 @enduml

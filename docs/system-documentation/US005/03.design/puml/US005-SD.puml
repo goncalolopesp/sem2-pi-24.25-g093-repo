@@ -2,43 +2,102 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildUI
-participant ":BuildStationController" as BuildController
-participant ":MapRepository" as MapRepo
-participant ":CityRepository" as CityRepo
-participant ":StationRepository" as StationRepo
+participant ":BuildStationUI" as BuildStationUI
+
 
 activate Player
-Player -> BuildUI: openBuildStationForm()
-activate BuildUI
-BuildUI --> Player: displayForm()
 
-Player -> BuildUI: enterData(map, type, x, y)
-BuildUI -> BuildController: buildStation(map, type, x, y)
-activate BuildController
+Player -> BuildStationUI : buildStationRequest()
+create ":BuildStaionController" as BuildStationController
+activate BuildStationUI
+BuildStationUI -> BuildStationController: <<create>>
+participant "repositories\n:Repositories" as Repositories
+participant "mapRepository\n:MapRepository" as MapRepository
+participant "cityRepository\n:CityRepository" as CityRepository
+participant "stationRepository\n:StationRepository" as StationRepository
 
-BuildController -> MapRepo: findMap(map)
-activate MapRepo
-MapRepo --> BuildController: Map
-deactivate MapRepo
 
-BuildController -> CityRepo: findClosestCity(map, x, y)
-activate CityRepo
-CityRepo --> BuildController: City
-deactivate CityRepo
+BuildStationUI --> Player : request map selection
+deactivate BuildStationUI
+Player -> BuildStationUI : select map
+activate BuildStationUI
+BuildStationUI --> BuildStationUI : keepMap(map)
 
-BuildController -> StationRepo: createStation(name, type, x, y, map)
-activate StationRepo
-StationRepo --> BuildController: Station
-deactivate StationRepo
 
-BuildController --> BuildUI: showSuccess(Station)
-deactivate BuildController
+BuildStationUI -> BuildStationController : getRepositories()
+activate BuildStationController
+BuildStationController -> Repositories : getInstance()
+activate Repositories
+Repositories --> BuildStationController : repositories
+deactivate Repositories
+BuildStationController --> BuildStationUI : repositories
 
-BuildUI --> Player: displaySuccess()
-deactivate BuildUI
-deactivate Player
+BuildStationUI --> Player : request station location
+deactivate BuildStationUI
+Player -> BuildStationUI : select location
+activate BuildStationUI
+BuildStationUI --> BuildStationUI : keepLocation(location)
+
+BuildStationUI -> BuildStationController : checkOverbuild(location)
+BuildStationController -> StationRepository : verifyNoOverbuild(location)
+activate StationRepository
+StationRepository --> BuildStationController : noConflict
+deactivate StationRepository
+
+BuildStationController --> BuildStationUI : proceed
+deactivate BuildStationController
+BuildStationUI --> Player : request station type (Depot/Station/Terminal)
+deactivate BuildStationUI
+Player -> BuildStationUI : select type
+activate BuildStationUI
+BuildStationUI --> BuildStationUI : keepType(type)
+
+BuildStationUI -> BuildStationController : checkBudget(type)
+activate BuildStationController
+BuildStationController -> StationRepository : verifyBudget(type)
+
+activate StationRepository
+StationRepository --> BuildStationController : budgetOK
+deactivate StationRepository
+BuildStationController --> BuildStationUI : budgetOK
+
+
+
+BuildStationUI -> MapRepository : getClosestCity(location)
+activate MapRepository
+MapRepository --> BuildStationUI : cityName
+deactivate MapRepository
+BuildStationUI --> StationRepository : proposeName(cityName, type)
+activate StationRepository
+StationRepository --> BuildStationUI : proposedName
+deactivate StationRepository
+BuildStationUI --> Player : display proposedName
+
+alt type == "Depot" or type == "Terminal"
+  BuildStationUI --> Player : request center (geometric)
+  Player -> BuildStationUI : select center
+  BuildStationUI --> BuildStationUI : keepCenter(center)
+end
+
+BuildStationUI --> BuildStationController : createStation(map, location, type, center)
+deactivate BuildStationUI
+BuildStationController -> StationRepository : createStation(map, location, type, center)
+activate StationRepository
+create ":station\n:Station" as Station
+
+StationRepository -> Station: <<create>>
+
+StationRepository --> StationRepository : saveStation()
+StationRepository --> BuildStationController : stationData
+deactivate StationRepository
+
+BuildStationController --> BuildStationUI : stationData
+deactivate BuildStationController
+
+BuildStationUI --> Player : display "Station created successfully"
+deactivate BuildStationUI
 @enduml

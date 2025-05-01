@@ -2,23 +2,31 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
 actor "Player" as Player
 participant ":BuildStationUI" as BuildUI
-participant ":BuildStationController" as BuildController
 
 activate Player
-Player -> BuildUI: openBuildStationForm()
+Player -> BuildUI : buildStationRequest()
 activate BuildUI
-BuildUI --> Player: displayForm()
+BuildUI --> Player : displayBuildForm()
 
-Player -> BuildUI: enterData(map, type, x, y)
-BuildUI -> BuildUI: validateAndStoreInput(map, type, x, y)
+Player -> BuildUI : select map
+BuildUI --> BuildUI : keepMap(map)
 
-BuildUI -> BuildController: buildStation(map, type, x, y)
-activate BuildController
+Player -> BuildUI : select location
+BuildUI --> BuildUI : keepLocation(location)
 
+Player -> BuildUI : select type
+BuildUI --> BuildUI : keepType(type)
 
+alt type == "Depot" or type == "Terminal"
+  Player -> BuildUI : select center
+  BuildUI --> BuildUI : keepCenter(center)
+end
 
+deactivate BuildUI
 @enduml
+
