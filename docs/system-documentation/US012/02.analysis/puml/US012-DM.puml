@@ -7,7 +7,7 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class ProductOwner {
+class Player {
 }
 
 class Simulator {
@@ -24,7 +24,7 @@ class Cargo {
     type
 }
 
-ProductOwner "1" -- "1" Simulator : controls
+Player "1" -- "1" Simulator : controls
 Simulator "1" -- "*" Station : manages
 Station "*" -- "*" Cargo : stores
 

@@ -59,11 +59,11 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 **Verify if Scenario exists Partial SD**
 
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-verify.svg)
+![Sequence Diagram - Partial - Verification](svg/US004-SD-verify.svg)
 
 **Display Success Message Partial SD**
 
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-displaySuccess.svg)
+![Sequence Diagram - Partial - Display Success](svg/US004-SD-displaySuccess.svg)
 
 ## 3.3. Class Diagram (CD)
 

@@ -1,18 +1,18 @@
 @startuml
 
-actor ProductOwner
+actor "Player" as Player
 participant "System" as System
 
-activate ProductOwner
+activate Player
 
-ProductOwner -> System: startSimulation()
+Player -> System: startSimulation()
 activate System
-System -> ProductOwner: Display Simulation Status
+System -> Player: Display Simulation Status
 deactivate System
 
-ProductOwner -> System: pauseSimulation()
+Player -> System: pauseSimulation()
 activate System
-System -> ProductOwner: Display Paused Status
+System -> Player: Display Paused Status
 deactivate System
 
 @enduml
