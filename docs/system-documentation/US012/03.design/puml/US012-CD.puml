@@ -1,0 +1,32 @@
+@startuml
+
+class Player {
+
+}
+
+class Simulation {
+    -selectedMap: int
+    +validateInputs()
+}
+
+class SimulationRepository {
+    +startSimulation(selectedMap)
+    +verifyIfExistsAndSaves(selectedMap)
+}
+
+class SimulationUI {
+    +getInput()
+    +showSuccess()
+    +showError()
+}
+
+class SimulationController {
+    +startSimulation(selectedMap)
+}
+
+SimulationRepository --> Simulation : creates >
+SimulationController --> SimulationRepository : uses
+SimulationController --> Player : gets current user
+SimulationUI --> SimulationController : interacts
+
+@enduml
