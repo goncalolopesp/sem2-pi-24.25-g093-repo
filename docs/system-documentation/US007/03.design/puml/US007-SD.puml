@@ -22,7 +22,7 @@ StationsListUI --> StationsListController : create
 participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
 participant "stationRepository\n:StationRepository" as stationRepository
-participant "stationRepository\n:BuildingRepository" as buildingRepository
+participant "buildingRepository\n:BuildingRepository" as buildingRepository
 
 StationsListController --> Repositories : getInstance()
 activate StationsListController
@@ -53,6 +53,7 @@ deactivate StationsListUI
 
 Employee -> StationsListUI : selects a station
 activate StationsListUI
+StationsListUI --> StationsListUI : saveStation()
 StationsListUI --> StationsListController : asks for the station details
 activate StationsListController
 StationsListController --> Repositories : getInstance()
