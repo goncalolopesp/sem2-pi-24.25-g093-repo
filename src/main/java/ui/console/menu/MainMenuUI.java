@@ -11,7 +11,6 @@ public class MainMenuUI implements Runnable{
     public void run() {
         List<MenuItem> options = new ArrayList<MenuItem>();
         options.add(new MenuItem("Create Map", new CreateMapUI()));
-
         int option = 0;
         do {
             option = Utils.showAndSelectIndex(options, "\n\n--- MAIN MENU --------------------------");
