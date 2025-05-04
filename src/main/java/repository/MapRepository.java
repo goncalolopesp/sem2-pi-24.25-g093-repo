@@ -4,6 +4,7 @@ import domain.Map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class MapRepository {
     private final List<Map> maps;
@@ -13,6 +14,10 @@ public class MapRepository {
         if (validateMap(map)) {
             maps.add(map);
         }
+    }
+
+    public Optional<Map> getMap(String name) {
+        return maps.stream().filter(m -> m.getMapName().equals(name)).findFirst();
     }
 
     private boolean validateMap(Map map) {
