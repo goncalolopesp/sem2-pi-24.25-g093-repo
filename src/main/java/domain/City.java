@@ -1,4 +1,7 @@
 package domain;
+
+import repository.CityRepository;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -53,13 +56,16 @@ public class City {
      * @param count number of blocks
      * @param sigma standard deviation
      */
-    public void generateBlocksAuto(int count, double sigma) {
-        for (int i = 0; i < count; i++) {
-            int x = (int) Math.round(centerX + random.nextGaussian() * sigma);
-            int y = (int) Math.round(centerY + random.nextGaussian() * sigma);
-            HouseBlock block = new HouseBlock(x, y);
-            if (!blocks.contains(block)) {
-                blocks.add(block);
+    public void generateBlocksAuto(int count, double sigma, CityRepository repo) {
+        Random rand = new Random();
+        int generated = 0;
+        while (generated < count) {
+            int x = (int) Math.round(centerX + rand.nextGaussian() * sigma);
+            int y = (int) Math.round(centerY + rand.nextGaussian() * sigma);
+            HouseBlock hb = new HouseBlock(x, y);
+            if (repo.isBlockPositionUnique(mapName, hb)) {
+                blocks.add(hb);
+                generated++;
             }
         }
     }
