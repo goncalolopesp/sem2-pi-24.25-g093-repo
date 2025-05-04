@@ -1,11 +1,15 @@
 package domain;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class Map {
     private final String mapName;
     private int width;
     private int height;
+    private final List<City> cities = new ArrayList<>();
 
     public Map(String mapName, int width, int height) {
         validateName(mapName);
@@ -42,4 +46,35 @@ public class Map {
     public int getHeight() {
         return height;
     }
+
+    /**
+     * Adds a city to this map if not already present.
+     * @param city the city to add
+     * @return true if added, false if a city with same name exists
+     */
+    public boolean addCity(City city) {
+        if (cities.stream().anyMatch(c -> c.getName().equals(city.getName()))) {
+            return false;
+        }
+        cities.add(city);
+        return true;
+    }
+
+    /**
+     * Removes a city and clears its blocks.
+     * @param city the city to remove
+     */
+    public void removeCity(City city) {
+        if (cities.remove(city)) {
+            city.clearBlocks();
+        }
+    }
+
+    /**
+     * @return the list of cities on that map.
+     */
+    public List<City> getCities() {
+        return Collections.unmodifiableList(cities);
+    }
+
 }

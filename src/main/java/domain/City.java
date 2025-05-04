@@ -1,88 +1,77 @@
 package domain;
-
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Random;
 
-/**
- * Represents a city located on a map, consisting of house blocks.
- */
 public class City {
-    private final String name;
-    private final String mapName;
-    private final List<HouseBlock> houseBlocks;
+    private String name;
+    private String mapName;
+    private int centerX;
+    private int centerY;
+    private final List<HouseBlock> blocks = new ArrayList<>();
+    private final Random random = new Random();
 
-    /**
-     * Constructs a City with a name, map association, and a list of house blocks.
-     *
-     * @param name        The name of the city.
-     * @param mapName     The name of the map where the city is located.
-     * @param houseBlocks The list of house blocks belonging to the city.
-     */
-    public City(String name, String mapName, List<HouseBlock> houseBlocks) {
+    public City(String name, String mapName, int centerX, int centerY) {
         this.name = name;
         this.mapName = mapName;
-        this.houseBlocks = new ArrayList<>(houseBlocks);
+        this.centerX = centerX;
+        this.centerY = centerY;
     }
 
-    /**
-     * Gets the name of the city.
-     *
-     * @return The city name.
-     */
     public String getName() {
         return name;
     }
 
-    /**
-     * Gets the name of the map this city belongs to.
-     *
-     * @return The map name.
-     */
     public String getMapName() {
         return mapName;
     }
 
-    /**
-     * Gets the list of house blocks in the city.
-     *
-     * @return List of house blocks.
-     */
-    public List<HouseBlock> getHouseBlocks() {
-        return new ArrayList<>(houseBlocks); // Defensive copy
+    public int getCenterX() {
+        return centerX;
+    }
+
+    public int getCenterY() {
+        return centerY;
     }
 
     /**
-     * Checks whether a given house block is already part of this city.
-     *
-     * @param block The block to check.
-     * @return True if it exists, false otherwise.
+     * Adds a house block manually if not already present.
+     * @param block the block to add
+     * @return true if added, false if duplicate
      */
-    public boolean hasHouseBlock(HouseBlock block) {
-        return houseBlocks.contains(block);
+    public boolean addBlockManual(HouseBlock block) {
+        if (blocks.contains(block)) {
+            return false;
+        }
+        blocks.add(block);
+        return true;
     }
 
     /**
-     * Adds a house block to the city.
-     *
-     * @param block The block to add.
+     * Generates and adds blocks automatically around the city center using normal distribution.
+     * @param count number of blocks
+     * @param sigma standard deviation
      */
-    public void addHouseBlock(HouseBlock block) {
-        if (!houseBlocks.contains(block)) {
-            houseBlocks.add(block);
+    public void generateBlocksAuto(int count, double sigma) {
+        for (int i = 0; i < count; i++) {
+            int x = (int) Math.round(centerX + random.nextGaussian() * sigma);
+            int y = (int) Math.round(centerY + random.nextGaussian() * sigma);
+            HouseBlock block = new HouseBlock(x, y);
+            if (!blocks.contains(block)) {
+                blocks.add(block);
+            }
         }
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof City)) return false;
-        City city = (City) o;
-        return name.equalsIgnoreCase(city.name) && mapName.equalsIgnoreCase(city.mapName);
+    /**
+     * Clears all house blocks (used if a city needs to be removed).
+     */
+    public void clearBlocks() {
+        blocks.clear();
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name.toLowerCase(), mapName.toLowerCase());
+    public List<HouseBlock> getBlocks() {
+        return Collections.unmodifiableList(blocks);
     }
 }
