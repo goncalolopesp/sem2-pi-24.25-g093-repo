@@ -1,93 +1,86 @@
-// src/main/java/ui/console/CreateCityUI.java
 package ui.console;
 
 import controller.CreateCityController;
-import domain.HouseBlock;
-import domain.City;
+import controller.CreateCityController.CenterError;
+import controller.CreateCityController.NameMapError;
+import controller.CreateCityController.BlockError;
 
-import java.util.ArrayList;
-import java.util.List;
+import domain.City;
+import domain.HouseBlock;
+
 import java.util.Scanner;
 
-/**
- * Console UI for creating a city and assigning house blocks.
- * Prompts each input in its own loop until valid, without using while(true).
- */
 public class CreateCityUI implements Runnable {
     private final CreateCityController ctrl = new CreateCityController();
 
-    @Override
-    public void run() {
+    @Override public void run() {
+        System.out.println("\n\n--- Create City ------------------------");
         Scanner sc = new Scanner(System.in);
-        String cityName = "";
-        String mapName = "";
-        int centerX = 0, centerY = 0;
-        City city = null;
+        String cityName, mapName;
 
-        // Name & Map
-        boolean validNameMap = false;
-        while (!validNameMap) {
-            System.out.print("Enter City Name: ");
-            cityName = sc.nextLine().trim();
-            System.out.print("Enter Map Name: ");
-            mapName = sc.nextLine().trim();
-            if (ctrl.createCity(cityName, mapName, 0, 0) != null) {
-                validNameMap = true;
-            } else {
-                System.out.println("Invalid or duplicate city name/map. Try again.");
-            }
-        }
+        NameMapError nm;
+        do {
+            System.out.print("Enter City Name: "); cityName = sc.nextLine().trim();
+            System.out.print("Enter Map Name: "); mapName = sc.nextLine().trim();
+            nm = ctrl.validateNameMap(cityName, mapName);
+            if (nm == NameMapError.MAP_NOT_FOUND)
+                System.out.println("Error: Map '" + mapName + "' does not exist.");
+            else if (nm == NameMapError.NAME_DUPLICATE)
+                System.out.println("Error: City name '" + cityName + "' already used on map '" + mapName + "'.");
+        } while (nm != NameMapError.OK);
 
-        // Center Coordinates
-        boolean validCenter = false;
-        while (!validCenter) {
-            System.out.print("Enter Center X: ");
-            centerX = Integer.parseInt(sc.nextLine());
-            System.out.print("Enter Center Y: ");
-            centerY = Integer.parseInt(sc.nextLine());
-            city = ctrl.createCity(cityName, mapName, centerX, centerY);
-            if (city != null) {
-                validCenter = true;
-            } else {
-                System.out.println("Center out of bounds or city exists. Try again.");
-            }
-        }
+        int cx, cy;
+        CenterError ce;
+        do {
+            System.out.print("Enter Center X: "); cx = Integer.parseInt(sc.nextLine());
+            System.out.print("Enter Center Y: "); cy = Integer.parseInt(sc.nextLine());
+            ce = ctrl.validateCenter(cityName, mapName, cx, cy);
+            if (ce == CenterError.OUT_OF_BOUNDS)
+                System.out.println("Error: Center (" + cx + "," + cy + ") outside map bounds.");
+            else if (ce == CenterError.POSITION_TAKEN)
+                System.out.println("Error: Another city occupies (" + cx + "," + cy + ").");
+            else if (ce == CenterError.BLOCK_PRESENT)
+                System.out.println("Error: A house block exists at (" + cx + "," + cy + ").");
+        } while (ce != CenterError.OK);
 
-        System.out.println("City created.");
+        City city = ctrl.createCity(cityName, mapName, cx, cy);
+        System.out.println("City created: " + city.getName() + " on map " + city.getMapName());
 
-        // Blocks Assignment Mode
-        System.out.print("Choose block mode (M=Manual, A=Auto): ");
-        String mode = sc.nextLine().trim().toUpperCase();
-        while (!mode.equals("M") && !mode.equals("A")) {
-            System.out.print("Invalid mode. Enter 'M' or 'A': ");
-            mode = sc.nextLine().trim().toUpperCase();
-        }
+        char mode;
+        do {
+            System.out.print("Choose block mode (M=Manual, A=Auto): ");
+            String line = sc.nextLine().trim().toUpperCase();
+            mode = line.isEmpty() ? ' ' : line.charAt(0);
+        } while (mode != 'M' && mode != 'A');
 
-        if (mode.equals("M")) {
-            List<HouseBlock> blocks = new ArrayList<>();
+        if (mode == 'M') {
             System.out.print("How many blocks to add? ");
             int n = Integer.parseInt(sc.nextLine());
             for (int i = 0; i < n; i++) {
-                System.out.print("Block " + (i + 1) + " X: ");
-                int bx = Integer.parseInt(sc.nextLine());
-                System.out.print("Block " + (i + 1) + " Y: ");
-                int by = Integer.parseInt(sc.nextLine());
-                blocks.add(new HouseBlock(bx, by));
+                HouseBlock b;
+                BlockError be;
+                do {
+                    System.out.print("Block " + (i+1) + " X: "); int bx = Integer.parseInt(sc.nextLine());
+                    System.out.print("Block " + (i+1) + " Y: "); int by = Integer.parseInt(sc.nextLine());
+                    b = new HouseBlock(bx, by);
+                    be = ctrl.validateBlock(city.getMapName(), b);
+                    if (be == BlockError.OUT_OF_BOUNDS)
+                        System.out.println("Error: Block (" + bx + "," + by + ") outside map bounds.");
+                    else if (be == BlockError.COLLIDES_CITY_CENTER)
+                        System.out.println("Error: Block collides with a city center at (" + bx + "," + by + ").");
+                    else if (be == BlockError.COLLIDES_BLOCK)
+                        System.out.println("Error: Block conflicts with existing block at (" + bx + "," + by + ").");
+                } while (be != BlockError.OK);
+                ctrl.addBlockManual(city, b);
             }
-            if (ctrl.assignBlocksManual(city, blocks)) {
-                System.out.println("Blocks assigned manually.");
-            } else {
-                System.out.println("Block conflict. No blocks were assigned.");
-            }
+            System.out.println("Blocks assigned manually.");
         } else {
-            System.out.print("Number of blocks: ");
-            int n = Integer.parseInt(sc.nextLine());
-            System.out.print("Sigma (spread): ");
-            double s = Double.parseDouble(sc.nextLine());
+            System.out.print("Number of blocks: "); int n = Integer.parseInt(sc.nextLine());
+            System.out.print("Sigma (spread): "); double s = Double.parseDouble(sc.nextLine());
             ctrl.assignBlocksAuto(city, n, s);
             System.out.println("Blocks assigned automatically.");
         }
 
-        System.out.println("Done.");
+        System.out.println("City created with success.");
     }
 }

@@ -1,38 +1,34 @@
 package repository;
 
+import controller.CreateCityController;
 import domain.City;
 import domain.HouseBlock;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class CityRepository {
     private final List<City> cities = new ArrayList<>();
 
-    public Optional<City> getCity(String name, String mapName) {
-        return cities.stream()
-                .filter(c -> c.getName().equals(name) && c.getMapName().equals(mapName))
-                .findFirst();
+    public void add(City c) { cities.add(c); }
+    public List<City> getCities() { return List.copyOf(cities); }
+
+    public boolean isNameUnique(String name, String map) {
+        return cities.stream().noneMatch(c->c.getName().equals(name) && c.getMapName().equals(map));
     }
 
-    public boolean add(City city) {
-        if (cities.stream().anyMatch(c -> c.getName().equals(city.getName()) && c.getMapName().equals(city.getMapName()))) {
-            return false;
-        }
-        cities.add(city);
-        return true;
+    public boolean existsAtPosition(String map, int x, int y) {
+        return cities.stream().filter(c->c.getMapName().equals(map))
+                .anyMatch(c->c.getCenterX()==x && c.getCenterY()==y);
     }
 
-    public List<City> getAll() { return List.copyOf(cities); }
+    public boolean isBlockPositionUnique(String map, HouseBlock b) {
+        return cities.stream().filter(c->c.getMapName().equals(map))
+                .flatMap(c->c.getBlocks().stream())
+                .noneMatch(b::equals);
+    }
 
-    /**
-     * Checks that no city on the same map has this block position.
-     */
-    public boolean isBlockPositionUnique(String mapName, HouseBlock block) {
-        return cities.stream()
-                .filter(c -> c.getMapName().equals(mapName))
-                .flatMap(c -> c.getBlocks().stream())
-                .noneMatch(b -> b.equals(block));
+    public CreateCityController.BlockError validateBlock(String map, HouseBlock b) {
+        // delegated to controller, stub here
+        return CreateCityController.BlockError.OK;
     }
 }
