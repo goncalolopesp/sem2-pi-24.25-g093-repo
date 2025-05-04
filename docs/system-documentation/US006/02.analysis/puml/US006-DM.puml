@@ -11,20 +11,20 @@ class Station {
     name
     location
     type
+    building
+    cargo
 }
 
 class Building {
     name
     availability
+    type
+    upgrade
 }
 
-class Equipment {
-    name
-    mutuallyExclusivity
-    replaces
+class Cost {
 }
 
-Building --|> Equipment
-Station "1" -- "1" Building : can be upgraded with
-
+Cost --|> Building
+Station *-- Building
 @enduml
