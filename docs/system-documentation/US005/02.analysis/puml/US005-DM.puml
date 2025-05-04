@@ -7,31 +7,42 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class Station {
-    name
-    location
-    type
-}
-
-class City {
-    name
-    location
-}
-
-class Map {
-    id
-    name
-    size
-}
-
 class Player {
-    id
     username
     password
 }
 
-Station "*" -- "1" Map : located in
-Station "*" -- "1" City : closest to
-Player "1" -- "*" Station : can build
+class Map {
+    name
+    sizeX
+    sizeY
+    location
+}
 
+class City {
+    name
+    Location
+    numHouseBlocks
+}
+
+class Location {
+    positionX
+    positionY
+}
+
+class Station {
+    name
+    location
+    type
+    building
+    cargo
+}
+
+Location --|> Map
+Location --|> City
+Location --|> Station
+Player *-- Station
+Map *-- Station
+Map *-- City
+Station "1" -- "1" City
 @enduml
