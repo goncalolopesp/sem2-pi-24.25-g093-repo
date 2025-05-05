@@ -9,7 +9,6 @@ public class Map {
     private final String mapName;
     private final int width;
     private final int height;
-    private final List<City> cities = new ArrayList<>();
 
     public Map(String mapName, int width, int height) {
         this.mapName = mapName;
@@ -21,28 +20,8 @@ public class Map {
     public int getWidth() { return width; }
     public int getHeight() { return height; }
 
-    /**
-     * Adds a city if its name is unique on this map.
-     */
-    public boolean addCity(City city) {
-        if (cities.stream().anyMatch(c -> c.getName().equals(city.getName()))) {
-            return false;
-        }
-        cities.add(city);
-        return true;
+    @Override
+    public String toString() {
+        return getMapName();
     }
-
-    /**
-     * Removes a city and clears its blocks (cascade due to composition).
-     */
-    public void removeCity(City city) {
-        if (cities.remove(city)) {
-            city.clearBlocks();
-        }
-    }
-
-    /**
-     * @return a list of cities
-     */
-    public List<City> getCities() { return Collections.unmodifiableList(cities); }
 }
