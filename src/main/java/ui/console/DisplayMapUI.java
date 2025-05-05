@@ -1,15 +1,17 @@
 package ui.console;
 
 import controller.DisplayMapController;
+import domain.City;
 import domain.Map;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
 public class DisplayMapUI implements Runnable{
     private final DisplayMapController ctrl = new DisplayMapController();
     private String mapName;
-    private int[][] mapArray;
+    private String[][] mapArray;
 
     @Override
     public void run() {
@@ -25,9 +27,9 @@ public class DisplayMapUI implements Runnable{
         for (int i = 0; i < mapArray.length; i++) {
             for (int j = 0; j < mapArray[0].length; j++) {
                 if (j == mapArray[0].length - 1) {
-                    System.out.print("0"); // no space after the last one
+                    System.out.print(mapArray[i][j]); // no space after the last one
                 } else {
-                    System.out.print("0 ");
+                    System.out.print(mapArray[i][j] + " ");
                 }
             }
             System.out.println();
@@ -38,7 +40,7 @@ public class DisplayMapUI implements Runnable{
         System.out.println(ctrl.getMaps());
     }
 
-    private int[][] submitData() {
+    private String[][] submitData() {
         int width = 0; int height = 0;
         Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
         if (ctrl.verifyIfMapExists(mapName)) {
@@ -47,7 +49,27 @@ public class DisplayMapUI implements Runnable{
         } else {
             System.out.println("\nMap doesn't exist!");
         }
-        return mapArray = new int[width][height];
+
+        mapArray = new String[width][height];
+
+        for (int i = 0; i < mapArray.length; i++) {
+            for (int j = 0; j < mapArray[0].length; j++) {
+                mapArray[i][j] = "⬛";
+            }
+        }
+
+        addCitiesToMap();
+
+        return mapArray;
+    }
+
+    private void addCitiesToMap() {
+        List<City> citiesList = ctrl.getCities();
+        for (int i = 0; i < ctrl.getCities().size(); i++) {
+            int centerX = citiesList.get(i).getCenterX();
+            int centerY = citiesList.get(i).getCenterY();
+            mapArray[centerX-1][centerY-1] = "🏙️";
+        }
     }
 
     private void requestData() {
