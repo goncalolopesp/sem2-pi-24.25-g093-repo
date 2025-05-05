@@ -51,7 +51,7 @@ public class DisplayMapUI implements Runnable{
             System.out.println("\nMap doesn't exist!");
         }
 
-        mapArray = new String[width][height];
+        mapArray = new String[height][width];
 
         for (int i = 0; i < mapArray.length; i++) {
             for (int j = 0; j < mapArray[0].length; j++) {
@@ -70,7 +70,7 @@ public class DisplayMapUI implements Runnable{
         for (int i = 0; i < ctrl.getCities().size(); i++) {
             int centerX = citiesList.get(i).getCenterX();
             int centerY = citiesList.get(i).getCenterY();
-            mapArray[centerX-1][centerY-1] = "🌆";
+            mapArray[centerY-1][centerX-1] = "🌆";
         }
     }
 
@@ -81,7 +81,7 @@ public class DisplayMapUI implements Runnable{
             for (int j = 0; j < houseBlockList.size(); j++) {
                 int posX = houseBlockList.get(j).getX();
                 int posY = houseBlockList.get(j).getY();
-                mapArray[posX-1][posY-1] = "🌆";
+                mapArray[posY-1][posX-1] = "🌆";
             }
         }
     }
