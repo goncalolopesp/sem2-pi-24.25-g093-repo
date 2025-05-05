@@ -1,3 +1,5 @@
+# US006 - Upgrade a Station With a Building
+
 ## 3. Design
 
 ### 3.1. Rationale

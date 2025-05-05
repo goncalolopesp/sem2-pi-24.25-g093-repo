@@ -12,7 +12,7 @@ public void ensureNullIsNotAllowed() {
 ```
 	
 
-**Test 2:** Check that it is not possible to create an instance of the Task class with a reference containing less than five chars - AC2. 
+**Test 2:** Check that overbuilding is not permitted (AC01: Overbuilding is not possible).
 
 ```java
 @Test(expected = IllegalArgumentException.class)
