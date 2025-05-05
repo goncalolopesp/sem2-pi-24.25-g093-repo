@@ -1,6 +1,7 @@
 package controller;
 
 import domain.City;
+import domain.HouseBlock;
 import domain.Map;
 import repository.CityRepository;
 import repository.MapRepository;

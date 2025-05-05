@@ -2,6 +2,7 @@ package ui.console;
 
 import controller.DisplayMapController;
 import domain.City;
+import domain.HouseBlock;
 import domain.Map;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class DisplayMapUI implements Runnable{
         }
 
         addCitiesToMap();
+        addHouseBlocksToMap();
 
         return mapArray;
     }
@@ -68,7 +70,19 @@ public class DisplayMapUI implements Runnable{
         for (int i = 0; i < ctrl.getCities().size(); i++) {
             int centerX = citiesList.get(i).getCenterX();
             int centerY = citiesList.get(i).getCenterY();
-            mapArray[centerX-1][centerY-1] = "🏙️";
+            mapArray[centerX-1][centerY-1] = "🌆";
+        }
+    }
+
+    private void addHouseBlocksToMap() {
+        List<City> citiesList = ctrl.getCities();
+        for (int i = 0; i < ctrl.getCities().size(); i++) {
+            List<HouseBlock> houseBlockList = citiesList.get(i).getBlocks();
+            for (int j = 0; j < houseBlockList.size(); j++) {
+                int posX = houseBlockList.get(j).getX();
+                int posY = houseBlockList.get(j).getY();
+                mapArray[posX-1][posY-1] = "🌆";
+            }
         }
     }
 
