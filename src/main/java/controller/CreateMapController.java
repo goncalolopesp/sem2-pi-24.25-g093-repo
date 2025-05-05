@@ -4,6 +4,8 @@ import domain.Map;
 import repository.MapRepository;
 import repository.Repositories;
 
+import java.util.List;
+
 public class CreateMapController {
     private MapRepository mapRepository;
 
@@ -33,5 +35,9 @@ public class CreateMapController {
         Map map = new Map(mapName, width, height);
         getMapRepository().add(map);
         return map;
+    }
+
+    public List<Map> getMaps() {
+        return getMapRepository().getMaps();
     }
 }
