@@ -10,9 +10,22 @@ import domain.HouseBlock;
 
 import java.util.Scanner;
 
+/**
+ * Launches the user interface responsible for the creation of the city on a certain map.
+ * @see CreateCityController
+ */
+
 public class CreateCityUI implements Runnable {
+    /** Controller handling city creation and validation. */
     private final CreateCityController ctrl = new CreateCityController();
 
+    /**
+     * Runs the "Create City" user interface.
+     * <p>
+     * Asks for city and map names,as well as coordinates for the city center, validates inputs, creates the city,
+     * then allows manual or automatic block assignment.
+     * </p>
+     */
     @Override public void run() {
         System.out.println("\n\n--- Create City ------------------------");
         Scanner sc = new Scanner(System.in);

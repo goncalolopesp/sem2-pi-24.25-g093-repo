@@ -9,11 +9,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+/**
+ * User interface to displays the a map with its cities and house blocks.
+ * <p>
+ * Presents a list of available maps, asks the user to select one by name,
+ * and then renders the map grid to the console, marking city centers and blocks.
+ * </p>
+ *
+ * @see DisplayMapController
+ */
+
+
 public class DisplayMapUI implements Runnable{
+    /** Controller responsible for retrieving map and city data. */
     private final DisplayMapController ctrl = new DisplayMapController();
     private String mapName;
     private String[][] mapArray;
 
+    /**
+     * Runs the user interface section.
+     */
     @Override
     public void run() {
         System.out.println("\n\n--- Map List ------------------------");
@@ -23,7 +38,10 @@ public class DisplayMapUI implements Runnable{
         System.out.println();
         displayMap();
     }
-    
+
+    /**
+     * Prints the map grid on the console.
+     */
     private void displayMap() {
         for (int i = 0; i < mapArray.length; i++) {
             for (int j = 0; j < mapArray[0].length; j++) {
@@ -37,10 +55,19 @@ public class DisplayMapUI implements Runnable{
         }
     }
 
+    /**
+     * Displays the list of available maps retrieved from the controller.
+     */
     private void displayMapList() {
         System.out.println(ctrl.getMaps());
     }
 
+    /**
+     * Initializes the map array based on selected map dimensions, populates it,
+     * and returns the array for rendering.
+     *
+     * @return the array that represents the map
+     */
     private String[][] submitData() {
         int width = 0; int height = 0;
         Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
@@ -65,6 +92,9 @@ public class DisplayMapUI implements Runnable{
         return mapArray;
     }
 
+    /**
+     * Marks the city centers on the map array by placing the city symbol at each center.
+     */
     private void addCitiesToMap() {
         List<City> citiesList = ctrl.getCities();
         for (int i = 0; i < citiesList.size(); i++) {
@@ -76,6 +106,9 @@ public class DisplayMapUI implements Runnable{
         }
     }
 
+    /**
+     * Marks house blocks on the map array by placing the block symbol at each block position.
+     */
     private void addHouseBlocksToMap() {
         List<City> citiesList = ctrl.getCities();
         for (int i = 0; i < citiesList.size(); i++) {
@@ -90,10 +123,18 @@ public class DisplayMapUI implements Runnable{
         }
     }
 
+    /**
+     * Asks the user to enter the name of the map to display.
+     */
     private void requestData() {
         mapName = requestMapName();
     }
 
+    /**
+     * Reads the map name from the console input and trims whitespace.
+     *
+     * @return the entered and trimmed map name
+     */
     private String requestMapName() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Select Map: ");

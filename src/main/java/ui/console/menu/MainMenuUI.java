@@ -10,7 +10,22 @@ import ui.console.DisplayMapUI;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Console-based main menu for the application.
+ * <p>
+ * Presents all the options available.
+ * </p>
+ *
+ * @see CreateMapUI
+ * @see CreateCityUI
+ * @see CreateScenarioUI
+ * @see DisplayMapUI
+ */
+
 public class MainMenuUI implements Runnable{
+    /**
+     * Runs the main menu loop, displaying options until the user exits.
+     */
     public void run() {
         List<MenuItem> options = new ArrayList<MenuItem>();
         options.add(new MenuItem("Create Map", new CreateMapUI()));
