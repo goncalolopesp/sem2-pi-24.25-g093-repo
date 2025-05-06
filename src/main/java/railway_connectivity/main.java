@@ -108,7 +108,7 @@ public class main {
             for(int i = 0; i < size; i++){
                 String from = edges.get(i)[0];
                 String to = edges.get(i)[1];
-                //Adds the "from" station if she isn't on the list
+                //Adds the "from" station if it isn't on the list
                 boolean hasFrom = false;
                 for (int j = 0; j < vertices.size(); j++){
                     if(vertices.get(j).equals(from)){
@@ -119,7 +119,7 @@ public class main {
                 if(!hasFrom){
                     vertices.add(from);
                 }
-                //Adds the "to" station if she isn't on the list'
+                //Adds the "to" station if it isn't on the list
                 boolean hasTo = false;
                 for(int j = 0; j<vertices.size();j++){
                     if(vertices.get(j).equals(to)){
@@ -178,7 +178,7 @@ public class main {
 
             //Counts how many vertices have an odd degree
             //If a graph has 0 vertices with odd degree - Eulerian Circuit (Starts and finishes in the same point)
-            //If a graph has 2 vertices with odd degree - Eulerian Cycle (Starts on a odd degree vertex and finishes in another)
+            //If a graph has 2 vertices with odd degree - Eulerian Cycle (Starts on an odd degree vertex and finishes in another)
             List<String> odd = new ArrayList<>();
             for (int i = 0; i < nonZero.size(); i++) {
                 String v = nonZero.get(i);

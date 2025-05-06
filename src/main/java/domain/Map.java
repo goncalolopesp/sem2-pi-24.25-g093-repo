@@ -1,9 +1,5 @@
 package domain;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Represents a map with a name and fixed dimensions.
  * <p>

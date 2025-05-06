@@ -1,8 +1,5 @@
 package repository;
 
-import controller.CreateCityController;
-import domain.City;
-import domain.HouseBlock;
 import domain.Map;
 
 import java.util.ArrayList;

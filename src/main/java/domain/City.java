@@ -1,11 +1,8 @@
 package domain;
-import controller.CreateCityController;
-import repository.CityRepository;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Represents a city located on a specific map with a central position and a group of house blocks.

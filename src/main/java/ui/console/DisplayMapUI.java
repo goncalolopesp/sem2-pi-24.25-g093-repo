@@ -65,12 +65,8 @@ public class DisplayMapUI implements Runnable{
     private String[][] submitData() {
         int width = 0; int height = 0;
         Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
-        if (ctrl.verifyIfMapExists(mapName)) {
-            width = matchingMap.get().getWidth();
-            height = matchingMap.get().getHeight();
-        } else {
-            System.out.println("\nMap doesn't exist!");
-        }
+        width = matchingMap.get().getWidth();
+        height = matchingMap.get().getHeight();
 
         mapArray = new String[height][width];
 
@@ -131,7 +127,16 @@ public class DisplayMapUI implements Runnable{
      */
     private String requestMapName() {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Select Map: ");
-        return sc.nextLine().trim();
+        System.out.print("Enter Map Name: ");
+        String mapName;
+
+        do {
+            mapName = sc.nextLine();
+            if (!ctrl.verifyIfMapExists(mapName)){
+                System.out.print("\nMap doesn't exist. Try again: ");
+            }
+        } while(!ctrl.verifyIfMapExists(mapName));
+
+        return mapName.trim();
     }
 }

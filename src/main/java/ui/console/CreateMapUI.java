@@ -1,9 +1,6 @@
 package ui.console;
 
-import controller.CreateCityController;
 import controller.CreateMapController;
-import domain.City;
-import domain.HouseBlock;
 import domain.Map;
 
 import java.util.Optional;
@@ -121,6 +118,15 @@ public class CreateMapUI implements Runnable{
     private String requestMapName() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Map Name: ");
-        return sc.nextLine().trim();
+        String mapName;
+
+        do {
+            mapName = sc.nextLine();
+            if (!ctrl.checkNameUniqueness(mapName)){
+                System.out.print("\nName not unique. Try again: ");
+            }
+        } while(!ctrl.checkNameUniqueness(mapName));
+
+        return mapName.trim();
     }
 }

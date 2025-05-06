@@ -59,14 +59,13 @@ public class CreateMapController {
      * @return the created Map instance, or null if name is not unique
      */
     public Map createMap(String mapName, int width, int height) {
-        if (!getMapRepository().checkNameUniqueness(mapName)){
-            System.out.println("\nName not unique.");
-            return null;
-        }
-
         Map map = new Map(mapName, width, height);
         getMapRepository().add(map);
         return map;
+    }
+
+    public boolean checkNameUniqueness(String name) {
+        return getMapRepository().checkNameUniqueness(name);
     }
 
     /**
