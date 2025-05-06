@@ -59,7 +59,7 @@ deactivate stationRepository
 
 UpgradeStationController --> UpgradeStationUI : upgradedStation
 deactivate UpgradeStationController
-
+destroy UpgradeStationController
 UpgradeStationUI --> Player : display "Upgrade applied successfully."
 deactivate UpgradeStationUI
 @enduml

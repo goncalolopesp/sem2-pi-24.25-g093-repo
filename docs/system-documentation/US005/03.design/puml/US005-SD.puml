@@ -101,6 +101,7 @@ deactivate StationRepository
 
 BuildStationController --> BuildStationUI : stationData
 deactivate BuildStationController
+destroy BuildStationController
 
 BuildStationUI --> Player : display "Station created successfully"
 deactivate BuildStationUI
