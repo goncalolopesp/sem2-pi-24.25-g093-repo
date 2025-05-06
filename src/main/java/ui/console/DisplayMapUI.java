@@ -67,21 +67,25 @@ public class DisplayMapUI implements Runnable{
 
     private void addCitiesToMap() {
         List<City> citiesList = ctrl.getCities();
-        for (int i = 0; i < ctrl.getCities().size(); i++) {
-            int centerX = citiesList.get(i).getCenterX();
-            int centerY = citiesList.get(i).getCenterY();
-            mapArray[centerY-1][centerX-1] = "🌆";
+        for (int i = 0; i < citiesList.size(); i++) {
+            if (citiesList.stream().anyMatch(city -> city.getMapName().equals(mapName))){
+                int centerX = citiesList.get(i).getCenterX();
+                int centerY = citiesList.get(i).getCenterY();
+                mapArray[centerY-1][centerX-1] = "🌆";
+            }
         }
     }
 
     private void addHouseBlocksToMap() {
         List<City> citiesList = ctrl.getCities();
-        for (int i = 0; i < ctrl.getCities().size(); i++) {
-            List<HouseBlock> houseBlockList = citiesList.get(i).getBlocks();
-            for (int j = 0; j < houseBlockList.size(); j++) {
-                int posX = houseBlockList.get(j).getX();
-                int posY = houseBlockList.get(j).getY();
-                mapArray[posY-1][posX-1] = "🌆";
+        for (int i = 0; i < citiesList.size(); i++) {
+            if (citiesList.stream().anyMatch(city -> city.getMapName().equals(mapName))){
+                List<HouseBlock> houseBlockList = citiesList.get(i).getBlocks();
+                for (int j = 0; j < houseBlockList.size(); j++) {
+                    int posX = houseBlockList.get(j).getX();
+                    int posY = houseBlockList.get(j).getY();
+                    mapArray[posY-1][posX-1] = "🌆";
+                }
             }
         }
     }
