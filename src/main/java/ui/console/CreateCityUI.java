@@ -12,7 +12,6 @@ import java.util.Scanner;
 
 /**
  * Launches the user interface responsible for the creation of the city on a certain map.
- * @see CreateCityController
  */
 
 public class CreateCityUI implements Runnable {

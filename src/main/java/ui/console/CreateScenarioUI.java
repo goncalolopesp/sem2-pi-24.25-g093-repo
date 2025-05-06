@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 /**
  * Launches the user interface responsible for the creation of a map.
- * @see CreateScenarioController
  */
 public class CreateScenarioUI implements Runnable {
     /** Controller responsible for scenario creation logic. */

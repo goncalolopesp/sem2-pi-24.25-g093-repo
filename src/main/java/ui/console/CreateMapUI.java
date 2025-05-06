@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 /**
  * Launches the user interface responsible for the creation of a map.
- * @see CreateMapController
  */
 
 public class CreateMapUI implements Runnable{

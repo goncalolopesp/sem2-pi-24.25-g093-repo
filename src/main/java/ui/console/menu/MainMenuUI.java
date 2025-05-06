@@ -15,11 +15,6 @@ import java.util.List;
  * <p>
  * Presents all the options available.
  * </p>
- *
- * @see CreateMapUI
- * @see CreateCityUI
- * @see CreateScenarioUI
- * @see DisplayMapUI
  */
 
 public class MainMenuUI implements Runnable{

@@ -10,13 +10,7 @@ import java.util.Optional;
 import java.util.Scanner;
 
 /**
- * User interface to displays the a map with its cities and house blocks.
- * <p>
- * Presents a list of available maps, asks the user to select one by name,
- * and then renders the map grid to the console, marking city centers and blocks.
- * </p>
- *
- * @see DisplayMapController
+ * Launches the user interface responsible for the display of a certain map, including its cities and houseblocks.
  */
 
 
