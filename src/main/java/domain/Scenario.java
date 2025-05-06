@@ -9,16 +9,25 @@ public class Scenario {
      */
     private final String scenarioName;
     private final String selectedMap;
+    private final int[] timeRestrictions;
+    private final String[] technologicalRestrictions;
+    private final String[] historicalRestrictions;
 
     /**
      * Constructs a new Scenario instance.
      *
-     * @param scenarioName the unique name of the scenario
-     * @param selectedMap  the name of the map associated with the scenario
+     * @param scenarioName           the unique name of the scenario
+     * @param selectedMap            the name of the map associated with the scenario
+     * @param timeRestrictions       the time restrictions associated with the scenario
+     * @param technologicalRestrictions the technological restrictions associated with the scenario
+     * @param historicalRestrictions the historical restrictions associated with the scenario
      */
-    public Scenario(String scenarioName, String selectedMap) {
+    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, String[] technologicalRestrictions, String[] historicalRestrictions) {
         this.scenarioName = scenarioName;
         this.selectedMap = selectedMap;
+        this.timeRestrictions = timeRestrictions;
+        this.technologicalRestrictions = technologicalRestrictions;
+        this.historicalRestrictions = historicalRestrictions;
     }
 
     /**
@@ -35,8 +44,31 @@ public class Scenario {
      *
      * @return the selected map name
      */
-    public String getSelectedMap() {
-        return selectedMap;
+    public String getSelectedMap() { return selectedMap; }
+
+    /**
+     * Returns the time restrictions for this scenario.
+     *
+     * @return the time restrictions
+     */
+    public int[] getTimeRestrictions() {
+        return timeRestrictions;
+    }
+
+    /**
+     * Returns the technological restrictions for this scenario.
+     *
+     * @return the technological restrictions
+     */
+    public String[] getTechnologicalRestrictions() { return technologicalRestrictions; }
+
+    /**
+     * Returns the historical restrictions for this scenario.
+     *
+     * @return the historical restrictions
+     */
+    public String[] getHistoricalRestrictions() {
+        return historicalRestrictions;
     }
 
     /**

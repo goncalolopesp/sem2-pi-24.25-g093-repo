@@ -1,6 +1,5 @@
 package repository;
 
-import domain.Map;
 import domain.Scenario;
 
 import java.util.ArrayList;
@@ -51,6 +50,10 @@ public class ScenarioRepository {
      */
     private boolean validateScenario(Scenario scenario) {
         return !scenarios.contains(scenario);
+    }
+
+    public boolean checkNameUniqueness(String name) {
+        return scenarios.stream().noneMatch(s -> s.getScenarioName().equals(name));
     }
 
     /**

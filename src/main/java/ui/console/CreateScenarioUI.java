@@ -1,6 +1,5 @@
 package ui.console;
 
-import controller.CreateMapController;
 import controller.CreateScenarioController;
 import controller.DisplayMapController;
 import domain.Scenario;
@@ -16,6 +15,9 @@ public class CreateScenarioUI implements Runnable {
     private final CreateScenarioController ctrl;
     private String scenarioName;
     private String selectedMap;
+    private int[] timeRestrictions;
+    private String[] technologicalRestrictions;
+    private String[] historicalRestrictions;
 
     /**
      * Constructs a new CreateScenarioUI, initializing its controller.
@@ -36,6 +38,7 @@ public class CreateScenarioUI implements Runnable {
         System.out.println("\n\n--- Create Scenario ------------------------");
         requestData();
         submitData();
+        System.out.println(ctrl.getScenarios());
     }
 
     /**
@@ -43,7 +46,7 @@ public class CreateScenarioUI implements Runnable {
      * Prints a success or failure message based on the result.
      */
     private void submitData() {
-        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap));
+        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions));
 
         if (scenario.isPresent()) {
             System.out.println("\nScenario successfully created!");
@@ -56,8 +59,11 @@ public class CreateScenarioUI implements Runnable {
      * Asks the user for scenario name and map selection.
      */
     private void requestData() {
-        scenarioName = requestScenarioName();
         selectedMap = requestSelectedMap();
+        scenarioName = requestScenarioName();
+        timeRestrictions = requestTimeRestrictions();
+        technologicalRestrictions = requestTechnologicalRestrictions();
+        historicalRestrictions = requestHistoricalRestrictions();
     }
 
     /**
@@ -68,7 +74,16 @@ public class CreateScenarioUI implements Runnable {
     private String requestScenarioName() {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Scenario Name: ");
-        return sc.nextLine().trim();
+        String scenarioName;
+
+        do {
+            scenarioName = sc.nextLine();
+            if (!ctrl.checkNameUniqueness(scenarioName)){
+                System.out.print("\nName not unique. Try again: ");
+            }
+        } while (!ctrl.checkNameUniqueness(scenarioName));
+
+        return scenarioName.trim();
     }
 
     /**
@@ -91,5 +106,92 @@ public class CreateScenarioUI implements Runnable {
         } while (!mctrl.verifyIfMapExists(selectedMap));
 
         return selectedMap.trim();
+    }
+
+    /**
+     * Asks the user to select a starting and final year.
+     * Repeats until valid dates are provided.
+     *
+     * @return the entered time restrictions
+     */
+    private int[] requestTimeRestrictions() {
+        Scanner sc = new Scanner(System.in);
+        int[] tR = new int[2];
+
+        System.out.print("Enter Starting Year: ");
+        tR[0] = sc.nextInt();
+        System.out.print("Enter Final Year: ");
+        tR[1] = sc.nextInt();
+
+        return tR;
+    }
+
+    /**
+     * Asks the user to select the technological restrictions.
+     *
+     * @return the entered technological restrictions
+     */
+    private String[] requestTechnologicalRestrictions() {
+        Scanner sc = new Scanner(System.in);
+        String[] tR = new String[3];
+
+        System.out.print("Does the scenario contain steam locomotives? ");
+
+        do {
+            tR[0] = sc.next();
+            if (!tR[0].equalsIgnoreCase("Y") && !tR[0].equalsIgnoreCase("N")) {
+                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            }
+        } while (!tR[0].equalsIgnoreCase("Y") && !tR[0].equalsIgnoreCase("N"));
+
+        System.out.print("Does the scenario contain diesel locomotives? ");
+
+        do {
+            tR[1] = sc.next();
+            if (!tR[1].equalsIgnoreCase("Y") && !tR[1].equalsIgnoreCase("N")) {
+                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            }
+        } while (!tR[1].equalsIgnoreCase("Y") && !tR[1].equalsIgnoreCase("N"));
+
+        System.out.print("Does the scenario contain electric locomotives? ");
+
+        do {
+            tR[2] = sc.next();
+            if (!tR[2].equalsIgnoreCase("Y") && !tR[2].equalsIgnoreCase("N")) {
+                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            }
+        } while (!tR[2].equalsIgnoreCase("Y") && !tR[2].equalsIgnoreCase("N"));
+
+        return tR;
+    }
+
+    /**
+     * Asks the user to select the historical restrictions.
+     *
+     * @return the entered technological restrictions
+     */
+    private String[] requestHistoricalRestrictions() {
+        Scanner sc = new Scanner(System.in);
+        String[] hR = new String[2];
+
+        System.out.print("Is a vaccination campaign present in the scenario? ");
+
+        do {
+            hR[0] = sc.next();
+            if (!hR[0].equalsIgnoreCase("Y") && !hR[0].equalsIgnoreCase("N")) {
+                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            }
+        } while (!hR[0].equalsIgnoreCase("Y") && !hR[0].equalsIgnoreCase("N"));
+
+        System.out.print("Is a schooling program present in the scenario? ");
+
+        do {
+            hR[1] = sc.next();
+            if (!hR[1].equalsIgnoreCase("Y") && !hR[1].equalsIgnoreCase("N")) {
+                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            }
+        } while (!hR[1].equalsIgnoreCase("Y") && !hR[1].equalsIgnoreCase("N"));
+
+        return hR;
     }
 }

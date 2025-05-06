@@ -44,14 +44,26 @@ public class CreateScenarioController {
     /**
      * Creates a new scenario with the given name and associated map.
      *
-     * @param scenarioName the unique name of the scenario
-     * @param selectedMap  the name of the map associated with this scenario
+     * @param scenarioName           the unique name of the scenario
+     * @param selectedMap            the name of the map associated with this scenario
+     * @param timeRestrictions
+     * @param technologicalRestrictions
+     * @param historicalRestrictions
      * @return the created Scenario instance
      */
-    public Scenario createScenario(String scenarioName, String selectedMap) {
-        Scenario scenario = new Scenario(scenarioName, selectedMap);
+    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, String[] technologicalRestrictions, String[] historicalRestrictions) {
+        Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions);
         getScenarioRepository().add(scenario);
         return scenario;
+    }
+
+    /**
+     * Checks if name is unique.
+     *
+     * @return boolean
+     */
+    public boolean checkNameUniqueness(String name) {
+        return getScenarioRepository().checkNameUniqueness(name);
     }
 
     /**
