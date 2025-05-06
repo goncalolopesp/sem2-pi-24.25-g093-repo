@@ -3,11 +3,13 @@ package repository;
 public class Repositories {
     private static Repositories instance;
     private final MapRepository mapRepository;
-    private final CityRepository cityRepo;
+    private final CityRepository cityRepository;
+    private final ScenarioRepository scenarioRepository;
 
     private Repositories() {
         mapRepository = new MapRepository();
-        cityRepo = new CityRepository();
+        cityRepository = new CityRepository();
+        scenarioRepository = new ScenarioRepository();
     }
 
     public static Repositories getInstance() {
@@ -20,5 +22,6 @@ public class Repositories {
     }
 
     public MapRepository getMapRepository() { return mapRepository; }
-    public CityRepository getCityRepository() { return cityRepo; }
+    public CityRepository getCityRepository() { return cityRepository; }
+    public ScenarioRepository getScenarioRepository() { return scenarioRepository; }
 }
