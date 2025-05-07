@@ -29,7 +29,7 @@ public class MainMenuUI implements Runnable{
         options.add(new MenuItem("Display Map", new DisplayMapUI()));
         int option = 0;
         do {
-            option = Utils.showAndSelectIndex(options, "\n\n--- MAIN MENU --------------------------");
+            option = Utils.showAndSelectIndex(options, "\n\n--- ADMIN MENU --------------------------");
 
             if ((option >= 0) && (option < options.size())) {
                 options.get(option).run();
