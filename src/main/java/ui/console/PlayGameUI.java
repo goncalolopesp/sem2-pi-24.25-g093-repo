@@ -58,8 +58,6 @@ public class PlayGameUI implements Runnable {
             int choice = Utils.showAndSelectIndex(options, "Choose an action:");
             switch (choice) {
                 case 0:
-                    // TODO: implement station purchase flow
-                    System.out.println("[Buy a Station] feature not implemented yet.");
                     break;
 
                 case 1:
