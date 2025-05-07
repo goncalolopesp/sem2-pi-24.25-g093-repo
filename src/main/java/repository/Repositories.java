@@ -12,6 +12,7 @@ public class Repositories {
     private final MapRepository mapRepository;
     private final CityRepository cityRepository;
     private final ScenarioRepository scenarioRepository;
+    private final AuthRepository authRepository;
 
 
     /**
@@ -22,6 +23,7 @@ public class Repositories {
         mapRepository = new MapRepository();
         cityRepository = new CityRepository();
         scenarioRepository = new ScenarioRepository();
+        authRepository = new AuthRepository();
     }
 
     /**
@@ -57,4 +59,6 @@ public class Repositories {
      * @return the ScenarioRepository
      */
     public ScenarioRepository getScenarioRepository() { return scenarioRepository; }
+
+    public AuthRepository getAuthRepository() { return authRepository; }
 }
