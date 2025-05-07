@@ -41,11 +41,33 @@ public class CreateCityUI implements Runnable {
                 System.out.println("Error: City name '" + cityName + "' already used on map '" + mapName + "'.");
         } while (nm != NameMapError.OK);
 
-        int cx, cy;
+        int cx = 0, cy = 0;
         CenterError ce;
         do {
-            System.out.print("Enter Center X: "); cx = Integer.parseInt(sc.nextLine());
-            System.out.print("Enter Center Y: "); cy = Integer.parseInt(sc.nextLine());
+            boolean validX = false;
+            while (!validX) {
+                System.out.print("Enter Center X: ");
+                String input = sc.nextLine().trim();
+                try {
+                    cx = Integer.parseInt(input);
+                    validX = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: '" + input + "' is not a valid integer. Please enter a number.");
+                }
+            }
+
+            boolean validY = false;
+            while (!validY) {
+                System.out.print("Enter Center Y: ");
+                String input = sc.nextLine().trim();
+                try {
+                    cy = Integer.parseInt(input);
+                    validY = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: '" + input + "' is not a valid integer. Please enter a number.");
+                }
+            }
+
             ce = ctrl.validateCenter(cityName, mapName, cx, cy);
             if (ce == CenterError.OUT_OF_BOUNDS)
                 System.out.println("Error: Center (" + cx + "," + cy + ") outside map bounds.");
@@ -66,8 +88,18 @@ public class CreateCityUI implements Runnable {
         } while (mode != 'M' && mode != 'A');
 
         if (mode == 'M') {
-            System.out.print("How many blocks to add? ");
-            int n = Integer.parseInt(sc.nextLine());
+            int n = 0;
+            boolean valid = false;
+            while (!valid) {
+                System.out.print("How many blocks to add? ");
+                String input = sc.nextLine().trim();
+                try {
+                    n = Integer.parseInt(input);
+                    valid = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: '" + input + "' is not a valid integer. Please enter a number.");
+                }
+            }
             for (int i = 0; i < n; i++) {
                 HouseBlock b;
                 BlockError be;
@@ -87,8 +119,31 @@ public class CreateCityUI implements Runnable {
             }
             System.out.println("Blocks assigned manually.");
         } else {
-            System.out.print("Number of blocks: "); int n = Integer.parseInt(sc.nextLine());
-            System.out.print("Sigma (spread): "); double s = Double.parseDouble(sc.nextLine());
+            int n = 0;
+            boolean validN = false;
+            while (!validN) {
+                System.out.print("Number of blocks: ");
+                String input = sc.nextLine().trim();
+                try {
+                    n = Integer.parseInt(input);
+                    validN = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: '" + input + "' is not a valid integer. Please enter a number.");
+                }
+            }
+
+            double s = 0;
+            boolean validS = false;
+            while (!validS) {
+                System.out.print("Sigma (spread): ");
+                String input = sc.nextLine().trim();
+                try {
+                    s = Double.parseDouble(input);
+                    validS = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Error: '" + input + "' is not a valid number. Please enter a decimal.");
+                }
+            }
             ctrl.assignBlocksAuto(city, n, s);
             System.out.println("Blocks assigned automatically.");
         }
