@@ -53,7 +53,7 @@ public class AuthUI implements Runnable {
     public void run1(){
         boolean success = doLogin();
         if (success) {
-            if (ctrl.getRole(ctrl.getCurrentUserEmail()).equals(AuthenticationController.ROLE_EDITOR)) {
+            if (ctrl.getRole(ctrl.getCurrentUserEmail()).equals(AuthController.ROLE_EDITOR)) {
                 MainMenuUI admUI = new MainMenuUI();
                 admUI.run();
             }else{
