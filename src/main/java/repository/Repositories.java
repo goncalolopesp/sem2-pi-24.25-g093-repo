@@ -13,6 +13,7 @@ public class Repositories {
     private final CityRepository cityRepository;
     private final ScenarioRepository scenarioRepository;
     private final AuthRepository authRepository;
+    private final StationRepository stationRepository;
 
 
     /**
@@ -24,6 +25,7 @@ public class Repositories {
         cityRepository = new CityRepository();
         scenarioRepository = new ScenarioRepository();
         authRepository = new AuthRepository();
+        stationRepository  = new StationRepository();
     }
 
     /**
@@ -60,5 +62,17 @@ public class Repositories {
      */
     public ScenarioRepository getScenarioRepository() { return scenarioRepository; }
 
+    /**
+     * Gets the repository for authentication.
+     *
+     * @return the AuthRepository
+     */
     public AuthRepository getAuthRepository() { return authRepository; }
+
+    /**
+     * Gets the repository for station entities.
+     *
+     * @return the StationRepository
+     */
+    public StationRepository getStationRepository() { return stationRepository; }
 }
