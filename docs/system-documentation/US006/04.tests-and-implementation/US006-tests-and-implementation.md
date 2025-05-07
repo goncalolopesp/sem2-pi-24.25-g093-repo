@@ -78,7 +78,6 @@ import domain.Building;
 import repository.Repositories;
 import repository.MapRepository;
 import repository.ScenarioRepository;
-import repository.StationRepository;
 import repository.BuildingRepository;
 
 public class UpgradeStationController {
@@ -112,13 +111,13 @@ public class UpgradeStationController {
         if (scenario == null || !scenario.getMapName().equals(mapName)) {
             throw new IllegalArgumentException("Error: Scenario not found for given map.");
         }
-        
+
         Optional<Station> optStation = stationRepository.findByMapScenarioAndName(mapName, scenarioName, buildingName);
         if (!optStation.isPresent()) {
             throw new IllegalArgumentException("Error: Station does not exist.");
         }
         Station station = optStation.get();
-        
+
         Building building = buildingRepository.findByName(buildingName);
         if (building == null) {
             throw new IllegalArgumentException("Error: Building type not available.");
