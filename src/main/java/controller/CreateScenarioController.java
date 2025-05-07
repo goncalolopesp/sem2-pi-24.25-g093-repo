@@ -51,7 +51,7 @@ public class CreateScenarioController {
      * @param historicalRestrictions
      * @return the created Scenario instance
      */
-    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, String[] technologicalRestrictions, String[] historicalRestrictions) {
+    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions) {
         Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions);
         getScenarioRepository().add(scenario);
         return scenario;

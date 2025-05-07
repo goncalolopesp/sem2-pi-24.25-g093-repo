@@ -1,5 +1,7 @@
 package domain;
 
+import java.util.List;
+
 public class Scenario {
     /**
      * Represents a scenario, defined by a unique name and associated with a specific map, alongside restrictions.
@@ -10,8 +12,8 @@ public class Scenario {
     private final String scenarioName;
     private final String selectedMap;
     private final int[] timeRestrictions;
-    private final String[] technologicalRestrictions;
-    private final String[] historicalRestrictions;
+    private final List<String> technologicalRestrictions;
+    private final List<String> historicalRestrictions;
 
     /**
      * Constructs a new Scenario instance.
@@ -22,7 +24,7 @@ public class Scenario {
      * @param technologicalRestrictions the technological restrictions associated with the scenario
      * @param historicalRestrictions the historical restrictions associated with the scenario
      */
-    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, String[] technologicalRestrictions, String[] historicalRestrictions) {
+    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions) {
         this.scenarioName = scenarioName;
         this.selectedMap = selectedMap;
         this.timeRestrictions = timeRestrictions;
@@ -60,14 +62,14 @@ public class Scenario {
      *
      * @return the technological restrictions
      */
-    public String[] getTechnologicalRestrictions() { return technologicalRestrictions; }
+    public List<String> getTechnologicalRestrictions() { return technologicalRestrictions; }
 
     /**
      * Returns the historical restrictions for this scenario.
      *
      * @return the historical restrictions
      */
-    public String[] getHistoricalRestrictions() {
+    public List<String> getHistoricalRestrictions() {
         return historicalRestrictions;
     }
 

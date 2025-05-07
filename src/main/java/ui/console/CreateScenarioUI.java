@@ -4,8 +4,7 @@ import controller.CreateScenarioController;
 import controller.DisplayMapController;
 import domain.Scenario;
 
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Launches the user interface responsible for the creation of a map.
@@ -16,8 +15,8 @@ public class CreateScenarioUI implements Runnable {
     private String scenarioName;
     private String selectedMap;
     private int[] timeRestrictions;
-    private String[] technologicalRestrictions;
-    private String[] historicalRestrictions;
+    private List<String> technologicalRestrictions;
+    private List<String> historicalRestrictions;
 
     /**
      * Constructs a new CreateScenarioUI, initializing its controller.
@@ -38,7 +37,6 @@ public class CreateScenarioUI implements Runnable {
         System.out.println("\n\n--- Create Scenario ------------------------");
         requestData();
         submitData();
-        System.out.println(ctrl.getScenarios());
     }
 
     /**
@@ -116,14 +114,27 @@ public class CreateScenarioUI implements Runnable {
      */
     private int[] requestTimeRestrictions() {
         Scanner sc = new Scanner(System.in);
-        int[] tR = new int[2];
+        int[] timePeriod = new int[2];
 
-        System.out.print("Enter Starting Year: ");
-        tR[0] = sc.nextInt();
-        System.out.print("Enter Final Year: ");
-        tR[1] = sc.nextInt();
+        System.out.print("Enter Starting Year (Must be equal or higher than 1804 and lower than 2025): ");
 
-        return tR;
+        do{
+            timePeriod[0] = sc.nextInt();
+            if (timePeriod[0] < 1804 || timePeriod[0] >= 2025) {
+                System.out.print("Starting Year must be equal or higher than 1804 and lower than 2025. Try again: ");
+            }
+        } while (timePeriod[0] < 1804 || timePeriod[0] >= 2025);
+
+        System.out.print("Enter Final Year (Must be equal or lower than 2025): ");
+
+        do{
+            timePeriod[1] = sc.nextInt();
+            if (timePeriod[1] > 2025 || timePeriod[1] <= timePeriod[0]) {
+                System.out.print("Final Year must be higher than the Starting Year and equal or lower than 2025. Try again: ");
+            }
+        } while (timePeriod[1] > 2025 || timePeriod[1] <= timePeriod[0]);
+
+        return timePeriod;
     }
 
     /**
@@ -131,38 +142,39 @@ public class CreateScenarioUI implements Runnable {
      *
      * @return the entered technological restrictions
      */
-    private String[] requestTechnologicalRestrictions() {
+    private List<String> requestTechnologicalRestrictions() {
         Scanner sc = new Scanner(System.in);
-        String[] tR = new String[3];
+        List<String> availableTypes = new ArrayList<>();
+        String[] validTypes = {"steam", "diesel", "electric"};
+        boolean valid;
 
-        System.out.print("Does the scenario contain steam locomotives? ");
-
-        do {
-            tR[0] = sc.next();
-            if (!tR[0].equalsIgnoreCase("Y") && !tR[0].equalsIgnoreCase("N")) {
-                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
-            }
-        } while (!tR[0].equalsIgnoreCase("Y") && !tR[0].equalsIgnoreCase("N"));
-
-        System.out.print("Does the scenario contain diesel locomotives? ");
+        System.out.print("Enter Available Locomotive Types (comma-separated: steam, diesel, electric): ");
 
         do {
-            tR[1] = sc.next();
-            if (!tR[1].equalsIgnoreCase("Y") && !tR[1].equalsIgnoreCase("N")) {
-                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            String[] input = sc.nextLine().split("\\s*,\\s*");
+
+            for (int i = 0; i < input.length; i++) {
+                valid = true;
+                String item = input[i];
+
+                for (int j = 0; j < validTypes.length; j++) {
+                    if (item.equalsIgnoreCase(validTypes[j])) {
+                        availableTypes.add(validTypes[j]); // Store the normalized lowercase version
+                    } else {
+                        valid = false;
+                    }
+                }
+                if (!valid && !availableTypes.contains(item)) {
+                    System.out.println("Invalid Type. Type '" + item + "' not added.");
+                }
             }
-        } while (!tR[1].equalsIgnoreCase("Y") && !tR[1].equalsIgnoreCase("N"));
 
-        System.out.print("Does the scenario contain electric locomotives? ");
-
-        do {
-            tR[2] = sc.next();
-            if (!tR[2].equalsIgnoreCase("Y") && !tR[2].equalsIgnoreCase("N")) {
-                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
+            if (availableTypes.size() == 0) {
+                System.out.print("Invalid input. Please enter only steam, diesel, and/or electric: ");
             }
-        } while (!tR[2].equalsIgnoreCase("Y") && !tR[2].equalsIgnoreCase("N"));
+        } while (availableTypes.size() == 0);
 
-        return tR;
+        return availableTypes;
     }
 
     /**
@@ -170,28 +182,38 @@ public class CreateScenarioUI implements Runnable {
      *
      * @return the entered technological restrictions
      */
-    private String[] requestHistoricalRestrictions() {
+    private List<String> requestHistoricalRestrictions() {
         Scanner sc = new Scanner(System.in);
-        String[] hR = new String[2];
+        List<String> historicalEvents = new ArrayList<>();
+        String[] validEvents = {"vaccination campaign", "school program"};
+        boolean valid;
 
-        System.out.print("Is a vaccination campaign present in the scenario? ");
-
-        do {
-            hR[0] = sc.next();
-            if (!hR[0].equalsIgnoreCase("Y") && !hR[0].equalsIgnoreCase("N")) {
-                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
-            }
-        } while (!hR[0].equalsIgnoreCase("Y") && !hR[0].equalsIgnoreCase("N"));
-
-        System.out.print("Is a schooling program present in the scenario? ");
+        System.out.print("Enter Historical Events (comma-separated: vaccination campaign, school program): ");
 
         do {
-            hR[1] = sc.next();
-            if (!hR[1].equalsIgnoreCase("Y") && !hR[1].equalsIgnoreCase("N")) {
-                System.out.print("Answer must be Y (Yes) or N (No). Try again: ");
-            }
-        } while (!hR[1].equalsIgnoreCase("Y") && !hR[1].equalsIgnoreCase("N"));
+            String[] input = sc.nextLine().split("\\s*,\\s*");
 
-        return hR;
+            for (int i = 0; i < input.length; i++) {
+                valid = true;
+                String item = input[i];
+
+                for (int j = 0; j < validEvents.length; j++) {
+                    if (item.equalsIgnoreCase(validEvents[j])) {
+                        historicalEvents.add(validEvents[j]); // Store the normalized lowercase version
+                    } else {
+                        valid = false;
+                    }
+                }
+                if (!valid && !historicalEvents.contains(item)) {
+                    System.out.println("Invalid Event. Event '" + item + "' not added.");
+                }
+            }
+
+            if (historicalEvents.size() == 0) {
+                System.out.print("Invalid input. Please enter only vaccination campaign and/or school program: ");
+            }
+        } while (historicalEvents.size() == 0);
+
+        return historicalEvents;
     }
 }
