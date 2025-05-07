@@ -60,7 +60,6 @@ public class PlayGameUI implements Runnable {
                 case 0:
                     new BuildStationUI(selectedMap).run();
                     break;
-
                 case 1:
                     exit = true;
                     break;
@@ -71,39 +70,60 @@ public class PlayGameUI implements Runnable {
     }
 
     /**
-     * Renders the map grid without coordinates headers, using symbols:
-     * ⬛ empty, 🌆 city center, 🏠 house block, 🚉 station.
+     * Renders the map grid using 1-based coordinates, and only shows stations belonging to the current user.
+     * Symbols: ⬛ empty, 🌆 city center, 🏠 house block, 🚉 station.
      *
      * @param map the map to render
      */
     private void displayMapData(Map map) {
-        int width = map.getWidth();
-        int height = map.getHeight();
-        String[][] grid = new String[height][width];
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        int width = map.getWidth();   // ex: se width == 10, x varia 1..10
+        int height = map.getHeight(); // ex: se height == 8, y varia 1..8
+
+        // Criamos array [0..height][0..width], mas só usamos índices 1..height / 1..width
+        String[][] grid = new String[height + 1][width + 1];
+
+        // Inicializa tudo a ⬛ em 1..height e 1..width
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
                 grid[y][x] = "⬛";
             }
         }
 
+        // ––– Desenha as cidades e blocos de casas –––
         List<City> cities = displayCtrl.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
+
         for (City city : cities) {
-            grid[city.getCenterY()][city.getCenterX()] = "🌆";
+            // Já estão em 1-based, não adicionar +1
+            int cy = city.getCenterY();
+            int cx = city.getCenterX();
+            grid[cy][cx] = "🌆";
+
             for (HouseBlock hb : city.getBlocks()) {
-                grid[hb.getY()][hb.getX()] = "🏠";
+                int by = hb.getY();
+                int bx = hb.getX();
+                grid[by][bx] = "🏠";
             }
         }
 
-        for (Station st : map.getStations()) {
-            if (st.getMapName().equals(map.getMapName())) {
-                grid[st.getY()][st.getX()] = "🚉";
+        // ––– Desenha só as estações do jogador atual –––
+        User currentUser = CurrentUser.getInstance().getUser();
+        if (currentUser != null) {
+            String me = currentUser.getEmail();
+            for (Station st : map.getStations()) {
+                if (st.getMapName().equals(map.getMapName())
+                        && st.getOwnerPlayer().equals(me)) {
+                    int sy = st.getY();
+                    int sx = st.getX();
+                    grid[sy][sx] = "🚉";
+                }
             }
         }
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        // ––– Imprime o grid linhas 1..height e colunas 1..width –––
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
                 System.out.print(grid[y][x]);
             }
             System.out.println();

@@ -66,7 +66,7 @@ public class CreateCityController {
         Optional<domain.Map> m = mapRepo.getMap(map);
         if (m.isEmpty()) return CenterError.OUT_OF_BOUNDS;
         var mp = m.get();
-        if (x < 1 || x >= mp.getWidth() || y < 1 || y >= mp.getHeight()) return CenterError.OUT_OF_BOUNDS;
+        if (x < 1 || x > mp.getWidth() || y < 1 || y > mp.getHeight()) return CenterError.OUT_OF_BOUNDS;
         if (cityRepo.existsAtPosition(map, x, y)) return CenterError.POSITION_TAKEN;
         HouseBlock hb = new HouseBlock(x, y);
         if (!cityRepo.isBlockPositionUnique(map, hb)) return CenterError.BLOCK_PRESENT;
@@ -88,7 +88,7 @@ public class CreateCityController {
         if (m.isEmpty()) return BlockError.OUT_OF_BOUNDS;
         var mp = m.get();
         int x = b.getX(), y = b.getY();
-        if (x < 1 || x >= mp.getWidth() || y < 1 || y >= mp.getHeight()) return BlockError.OUT_OF_BOUNDS;
+        if (x < 1 || x > mp.getWidth() || y < 1 || y > mp.getHeight()) return BlockError.OUT_OF_BOUNDS;
         if (cityRepo.existsAtPosition(map, x, y)) return BlockError.COLLIDES_CITY_CENTER;
         if (!cityRepo.isBlockPositionUnique(map, b)) return BlockError.COLLIDES_BLOCK;
         return BlockError.OK;

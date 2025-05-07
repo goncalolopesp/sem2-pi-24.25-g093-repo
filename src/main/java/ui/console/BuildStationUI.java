@@ -83,7 +83,6 @@ public class BuildStationUI implements Runnable {
                             .findFirst();
                     String stName = st.map(Station::getName).orElse("<unknown>");
                     System.out.println("Station '" + stName + "' built successfully at (" + x + "," + y + ").");
-                    System.out.println("Remaining budget: " + CurrentUser.getInstance().getUser().getBudget());
                     placed = true;
                     break;
                 case INVALID_COORDINATES:

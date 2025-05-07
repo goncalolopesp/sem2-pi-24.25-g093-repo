@@ -26,14 +26,4 @@ public class StationRepository {
     public List<Station> getStations() {
         return List.copyOf(stations);
     }
-
-    /**
-     * Checks whether the given coordinates on a map are already occupied by another station.
-     */
-    public boolean existsAt(String mapName, int x, int y) {
-        return stations.stream()
-                .anyMatch(s -> s.getMapName().equals(mapName)
-                        && s.getX() == x
-                        && s.getY() == y);
-    }
 }

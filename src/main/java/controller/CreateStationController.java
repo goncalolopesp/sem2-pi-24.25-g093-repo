@@ -70,7 +70,7 @@ public class CreateStationController {
         }
 
         // validate coordinates in map bounds
-        if (x < 0 || x >= map.getWidth() || y < 0 || y >= map.getHeight()) {
+        if (x < 1 || x > map.getWidth() || y < 1 || y > map.getHeight()) {
             return Error.INVALID_COORDINATES;
         }
 
