@@ -4,15 +4,17 @@ import domain.CurrentUser;
 import domain.Map;
 import domain.Station;
 import domain.User;
+import domain.City;
 import repository.Repositories;
 import repository.StationRepository;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Controller for buying/placing stations.
+ * Controller for buying and placing stations.
  */
 public class CreateStationController {
     public enum Error { OK, INVALID_TYPE, INSUFFICIENT_FUNDS, OVERBUILD, INVALID_COORDINATES }
@@ -26,13 +28,14 @@ public class CreateStationController {
 
     /**
      * Attempts to build a station of the given type at (x,y) on map.
-     * @param typeStr one of "DEPOT","STATION","TERMINAL"
-     * @param map the map to build on
+     * @param typeStr user input type name
+     * @param map the Map instance
      * @param x x-coordinate
      * @param y y-coordinate
-     * @return Error code indicating success or failure reason
+     * @return Error status
      */
     public Error buildStation(String typeStr, Map map, int x, int y) {
+        // parse type
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -40,6 +43,7 @@ public class CreateStationController {
             return Error.INVALID_TYPE;
         }
 
+        // get current user and cost
         User user = CurrentUser.getInstance().getUser();
         int cost;
         int capacity;
@@ -60,35 +64,52 @@ public class CreateStationController {
                 return Error.INVALID_TYPE;
         }
 
+        // check funds
         if (user.getBudget() < cost) {
             return Error.INSUFFICIENT_FUNDS;
         }
 
-        // coordinates must lie inside map
+        // validate coordinates in map bounds
         if (x < 0 || x >= map.getWidth() || y < 0 || y >= map.getHeight()) {
             return Error.INVALID_COORDINATES;
         }
 
-        // cannot overbuild: existing station in repo or on map
-        if (stationRepo.existsAt(map.getMapName(), x, y) ||
-                map.getStations().stream().anyMatch(s -> s.getX() == x && s.getY() == y)) {
+        // check overbuild: cities and house blocks
+        List<City> cities = new DisplayMapController().getCities().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        boolean onCity = cities.stream()
+                .anyMatch(c -> c.getCenterX() == x && c.getCenterY() == y);
+        boolean onBlock = cities.stream()
+                .flatMap(c -> c.getBlocks().stream())
+                .anyMatch(b -> b.getX() == x && b.getY() == y);
+        // only block same-player stations
+        String owner = user.getEmail();
+        boolean onStation = stationRepo.getStations().stream()
+                .filter(s -> s.getMapName().equals(map.getMapName()) && s.getOwnerPlayer().equals(owner))
+                .anyMatch(s -> s.getX() == x && s.getY() == y);
+        if (onCity || onBlock || onStation) {
             return Error.OVERBUILD;
         }
 
-        // name = nearest city name + type
-        String baseName = "Unknown";
-        List<domain.City> cities = new DisplayMapController().getCities();
-        Optional<domain.City> nearest = cities.stream()
-                .filter(c -> c.getMapName().equals(map.getMapName()))
-                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - x) + Math.abs(c.getCenterY() - y)));
-        if (nearest.isPresent()) {
-            baseName = nearest.get().getName();
-        }
+        // determine nearest city name for station name
+        String baseName = cities.stream()
+                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX()-x) + Math.abs(c.getCenterY()-y)))
+                .map(City::getName)
+                .orElse("Unknown");
         String stationName = baseName + "-" + type.name();
 
-        // build station with ownerPlayer = user.getEmail()
-        Station st = new Station(type, stationName, map.getMapName(), user.getEmail(), cost, capacity, x, y);
+        // create station
+        Station st = new Station(type, stationName,
+                map.getMapName(),
+                owner,
+                cost,
+                capacity,
+                x, y);
+
+        // persist and attach
         stationRepo.addStation(st);
+        map.getStations().add(st);
 
         // deduct budget
         user.setBudget(new domain.Budget(user.getBudget() - cost));
@@ -96,9 +117,7 @@ public class CreateStationController {
         return Error.OK;
     }
 
-    /**
-     * Expose for UI to list all existing stations.
-     */
+    /** Returns all stations (for display or testing). */
     public List<Station> getStations() {
         return stationRepo.getStations();
     }

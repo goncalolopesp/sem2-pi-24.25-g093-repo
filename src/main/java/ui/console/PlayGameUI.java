@@ -58,6 +58,7 @@ public class PlayGameUI implements Runnable {
             int choice = Utils.showAndSelectIndex(options, "Choose an action:");
             switch (choice) {
                 case 0:
+                    new BuildStationUI(selectedMap).run();
                     break;
 
                 case 1:
@@ -101,7 +102,6 @@ public class PlayGameUI implements Runnable {
             }
         }
 
-        // Print each row without coordinate labels
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 System.out.print(grid[y][x]);
