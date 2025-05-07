@@ -12,6 +12,7 @@ public class Map {
     private final String mapName;
     private final int width;
     private final int height;
+    private final java.util.List<Station> stations = new java.util.ArrayList<>();
 
     /**
      * Constructs a new Map instance with the specified name and dimensions.
@@ -44,6 +45,13 @@ public class Map {
      * @return the height in grid units
      */
     public int getHeight() { return height; }
+
+    /**
+     * Returns the stations on the map.
+     *
+     * @return the stations on the map
+     */
+    public java.util.List<Station> getStations() { return stations; }
 
     /**
      * Returns the string representation of this map, which is its name.
