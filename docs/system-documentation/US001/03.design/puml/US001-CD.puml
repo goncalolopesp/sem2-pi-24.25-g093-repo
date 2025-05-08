@@ -1,0 +1,65 @@
+@startuml
+
+
+    class Map {
+        - mapName : String
+        - width : int
+        - height : int
+        - stations : List<Station>
+        --
+        + Map(mapName: String, width: int, height: int)
+        + getMapName() : String
+        + getWidth() : int
+        + getHeight() : int
+        + getStations() : List<Station>
+        + toString() : String
+    }
+
+
+    class MapRepository {
+        - maps : List<Map>
+        --
+        + MapRepository()
+        + add(map: Map) : void
+        + getMap(name: String) : Optional<Map>
+        + checkNameUniqueness(name: String) : boolean
+        + getMaps() : List<Map>
+        - validateMap(map: Map) : boolean
+    }
+
+
+
+    class CreateMapController {
+        - mapRepository : MapRepository
+        --
+        + CreateMapController()
+        + CreateMapController(mapRepository: MapRepository)
+        + createMap(mapName: String, width: int, height: int) : Map
+        + checkNameUniqueness(name: String) : boolean
+        + getMaps() : List<Map>
+        - getMapRepository() : MapRepository
+    }
+
+
+
+    class CreateMapUI {
+        - ctrl : CreateMapController
+        - mapName : String
+        - width : int
+        - height : int
+        --
+        + CreateMapUI()
+        + run() : void
+        - requestData() : void
+        - submitData() : void
+        - requestMapName() : String
+        - requestWidth() : int
+        - requestHeight() : int
+    }
+
+
+CreateMapUI --> CreateMapController
+CreateMapController --> MapRepository
+MapRepository --> Map
+
+@enduml

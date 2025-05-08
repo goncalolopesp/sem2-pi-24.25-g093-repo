@@ -1,11 +1,53 @@
 @startuml
-'https://plantuml.com/sequence-diagram
+actor User as "Editor"
+participant "CreateMapUI" as UI
+participant "CreateMapController" as Controller
+participant "MapRepository" as Repo
+participant "Map" as MapClass
 
-autonumber
+User -> UI : run()
+activate UI
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+UI -> UI : requestData()
+UI -> UI : requestMapName()
+UI -> Controller : checkNameUniqueness(name)
+activate Controller
+Controller -> Repo : checkNameUniqueness(name)
+activate Repo
+Repo --> Controller : true/false
+deactivate Repo
+Controller --> UI : true/false
+deactivate Controller
+UI -> UI : requestWidth()
+UI -> UI : requestHeight()
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+UI -> UI : submitData()
+UI -> Controller : createMap(name, width, height)
+activate Controller
+
+Controller -> Repo : checkNameUniqueness(name)
+activate Repo
+Repo --> Controller : true/false
+deactivate Repo
+
+alt name is unique
+    Controller -> MapClass : <<create>> new Map(name, width, height)
+    activate MapClass
+    MapClass --> Controller : Map
+    deactivate MapClass
+
+    Controller -> Repo : add(map)
+    activate Repo
+    Repo -> Repo : validateMap(map)
+    Repo --> Controller : (void)
+    deactivate Repo
+
+    Controller --> UI : Map
+else name not unique
+    Controller --> UI : null
+end
+
+UI -> UI : shows the result
+deactivate Controller
+deactivate UI
 @enduml
