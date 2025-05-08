@@ -3,6 +3,7 @@ package controller;
 import domain.CurrentUser;
 import domain.Map;
 import domain.Station;
+import domain.Station.Orientation;
 import domain.User;
 import domain.City;
 import repository.Repositories;
@@ -34,7 +35,7 @@ public class CreateStationController {
      * @param y y-coordinate
      * @return Error status
      */
-    public Error buildStation(String typeStr, Map map, int x, int y) {
+    public Error buildStation(String typeStr, Map map, int x, int y,Orientation orientation) {
         // parse type
         Station.Type type;
         try {
@@ -105,7 +106,7 @@ public class CreateStationController {
                 owner,
                 cost,
                 capacity,
-                x, y);
+                x, y,orientation);
 
         // persist and attach
         stationRepo.addStation(st);

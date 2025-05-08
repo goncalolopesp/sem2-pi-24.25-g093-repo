@@ -1,15 +1,13 @@
 package domain;
 
 /**
- * Represents a Station within a map.
- * <p>
- * The Map class encapsulates the map's unique name and its
- * width and height in grid units.
- * </p>
+ * Represents a Station within a map, now including orientation.
  */
 public class Station {
     /** Available types of stations. */
     public enum Type { DEPOT, STATION, TERMINAL }
+    /** Orientation if DEPOT or TERMINAL. */
+    public enum Orientation { NE, SE, NW, SW }
 
     private final Type type;
     private final String name;
@@ -18,6 +16,7 @@ public class Station {
     private final int price;
     private final int capacity;
     private final int x, y;
+    private final Orientation orientation;
 
     /**
      * Constructs a new Station.
@@ -30,64 +29,28 @@ public class Station {
      * @param capacity     maximum cargo capacity
      * @param x            x-coordinate on the map
      * @param y            y-coordinate on the map
+     * @param orientation  orientation of the center (null for STATION)
      */
-    public Station(Type type, String name, String mapName, String ownerPlayer, int price, int capacity, int x, int y) {
-        this.type = type;
-        this.name = name;
-        this.mapName = mapName;
+    public Station(Type type, String name, String mapName, String ownerPlayer,
+                   int price, int capacity, int x, int y, Orientation orientation) {
+        this.type        = type;
+        this.name        = name;
+        this.mapName     = mapName;
         this.ownerPlayer = ownerPlayer;
-        this.price = price;
-        this.capacity = capacity;
-        this.x = x;
-        this.y = y;
+        this.price       = price;
+        this.capacity    = capacity;
+        this.x           = x;
+        this.y           = y;
+        this.orientation = orientation;
     }
 
-    /**
-     * Returns the type of the station.
-     *
-     * @return the type of the station
-     */
     public Type getType()           { return type; }
-    /**
-     * Returns the name of the station.
-     *
-     * @return the station's name
-     */
     public String getName()         { return name; }
-    /**
-     * Returns the name of the map where the station is placed.
-     *
-     * @return the name of the map where the station is placed
-     */
     public String getMapName()      { return mapName; }
-    /**
-     * Returns the name of the owner of the station
-     *
-     * @return the name of the owner of the station
-     */
     public String getOwnerPlayer()  { return ownerPlayer; }
-    /**
-     * Returns the price of the station
-     *
-     * @return the price of the station
-     */
     public int getPrice()           { return price; }
-    /**
-     * Returns the station's cargo capacity
-     *
-     * @return the station's cargo capacity
-     */
     public int getCapacity()        { return capacity; }
-    /**
-     * Returns the x-coordinate of the station
-     *
-     * @return the x-coordinate of the station
-     */
     public int getX()               { return x; }
-    /**
-     * Returns the y-coordinate of the station.
-     *
-     * @return the y-coordinate of the station
-     */
     public int getY()               { return y; }
+    public Orientation getOrientation() { return orientation; }
 }

@@ -6,6 +6,7 @@ import domain.Map;
 import domain.CurrentUser;
 import domain.User;
 import domain.Station;
+import domain.Station.Orientation;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 
 import java.util.List;
@@ -13,12 +14,15 @@ import java.util.Optional;
 import java.util.Scanner;
 
 /**
- * UI for buying and placing a station on a map.
+ * UI for buying and placing a station on a map, with orientation
+ * prompt for Depot and Terminal.
  */
 public class BuildStationUI implements Runnable {
 
     private final Map map;
     private final CreateStationController ctrl = new CreateStationController();
+    private static final List<String> VALID_ORIENTS =
+            List.of("NE", "SE", "NW", "SW");
 
     public BuildStationUI(Map map) {
         this.map = map;
@@ -65,17 +69,32 @@ public class BuildStationUI implements Runnable {
         }
 
         boolean placed = false;
+        Scanner sc = new Scanner(System.in);
         while (!placed) {
             System.out.print("Enter X coordinate: ");
-            Scanner sc = new Scanner(System.in);
             int x = sc.nextInt();
-            System.out.print( "Enter Y coordinate: ");
+            System.out.print("Enter Y coordinate: ");
             int y = sc.nextInt();
 
-            Error result = ctrl.buildStation(typeName, map, x, y);
+            // Only prompt orientation for DEPOT or TERMINAL
+            Orientation orientation = null;
+            if (typeName.equals("DEPOT") || typeName.equals("TERMINAL")) {
+                while (true) {
+                    System.out.print("Enter orientation (NE, SE, NW or SW): ");
+                    String input = sc.next().trim().toUpperCase();
+                    if (VALID_ORIENTS.contains(input)) {
+                        orientation = Orientation.valueOf(input);
+                        break;
+                    } else {
+                        System.out.println("Orientation is invalid. It must be NE, SE, NW ou SW.");
+                    }
+                }
+            }
+
+            // call controller with orientation (null for STATION)
+            Error result = ctrl.buildStation(typeName, map, x, y, orientation);
             switch (result) {
                 case OK:
-                    // find the newly created station to get its name
                     Optional<Station> st = ctrl.getStations().stream()
                             .filter(s -> s.getMapName().equals(map.getMapName())
                                     && s.getX() == x && s.getY() == y
