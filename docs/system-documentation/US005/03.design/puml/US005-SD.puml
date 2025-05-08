@@ -14,7 +14,7 @@ activate Player
 Player -> BuildStationUI : buildStationRequest()
 create ":BuildStaionController" as BuildStationController
 activate BuildStationUI
-BuildStationUI -> BuildStationController: <<create>>
+BuildStationUI -> BuildStationController: create()
 participant "repositories\n:Repositories" as Repositories
 participant "mapRepository\n:MapRepository" as MapRepository
 participant "cityRepository\n:CityRepository" as CityRepository
@@ -81,7 +81,7 @@ StationRepository --> BuildStationController : proposedName
 deactivate StationRepository
 
 
-alt type == "Depot" or type == "Terminal"
+alt type == "STATION"
   BuildStationUI --> Player : request center (geometric)
   Player -> BuildStationUI : select center
   BuildStationUI --> BuildStationUI : keepCenter(center)
@@ -93,7 +93,7 @@ BuildStationController -> StationRepository : createStation(map, location, type,
 activate StationRepository
 create ":station\n:Station" as Station
 
-StationRepository -> Station: <<create>>
+StationRepository -> Station: create()
 
 StationRepository --> StationRepository : saveStation()
 StationRepository --> BuildStationController : stationData

@@ -11,7 +11,7 @@ participant ":UpgradeStationUI" as UpgradeStationUI
 activate Player
 activate UpgradeStationUI
 create ":UpgradeStationController" as UpgradeStationController
-UpgradeStationUI -> UpgradeStationController : «create»
+UpgradeStationUI -> UpgradeStationController : create()
 activate UpgradeStationController
 participant "stationRepository\n:StationRepository" as stationRepository
 UpgradeStationController -> stationRepository : findStation(station)

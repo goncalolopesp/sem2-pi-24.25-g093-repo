@@ -14,7 +14,7 @@ Player -> UpgradeStationUI : requests station upgrade
 activate UpgradeStationUI
 
 create ":UpgradeStationController" as UpgradeStationController
-UpgradeStationUI -> UpgradeStationController : «create»
+UpgradeStationUI -> UpgradeStationController : create()
 activate UpgradeStationController
 
 UpgradeStationUI --> Player : requests station and upgrade option

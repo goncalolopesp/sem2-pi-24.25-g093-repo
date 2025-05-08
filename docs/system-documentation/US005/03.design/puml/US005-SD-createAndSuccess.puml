@@ -12,7 +12,7 @@ activate Player
 Player -> BuildUI : buildStationRequest()
 activate BuildUI
 create ":BuildStationController" as BuildController
-BuildUI -> BuildController : «create»()
+BuildUI -> BuildController : create()
 activate BuildController
 participant "repositories\n:Repositories" as Repositories
 participant "stationRepository\n:StationRepository" as StationRepo
@@ -25,7 +25,7 @@ BuildController -> StationRepo : createStation(map,name, location, type, center)
 activate StationRepo
 
 create "station\n:Station" as Station
-StationRepo -> Station         : «create»()
+StationRepo -> Station         : create()
 StationRepo -> StationRepo     : saveStation(Station)
 StationRepo --> BuildController : stationData
 deactivate StationRepo
