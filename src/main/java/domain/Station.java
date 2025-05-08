@@ -98,4 +98,9 @@ public class Station {
      * @return the center's orientation of a station (null for DEPOT and TERMINAL)
      */
     public Orientation getOrientation() { return orientation; }
+
+    @Override
+    public String toString() {
+        return name + " " + type + " (" + x + y + ')';
+    }
 }
