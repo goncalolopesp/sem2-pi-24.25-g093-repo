@@ -15,14 +15,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Controller for buying and placing stations.
+ * Controller responsible for creating and retrieving stations.
+ * <p>
+ * Delegates persistence to StationRepository
+ * </p>
  */
 public class CreateStationController {
     public enum Error { OK, INVALID_TYPE, INSUFFICIENT_FUNDS, OVERBUILD, INVALID_COORDINATES }
 
     private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
 
-    // station costs & capacities
     private static final int COST_DEPOT    = 50,  CAP_DEPOT    = 100;
     private static final int COST_STATION  = 100, CAP_STATION  = 200;
     private static final int COST_TERMINAL = 200, CAP_TERMINAL = 400;
@@ -36,7 +38,7 @@ public class CreateStationController {
      * @return Error status
      */
     public Error buildStation(String typeStr, Map map, int x, int y,Orientation orientation) {
-        // parse type
+
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -44,7 +46,6 @@ public class CreateStationController {
             return Error.INVALID_TYPE;
         }
 
-        // get current user and cost
         User user = CurrentUser.getInstance().getUser();
         int cost;
         int capacity;
@@ -65,17 +66,14 @@ public class CreateStationController {
                 return Error.INVALID_TYPE;
         }
 
-        // check funds
         if (user.getBudget() < cost) {
             return Error.INSUFFICIENT_FUNDS;
         }
 
-        // validate coordinates in map bounds
         if (x < 1 || x > map.getWidth() || y < 1 || y > map.getHeight()) {
             return Error.INVALID_COORDINATES;
         }
 
-        // check overbuild: cities and house blocks
         List<City> cities = new DisplayMapController().getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
@@ -84,7 +82,6 @@ public class CreateStationController {
         boolean onBlock = cities.stream()
                 .flatMap(c -> c.getBlocks().stream())
                 .anyMatch(b -> b.getX() == x && b.getY() == y);
-        // only block same-player stations
         String owner = user.getEmail();
         boolean onStation = stationRepo.getStations().stream()
                 .filter(s -> s.getMapName().equals(map.getMapName()) && s.getOwnerPlayer().equals(owner))
@@ -93,14 +90,12 @@ public class CreateStationController {
             return Error.OVERBUILD;
         }
 
-        // determine nearest city name for station name
         String baseName = cities.stream()
                 .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX()-x) + Math.abs(c.getCenterY()-y)))
                 .map(City::getName)
                 .orElse("Unknown");
         String stationName = baseName + "-" + type.name();
 
-        // create station
         Station st = new Station(type, stationName,
                 map.getMapName(),
                 owner,
@@ -108,17 +103,17 @@ public class CreateStationController {
                 capacity,
                 x, y,orientation);
 
-        // persist and attach
         stationRepo.addStation(st);
         map.getStations().add(st);
 
-        // deduct budget
         user.setBudget(new domain.Budget(user.getBudget() - cost));
 
         return Error.OK;
     }
 
-    /** Returns all stations (for display or testing). */
+    /** Returns all stations (for display or testing).
+     * @return a list of all the stations
+     */
     public List<Station> getStations() {
         return stationRepo.getStations();
     }

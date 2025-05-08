@@ -14,12 +14,12 @@ import java.util.Optional;
 import java.util.Scanner;
 
 /**
- * UI for buying and placing a station on a map, with orientation
- * prompt for Depot and Terminal.
+ * Launches the user interface responsible to build the station.
  */
 public class BuildStationUI implements Runnable {
 
     private final Map map;
+    /** Controller handling station creation and validation. */
     private final CreateStationController ctrl = new CreateStationController();
     private static final List<String> VALID_ORIENTS =
             List.of("NE", "SE", "NW", "SW");
@@ -28,6 +28,12 @@ public class BuildStationUI implements Runnable {
         this.map = map;
     }
 
+    /**
+     * Runs the "Build Station" user interface.
+     * <p>
+     * Asks for station type, the coordinates of the center, and if the station type is "STATION", asks the orientation (NE,SE,NW or SW)
+     * </p>
+     */
     @Override
     public void run() {
         User user = CurrentUser.getInstance().getUser();
@@ -62,7 +68,6 @@ public class BuildStationUI implements Runnable {
                 return;
         }
 
-        // Validate budget before asking coords
         if (user.getBudget() < cost) {
             System.out.println("Insufficient funds. You have " + user.getBudget() + ", but this station costs " + cost + ".");
             return;
@@ -76,9 +81,8 @@ public class BuildStationUI implements Runnable {
             System.out.print("Enter Y coordinate: ");
             int y = sc.nextInt();
 
-            // Only prompt orientation for DEPOT or TERMINAL
             Orientation orientation = null;
-            if (typeName.equals("DEPOT") || typeName.equals("TERMINAL")) {
+            if (typeName.equals("STATION")) {
                 while (true) {
                     System.out.print("Enter orientation (NE, SE, NW or SW): ");
                     String input = sc.next().trim().toUpperCase();
@@ -91,7 +95,6 @@ public class BuildStationUI implements Runnable {
                 }
             }
 
-            // call controller with orientation (null for STATION)
             Error result = ctrl.buildStation(typeName, map, x, y, orientation);
             switch (result) {
                 case OK:

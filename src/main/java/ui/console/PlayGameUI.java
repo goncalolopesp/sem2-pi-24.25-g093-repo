@@ -16,14 +16,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * User interface for playing the game: select a map and a scenario, then display the map and actions menu.
+ * Launches the user interface responsible to make the game playable.
  */
+
 public class PlayGameUI implements Runnable {
 
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final DisplayMapController displayCtrl = new DisplayMapController();
 
+    /**
+     * Runs the "PlayGameUI" user interface.
+     * <p>
+     * Allows the user to select the game options , which will allow him to play the game
+     * </p>
+     */
     @Override
     public void run() {
         List<Map> maps = mapCtrl.getMaps();
@@ -70,32 +77,38 @@ public class PlayGameUI implements Runnable {
     }
 
     /**
-     * Renders the map grid using 1-based coordinates, and only shows stations belonging to the current user.
-     * Symbols: ⬛ empty, 🌆 city center, 🏠 house block, 🚉 station.
+     * Renders the map grid using 1-based coordinates and prints it to the console.
+     * Displays only the city centers, house blocks, and stations owned by
+     * the current user.
+     * <p>
+     * Symbols:
+     * <ul>
+     *   <li>⬛ empty</li>
+     *   <li>🌆 city center</li>
+     *   <li>🏠 house block</li>
+     *   <li>🚉 station</li>
+     * </ul>
+     * </p>
      *
      * @param map the map to render
      */
     private void displayMapData(Map map) {
-        int width = map.getWidth();   // ex: se width == 10, x varia 1..10
-        int height = map.getHeight(); // ex: se height == 8, y varia 1..8
+        int width = map.getWidth();
+        int height = map.getHeight();
 
-        // Criamos array [0..height][0..width], mas só usamos índices 1..height / 1..width
         String[][] grid = new String[height + 1][width + 1];
 
-        // Inicializa tudo a ⬛ em 1..height e 1..width
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
                 grid[y][x] = "⬛";
             }
         }
 
-        // ––– Desenha as cidades e blocos de casas –––
         List<City> cities = displayCtrl.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
 
         for (City city : cities) {
-            // Já estão em 1-based, não adicionar +1
             int cy = city.getCenterY();
             int cx = city.getCenterX();
             grid[cy][cx] = "🌆";
@@ -107,7 +120,6 @@ public class PlayGameUI implements Runnable {
             }
         }
 
-        // ––– Desenha só as estações do jogador atual –––
         User currentUser = CurrentUser.getInstance().getUser();
         if (currentUser != null) {
             String me = currentUser.getEmail();
@@ -121,7 +133,6 @@ public class PlayGameUI implements Runnable {
             }
         }
 
-        // ––– Imprime o grid linhas 1..height e colunas 1..width –––
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
                 System.out.print(grid[y][x]);

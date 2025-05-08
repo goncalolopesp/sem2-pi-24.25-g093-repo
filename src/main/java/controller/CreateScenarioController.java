@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Controller responsible for creating and retrieving scenarios.
  * <p>
- * Delegates persistence to ScenarioRepository}
+ * Delegates persistence to ScenarioRepository
  * </p>
  */
 
