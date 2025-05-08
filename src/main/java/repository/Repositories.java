@@ -14,6 +14,7 @@ public class Repositories {
     private final ScenarioRepository scenarioRepository;
     private final AuthRepository authRepository;
     private final StationRepository stationRepository;
+    private final BuildingRepository buildingRepository;
 
 
     /**
@@ -26,6 +27,7 @@ public class Repositories {
         scenarioRepository = new ScenarioRepository();
         authRepository = new AuthRepository();
         stationRepository  = new StationRepository();
+        buildingRepository = new BuildingRepository();
     }
 
     /**
@@ -46,33 +48,40 @@ public class Repositories {
     /**
      * Gets the repository for map entities.
      *
-     * @return the MapRepository instance
+     * @return the mapRepository
      */
     public MapRepository getMapRepository() { return mapRepository; }
     /**
      * Gets the repository for city entities.
      *
-     * @return the CityRepository instance
+     * @return the cityRepository
      */
     public CityRepository getCityRepository() { return cityRepository; }
     /**
      * Gets the repository for scenario entities.
      *
-     * @return the ScenarioRepository
+     * @return the scenarioRepository
      */
     public ScenarioRepository getScenarioRepository() { return scenarioRepository; }
 
     /**
      * Gets the repository for authentication.
      *
-     * @return the AuthRepository
+     * @return the authRepository
      */
     public AuthRepository getAuthRepository() { return authRepository; }
 
     /**
      * Gets the repository for station entities.
      *
-     * @return the StationRepository
+     * @return the stationRepository
      */
     public StationRepository getStationRepository() { return stationRepository; }
+
+    /**
+     * Gets the repository for building entities.
+     *
+     * @return the buildingRepository
+     */
+    public BuildingRepository getBuildingRepository() { return buildingRepository; }
 }
