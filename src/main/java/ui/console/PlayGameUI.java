@@ -11,7 +11,9 @@ import domain.Station;
 import domain.CurrentUser;
 import domain.User;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import ui.console.menu.MenuItem;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,47 +35,51 @@ public class PlayGameUI implements Runnable {
      */
     @Override
     public void run() {
+
+        Map selectedMap = getMap();
+        Scenario selectedScenario = getScenario(selectedMap);
+
+        if (selectedMap == null || selectedScenario == null) {
+            System.out.println("No Map or Scenario chosen.");
+            return;
+        }
+
+        List<MenuItem> options = new ArrayList<MenuItem>();
+        options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
+        options.add(new MenuItem("Upgrade A Station", new UpgradeStationUI()));
+        int option;
+        do {
+            displayMapData(selectedMap);
+
+            option = Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------");
+
+            if ((option >= 0) && (option < options.size())) {
+                options.get(option).run();
+            }
+
+        } while (option != -1);
+    }
+
+    private Map getMap() {
         List<Map> maps = mapCtrl.getMaps();
         if (maps.isEmpty()) {
             System.out.println("No maps available.");
-            return;
+            return null;
         }
         int mapIndex = Utils.showAndSelectIndex(maps, "Select a map:");
-        Map selectedMap = maps.get(mapIndex);
+        return maps.get(mapIndex);
+    }
 
+    private Scenario getScenario(Map selectedMap) {
         List<Scenario> scenarios = scenarioCtrl.getScenarios().stream()
                 .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
                 .collect(Collectors.toList());
         if (scenarios.isEmpty()) {
             System.out.println("No scenarios available for map '" + selectedMap.getMapName() + "'.");
-            return;
+            return null;
         }
         int scenIndex = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
-        Scenario selectedScenario = scenarios.get(scenIndex);
-
-        // Main loop: display map, budget and menu until user chooses to exit (option 0)
-        boolean exit = false;
-        while (!exit) {
-            displayMapData(selectedMap);
-
-            User currentUser = CurrentUser.getInstance().getUser();
-            if (currentUser != null) {
-                System.out.println("Your budget is: " + currentUser.getBudget());
-            }
-
-            List<String> options = List.of("Buy a Station", "Return to Menu");
-            int choice = Utils.showAndSelectIndex(options, "Choose an action:");
-            switch (choice) {
-                case 0:
-                    new BuildStationUI(selectedMap).run();
-                    break;
-                case 1:
-                    exit = true;
-                    break;
-                default:
-                    exit = true;
-            }
-        }
+        return scenarios.get(scenIndex);
     }
 
     /**
@@ -132,6 +138,7 @@ public class PlayGameUI implements Runnable {
                 }
             }
         }
+
 
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {

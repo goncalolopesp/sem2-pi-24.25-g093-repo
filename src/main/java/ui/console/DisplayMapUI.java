@@ -1,9 +1,7 @@
 package ui.console;
 
 import controller.DisplayMapController;
-import domain.City;
-import domain.HouseBlock;
-import domain.Map;
+import domain.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +15,7 @@ import java.util.Scanner;
 public class DisplayMapUI implements Runnable{
     /** Controller responsible for retrieving map and city data. */
     private final DisplayMapController ctrl = new DisplayMapController();
+    private final User currentUser = CurrentUser.getInstance().getUser();
     private String mapName;
     private String[][] mapArray;
 
@@ -79,6 +78,10 @@ public class DisplayMapUI implements Runnable{
         addCitiesToMap();
         addHouseBlocksToMap();
 
+        if (currentUser.getRoleId().equals("PLAYER")) {
+            addStationsToMap();
+        }
+
         return mapArray;
     }
 
@@ -108,6 +111,22 @@ public class DisplayMapUI implements Runnable{
                     int posX = houseBlockList.get(j).getX();
                     int posY = houseBlockList.get(j).getY();
                     mapArray[posY-1][posX-1] = "🌆";
+                }
+            }
+        }
+    }
+
+    private void addStationsToMap() {
+        if (currentUser != null) {
+            String me = currentUser.getEmail();
+            Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
+
+            for (Station st : matchingMap.get().getStations()) {
+                if (st.getMapName().equals(matchingMap.get().getMapName())
+                        && st.getOwnerPlayer().equals(me)) {
+                    int sy = st.getY();
+                    int sx = st.getX();
+                    mapArray[sy][sx] = "🚉";
                 }
             }
         }
