@@ -7,6 +7,9 @@ import java.util.List;
 
 /**
  * Repository for storing and querying Station instances.
+ * <p>
+ * Provides methods to add stations and get a list of all the stations created.
+ * </p>
  */
 public class StationRepository {
     private final List<Station> stations = new ArrayList<>();

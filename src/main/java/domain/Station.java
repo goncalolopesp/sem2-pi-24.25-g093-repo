@@ -29,7 +29,7 @@ public class Station {
      * @param capacity     maximum cargo capacity
      * @param x            x-coordinate on the map
      * @param y            y-coordinate on the map
-     * @param orientation  orientation of the center (null for STATION)
+     * @param orientation  orientation of the center (null for DEPOT and TERMINAL)
      */
     public Station(Type type, String name, String mapName, String ownerPlayer,
                    int price, int capacity, int x, int y, Orientation orientation) {
@@ -44,13 +44,58 @@ public class Station {
         this.orientation = orientation;
     }
 
+    /**
+     * Returns the type of a staion.
+     *
+     * @return the type of a station
+     */
     public Type getType()           { return type; }
+    /**
+     * Returns the name of a staion.
+     *
+     * @return the name of a station
+     */
     public String getName()         { return name; }
+    /**
+     * Returns the name of the map where a staion is placed.
+     *
+     * @return the name of the map where a staion is placed
+     */
     public String getMapName()      { return mapName; }
+    /**
+     * Returns the owner of a station.
+     *
+     * @return the owner of a staiton
+     */
     public String getOwnerPlayer()  { return ownerPlayer; }
+    /**
+     * Returns the price of a station.
+     *
+     * @return the price of a staiton
+     */
     public int getPrice()           { return price; }
+    /**
+     * Returns the cargo capacity of a station.
+     *
+     * @return the cargo capacity of a staiton
+     */
     public int getCapacity()        { return capacity; }
+    /**
+     * Returns the x-coordinate of a station.
+     *
+     * @return the x-coordinate of a staiton
+     */
     public int getX()               { return x; }
+    /**
+     * Returns the y-coordinate of a station.
+     *
+     * @return the y-coordinate of a staiton
+     */
     public int getY()               { return y; }
+    /**
+     * Returns the center's orientation of a station (null for DEPOT and TERMINAL).
+     *
+     * @return the center's orientation of a station (null for DEPOT and TERMINAL)
+     */
     public Orientation getOrientation() { return orientation; }
 }
