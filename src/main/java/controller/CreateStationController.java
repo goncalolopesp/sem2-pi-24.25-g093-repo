@@ -11,109 +11,116 @@ import repository.StationRepository;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Controller responsible for creating and retrieving stations.
- * <p>
- * Delegates persistence to StationRepository
- * </p>
- */
 public class CreateStationController {
     public enum Error { OK, INVALID_TYPE, INSUFFICIENT_FUNDS, OVERBUILD, INVALID_COORDINATES }
 
     private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
 
-    private static final int COST_DEPOT    = 50,  CAP_DEPOT    = 100;
-    private static final int COST_STATION  = 100, CAP_STATION  = 200;
+    private static final int COST_DEPOT = 50, CAP_DEPOT = 100;
+    private static final int COST_STATION = 100, CAP_STATION = 200;
     private static final int COST_TERMINAL = 200, CAP_TERMINAL = 400;
 
-    /**
-     * Attempts to build a station of the given type at (x,y) on map.
-     * @param typeStr user input type name
-     * @param map the Map instance
-     * @param x x-coordinate
-     * @param y y-coordinate
-     * @return Error status
-     */
-    public Error buildStation(String typeStr, Map map, int x, int y,Orientation orientation) {
-
+    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation) {
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             return Error.INVALID_TYPE;
         }
-
         User user = CurrentUser.getInstance().getUser();
-        int cost;
-        int capacity;
+        int cost, capacity;
         switch (type) {
             case DEPOT:
-                cost = COST_DEPOT;
-                capacity = CAP_DEPOT;
-                break;
+                cost = COST_DEPOT; capacity = CAP_DEPOT; break;
             case STATION:
-                cost = COST_STATION;
-                capacity = CAP_STATION;
-                break;
+                cost = COST_STATION; capacity = CAP_STATION; break;
             case TERMINAL:
-                cost = COST_TERMINAL;
-                capacity = CAP_TERMINAL;
-                break;
+                cost = COST_TERMINAL; capacity = CAP_TERMINAL; break;
             default:
                 return Error.INVALID_TYPE;
         }
+        if (user.getBudget() < cost) return Error.INSUFFICIENT_FUNDS;
 
-        if (user.getBudget() < cost) {
-            return Error.INSUFFICIENT_FUNDS;
+        int origX = x;
+        int origY = y;
+        int centerX, centerY;
+        int areaW, areaH;
+
+        int difx= 0,dify = 0;
+        if (type == Station.Type.STATION) {
+            int dx = 0,dy = 0;
+            areaW = areaH = 4;
+            if(orientation == Orientation.NE) dx = 1;
+            else if(orientation == Orientation.SW) dy = 1;
+            else if(orientation == Orientation.SE){
+                dx=1;
+                dy=1;
+            }
+            origX += dx;
+            origY += dy;
+            centerX = origX;
+            centerY = origY;
+            difx = dx;
+            dify=dy;
+        }  else {
+            areaW = (type == Station.Type.DEPOT ? 3 : 5);
+            areaH = areaW;
+            centerX = origX;
+            centerY = origY;
         }
-
-        if (x < 1 || x > map.getWidth() || y < 1 || y > map.getHeight()) {
+        int originX = centerX - (areaW - 1) / 2;
+        int originY = centerY - (areaH - 1) / 2;
+        if (originX < 1 || originY < 1 || originX + areaW - 1 > map.getWidth() || originY + areaH - 1 > map.getHeight()) {
             return Error.INVALID_COORDINATES;
         }
-
         List<City> cities = new DisplayMapController().getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
-        boolean onCity = cities.stream()
-                .anyMatch(c -> c.getCenterX() == x && c.getCenterY() == y);
-        boolean onBlock = cities.stream()
-                .flatMap(c -> c.getBlocks().stream())
-                .anyMatch(b -> b.getX() == x && b.getY() == y);
-        String owner = user.getEmail();
-        boolean onStation = stationRepo.getStations().stream()
-                .filter(s -> s.getMapName().equals(map.getMapName()) && s.getOwnerPlayer().equals(owner))
-                .anyMatch(s -> s.getX() == x && s.getY() == y);
-        if (onCity || onBlock || onStation) {
-            return Error.OVERBUILD;
+        for (int dx = 0; dx < areaW; dx++) {
+            for (int dy = 0; dy < areaH; dy++) {
+                int cx = originX + dx;
+                int cy = originY + dy;
+                boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
+                boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
+                        .anyMatch(b -> b.getX() == cx && b.getY() == cy);
+                if (onCity || onBlock) return Error.OVERBUILD;
+                String owner = user.getEmail();
+                for (Station s : stationRepo.getStations()) {
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    int sw, sh, sox, soy;
+                    if (s.getType() == Station.Type.STATION) {
+                        sw = sh = 4;
+                        int sbX = s.getX();
+                        int sbY = s.getY();
+                        int sdx = (s.getOrientation() == Orientation.NE || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        int sdy = (s.getOrientation() == Orientation.SW || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        sox = sbX + sdx - 1;
+                        soy = sbY + sdy - 1;
+                    } else {
+                        sw = (s.getType() == Station.Type.DEPOT ? 3 : 5);
+                        sh = sw;
+                        sox = s.getX() - sw/2;
+                        soy = s.getY() - sh/2;
+                    }
+                    if (cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh) return Error.OVERBUILD;
+                }
+            }
         }
-
-        String baseName = cities.stream()
-                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX()-x) + Math.abs(c.getCenterY()-y)))
+        final int nameRefX = origX - difx;
+        final int nameRefY = origY - dify;
+        String name = cities.stream()
+                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
                 .map(City::getName)
-                .orElse("Unknown");
-        String stationName = baseName + "-" + type.name();
-
-        Station st = new Station(type, stationName,
-                map.getMapName(),
-                owner,
-                cost,
-                capacity,
-                x, y,orientation);
-
+                .orElse("Unknown") + "-" + type.name();
+        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
-
         user.setBudget(new domain.Budget(user.getBudget() - cost));
-
         return Error.OK;
     }
 
-    /** Returns all stations (for display or testing).
-     * @return a list of all the stations
-     */
     public List<Station> getStations() {
         return stationRepo.getStations();
     }

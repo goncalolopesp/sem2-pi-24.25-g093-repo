@@ -98,13 +98,10 @@ public class BuildStationUI implements Runnable {
             Error result = ctrl.buildStation(typeName, map, x, y, orientation);
             switch (result) {
                 case OK:
-                    Optional<Station> st = ctrl.getStations().stream()
-                            .filter(s -> s.getMapName().equals(map.getMapName())
-                                    && s.getX() == x && s.getY() == y
-                                    && s.getOwnerPlayer().equals(user.getEmail()))
-                            .findFirst();
-                    String stName = st.map(Station::getName).orElse("<unknown>");
-                    System.out.println("Station '" + stName + "' built successfully at (" + x + "," + y + ").");
+                        List<Station> all = ctrl.getStations();
+                        Station st = all.get(all.size() - 1);
+                        System.out.println("Station '" + st.getName() +
+                                "' built successfully at (" + st.getX() + "," + st.getY() + ").");
                     placed = true;
                     break;
                 case INVALID_COORDINATES:
