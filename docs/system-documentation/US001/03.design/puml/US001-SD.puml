@@ -1,15 +1,21 @@
 @startuml
 actor User as "Editor"
+autonumber
 participant "CreateMapUI" as UI
 participant "CreateMapController" as Controller
 participant "MapRepository" as Repo
 participant "Map" as MapClass
 
-User -> UI : run()
+
+activate User
+User -> UI : Asks to create a new map
 activate UI
 
-UI -> UI : requestData()
-UI -> UI : requestMapName()
+UI -> Controller** : create()
+UI --> User : requests map size
+User -> UI : types requested data
+UI --> User : requests map name
+User -> UI : types requested data
 UI -> Controller : checkNameUniqueness(name)
 activate Controller
 Controller -> Repo : checkNameUniqueness(name)
@@ -18,36 +24,30 @@ Repo --> Controller : true/false
 deactivate Repo
 Controller --> UI : true/false
 deactivate Controller
-UI -> UI : requestWidth()
-UI -> UI : requestHeight()
 
-UI -> UI : submitData()
 UI -> Controller : createMap(name, width, height)
 activate Controller
 
 Controller -> Repo : checkNameUniqueness(name)
 activate Repo
-Repo --> Controller : true/false
+Repo --> Controller : true
 deactivate Repo
 
-alt name is unique
-    Controller -> MapClass : <<create>> new Map(name, width, height)
-    activate MapClass
-    MapClass --> Controller : Map
-    deactivate MapClass
+Controller -> MapClass : <<create>> new Map(name, width, height)
+activate MapClass
+MapClass --> Controller : Map
+deactivate MapClass
 
-    Controller -> Repo : add(map)
-    activate Repo
-    Repo -> Repo : validateMap(map)
-    Repo --> Controller : (void)
-    deactivate Repo
+Controller -> Repo : add(map)
+activate Repo
+Repo -> Repo : validateMap(map)
+Repo --> Controller : (void)
+deactivate Repo
 
-    Controller --> UI : Map
-else name not unique
-    Controller --> UI : null
-end
-
-UI -> UI : shows the result
+Controller --> UI : Map
 deactivate Controller
+
+UI --> User : displays operation success
 deactivate UI
+deactivate User
 @enduml
