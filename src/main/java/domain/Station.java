@@ -101,6 +101,6 @@ public class Station {
 
     @Override
     public String toString() {
-        return name + " " + type + " (" + x + y + ')';
+        return name + " " + type + " (" + x + ',' + y + ')';
     }
 }

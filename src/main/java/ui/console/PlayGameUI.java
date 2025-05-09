@@ -26,6 +26,7 @@ public class PlayGameUI implements Runnable {
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final DisplayMapController displayCtrl = new DisplayMapController();
+    private final User currentUser = CurrentUser.getInstance().getUser();
 
     /**
      * Runs the "PlayGameUI" user interface.
@@ -50,6 +51,10 @@ public class PlayGameUI implements Runnable {
         int option;
         do {
             displayMapData(selectedMap);
+
+            if (currentUser != null) {
+                System.out.println("Your budget is: " + currentUser.getBudget());
+            }
 
             option = Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------");
 
@@ -126,7 +131,6 @@ public class PlayGameUI implements Runnable {
             }
         }
 
-        User currentUser = CurrentUser.getInstance().getUser();
         if (currentUser != null) {
             String me = currentUser.getEmail();
             for (Station st : map.getStations()) {
