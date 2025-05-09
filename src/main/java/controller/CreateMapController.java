@@ -48,10 +48,6 @@ public class CreateMapController {
 
     /**
      * Creates a new map with the given name and dimensions.
-     * <p>
-     * Checks for name uniqueness before creation. Prints an error message and returns null if
-     * the name is already in use.
-     * </p>
      *
      * @param mapName the unique name for the map
      * @param width   the width of the map (must be positive)

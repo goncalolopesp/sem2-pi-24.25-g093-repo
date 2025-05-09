@@ -112,6 +112,9 @@ public class CreateMapUI implements Runnable{
 
     /**
      * Asks the user to enter a map name and trims whitespace.
+     * <p>
+     * Repeats process until user provides a unique name
+     * </p>
      *
      * @return the entered and trimmed map name
      */

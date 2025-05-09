@@ -1,21 +1,38 @@
 package controller;
 
 import domain.Building;
-import domain.CurrentUser;
-import domain.User;
+import domain.Map;
 import repository.BuildingRepository;
 import repository.Repositories;
 
 import java.util.List;
 
+/**
+ * Controller responsible for the creation and validation of station upgrades.
+ * <p>
+ * Delegates storage to BuildingRepository.
+ * </p>
+ */
 public class UpgradeStationController {
     private BuildingRepository buildingRepository;
-    private User currentUser = CurrentUser.getInstance().getUser();
 
+    /**
+     * Constructs an UpgradeStationController using the shared repositories instance.
+     */
     public UpgradeStationController() { getBuildingRepository(); }
 
+    /**
+     * Constructs an UpgradeStationController with a provided BuildingRepository (for testing).
+     *
+     * @param buildingRepository the BuildingRepository to use
+     */
     public UpgradeStationController(BuildingRepository buildingRepository) { this.buildingRepository = buildingRepository; }
 
+    /**
+     * Returns the BuildingRepository, initializing it if necessary.
+     *
+     * @return the BuildingRepository instance
+     */
     private BuildingRepository getBuildingRepository() {
         if (buildingRepository == null) {
             Repositories repositories = Repositories.getInstance();
@@ -25,15 +42,31 @@ public class UpgradeStationController {
         return buildingRepository;
     }
 
-    public Building upgradeStation(String stationName, String buildingType, String owner) {
-        owner = currentUser.getEmail();
-        Building building = new Building(stationName, buildingType, owner);
+    /**
+     * Upgrades a station with the given name and building type.
+     *
+     * @param stationName the name of the station to be upgraded
+     * @param buildingType the type of building to be added to the station
+     * @return the created Building instance for the station
+     */
+    public Building upgradeStation(String stationName, String buildingType) {
+        Building building = new Building(stationName, buildingType);
         getBuildingRepository().add(building);
         return building;
     }
 
+    /**
+     * Retrieves the list of all buildings stored in the repository.
+     *
+     * @return unmodifiable list of existing {@link Building} instances
+     */
     public List<Building> getBuildings() { return getBuildingRepository().getBuildings(); }
 
+    /**
+     * Verifies if provided building type already exists in provided station.
+     *
+     * @return true if it does or false if otherwise.
+     */
     public boolean verifyIfBuildingExists(String stationName, String buildingType) {
         if (getBuildings().stream().anyMatch(station -> station.getStationName().equals(stationName)) &&
                 getBuildings().stream().anyMatch(type -> type.getBuildingType().equals(buildingType))) {

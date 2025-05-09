@@ -9,7 +9,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+/**
+ * Launches the user interface responsible for the upgrade of a station.
+ */
+
 public class UpgradeStationUI implements Runnable{
+    /** Controller responsible for station upgrade logic. */
     private final UpgradeStationController ctrl;
     private final User currentUser = CurrentUser.getInstance().getUser();
     private String stationName;
@@ -22,8 +27,16 @@ public class UpgradeStationUI implements Runnable{
 
     public UpgradeStationUI() { ctrl = new UpgradeStationController(); }
 
+    /**
+     * Returns the controller used to upgrade Stations.
+     *
+     * @return the UpgradeStationController instance
+     */
     private UpgradeStationController getUpgradeStationController() { return ctrl; }
 
+    /**
+     * Runs the user interface section.
+     */
     @Override
     public void run() {
         System.out.println("\n\n--- Upgrade Station ------------------------");
@@ -34,8 +47,12 @@ public class UpgradeStationUI implements Runnable{
         }
     }
 
+    /**
+     * Collects all data related to upgrading a station.
+     * Prints a success or failure message based on the result.
+     */
     private void submitData() {
-        Optional<Building> building = Optional.ofNullable(getUpgradeStationController().upgradeStation(stationName, buildingType, currentUser.getEmail()));
+        Optional<Building> building = Optional.ofNullable(getUpgradeStationController().upgradeStation(stationName, buildingType));
 
         if (building.isPresent()) {
             System.out.println("\nBuilding successfully created!");
@@ -44,6 +61,9 @@ public class UpgradeStationUI implements Runnable{
         }
     }
 
+    /**
+     * Asks the user for station name and building type.
+     */
     private void requestData() {
         stationName = requestStation();
 
@@ -52,6 +72,14 @@ public class UpgradeStationUI implements Runnable{
         }
     }
 
+    /**
+     * Asks the user to enter a valid station.
+     * <p>
+     * Repeats until an available station is found.
+     * </p>
+     *
+     * @return the validated station name
+     */
     private String requestStation() {
         Scanner sc = new Scanner(System.in);
         List<Station> availableStations = displayStationList();
@@ -83,6 +111,14 @@ public class UpgradeStationUI implements Runnable{
         return stationName;
     }
 
+    /**
+     * Asks the user to enter a valid building type.
+     * <p>
+     * Repeats until a valid building type is provided.
+     * </p>
+     *
+     * @return the validated building type
+     */
     private String requestBuildingType(String stationName) {
         Scanner sc = new Scanner(System.in);
         String buildingType;
@@ -118,6 +154,10 @@ public class UpgradeStationUI implements Runnable{
         return buildingType;
     }
 
+    /**
+     * Collects all stations owned by the current player in order to display them.
+     * @return the available stations owned by the current player.
+     */
     private List<Station> displayStationList() {
         CreateStationController sctrl = new CreateStationController();
         List<Station> availableStations = new ArrayList<>();
