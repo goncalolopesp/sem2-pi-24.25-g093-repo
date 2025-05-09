@@ -1,0 +1,54 @@
+@startuml US009-CD
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+
+class BuyLocomotiveUI {
+  + buyRequest(locomotive: Locomotive)
+  + showLocomotives(locomotives: List<Locomotive>)
+  + storeBoughtLocomotive(locomotive: Locomotive)
+  + showConfirmation()
+  + showSuccess(message: String)
+}
+
+class BuyLocomotiveController {
+  + buyRequest(locomotive: Locomotive)
+  + buyLocomotive(locomotive: Locomotive): boolean
+}
+
+class LocomotiveRepository {
+  + getAvailableLocomotives(): List<Locomotive>
+  + buyLocomotive(locomotive: Locomotive) : boolean
+}
+
+class ScenarioRepository {
+  + getAvailableLocomotives(scenario: Scenario): List<Locomotive>
+}
+
+class Locomotive {
+  - name: String
+  - price: int
+  - type : String
+  - requiredRail : String
+  - startYearOfOperation : int
+  - power : double
+  - acceleration : double
+  - topSpeed : double
+}
+
+class Scenario {
+  - techRestrictions : String
+  - startYear : int
+  - endYear : int
+  - events : String
+}
+
+BuyLocomotiveUI ..> BuyLocomotiveController     : uses
+BuyLocomotiveController ..> LocomotiveRepository   : uses
+BuyLocomotiveController ..> ScenarioRepository    : uses
+
+LocomotiveRepository --> Locomotive    : returns
+ScenarioRepository  --> Scenario     : returns
+
+@enduml
