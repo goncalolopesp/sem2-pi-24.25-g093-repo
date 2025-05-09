@@ -1,0 +1,113 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Employee
+participant ":BuyLocomotiveUI" as BuyLocomotiveUI
+
+'As A Player, I want to buy a locomotive
+
+activate Employee
+
+Employee -> BuyLocomotiveUI : asks to buy a locomotive
+activate BuyLocomotiveUI
+
+create ":BuyLocomotiveController" as BuyLocomotiveController
+
+BuyLocomotiveUI --> BuyLocomotiveController : create
+
+
+
+
+participant ":Repositories" as Repositories
+participant "repositories\n:Repositories" as Repo
+participant "locomotiveRepository\n:LocomotiveRepository" as locomotiveRepository
+participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+
+BuyLocomotiveController --> Repositories : getInstance()
+activate BuyLocomotiveController
+activate Repositories
+
+Repositories --> BuyLocomotiveController : repositories
+
+deactivate Repositories
+
+BuyLocomotiveController --> Repo : getscenarioRepository()
+activate Repo
+
+Repo --> BuyLocomotiveController : scenarioRepository
+deactivate Repo
+
+
+BuyLocomotiveController --> scenarioRepository : asks for the list of available locomotives
+activate scenarioRepository
+scenarioRepository --> BuyLocomotiveController : lists
+deactivate scenarioRepository
+
+BuyLocomotiveController --> Repositories : getInstance()
+activate Repositories
+Repositories --> BuyLocomotiveController : repositories
+deactivate Repositories
+
+BuyLocomotiveController --> Repo : getlocomotiveRepository()
+activate Repo
+Repo --> BuyLocomotiveController : locomotiveRepository
+deactivate Repo
+
+BuyLocomotiveController --> locomotiveRepository : asks for the locomotives similar to the ones available in the scenario
+activate locomotiveRepository
+locomotiveRepository --> BuyLocomotiveController : lists
+deactivate locomotiveRepository
+
+BuyLocomotiveController --> BuyLocomotiveUI : lists
+
+deactivate BuyLocomotiveController
+
+BuyLocomotiveUI --> Employee : lists the available locomotives
+BuyLocomotiveUI --> Employee : asks the wished locomotive
+deactivate BuyLocomotiveUI
+
+Employee -> BuyLocomotiveUI : selects a locomotive from the list
+
+activate BuyLocomotiveUI
+
+BuyLocomotiveUI --> BuyLocomotiveUI : saveLocomotive()
+
+BuyLocomotiveUI --> BuyLocomotiveController : asks for the locomotive's price
+activate BuyLocomotiveController
+
+BuyLocomotiveController --> Repositories : getInstance()
+activate Repositories
+Repositories --> BuyLocomotiveController : repositories
+deactivate Repositories
+
+BuyLocomotiveController --> Repo : getlocomotiveRepository()
+activate Repo
+Repo --> BuyLocomotiveController : locomotiveRepository
+deactivate Repo
+
+BuyLocomotiveController --> BuyLocomotiveController : getBudget()
+
+BuyLocomotiveController --> locomotiveRepository : getPrice(locomotive)
+activate locomotiveRepository
+locomotiveRepository --> BuyLocomotiveController : price of the locomotive
+deactivate locomotiveRepository
+
+BuyLocomotiveController --> BuyLocomotiveUI : bought locomotive
+
+BuyLocomotiveUI --> Employee : boughtLocomotive
+BuyLocomotiveUI --> Employee : Success Message
+
+alt Budget < price
+    BuyLocomotiveController --> BuyLocomotiveUI : Error Message "Not Enough Budget"
+    deactivate BuyLocomotiveController
+    BuyLocomotiveUI --> Employee : Error Message "Not Enough Budget"
+end
+
+deactivate BuyLocomotiveUI
+
+
+@enduml
