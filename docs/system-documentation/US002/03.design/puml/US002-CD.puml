@@ -1,0 +1,110 @@
+@startuml
+
+    class Location {
+        - positionX : int
+        - positionY : int
+        --
+        + Location(positionX: int, positionY: int)
+        + getPositionX() : int
+        + getPositionY() : int
+        + toString() : String
+    }
+    enum Industrytype {
+        IRON MINE
+        COAL MINE
+        BAUXITE MINE
+        NITRATE MINE
+        VEGETABLE FARM
+        CEREAL FARM
+        WOOL FARM
+        COFFEE FARM
+        RUBBER FARM
+        CATTLE FARM
+        BAKERY
+        TEXTILE
+        AUTOMOBILE
+        STEEL MILL
+    }
+    class Industry {
+        - type : Industrytype
+        - location : Location
+        --
+        + Industry(type: industrytype, X-position: int, Y-position: int)
+        + getType() : industrytype
+        + getX-position() : int
+        + getY-position() : int
+        + toString() : String
+    }
+
+    class Map {
+        - mapName : String
+        - location : Location
+        - stations : List<Station>
+        --
+        + Map(mapName: String, width: int, height: int)
+        + getMapName() : String
+        + getWidth() : int
+        + getHeight() : int
+        + getStations() : List<Station>
+        + toString() : String
+    }
+
+    class IndustryRepository {
+        - Industries : List<Industry>
+        --
+        + IndustryRepository()
+        + getIndustries() : List<Industry>
+    }
+
+    class MapRepository {
+        - maps : List<Map>
+        --
+        + MapRepository()
+        + add(map: Map) : void
+        + getMap(name: String) : Optional<Map>
+        + checkNameUniqueness(name: String) : boolean
+        + getMaps() : List<Map>
+        - validateMap(map: Map) : boolean
+    }
+
+
+    class PlaceIndustryController {
+        - IndustryRepository : IndustryRepository
+        --
+        + PlaceIndustryController()
+        + PlaceIndustryController(IndustryRepository: IndustryRepository)
+        + placeIndustryOnMap(industry: industry, positionX: int, positionY: int, map: Map)
+        - getIndustryRepository() : IndustryRepository
+        - getMapRepository() : MapRepository
+    }
+
+
+
+    class PlaceIndustryUI {
+        - ctrl : PlaceIndustryController
+        - industry : Industry
+        - positionX : int
+        - positionY : int
+        - map : Map
+        --
+        + PlaceIndustryUI()
+        + run() : void
+        - requestData() : void
+        - submitData() : void
+        - selectMap() : void
+        - selectIndustry() : void
+        - requestPositionX() : int
+        - requestPositionY() : int
+    }
+
+Industry --o Map : contains
+PlaceIndustryUI --> PlaceIndustryController
+PlaceIndustryController --> IndustryRepository
+PlaceIndustryController --> MapRepository
+IndustryRepository --> Industry
+MapRepository --> Map
+Industry --> Industrytype
+Industry *-- Location : has
+Map *-- Location : has
+
+@enduml

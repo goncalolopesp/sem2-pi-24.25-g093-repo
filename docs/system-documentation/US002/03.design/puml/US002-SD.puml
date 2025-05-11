@@ -1,11 +1,90 @@
 @startuml
-'https://plantuml.com/sequence-diagram
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
 
 autonumber
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+actor "Editor" as User
+participant "PlaceIndustryUI" as PlaceIndustryUI
+participant "PlaceIndustryController" as PlaceIndustryController
+participant ":Repositories" as RepositorySingleton
+participant "repositories\n:Repositories" as PLAT
+participant "MapRepository" as MapRepository
+participant "IndustryRepository" as IndustryRepository
+participant "Industry" as Industry
+activate User
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+
+    User -> PlaceIndustryUI :aks to add an industry
+        activate PlaceIndustryUI
+
+        "PlaceIndustryUI" -> PlaceIndustryController** : create
+        activate PlaceIndustryController
+
+                        PlaceIndustryController -> RepositorySingleton : getInstance()
+                        activate RepositorySingleton
+
+                            RepositorySingleton --> PlaceIndustryController: repositories
+                        deactivate RepositorySingleton
+
+                        PlaceIndustryController -> PLAT : getTaskCategoryRepository()
+                        activate PLAT
+
+                            PLAT --> PlaceIndustryController: taskCategoryRepository
+                        deactivate PLAT
+
+        deactivate PlaceIndustryController
+        "PlaceIndustryUI" -> PlaceIndustryController : getMaps()
+        activate PlaceIndustryController
+            PlaceIndustryController -> MapRepository : getMaps()
+            activate MapRepository
+                MapRepository --> PlaceIndustryController :  List of maps
+            deactivate MapRepository
+            PlaceIndustryController --> PlaceIndustryUI : List of maps
+        deactivate PlaceIndustryController
+
+
+
+        PlaceIndustryUI --> User : shows list of maps
+    deactivate PlaceIndustryUI
+
+    User -> PlaceIndustryUI :  selects one map
+    activate PlaceIndustryUI
+
+        PlaceIndustryUI -> PlaceIndustryController : getIndustries()
+        activate PlaceIndustryController
+            PlaceIndustryController -> "IndustryRepository" : getIndustries()
+            activate IndustryRepository
+                IndustryRepository --> PlaceIndustryController : List of industries
+            deactivate IndustryRepository
+            PlaceIndustryController --> PlaceIndustryUI : List of industries
+        deactivate PlaceIndustryController
+        PlaceIndustryUI --> User : shows list of industries
+    deactivate PlaceIndustryUI
+
+
+        User -> PlaceIndustryUI : select one Industry
+        activate "PlaceIndustryUI"
+        PlaceIndustryUI --> User : requests map coordinates
+
+    deactivate PlaceIndustryUI
+
+
+    User -> PlaceIndustryUI : types requested data
+    activate PlaceIndustryUI
+        PlaceIndustryUI -> PlaceIndustryController : placeIndustryOnMap(industry,x,y,map)
+        activate PlaceIndustryController
+            PlaceIndustryController -> Industry : placeIndustryOnMap(industry,x,y,map)
+            activate Industry
+                Industry --> PlaceIndustryController : void
+            deactivate Industry
+
+            PlaceIndustryController --> PlaceIndustryUI : void
+        deactivate PlaceIndustryController
+
+
+        PlaceIndustryUI --> User : displays operation success
+    deactivate PlaceIndustryUI
+
 @enduml

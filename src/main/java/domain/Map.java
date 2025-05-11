@@ -1,5 +1,8 @@
 package domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a map with a name and fixed dimensions.
  * <p>
@@ -10,9 +13,9 @@ package domain;
 
 public class Map {
     private final String mapName;
-    private final int width;
-    private final int height;
-    private final java.util.List<Station> stations = new java.util.ArrayList<>();
+    private final Location location;
+    private final List<Station> stations = new ArrayList<>();
+    private final List<Industry> industries = new ArrayList<>();
 
     /**
      * Constructs a new Map instance with the specified name and dimensions.
@@ -23,8 +26,7 @@ public class Map {
      */
     public Map(String mapName, int width, int height) {
         this.mapName = mapName;
-        this.width = width;
-        this.height = height;
+        this.location = new Location(width, height);
     }
 
     /**
@@ -38,21 +40,42 @@ public class Map {
      *
      * @return the width in grid units
      */
-    public int getWidth() { return width; }
+    public int getWidth() {
+        return location.getX(); }
     /**
      * Returns the height of the map.
      *
      * @return the height in grid units
      */
-    public int getHeight() { return height; }
+    public int getHeight() {
+        return location.getY();
+    }
 
     /**
      * Returns the stations on the map.
      *
      * @return the stations on the map
      */
-    public java.util.List<Station> getStations() { return stations; }
+    public List<Station> getStations() { return stations; }
 
+    /**
+     * Returns the industries on the map.
+     *
+     * @return the industries on the map
+     */
+    public List<Industry> getIndustries() { return industries; }
+
+    /**
+     * Adds a station to the map at the specified coordinates.
+     *
+     * @param industry   the Station to add
+     * @param positionX the x-coordinate of the station
+     * @param positionY the y-coordinate of the station
+     */
+    public boolean placeIndustry(Industry industry, int positionX, int positionY) {
+        industry.setLocation(new Location(positionX, positionY));
+        return industries.add(industry);
+    }
     /**
      * Returns the string representation of this map, which is its name.
      *
