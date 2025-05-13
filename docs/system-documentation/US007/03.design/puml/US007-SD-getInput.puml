@@ -1,0 +1,26 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Employee
+participant ":StationsListUI" as StationsListUI
+
+activate Employee
+
+Employee -> StationsListUI : openStationListing()
+activate StationsListUI
+
+StationsListUI --> Employee : listStations()
+
+Employee -> StationsListUI : selectStation(station)
+
+StationsListUI --> StationsListUI : saveStation()
+
+StationsListUI --> Employee : displayStationData()
+
+
+
+@enduml
