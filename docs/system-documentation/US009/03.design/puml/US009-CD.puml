@@ -30,18 +30,19 @@ class Locomotive {
   - name: String
   - price: int
   - type : String
-  - requiredRail : String
+  - fuelCost : int
+  - maintenanceCost : int
   - startYearOfOperation : int
-  - power : double
-  - acceleration : double
+  - endYearOfOperation : int
   - topSpeed : double
 }
 
 class Scenario {
-  - techRestrictions : String
+  - scenarioName : String
+  - techRestriction : String
   - startYear : int
   - endYear : int
-  - events : String
+  - historicalRestriction : String
 }
 
 BuyLocomotiveUI ..> BuyLocomotiveController     : uses
