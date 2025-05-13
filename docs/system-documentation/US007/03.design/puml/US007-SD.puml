@@ -15,7 +15,7 @@ activate StationsListUI
 
 create ":StationsListController" as StationsListController
 
-StationsListUI --> StationsListController : create
+StationsListUI --> StationsListController : create()
 
 
 
