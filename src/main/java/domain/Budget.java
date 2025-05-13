@@ -16,4 +16,12 @@ public class Budget {
         this.budget = budget;
     }
 
+    public void addBudget(int budget) {
+        this.budget += budget;
+    }
+
+    public void subtractBudget(int budget) {
+        this.budget -= budget;
+    }
+
 }
