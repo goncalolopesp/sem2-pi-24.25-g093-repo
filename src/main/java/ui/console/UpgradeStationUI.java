@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Launches the user interface responsible for the upgrade of a station.
@@ -17,15 +18,16 @@ public class UpgradeStationUI implements Runnable{
     /** Controller responsible for station upgrade logic. */
     private final UpgradeStationController ctrl;
     private final User currentUser = CurrentUser.getInstance().getUser();
-    private String stationName;
+    private Station station;
     private String buildingType;
+    private final Map selectedMap;
     private static final int COST_TELEGRAPH = 250,  COST_TELEPHONE = 270;
     private static final int COST_SCAFE = 340, COST_LCAFE = 430;
     private static final int COST_CUSTOMS = 570, COST_POFFICE = 730;
     private static final int COST_SHOTEL = 940, COST_LHOTEL = 1170;
     private static final int COST_SILO = 1450, COST_LSTORAGE = 1750;
 
-    public UpgradeStationUI() { ctrl = new UpgradeStationController(); }
+    public UpgradeStationUI(Map selectedMap) { ctrl = new UpgradeStationController(); this.selectedMap = selectedMap; }
 
     /**
      * Returns the controller used to upgrade Stations.
@@ -42,7 +44,7 @@ public class UpgradeStationUI implements Runnable{
         System.out.println("\n\n--- Upgrade Station ------------------------");
         requestData();
 
-        if (stationName != null && buildingType != (null)) {
+        if (station != null && buildingType != (null)) {
             submitData();
         }
     }
@@ -52,7 +54,7 @@ public class UpgradeStationUI implements Runnable{
      * Prints a success or failure message based on the result.
      */
     private void submitData() {
-        Optional<Building> building = Optional.ofNullable(getUpgradeStationController().upgradeStation(stationName, buildingType));
+        Optional<Building> building = Optional.ofNullable(getUpgradeStationController().upgradeStation(station, buildingType));
 
         if (building.isPresent()) {
             System.out.println("\nBuilding successfully created!");
@@ -65,10 +67,10 @@ public class UpgradeStationUI implements Runnable{
      * Asks the user for station name and building type.
      */
     private void requestData() {
-        stationName = requestStation();
+        station = requestStation();
 
-        if (stationName != null){
-            buildingType = requestBuildingType(stationName);
+        if (station != null){
+            buildingType = requestBuildingType(station);
         }
     }
 
@@ -80,35 +82,56 @@ public class UpgradeStationUI implements Runnable{
      *
      * @return the validated station name
      */
-    private String requestStation() {
-        Scanner sc = new Scanner(System.in);
-        List<Station> availableStations = displayStationList();
-        String stationName; boolean found = false;
-
-        if (availableStations.isEmpty()) {
-            System.out.println("No Available Stations found.");
+    private Station requestStation() {
+        List<Station> owned = selectedMap.getStations().stream()
+                .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail()))
+                .collect(Collectors.toList());
+        if (owned.isEmpty()) {
+            System.out.println("You have no stations on this map.");
             return null;
         }
 
-        System.out.println(availableStations);
-        System.out.print("Enter Station Name: ");
+        System.out.println("Your stations:");
+        for (Station s : owned) {
+            System.out.println(" - " + s.getName() +
+                    " (center: " + s.getX() + "," + s.getY() + ") - type: " + s.getType());
+        }
 
-        do {
-            stationName = sc.nextLine().trim();
+        Scanner sc = new Scanner(System.in);
+        Station chosen = null;
 
-            for (int i = 0; i < availableStations.size(); i++) {
-                if (availableStations.get(i).getName().equalsIgnoreCase(stationName)) {
-                    found = true;
+        while (chosen == null) {
+            System.out.print("Enter station name: ");
+            String name = sc.nextLine().trim();
+            List<Station> matches = owned.stream()
+                    .filter(s -> s.getName().equalsIgnoreCase(name))
+                    .collect(Collectors.toList());
+
+            if (matches.isEmpty()) {
+                System.out.println("Invalid name. Please try again.");
+                continue;
+            }
+
+            if (matches.size() == 1) {
+                chosen = matches.get(0);
+            } else {
+                System.out.println("Multiple stations named '" + name + "'.");
+                System.out.print("Enter center X coordinate: ");
+                int cx = Integer.parseInt(sc.nextLine().trim());
+                System.out.print("Enter center Y coordinate: ");
+                int cy = Integer.parseInt(sc.nextLine().trim());
+                for (Station s : matches) {
+                    if (s.getX() == cx && s.getY() == cy) {
+                        chosen = s;
+                        break;
+                    }
+                }
+                if (chosen == null) {
+                    System.out.println("No station found at those coordinates. Please try again.");
                 }
             }
-
-            if (!found) {
-                System.out.print("Invalid Station. Try again: ");
-            }
-
-        } while (!found);
-
-        return stationName;
+        }
+        return chosen;
     }
 
     /**
@@ -119,21 +142,24 @@ public class UpgradeStationUI implements Runnable{
      *
      * @return the validated building type
      */
-    private String requestBuildingType(String stationName) {
+    private String requestBuildingType(Station station) {
         Scanner sc = new Scanner(System.in);
         String buildingType;
         String[] validTypes = {"telegraph" , "telephone", "small cafe", "large cafe", "customs", "post office", "small hotel", "large hotel", "silo", "liquid storage"};
         int[] costs = {COST_TELEGRAPH, COST_TELEPHONE, COST_SCAFE, COST_LCAFE, COST_CUSTOMS, COST_POFFICE, COST_SHOTEL, COST_LHOTEL, COST_SILO, COST_LSTORAGE};
         boolean valid = false; int cost = 0;
 
-        System.out.print("Enter Available Building Type (Telegraph, Telephone, Small Cafe, Large Cafe, Customs, Post Office, Small Hotel, Large Hotel, Silo, Liquid Storage): ");
+        System.out.printf("Enter Available Building Type\n" +
+                "(Telegraph (%d), Telephone (%d), Small Cafe (%d), Large Cafe (%d), Customs (%d))\n" +
+                "(Post Office (%d), Small Hotel (%d), Large Hotel (%d), Silo (%d), Liquid Storage (%d)): ", COST_TELEGRAPH, COST_TELEPHONE,
+                COST_SCAFE, COST_LCAFE, COST_CUSTOMS, COST_POFFICE, COST_SHOTEL, COST_LHOTEL, COST_SILO, COST_LSTORAGE);
 
         do {
 
             buildingType = sc.nextLine().trim().toLowerCase();
 
             for (int i = 0; i < validTypes.length; i++) {
-                if (buildingType.equals(validTypes[i]) && !ctrl.verifyIfBuildingExists(stationName, buildingType) && currentUser.getBudget() >= costs[i]) {
+                if (buildingType.equals(validTypes[i]) && !ctrl.verifyIfBuildingExists(station, buildingType) && currentUser.getBudgetValue() >= costs[i]) {
                     valid = true;
                     cost = costs[i];
                 } else if (buildingType == null) {
@@ -143,13 +169,13 @@ public class UpgradeStationUI implements Runnable{
 
             if (!valid) {
                 System.out.print("Invalid input. Building type doesn't exist or Player doesn't have enough budget. Please try again: ");
-            } else if (ctrl.verifyIfBuildingExists(stationName, buildingType)) {
-                System.out.print(buildingType + " already exists in station " + stationName + ". Please try again: ");
+            } else if (ctrl.verifyIfBuildingExists(station, buildingType)) {
+                System.out.print(buildingType + " already exists in station " + station.getName() + ". Please try again: ");
             }
 
-        } while (!valid || ctrl.verifyIfBuildingExists(stationName, buildingType));
+        } while (!valid || ctrl.verifyIfBuildingExists(station, buildingType));
 
-        currentUser.setBudget(new Budget(currentUser.getBudget() - cost));
+        currentUser.setBudget(new Budget(currentUser.getBudgetValue() - cost));
 
         return buildingType;
     }

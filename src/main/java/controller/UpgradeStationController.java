@@ -2,6 +2,7 @@ package controller;
 
 import domain.Building;
 import domain.Map;
+import domain.Station;
 import repository.BuildingRepository;
 import repository.Repositories;
 
@@ -45,12 +46,12 @@ public class UpgradeStationController {
     /**
      * Upgrades a station with the given name and building type.
      *
-     * @param stationName the name of the station to be upgraded
+     * @param station the name of the station to be upgraded
      * @param buildingType the type of building to be added to the station
      * @return the created Building instance for the station
      */
-    public Building upgradeStation(String stationName, String buildingType) {
-        Building building = new Building(stationName, buildingType);
+    public Building upgradeStation(Station station, String buildingType) {
+        Building building = new Building(station, buildingType);
         getBuildingRepository().add(building);
         return building;
     }
@@ -67,8 +68,8 @@ public class UpgradeStationController {
      *
      * @return true if it does or false if otherwise.
      */
-    public boolean verifyIfBuildingExists(String stationName, String buildingType) {
-        if (getBuildings().stream().anyMatch(station -> station.getStationName().equals(stationName)) &&
+    public boolean verifyIfBuildingExists(Station station, String buildingType) {
+        if (getBuildings().stream().anyMatch(s -> s.getStation().equals(station)) &&
                 getBuildings().stream().anyMatch(type -> type.getBuildingType().equals(buildingType))) {
             return true;
         }

@@ -7,17 +7,17 @@ package domain;
  * </p>
  */
 public class Building {
-    private final String stationName;
+    private final Station station;
     private final String buildingType;
 
     /**
      * Constructs a new Map instance with the specified name and dimensions.
      *
-     * @param stationName the name of the associated station
+     * @param station the name of the associated station
      * @param buildingType the type of the building
      */
-    public Building(String stationName, String buildingType) {
-        this.stationName = stationName;
+    public Building(Station station, String buildingType) {
+        this.station = station;
         this.buildingType = buildingType;
     }
 
@@ -26,8 +26,8 @@ public class Building {
      *
      * @return the station's name
      */
-    public String getStationName() {
-        return stationName;
+    public Station getStation() {
+        return station;
     }
 
     /**

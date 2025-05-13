@@ -68,7 +68,7 @@ public class BuildStationUI implements Runnable {
                 return;
         }
 
-        if (user.getBudget() < cost) {
+        if (user.getBudgetValue() < cost) {
             System.out.println("Insufficient funds. You have " + user.getBudget() + ", but this station costs " + cost + ".");
             return;
         }

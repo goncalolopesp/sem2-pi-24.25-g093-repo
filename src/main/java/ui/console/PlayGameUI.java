@@ -40,12 +40,12 @@ public class PlayGameUI implements Runnable {
         List<MenuItem> options = new ArrayList<>();
         options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
         options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
-        options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI()));
+        options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap)));
         int option;
         do {
             displayMapData(selectedMap);
             if (currentUser != null) {
-                System.out.println("Your budget is: " + currentUser.getBudget());
+                System.out.println("Your budget is: " + currentUser.getBudgetValue());
             }
             option = Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------");
             if (option >= 0 && option < options.size()) {

@@ -41,7 +41,7 @@ public class CreateStationController {
             default:
                 return Error.INVALID_TYPE;
         }
-        if (user.getBudget() < cost) return Error.INSUFFICIENT_FUNDS;
+        if (user.getBudgetValue() < cost) return Error.INSUFFICIENT_FUNDS;
 
         int origX = x;
         int origY = y;
@@ -117,7 +117,7 @@ public class CreateStationController {
         Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
-        user.setBudget(new domain.Budget(user.getBudget() - cost));
+        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
         return Error.OK;
     }
 
@@ -215,7 +215,7 @@ public class CreateStationController {
         Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
-        user.setBudget(new domain.Budget(user.getBudget() - cost));
+        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
         return Error.OK;
     }
 

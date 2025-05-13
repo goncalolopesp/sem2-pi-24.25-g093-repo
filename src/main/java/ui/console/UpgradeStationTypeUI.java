@@ -92,7 +92,7 @@ public class UpgradeStationTypeUI implements Runnable {
             orientation = station.getOrientation();
         }
 
-        int budget = CurrentUser.getInstance().getUser().getBudget();
+        int budget = CurrentUser.getInstance().getUser().getBudgetValue();
         if (budget < cost) {
             System.out.println("Insufficient budget. Required: " + cost + ", Available: " + budget);
             return;
