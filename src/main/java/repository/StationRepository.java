@@ -29,4 +29,12 @@ public class StationRepository {
     public List<Station> getStations() {
         return List.copyOf(stations);
     }
+
+    /**
+     * Removes a certain station from the list of all the stations.
+     */
+    public void removeStation(Station station) {
+        stations.remove(station);
+    }
+
 }

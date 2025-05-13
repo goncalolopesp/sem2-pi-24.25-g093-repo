@@ -39,7 +39,8 @@ public class PlayGameUI implements Runnable {
 
         List<MenuItem> options = new ArrayList<>();
         options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
-        options.add(new MenuItem("Upgrade A Station", new UpgradeStationUI()));
+        options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
+        options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI()));
         int option;
         do {
             displayMapData(selectedMap);

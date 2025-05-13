@@ -121,6 +121,104 @@ public class CreateStationController {
         return Error.OK;
     }
 
+    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation,int cost) {
+        Station.Type type;
+        try {
+            type = Station.Type.valueOf(typeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Error.INVALID_TYPE;
+        }
+        User user = CurrentUser.getInstance().getUser();
+        int capacity;
+        switch (type) {
+            case DEPOT:
+                capacity = CAP_DEPOT; break;
+            case STATION:
+                capacity = CAP_STATION; break;
+            case TERMINAL:
+                capacity = CAP_TERMINAL; break;
+            default:
+                return Error.INVALID_TYPE;
+        }
+
+        int origX = x;
+        int origY = y;
+        int centerX, centerY;
+        int areaW, areaH;
+
+        int difx= 0,dify = 0;
+        if (type == Station.Type.STATION) {
+            int dx = 0,dy = 0;
+            areaW = areaH = 4;
+            if(orientation == Orientation.NE) dx = 1;
+            else if(orientation == Orientation.SW) dy = 1;
+            else if(orientation == Orientation.SE){
+                dx=1;
+                dy=1;
+            }
+            origX += dx;
+            origY += dy;
+            centerX = origX;
+            centerY = origY;
+            difx = dx;
+            dify=dy;
+        }  else {
+            areaW = (type == Station.Type.DEPOT ? 3 : 5);
+            areaH = areaW;
+            centerX = origX;
+            centerY = origY;
+        }
+        int originX = centerX - (areaW - 1) / 2;
+        int originY = centerY - (areaH - 1) / 2;
+        if (originX < 1 || originY < 1 || originX + areaW - 1 > map.getWidth() || originY + areaH - 1 > map.getHeight()) {
+            return Error.INVALID_COORDINATES;
+        }
+        List<City> cities = new DisplayMapController().getCities().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        for (int dx = 0; dx < areaW; dx++) {
+            for (int dy = 0; dy < areaH; dy++) {
+                int cx = originX + dx;
+                int cy = originY + dy;
+                boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
+                boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
+                        .anyMatch(b -> b.getX() == cx && b.getY() == cy);
+                if (onCity || onBlock) return Error.OVERBUILD;
+                String owner = user.getEmail();
+                for (Station s : stationRepo.getStations()) {
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    int sw, sh, sox, soy;
+                    if (s.getType() == Station.Type.STATION) {
+                        sw = sh = 4;
+                        int sbX = s.getX();
+                        int sbY = s.getY();
+                        int sdx = (s.getOrientation() == Orientation.NE || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        int sdy = (s.getOrientation() == Orientation.SW || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        sox = sbX + sdx - 1;
+                        soy = sbY + sdy - 1;
+                    } else {
+                        sw = (s.getType() == Station.Type.DEPOT ? 3 : 5);
+                        sh = sw;
+                        sox = s.getX() - sw/2;
+                        soy = s.getY() - sh/2;
+                    }
+                    if (cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh) return Error.OVERBUILD;
+                }
+            }
+        }
+        final int nameRefX = origX - difx;
+        final int nameRefY = origY - dify;
+        String name = cities.stream()
+                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
+                .map(City::getName)
+                .orElse("Unknown") + "-" + type.name();
+        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,origX, origY, orientation);
+        stationRepo.addStation(st);
+        map.getStations().add(st);
+        user.setBudget(new domain.Budget(user.getBudget() - cost));
+        return Error.OK;
+    }
+
     public List<Station> getStations() {
         return stationRepo.getStations();
     }
