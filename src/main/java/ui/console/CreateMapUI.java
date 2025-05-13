@@ -72,12 +72,17 @@ public class CreateMapUI implements Runnable{
      */
     private int requestHeight() {
         Scanner sc = new Scanner(System.in);
-        int h;
+        int h = 0;
 
         System.out.print("Enter Map Height: ");
 
         do {
-            h = sc.nextInt();
+            String input = sc.nextLine().trim();
+            try {
+                h = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
+            }
             if (h <= 0 || h > 256) {
                 System.out.print("Invalid height. Must be positive and below 256. Try again: ");
             }
@@ -96,12 +101,17 @@ public class CreateMapUI implements Runnable{
      */
     private int requestWidth() {
         Scanner sc = new Scanner(System.in);
-        int w;
+        int w = 0;
 
         System.out.print("Enter Map Width: ");
 
         do {
-            w = sc.nextInt();
+            String input = sc.nextLine().trim();
+            try {
+                w = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
+            }
             if (w <= 0 || w > 256) {
                 System.out.print("Invalid width. Must be positive and below 256. Try again: ");
             }
@@ -122,13 +132,18 @@ public class CreateMapUI implements Runnable{
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Map Name: ");
         String mapName;
+        String pattern = "^[^\\\\/:*?\"<>|\\r\\n]+$";
 
         do {
             mapName = sc.nextLine();
             if (!ctrl.checkNameUniqueness(mapName)){
                 System.out.print("\nName not unique. Try again: ");
+            } else if (!mapName.matches(pattern)) {
+                System.out.print("\nInvalid name. Must contain only alphanumeric characters and spaces. Try again: ");
+            } else if (mapName.isEmpty()) {
+                System.out.print("\nName cannot be empty. Try again: ");
             }
-        } while(!ctrl.checkNameUniqueness(mapName));
+        } while(!ctrl.checkNameUniqueness(mapName) || !mapName.matches(pattern) || mapName.isEmpty());
 
         return mapName.trim();
     }
