@@ -119,7 +119,12 @@ public class CreateScenarioUI implements Runnable {
         System.out.print("Enter Starting Year (Must be equal or higher than 1804 and lower than 2025): ");
 
         do{
-            timePeriod[0] = sc.nextInt();
+            String input = sc.nextLine().trim();
+            try {
+                timePeriod[0] = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
+            }
             if (timePeriod[0] < 1804 || timePeriod[0] >= 2025) {
                 System.out.print("Starting Year must be equal or higher than 1804 and lower than 2025. Try again: ");
             }
@@ -128,7 +133,12 @@ public class CreateScenarioUI implements Runnable {
         System.out.print("Enter Final Year (Must be equal or lower than 2025): ");
 
         do{
-            timePeriod[1] = sc.nextInt();
+            String input = sc.nextLine().trim();
+            try {
+                timePeriod[1] = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
+            }
             if (timePeriod[1] > 2025 || timePeriod[1] <= timePeriod[0]) {
                 System.out.print("Final Year must be higher than the Starting Year and equal or lower than 2025. Try again: ");
             }
@@ -145,10 +155,10 @@ public class CreateScenarioUI implements Runnable {
     private List<String> requestTechnologicalRestrictions() {
         Scanner sc = new Scanner(System.in);
         List<String> availableTypes = new ArrayList<>();
-        String[] validTypes = {"steam", "diesel", "electric"};
+        String[] validTypes = {"none", "steam", "diesel", "electric"};
         boolean valid;
 
-        System.out.print("Enter Available Locomotive Types (comma-separated: steam, diesel, electric): ");
+        System.out.print("Enter Available Locomotive Types (comma-separated: none, steam, diesel, electric): ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");
@@ -158,7 +168,7 @@ public class CreateScenarioUI implements Runnable {
                 String item = input[i];
 
                 for (int j = 0; j < validTypes.length; j++) {
-                    if (item.equalsIgnoreCase(validTypes[j])) {
+                    if (item.equalsIgnoreCase(validTypes[j]) && !availableTypes.contains("none")) {
                         availableTypes.add(validTypes[j]); // Store the normalized lowercase version
                     } else {
                         valid = false;
@@ -185,10 +195,10 @@ public class CreateScenarioUI implements Runnable {
     private List<String> requestHistoricalRestrictions() {
         Scanner sc = new Scanner(System.in);
         List<String> historicalEvents = new ArrayList<>();
-        String[] validEvents = {"vaccination campaign", "school program"};
+        String[] validEvents = {"none", "vaccination campaign", "school program"};
         boolean valid;
 
-        System.out.print("Enter Historical Events (comma-separated: vaccination campaign, school program): ");
+        System.out.print("Enter Historical Events (comma-separated: none, vaccination campaign, school program): ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");
@@ -198,7 +208,7 @@ public class CreateScenarioUI implements Runnable {
                 String item = input[i];
 
                 for (int j = 0; j < validEvents.length; j++) {
-                    if (item.equalsIgnoreCase(validEvents[j])) {
+                    if (item.equalsIgnoreCase(validEvents[j]) && !historicalEvents.contains("none")) {
                         historicalEvents.add(validEvents[j]); // Store the normalized lowercase version
                     } else {
                         valid = false;
