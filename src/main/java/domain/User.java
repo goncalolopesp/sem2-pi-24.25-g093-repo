@@ -20,7 +20,8 @@ public class User {
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public String getRoleId() { return roleId; }
-    public int getBudget() { return budget.getBudget(); }
+    public int getBudgetValue() { return budget.getBudget(); }
+    public Budget getBudget() { return budget; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
