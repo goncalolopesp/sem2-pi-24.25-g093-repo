@@ -1,0 +1,38 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Employee
+participant ":BuyLocomotiveUI" as BuyLocomotiveUI
+
+activate Employee
+
+activate BuyLocomotiveUI
+
+create ":BuyLocomotiveController" as BuyLocomotiveController
+
+BuyLocomotiveUI --> BuyLocomotiveController : create
+
+participant "locomotiveRepository\n:LocomotiveRepository" as locomotiveRepository
+
+activate BuyLocomotiveController
+
+BuyLocomotiveController --> BuyLocomotiveController : getBudget()
+
+BuyLocomotiveController --> locomotiveRepository : getPrice(locomotive)
+activate locomotiveRepository
+locomotiveRepository --> BuyLocomotiveController : price of the locomotive
+deactivate locomotiveRepository
+
+BuyLocomotiveController --> BuyLocomotiveUI : bought locomotive
+
+deactivate BuyLocomotiveController
+
+BuyLocomotiveUI --> Employee : Success Message
+
+deactivate BuyLocomotiveUI
+
+@enduml
