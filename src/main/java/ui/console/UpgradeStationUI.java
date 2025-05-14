@@ -150,8 +150,8 @@ public class UpgradeStationUI implements Runnable{
         boolean valid = false; int cost = 0;
 
         System.out.printf("Enter Available Building Type\n" +
-                "(Telegraph (%d), Telephone (%d), Small Cafe (%d), Large Cafe (%d), Customs (%d))\n" +
-                "(Post Office (%d), Small Hotel (%d), Large Hotel (%d), Silo (%d), Liquid Storage (%d)): ", COST_TELEGRAPH, COST_TELEPHONE,
+                        "(Telegraph (%d), Telephone (%d), Small Cafe (%d), Large Cafe (%d), Customs (%d))\n" +
+                        "(Post Office (%d), Small Hotel (%d), Large Hotel (%d), Silo (%d), Liquid Storage (%d)): ", COST_TELEGRAPH, COST_TELEPHONE,
                 COST_SCAFE, COST_LCAFE, COST_CUSTOMS, COST_POFFICE, COST_SHOTEL, COST_LHOTEL, COST_SILO, COST_LSTORAGE);
 
         do {
