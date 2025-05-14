@@ -34,8 +34,8 @@ public class StationRepository {
     /**
      * Removes a certain station from the list of all the stations.
      */
-    public void removeStation(Station station) {
-        stations.remove(station);
+    public boolean removeStation(Station station) {
+        return stations.remove(station);
     }
 
 }
