@@ -25,6 +25,7 @@ public class StationRepository {
 
     /**
      * Returns a defensive copy of all stations.
+     * @return unmodifiable list of stored Station objects
      */
     public List<Station> getStations() {
         return List.copyOf(stations);

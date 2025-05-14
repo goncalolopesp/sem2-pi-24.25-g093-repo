@@ -1,4 +1,3 @@
-// File: ui/console/UpgradeStationTypeUI.java
 package ui.console;
 
 import domain.CurrentUser;
@@ -13,15 +12,24 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * UI for upgrading a station's type, based on current station type and budget.
+ * Launches the user interface responsible for upgrading the type of a station.
  */
 public class UpgradeStationTypeUI implements Runnable {
     private final Map selectedMap;
 
+    /**
+     * Gets the selected map.
+     */
     public UpgradeStationTypeUI(Map selectedMap) {
         this.selectedMap = selectedMap;
     }
 
+    /**
+     * Runs the "UpgradeStationType" user interface.
+     * <p>
+     * Asks for the name of the station that will be upgraded. According to the type, will validate the possible upgrades, and will upgrade if possible.
+     * </p>
+     */
     @Override
     public void run() {
         Station station = requestStation();
@@ -108,7 +116,8 @@ public class UpgradeStationTypeUI implements Runnable {
     /**
      * Prompts the player to select one of their stations by name,
      * listing all owned stations with center coordinates.
-     * If duplicate names exist, asks for coordinates to disambiguate.
+     * If duplicate names exist, asks for coordinates.
+     * @return the selected station, or null if none was selected
      */
     private Station requestStation() {
         List<Station> owned = selectedMap.getStations().stream()

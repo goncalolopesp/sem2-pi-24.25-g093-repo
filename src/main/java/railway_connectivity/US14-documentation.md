@@ -32,6 +32,7 @@ The purpose of this User Story is to determine an **Eulerian circuit**—a cycle
     - Builds adjacency map
     - Checks if every vertex has an even degree
     - Runs a simplified version of the Fleury Algorithm: removes the first edge until none remain
+    - Does the graphical representation of the circuit, using Graphviz
 
 3. **verifyConnected(String v, List vertices, List<List> adjLists, List vis, List<String[]> edges)**
     - Ensures that the graph is a connected one
@@ -57,7 +58,7 @@ The purpose of this User Story is to determine an **Eulerian circuit**—a cycle
     1. Selects the first neighbor in the adjacency list
     2. Removes that edge from both lists
     3. Moves to the neighbor station
-9. Print the final circuit (the sequence of stations, from the starting point to the finish point)  
+9. Does the graphical representation of the circuit, using Graphviz  
 
 ---
 
