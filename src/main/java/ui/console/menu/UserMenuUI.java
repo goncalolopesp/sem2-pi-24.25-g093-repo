@@ -10,7 +10,7 @@ public class UserMenuUI {
 
     public void run() {
         List<MenuItem> options = new ArrayList<MenuItem>();
-        options.add(new MenuItem("Play Game", new PlayGameUI()));
+        options.add(new MenuItem("Play Game", new SimulationUI()));
         int option = 0;
         do {
             option = Utils.showAndSelectIndex(options, "\n\n--- PLAYER MENU --------------------------");

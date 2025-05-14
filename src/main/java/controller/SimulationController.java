@@ -1,83 +1,19 @@
-package ui.console;
+package controller;
 
-import controller.CreateMapController;
-import controller.CreateScenarioController;
-import controller.DisplayMapController;
-import domain.Map;
-import domain.Scenario;
-import domain.City;
-import domain.HouseBlock;
-import domain.Station;
-import domain.CurrentUser;
-import domain.User;
+import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
-import ui.console.menu.MenuItem;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Launches the user interface responsible for making the game playable.
- */
-public class PlayGameUI implements Runnable {
+public class SimulationController {
 
+    private final User currentUser = CurrentUser.getInstance().getUser();
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final DisplayMapController displayCtrl = new DisplayMapController();
-    private final User currentUser = CurrentUser.getInstance().getUser();
 
-    @Override
-    public void run() {
-        Map selectedMap = getMap();
-        Scenario selectedScenario = getScenario(selectedMap);
-
-
-        if (selectedMap == null || selectedScenario == null) {
-            System.out.println("No Map or Scenario chosen.");
-            return;
-        }
-
-        List<MenuItem> options = new ArrayList<>();
-        options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
-        options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
-        options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap)));
-        int option;
-        do {
-            displayMapData(selectedMap);
-            if (currentUser != null) {
-                System.out.println("Your budget is: " + currentUser.getBudgetValue());
-            }
-            option = Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------");
-            if (option >= 0 && option < options.size()) {
-                options.get(option).run();
-            }
-        } while (option != -1);
-    }
-
-    private Map getMap() {
-        List<Map> maps = mapCtrl.getMaps();
-        if (maps.isEmpty()) {
-            System.out.println("No maps available.");
-            return null;
-        }
-        int idx = Utils.showAndSelectIndex(maps, "Select a map:");
-        return maps.get(idx);
-    }
-
-    private Scenario getScenario(Map selectedMap) {
-        List<Scenario> scenarios = scenarioCtrl.getScenarios().stream()
-                .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
-                .collect(Collectors.toList());
-        if (scenarios.isEmpty()) {
-            System.out.println("No scenarios available for map '" + selectedMap.getMapName() + "'.");
-            return null;
-        }
-        int idx = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
-        return scenarios.get(idx);
-    }
-
-    private void displayMapData(Map map) {
+    public void displayMapData(Map map, User currentUser) {
         int width = map.getWidth();
         int height = map.getHeight();
         String[][] grid = new String[height + 1][width + 1];
@@ -87,6 +23,19 @@ public class PlayGameUI implements Runnable {
             }
         }
 
+        addCitiesToMap(grid, map);
+        addStationsToMap(grid, map, width, height);
+
+        // Print the grid
+        for (int y = 1; y <= height; y++) {
+            for (int x = 1; x <= width; x++) {
+                System.out.print(grid[y][x]);
+            }
+            System.out.println();
+        }
+    }
+
+    private void addCitiesToMap(String[][] grid, Map map) {
         // Draw cities and house blocks
         List<City> cities = displayCtrl.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
@@ -97,7 +46,9 @@ public class PlayGameUI implements Runnable {
                 grid[hb.getY()][hb.getX()] = "🏠";
             }
         }
+    }
 
+    private void addStationsToMap(String[][] grid, Map map, int width, int height) {
         // Draw stations owned by current user
         if (currentUser != null) {
             String owner = currentUser.getEmail();
@@ -152,14 +103,6 @@ public class PlayGameUI implements Runnable {
                 }
             }
         }
-
-        // Print the grid
-        for (int y = 1; y <= height; y++) {
-            for (int x = 1; x <= width; x++) {
-                System.out.print(grid[y][x]);
-            }
-            System.out.println();
-        }
     }
 
     private void paintArea(String[][] grid, int maxW, int maxH,
@@ -173,5 +116,27 @@ public class PlayGameUI implements Runnable {
                 }
             }
         }
+    }
+
+    public Map getMap() {
+        List<Map> maps = mapCtrl.getMaps();
+        if (maps.isEmpty()) {
+            System.out.println("No maps available.");
+            return null;
+        }
+        int idx = Utils.showAndSelectIndex(maps, "Select a map:");
+        return maps.get(idx);
+    }
+
+    public Scenario getScenario(Map selectedMap) {
+        List<Scenario> scenarios = scenarioCtrl.getScenarios().stream()
+                .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
+                .collect(Collectors.toList());
+        if (scenarios.isEmpty()) {
+            System.out.println("No scenarios available for map '" + selectedMap.getMapName() + "'.");
+            return null;
+        }
+        int idx = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
+        return scenarios.get(idx);
     }
 }
