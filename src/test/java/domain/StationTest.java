@@ -63,7 +63,19 @@ class StationTest {
     }
 
     @Test
+    void setCapacityOwned_SetsCorrectValue() {
+        station.setCapacityOwned(100);
+        assertEquals(100, station.getCapacityOwned());
+    }
+
+    @Test
     void getOrientation_ReturnsCorrectValue() {
         assertEquals(Station.Orientation.NE, station.getOrientation());
+    }
+
+    @Test
+    void printStation(){
+        String teste = station.toString();
+        assertEquals(teste,station.toString());
     }
 }

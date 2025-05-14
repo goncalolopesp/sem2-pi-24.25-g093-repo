@@ -1,4 +1,3 @@
-// CreateCityControllerTest.java
 package controller;
 
 import controller.CreateCityController;

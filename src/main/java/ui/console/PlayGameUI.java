@@ -32,6 +32,7 @@ public class PlayGameUI implements Runnable {
         Map selectedMap = getMap();
         Scenario selectedScenario = getScenario(selectedMap);
 
+
         if (selectedMap == null || selectedScenario == null) {
             System.out.println("No Map or Scenario chosen.");
             return;
