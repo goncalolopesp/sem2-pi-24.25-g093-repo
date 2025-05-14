@@ -72,7 +72,7 @@ public class SimulationUI implements Runnable {
         do {
             if (running.get()) {
                 // Game is running: show game actions
-                ctrl.displayMapData(selectedMap, currentUser);
+                ctrl.displayMapData(selectedMap);
                 if (currentUser != null) {
                     System.out.println("Your budget is: " + currentUser.getBudgetValue());
                 }

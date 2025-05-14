@@ -13,7 +13,7 @@ public class SimulationController {
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final DisplayMapController displayCtrl = new DisplayMapController();
 
-    public void displayMapData(Map map, User currentUser) {
+    public void displayMapData(Map map) {
         int width = map.getWidth();
         int height = map.getHeight();
         String[][] grid = new String[height + 1][width + 1];
