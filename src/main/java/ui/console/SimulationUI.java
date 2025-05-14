@@ -1,10 +1,7 @@
 package ui.console;
 
 import controller.SimulationController;
-import domain.Map;
-import domain.Scenario;
-import domain.CurrentUser;
-import domain.User;
+import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import ui.console.menu.MenuItem;
 
@@ -57,6 +54,7 @@ public class SimulationUI implements Runnable {
                 timePeriod.get().getAndAdd(0, (1));
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
                     System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ". Type your option: ");
+                    ctrl.payLocomotiveMaintenance();
                 }
             }
             if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
@@ -81,6 +79,8 @@ public class SimulationUI implements Runnable {
                     options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
                     options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
                     options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap)));
+                    options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
+                    options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();

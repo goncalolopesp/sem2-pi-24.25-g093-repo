@@ -3,6 +3,7 @@ package controller;
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -139,4 +140,36 @@ public class SimulationController {
         int idx = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
         return scenarios.get(idx);
     }
+
+    public void payLocomotiveMaintenance(){
+        boolean canPay = true;
+        int yearlyBudget = 0;
+        int yearlyManagementCost = 0;
+        List<Locomotive> canUse = new ArrayList<>();
+        for (Locomotive loc : currentUser.getLocomotives()){
+            yearlyBudget = loc.getFuelCost();
+            yearlyManagementCost = loc.getMaintenanceCost();
+            if ((yearlyManagementCost > currentUser.getBudgetValue())) {
+                canPay = false;
+            }else{
+                canPay = true;
+            }
+
+            if (canPay){
+                currentUser.getBudget().subtractBudget(yearlyManagementCost);
+                if (yearlyBudget > currentUser.getBudgetValue()) {
+                    loc.setAvailability(false);
+                }else{
+                    loc.setAvailability(true);
+                }
+                canUse.add(loc);
+                if (loc.getAvailability())
+                    currentUser.getBudget().subtractBudget(yearlyBudget);
+
+            }
+
+        }
+        currentUser.setLocomotives(canUse);
+    }
+
 }
