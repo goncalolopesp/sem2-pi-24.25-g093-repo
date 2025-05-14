@@ -1,5 +1,7 @@
 package domain;
 
+import java.util.*;
+
 public class User {
 
     String name;
@@ -7,6 +9,7 @@ public class User {
     String password;
     String roleId;
     Budget budget;
+    List<Locomotive> locomotives;
 
     public User(String name, String email, String password, String roleId, Budget Budget) {
         this.name = name;
@@ -14,6 +17,7 @@ public class User {
         this.password = password;
         this.roleId = roleId;
         this.budget = Budget;
+        this.locomotives = new ArrayList<>();
     }
 
     public String getName() { return name; }
@@ -22,11 +26,13 @@ public class User {
     public String getRoleId() { return roleId; }
     public int getBudgetValue() { return budget.getBudget(); }
     public Budget getBudget() { return budget; }
+    public List<Locomotive> getLocomotives() { return locomotives; }
 
     public void setName(String name) { this.name = name; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setRoleId(String roleId) { this.roleId = roleId; }
     public void setBudget(Budget budget) { this.budget = budget; }
+    public void setLocomotives(List<Locomotive> locomotives) { this.locomotives = locomotives; }
 
 }
