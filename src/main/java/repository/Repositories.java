@@ -26,9 +26,9 @@ public class Repositories {
         cityRepository = new CityRepository();
         scenarioRepository = new ScenarioRepository();
         authRepository = new AuthRepository();
-        stationRepository = new StationRepository();
         buildingRepository = new BuildingRepository();
         industryRepository = new IndustryRepository();
+        stationRepository = new StationRepository();
     }
 
     /**
