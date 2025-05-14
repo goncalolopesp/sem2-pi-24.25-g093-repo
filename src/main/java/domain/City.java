@@ -14,9 +14,8 @@ import java.util.List;
 public class City {
     private final String name;
     private final String mapName;
-    private final int centerX;
-    private final int centerY;
     private final List<HouseBlock> blocks = new ArrayList<>();
+    private final Location location;
 
     /**
      * Constructs a new City instance with the specified name, map, and center coordinates.
@@ -29,8 +28,7 @@ public class City {
     public City(String name, String mapName, int centerX, int centerY) {
         this.name = name;
         this.mapName = mapName;
-        this.centerX = centerX;
-        this.centerY = centerY;
+        this.location = new Location(centerX, centerY);
     }
 
     /**
@@ -50,13 +48,16 @@ public class City {
      *
      * @return the x-coordinate
      */
-    public int getCenterX() { return centerX; }
+    public int getCenterX() {
+        return location.getX(); }
     /**
      * Returns the y-coordinate of the city's center.
      *
      * @return the y-coordinate
      */
-    public int getCenterY() { return centerY; }
+    public int getCenterY() {
+        return location.getY(); }
+
     /**
      * Returns an unmodifiable view of the house blocks in the city.
      *

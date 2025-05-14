@@ -51,6 +51,29 @@ public class CreateCityController {
     }
 
     /**
+     * Validates the city name and map name for creating a new city.
+     *
+     * @param cityName the desired city name
+     * @param mapName  the name of the map to use
+     * @param x        the x-coordinate of the center
+     * @param y        the y-coordinate of the center
+     * @return true if both names are valid and coordinates are acceptable; false otherwise
+     */
+    public boolean validateCity(String cityName, String mapName, int x, int y) {
+        NameMapError nameError = validateNameMap(cityName, mapName);
+        if (nameError != NameMapError.OK) {
+            return false;
+        }
+
+        CenterError centerError = validateCenter(cityName, mapName, x, y);
+        if (centerError != CenterError.OK) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Validates the center coordinates for a new city on a map.
      *
      * @param name the city name (unused for validation but kept for symmetry)

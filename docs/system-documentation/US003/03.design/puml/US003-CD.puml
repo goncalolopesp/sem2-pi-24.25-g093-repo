@@ -1,0 +1,97 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+skinparam shadowing false
+
+class Editor {
+}
+
+class CreateCityUI {
+    - ctrl : CreateCityController
+    + run() : void
+}
+
+class CreateCityController {
+    - mapRepo : MapRepository
+    - cityRepo : CityRepository
+    + validateNameMap(name : String, map : String) : NameMapError
+    + validateCity(cityName : String, mapName : String, x : int, y : int) : boolean
+    + validateCenter(name : String, map : String, x : int, y : int) : CenterError
+    + validateBlock(map : String, b : HouseBlock) : BlockError
+    + createCity(name : String, map : String, x : int, y : int) : City
+    + addBlockManual(city : City, b : HouseBlock) : boolean
+    + assignBlocksAuto(city : City, count : int, sigma : double) : void
+}
+
+class City {
+    - name : String
+    - mapName : String
+    - blocks : List<HouseBlock>
+    - location : Location
+    + getName() : String
+    + getMapName() : String
+    + getCenterX() : int
+    + getCenterY() : int
+    + getBlocks() : List<HouseBlock>
+    + addBlockManual(b : HouseBlock) : void
+}
+
+class Map {
+    - mapName : String
+    - location : Location
+    - stations : List<Station>
+    - industries : List<Industry>
+    + getMapName() : String
+    + getWidth() : int
+    + getHeight() : int
+    + getStations() : List<Station>
+    + getIndustries() : List<Industry>
+    + placeIndustry(industry : Industry, positionX : int, positionY : int) : boolean
+}
+
+class HouseBlock {
+    - x : int
+    - y : int
+    + getX() : int
+    + getY() : int
+}
+
+class Location {
+    - x : int
+    - y : int
+    + getX() : int
+    + getY() : int
+}
+
+class CityRepository {
+    - cities : List<City>
+    + add(c : City) : void
+    + getCities() : List<City>
+    + isNameUnique(name : String, map : String) : boolean
+    + existsAtPosition(map : String, x : int, y : int) : boolean
+    + isBlockPositionUnique(map : String, b : HouseBlock) : boolean
+}
+
+class MapRepository {
+    + getMap(mapName : String) : Optional<Map>
+}
+
+class Repositories {
+    + getInstance() : Repositories
+    + getMapRepository() : MapRepository
+    + getCityRepository() : CityRepository
+}
+
+Editor --> CreateCityUI
+CreateCityUI --> CreateCityController
+CreateCityController --> City
+CreateCityController --> CityRepository
+CreateCityController --> MapRepository
+City --> HouseBlock
+City --> Location
+Map --> Location
+Map --> Station
+Map --> Industry
+Repositories --> MapRepository
+Repositories --> CityRepository
+@enduml

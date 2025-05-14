@@ -1,11 +1,110 @@
 @startuml
-'https://plantuml.com/sequence-diagram
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
 
 autonumber
 
-Alice -> Bob: Authentication Request
-Bob --> Alice: Authentication Response
+actor "Editor" as User
+participant "CreateCityUI" as CreateCityUI
+participant "CreateCityController" as CreateCityController
+participant ":Repositories" as RepositorySingleton
+participant "repositories\n:Repositories" as PLAT
+participant "MapRepository" as MapRepository
+participant "CityRepository" as CityRepository
+participant "City" as City
+activate User
 
-Alice -> Bob: Another authentication Request
-Alice <-- Bob: another authentication Response
+
+    User -> CreateCityUI :asks to create a new city
+        activate CreateCityUI
+
+        "PlaceCityUI" -> CreateCityController** : create
+        activate CreateCityController
+
+                        CreateCityController -> RepositorySingleton : getInstance()
+                        activate RepositorySingleton
+
+                            RepositorySingleton --> CreateCityController: repositories
+                        deactivate RepositorySingleton
+
+                        CreateCityController -> PLAT : getTaskCategoryRepository()
+                        activate PLAT
+
+                            PLAT --> CreateCityController: taskCategoryRepository
+                        deactivate PLAT
+                        CreateCityController -> PLAT : getCityRepository()
+                        activate PLAT
+
+                            PLAT --> CreateCityController: cityRepository
+                        deactivate PLAT
+
+        deactivate CreateCityController
+        "PlaceCityUI" -> CreateCityController : getMaps()
+        activate CreateCityController
+            CreateCityController -> MapRepository : getMaps()
+            activate MapRepository
+                MapRepository --> CreateCityController :  List of maps
+            deactivate MapRepository
+            CreateCityController --> CreateCityUI : List of maps
+        deactivate CreateCityController
+
+
+
+        CreateCityUI --> User : shows list of maps
+    deactivate CreateCityUI
+    User -> CreateCityUI :  chooses one map
+activate CreateCityUI
+    CreateCityUI --> User : requests city name and coordinates
+
+deactivate CreateCityUI
+    User -> CreateCityUI : types city name and coordinates
+    activate CreateCityUI
+        CreateCityUI -> CreateCityController : validateCity()
+        activate CreateCityController
+            CreateCityController -> "CityRepository" : validateCity()
+            activate CityRepository
+                CityRepository --> CreateCityController : success
+            deactivate CityRepository
+            CreateCityController --> CreateCityUI : success
+        deactivate CreateCityController
+        CreateCityUI --> User : requests if manual or automatic house blocks
+    deactivate CreateCityUI
+
+alt User chooses manual house blocks
+    User -> CreateCityUI : chooses manual house blocks
+    activate CreateCityUI
+        CreateCityUI --> User : requests number house blocks
+    deactivate CreateCityUI
+    User -> CreateCityUI : types number house blocks
+    activate CreateCityUI
+        CreateCityUI -> CreateCityController : validateBlock(String map, HouseBlock b)
+        activate CreateCityController
+            CreateCityController -> "CityRepository" : validateBlock(String map, HouseBlock b)
+            activate CityRepository
+                CityRepository --> CreateCityController : success
+            deactivate CityRepository
+            CreateCityController --> CreateCityUI : success
+        deactivate CreateCityController
+        CreateCityUI --> User : displays operation success
+    deactivate CreateCityUI
+end
+
+        User -> CreateCityUI : chooses automatic house blocks
+        activate "CreateCityUI"
+        CreateCityUI -> CreateCityController : assignBlocksAuto(City city, int count, double sigma)
+        activate CreateCityController
+            CreateCityController -> "City" : assignBlocksAuto(City city, int count, double sigma)
+            activate City
+                City --> CreateCityController : success
+            deactivate City
+            CreateCityController --> CreateCityUI : success
+            deactivate CreateCityController
+        CreateCityUI --> User : displays operation success
+
+    deactivate CreateCityUI
+
+
+
+
 @enduml
