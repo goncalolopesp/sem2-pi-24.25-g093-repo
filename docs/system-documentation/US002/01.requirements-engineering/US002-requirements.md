@@ -46,6 +46,7 @@ As an Editor, I want to add an industry in a position (X, Y) of the selected map
 
 ### 1.6. System Sequence Diagram (SSD)
 ![System Sequence Diagram](svg/US002-SSD.svg)
+
 **_Other alternatives might exist._**
 
 ### 1.7. Other Relevant Remarks

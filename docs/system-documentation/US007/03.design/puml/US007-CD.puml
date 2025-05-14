@@ -1,0 +1,45 @@
+@startuml US007-CD
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
+
+class StationsListUI {
+  + showStations()
+  + showDetails(stationId: int)
+}
+
+class StationsListController {
+    + showStations()
+    + showDetails(stationId: int)
+}
+
+class StationRepository {
+  + getStationData(stationId: int): Station
+  + getStations()
+}
+
+class BuildingRepository {
+    + getBuildingData(buildingId: int): Building
+}
+
+class Building {
+  - id: int
+  - name: String
+  - cost: int
+}
+
+class Station {
+  - id: int
+  - level: int
+  - building: Building
+}
+
+StationsListUI ..> StationsListController      : uses
+StationsListController ..> StationRepository   : uses
+StationsListController ..> BuildingRepository  : uses
+
+StationRepository --> Station       : returns
+BuildingRepository  --> Building     : returns
+
+@enduml

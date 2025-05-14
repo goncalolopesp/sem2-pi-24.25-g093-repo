@@ -1,0 +1,22 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Employee
+participant ":BuyLocomotiveUI" as BuyLocomotiveUI
+
+activate Employee
+
+Employee -> BuyLocomotiveUI : openLocomotiveForm()
+activate BuyLocomotiveUI
+
+BuyLocomotiveUI --> Employee : displayLocomotiveList(locomotiveList)
+
+Employee -> BuyLocomotiveUI : selectLocomotive(locomotive)
+
+BuyLocomotiveUI --> BuyLocomotiveUI : saveLocomotive()
+
+@enduml

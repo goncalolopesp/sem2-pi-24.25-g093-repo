@@ -12,11 +12,7 @@ import guru.nidi.graphviz.model.MutableNode;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
 public class main {
     static Scanner sc = new Scanner(System.in);
@@ -66,7 +62,7 @@ public class main {
             String op = sc.nextLine();
 
             if (op.equals("1")) {
-                System.out.println("Implementar aqui US13");
+                implementUS13(lines);
                 break;
             } else if (op.equals("2")) {
                 implementUS14(lines);
@@ -79,6 +75,73 @@ public class main {
             }
         }
         sc.close();
+    }
+
+    private static void implementUS13(File linesFile) throws FileNotFoundException {
+        // Load railway data
+        List<String[]> edges = loadEdges(linesFile);
+
+        // Menu for train type selection
+        System.out.println("Select train type:");
+        System.out.println("1. Steam");
+        System.out.println("2. Diesel");
+        System.out.println("3. Electric");
+        System.out.print("Train type: ");
+        String trainType = sc.nextLine().trim();
+
+        // Input source and destination stations
+        System.out.print("Enter source station: ");
+        String source = sc.nextLine().trim();
+        System.out.print("Enter destination station: ");
+        String destination = sc.nextLine().trim();
+
+        // Build adjacency list
+        Map<String, List<String>> graph = buildGraph(edges, trainType);
+
+        // Check connectivity
+        boolean canTravel = isConnected(graph, source, destination);
+        if (canTravel) {
+            System.out.println("The train can travel between " + source + " and " + destination + ".");
+        } else {
+            System.out.println("The train cannot travel between " + source + " and " + destination + ".");
+        }
+    }
+
+    private static Map<String, List<String>> buildGraph(List<String[]> edges, String trainType) {
+        Map<String, List<String>> graph = new HashMap<>();
+        for (String[] edge : edges) {
+            String from = edge[0];
+            String to = edge[1];
+            String type = edge[2]; // 0 = non-electrified, 1 = electrified
+
+            // Filter edges based on train type
+            if (trainType.equals("3") && type.equals("0")) continue; // Electric trains can't use non-electrified lines
+
+            graph.putIfAbsent(from, new ArrayList<>());
+            graph.putIfAbsent(to, new ArrayList<>());
+            graph.get(from).add(to);
+            graph.get(to).add(from);
+        }
+        return graph;
+    }
+
+    private static boolean isConnected(Map<String, List<String>> graph, String source, String destination) {
+        Set<String> visited = new HashSet<>();
+        return dfs(graph, source, destination, visited);
+    }
+
+    private static boolean dfs(Map<String, List<String>> graph, String current, String destination, Set<String> visited) {
+        if (current.equals(destination)) return true;
+        visited.add(current);
+
+        for (String neighbor : graph.getOrDefault(current, new ArrayList<>())) {
+            if (!visited.contains(neighbor)) {
+                if (dfs(graph, neighbor, destination, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static void implementUS14(File linesF) throws IOException {

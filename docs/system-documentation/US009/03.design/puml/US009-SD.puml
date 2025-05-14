@@ -8,8 +8,6 @@ autonumber
 actor "Player" as Employee
 participant ":BuyLocomotiveUI" as BuyLocomotiveUI
 
-'As A Player, I want to buy a locomotive
-
 activate Employee
 
 Employee -> BuyLocomotiveUI : asks to buy a locomotive
