@@ -1,0 +1,49 @@
+@startuml US006-SD-split
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant ":UpgradeStationUI"          as UpgradeStationUI
+
+
+activate Player
+
+Player -> UpgradeStationUI : requests station upgrade
+create ":UpgradeStationController" as UpgradeStationController
+activate UpgradeStationUI
+UpgradeStationUI -> UpgradeStationController : create()
+participant ":station\n:Station"         as Station
+
+UpgradeStationUI --> Player : requests station and upgrade option
+deactivate UpgradeStationUI
+
+Player -> UpgradeStationUI : selects station and building
+activate UpgradeStationUI
+UpgradeStationUI --> UpgradeStationUI : keepSelection(station, buildingType)
+activate UpgradeStationController
+
+UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
+ref over UpgradeStationController
+    Check availability for buildingType
+end ref
+ref over UpgradeStationController
+    Check budget for buildingType
+end ref
+ref over UpgradeStationController
+    Validate upgrade allowance for station and buildingType
+end ref
+
+UpgradeStationController -> Station : upgrade(buildingType)
+activate Station
+Station --> UpgradeStationController : upgradedStation
+UpgradeStationController --> UpgradeStationUI : upgradedStation
+deactivate UpgradeStationController
+destroy UpgradeStationController
+
+UpgradeStationUI --> Player : display "Upgrade applied successfully."
+deactivate UpgradeStationUI
+deactivate Player
+@enduml
