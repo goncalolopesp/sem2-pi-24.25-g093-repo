@@ -1,8 +1,6 @@
-import controller.AuthController;
-import controller.BuyLocomotiveController;
-import controller.CreateMapController;
-import controller.CreateScenarioController;
+import controller.*;
 import domain.Budget;
+import domain.City;
 import domain.CurrentUser;
 import repository.AuthRepository;
 import repository.LocomotiveRepository;
@@ -15,7 +13,7 @@ import java.util.Optional;
 
 public class Bootstrap {
     public void run() {
-        addUsers(); addMaps(); addScenarios(); createLocomotives();
+        addUsers(); addMaps(); addCities(); addScenarios(); createLocomotives();
     }
 
     private void addUsers() {
@@ -110,13 +108,23 @@ public class Bootstrap {
         createMapController.createMap("exampleMap", 50, 50);
     }
 
+    private void addCities() {
+        CreateCityController createCityController = new CreateCityController();
+        City city = createCityController.createCity("exampleCity", "exampleMap", 5, 7);
+        addHouseBlocks(createCityController, city);
+    }
+
+    private void addHouseBlocks(CreateCityController createCityController, City city) {
+        createCityController.assignBlocksAuto(city, 5, 2);
+    }
+
     private void addScenarios() {
         CreateScenarioController createScenarioController = new CreateScenarioController();
-        int[] timeRestrictions = {1974, 1978};
+        int[] timeRestrictions = {1870, 1880};
         List<String> historicalRestrictions = new ArrayList<>();
         historicalRestrictions.add("none");
         List<String> techRestrictions = new ArrayList<>();
-        techRestrictions.add("none");
+        techRestrictions.add("steam");
         createScenarioController.createScenario("exampleScenario", "exampleMap", timeRestrictions, techRestrictions, historicalRestrictions);
     }
 
