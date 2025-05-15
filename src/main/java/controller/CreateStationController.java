@@ -122,10 +122,13 @@ public class CreateStationController {
         }
         final int nameRefX = origX - difx;
         final int nameRefY = origY - dify;
+
         String name = cities.stream()
                 .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
                 .map(City::getName)
                 .orElse("Unknown") + "-" + type.name();
+
+
         Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
@@ -247,5 +250,9 @@ public class CreateStationController {
      */
     public List<Station> getStations() {
         return stationRepo.getStations();
+    }
+
+    public StationRepository getStationRepository() {
+        return stationRepo;
     }
 }

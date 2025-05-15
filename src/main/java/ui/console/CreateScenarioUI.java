@@ -155,10 +155,10 @@ public class CreateScenarioUI implements Runnable {
     private List<String> requestTechnologicalRestrictions() {
         Scanner sc = new Scanner(System.in);
         List<String> availableTypes = new ArrayList<>();
-        String[] validTypes = {"none", "steam", "diesel", "electric"};
+        String[] validTypes = {"steam", "diesel", "electric"};
         boolean valid;
 
-        System.out.print("Enter Available Locomotive Types (comma-separated: none, steam, diesel, electric): ");
+        System.out.print("Enter Available Locomotive Types (comma-separated: steam, diesel, electric): ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");

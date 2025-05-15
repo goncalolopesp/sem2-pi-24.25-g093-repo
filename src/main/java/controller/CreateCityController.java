@@ -171,5 +171,9 @@ public class CreateCityController {
             city.addBlockManual(hb);
         }
     }
+
+    public CityRepository getCityRepo() {
+        return cityRepo;
+    }
 }
 

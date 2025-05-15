@@ -38,4 +38,9 @@ public class Building {
     public String getBuildingType() {
         return buildingType;
     }
+
+    @Override
+    public String toString() {
+        return buildingType;
+    }
 }

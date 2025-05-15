@@ -1,9 +1,10 @@
 package repository;
 
 import domain.Building;
+import domain.Station;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BuildingRepository {
     private final List<Building> buildings;
@@ -22,6 +23,13 @@ public class BuildingRepository {
         if (validateBuilding(building)) {
             buildings.add(building);
         }
+    }
+
+    public void remove(Station station, String buildingType) {
+        buildings.removeIf(b ->
+                b.getStation().equals(station) &&
+                        b.getBuildingType().equalsIgnoreCase(buildingType)
+        );
     }
 
     /**

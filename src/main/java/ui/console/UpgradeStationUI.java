@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -21,13 +23,14 @@ public class UpgradeStationUI implements Runnable{
     private Station station;
     private String buildingType;
     private final Map selectedMap;
+    private final AtomicReference<AtomicIntegerArray> timePeriod;
     private static final int COST_TELEGRAPH = 250,  COST_TELEPHONE = 270;
     private static final int COST_SCAFE = 340, COST_LCAFE = 430;
     private static final int COST_CUSTOMS = 570, COST_POFFICE = 730;
     private static final int COST_SHOTEL = 940, COST_LHOTEL = 1170;
     private static final int COST_SILO = 1450, COST_LSTORAGE = 1750;
 
-    public UpgradeStationUI(Map selectedMap) { ctrl = new UpgradeStationController(); this.selectedMap = selectedMap; }
+    public UpgradeStationUI(Map selectedMap, AtomicReference<AtomicIntegerArray> timePeriod) { ctrl = new UpgradeStationController(); this.selectedMap = selectedMap; this.timePeriod = timePeriod; }
 
     /**
      * Returns the controller used to upgrade Stations.
@@ -146,29 +149,51 @@ public class UpgradeStationUI implements Runnable{
         Scanner sc = new Scanner(System.in);
         String buildingType;
         String[] validTypes = {"telegraph" , "telephone", "small cafe", "large cafe", "customs", "post office", "small hotel", "large hotel", "silo", "liquid storage"};
+
         int[] costs = {COST_TELEGRAPH, COST_TELEPHONE, COST_SCAFE, COST_LCAFE, COST_CUSTOMS, COST_POFFICE, COST_SHOTEL, COST_LHOTEL, COST_SILO, COST_LSTORAGE};
+
         boolean valid = false; int cost = 0;
 
         System.out.printf("Enter Available Building Type\n" +
-                        "(Telegraph (%d), Telephone (%d), Small Cafe (%d), Large Cafe (%d), Customs (%d))\n" +
+                        "(Telegraph (%d) (1855-1875), Telephone (%d) (1876-Present), Small Cafe (%d), Large Cafe (%d), Customs (%d))\n" +
                         "(Post Office (%d), Small Hotel (%d), Large Hotel (%d), Silo (%d), Liquid Storage (%d)): ", COST_TELEGRAPH, COST_TELEPHONE,
                 COST_SCAFE, COST_LCAFE, COST_CUSTOMS, COST_POFFICE, COST_SHOTEL, COST_LHOTEL, COST_SILO, COST_LSTORAGE);
 
         do {
 
             buildingType = sc.nextLine().trim().toLowerCase();
+            int currentYear = timePeriod.get().get(0);
 
             for (int i = 0; i < validTypes.length; i++) {
-                if (buildingType.equals(validTypes[i]) && !ctrl.verifyIfBuildingExists(station, buildingType) && currentUser.getBudgetValue() >= costs[i]) {
+                if (buildingType.equals(validTypes[i]) && !ctrl.verifyIfBuildingExists(station, buildingType)) {
                     valid = true;
                     cost = costs[i];
+
+                    if (currentYear < 1855 || currentYear > 1875) {
+                        if (buildingType.equals("telegraph")) {
+                            System.out.println("Telegraph can only be built in the year 1855-1875.");
+                            valid = false;
+                        }
+                        if (ctrl.verifyIfBuildingExists(station, "telegraph")) {
+                            ctrl.getBuildingRepository().remove(station, "telegraph");
+                        }
+
+                    } else if (currentYear < 1876 || currentYear > 2026) {
+                        if (buildingType.equals("telephone")) {
+                            System.out.println("Telephone can only be built in the year 1876-Present.");
+                            valid = false;
+                        }
+                        if (ctrl.verifyIfBuildingExists(station, "telephone")) {
+                            ctrl.getBuildingRepository().remove(station, "telephone");
+                        }
+                    }
                 } else if (buildingType == null) {
                     return null;
                 }
             }
 
             if (!valid) {
-                System.out.print("Invalid input. Building type doesn't exist or Player doesn't have enough budget. Please try again: ");
+                System.out.print("Invalid input. Building type doesn't exist/isn't available in the current year or Player doesn't have enough budget. Please try again: ");
             } else if (ctrl.verifyIfBuildingExists(station, buildingType)) {
                 System.out.print(buildingType + " already exists in station " + station.getName() + ". Please try again: ");
             }
@@ -176,6 +201,8 @@ public class UpgradeStationUI implements Runnable{
         } while (!valid || ctrl.verifyIfBuildingExists(station, buildingType));
 
         currentUser.setBudget(new Budget(currentUser.getBudgetValue() - cost));
+
+        System.out.println(ctrl.getBuildings());
 
         return buildingType;
     }
