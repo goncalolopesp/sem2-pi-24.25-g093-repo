@@ -20,6 +20,7 @@ activate CreateScenarioController
 
 participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
+participant "mapRepository\n:MapRepository" as mapRepository
 participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
 
 CreateScenarioController --> Repositories : getInstance()
@@ -27,6 +28,12 @@ activate Repositories
 
 Repositories --> CreateScenarioController : repositories
 deactivate Repositories
+
+CreateScenarioController --> Repo : getMapRepository()
+activate Repo
+
+Repo --> CreateScenarioController : mapRepository
+deactivate Repo
 
 CreateScenarioController --> Repo : getScenarioRepository()
 activate Repo
@@ -49,12 +56,12 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
         activate CreateScenarioController
 
-        CreateScenarioController --> scenarioRepository  : verifyIfMapExists(selectedMap)
-        activate scenarioRepository
+        CreateScenarioController --> mapRepository  : verifyIfMapExists(selectedMap)
+        activate mapRepository
 
-        scenarioRepository --> scenarioRepository : verifyIfMapExists(selectedMap)
-        scenarioRepository --> CreateScenarioController : return false
-        deactivate scenarioRepository
+        mapRepository --> mapRepository : verifyIfMapExists(selectedMap)
+        mapRepository --> CreateScenarioController : return false
+        deactivate mapRepository
 
         CreateScenarioController --> CreateScenarioUI : outputs "Map doesn't exist! Try again: "
         deactivate CreateScenarioController
@@ -69,12 +76,12 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
     CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
     activate CreateScenarioController
 
-    CreateScenarioController --> scenarioRepository  : verifyIfMapExists(selectedMap)
-    activate scenarioRepository
+    CreateScenarioController --> mapRepository  : verifyIfMapExists(selectedMap)
+    activate mapRepository
 
-    scenarioRepository --> scenarioRepository : verifyIfMapExists(selectedMap)
-    scenarioRepository --> CreateScenarioController : return true
-    deactivate scenarioRepository
+    mapRepository --> mapRepository : verifyIfMapExists(selectedMap)
+    mapRepository --> CreateScenarioController : return true
+    deactivate mapRepository
 
     CreateScenarioController --> CreateScenarioUI : returns selectedMap
     deactivate CreateScenarioController
