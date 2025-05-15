@@ -4,6 +4,7 @@ import controller.CreateCityController;
 import domain.City;
 import domain.HouseBlock;
 import domain.Map;
+import repository.CityRepository;
 import repository.Repositories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,6 +139,23 @@ class CreateCityControllerTest {
         repos.getCityRepository().add(city);
         controller.assignBlocksAuto(city, 5, 1.0);
         assertEquals(5, city.getBlocks().size());
+    }
+
+    @Test
+    void testValidateCity(){
+        var repos = Repositories.getInstance();
+        repos.getMapRepository().add(new Map("TestMap2", 100, 100));
+        String city2 = "City2";
+        boolean test = controller.validateCity(city2, "TestMap2",5,5);
+        assertEquals(true, test);
+    }
+
+    @Test
+    void testGetRepository(){
+        var repos = Repositories.getInstance();
+        repos.getCityRepository();
+        CityRepository cityRepo2 = controller.getCityRepo();
+        assertEquals(cityRepo2, repos.getCityRepository());
     }
 
 }

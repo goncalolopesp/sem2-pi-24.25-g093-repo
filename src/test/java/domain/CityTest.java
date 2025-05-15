@@ -50,4 +50,19 @@ class CityTest {
         assertThrows(UnsupportedOperationException.class, () -> blocks.add(new HouseBlock(0, 0)));
     }
 
+    @Test
+    void getTotalGeneretedCargo(){
+        assertEquals(0, city.getTotalGeneratedCargo());
+    }
+
+    @Test
+    void getTotalGeneretedPeople(){
+        assertEquals(0, city.getTotalGeneratedPeople());
+    }
+
+    @Test
+    void getTotalGeneretedMail(){
+        assertEquals(0, city.getTotalGeneratedMail());
+    }
+
 }

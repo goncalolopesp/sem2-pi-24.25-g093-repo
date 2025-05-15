@@ -49,7 +49,7 @@ class CreateStationControllerTest {
     void testInsufficientFunds(){
         Map map = new Map("Map1", 10, 10);
         CurrentUser.getInstance().setUser(user);
-        user.setBudget(new domain.Budget(user.getBudgetValue() - 1000));
+        user.setBudget(new Budget(user.getBudgetValue() - 1000));
         var err = controller.buildStation("DEPOT", map, 4, 4, null);
         assertEquals(CreateStationController.Error.INSUFFICIENT_FUNDS, err);
 
@@ -103,6 +103,13 @@ class CreateStationControllerTest {
                 .collect(Collectors.toList());
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void testGetRepo(){
+        StationRepository stationRepo2 = controller.getStationRepository();
+        assertEquals(stationRepo, stationRepo2);
+
     }
 
 }
