@@ -5,6 +5,7 @@ import pt.ipp.isep.dei.ui.console.utils.Utils;
 import repository.StationRepository;
 import ui.console.menu.MenuItem;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,8 +51,10 @@ public class SimulationController {
             if (running.get()) {
                 timePeriod.get().getAndAdd(0, (1));
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                    System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ". Type your option: ");
+                    System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ".");
+                    removeOutdatedLocomotives(timePeriod.get().get(0));
                     payLocomotiveMaintenance();
+                    System.out.print("Type your option: ");
                 }
             }
             if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
@@ -247,5 +250,17 @@ public class SimulationController {
 
         }
         currentUser.setLocomotives(canUse);
+    }
+
+    public void removeOutdatedLocomotives(int year) {
+        List<Locomotive> locomotives = new ArrayList<>();
+        for (Locomotive locomotive : currentUser.getLocomotives()) {
+            if (!(locomotive.getEndYearOfOperation() <= year)) {
+                locomotives.add(locomotive);
+            }else{
+                System.out.println("\n" + locomotive.getModelName() + " removed from user's locomotives since the end of its operation is " + year);
+            }
+        }
+        currentUser.setLocomotives(locomotives);
     }
 }
