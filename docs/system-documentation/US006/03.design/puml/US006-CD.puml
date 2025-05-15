@@ -4,39 +4,124 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam classAttributeIconSize 0
 
-class UpgradeStationUI {
-  + requestUpgrade(stationId: int)
-  + showBuildingOptions(buildings: List<Building>)
-  + storeUpgradeData(building: Building)
-  + showConfirmation()
-  + showSuccess(message: String)
+interface Runnable{
+    + run() : void
+}
+class UpgradeStationUI implements Runnable {
+  - currentUser : User
+  - station : Station
+  - buildingType : String
+  - selectedMap : Map
+  - COST_TELEGRAPH : final int
+  - COST_TELEPHONE : final int
+  - COST_SCAFE: final int
+  - COST_LCAFE : final int
+  - COST_CUSTOMS : final int
+  - COST_POFFICE : final int
+  - COST_SHOTEL : final int
+  - COST_LHOTEL : final int
+  - COST_SILO : final int
+  - COST_LSTORAGE : final int
+  + run() : void
+  + UpgradeStationUI(Map selectedMap)
+  + UpgradeStationController getUpgradeStationController()
+  + submitData() : void
+  + requestData() : void
+  + requestStation() : Station
+  + requestBuildingType() : String
+  + displayStationList() : List<Station>
 }
 
 class UpgradeStationController {
-  + upgradeRequest(stationId: int)
-  + applyUpgrade(stationId: int, building: Building): boolean
+  + UpgradeStationController()
+  + UpgradeStationController(BuildingRepository buildingRepository)
+  + getBuildingRepository() : BuildingRepository
+  + upgradeStation(Station station, String buildingType) : Building
+  + getBuildings() : List<Building>
+  + verifyIfBuildingExists(Station station, String buildingType) : boolean
 }
 
 class BuildingRepository {
-  + getAvailableBuildings(): List<Building>
+  + BuildingRepository()
+  + add(Building building) : void
+  + validateBuilding(Building building) : boolean
+  + getBuildings() : List<Building>
 }
 
 class StationRepository {
-  + getStationData(stationId: int): Station
-  + applyUpgrade(station: Station, building: Building): boolean
+  + addStation(Station s) : boolean
+  + getStations() : List<Station>
+  + removeStation(Station station) : boolean
 }
 
 class Building {
-  - id: int
-  - name: String
-  - cost: int
+  - station : Station
+  - buildingType : String
+  + Building(Station station, String buildingType)
+  + getStation() : Station
+  + getBuildingType() : String
 }
 
 class Station {
-  - id: int
-  - level: int
-  - building: Building
+    - type : Type
+    - name : String
+    - mapName : String
+    - ownerPlayer : String
+    - price : int
+    - capacity : int
+    - capacityOwned : int
+    - x : int
+    - y : int
+    - orientation : Orientation
+    + Station(Type type, String name, String mapName, String ownerPlayer,
+                         int price, int capacity, int capacityOwned, int x, int y, Orientation orientation)
+    + getType()   : Type
+    + getName() : String
+    + getMapName() : String
+    + getOwnerPlayer() : String
+    + getPrice() : int
+    + getCapacity() : int
+    + getCapacityOwned() : int
+    + setCapacityOwned(int capacityOwned) : void
+    + getX() : int
+    + getY() : int
+    + getOrientation() : Orientation
+    + toString() : String
+
 }
+
+class Player {
+    - name : String
+    - email : String
+    - password : String
+    - roleId : String
+    - budget : Budget
+    + getName() : String
+    + getEmail() : String
+    + getPassword() : String
+    + getRoleId() : String
+    + getBudgetValue() : String
+    + getBudget() : Budget
+    + getLocomotives() : List<Locomotive>
+    + setName(String name): void
+    + setEmail(String email) : void
+    + setPassword(String password) : void
+    + setRoleId(String roleId) : void
+    + setBudget(Budget budget) : void
+    + setLocomotives(List<Locomotive> locomotives) : void
+
+}
+
+class Budget {
+    + Budget(int budget)
+    + getBudget() : int
+    + setBudget(int budget) : void
+    + addBudget(int budget) : void
+    + subtractBudget (int budget) : void
+}
+
+Player ..> Budget : owns
+Player ..> UpgradeStationUI : requests
 
 UpgradeStationUI ..> UpgradeStationController     : uses
 UpgradeStationController ..> BuildingRepository   : uses

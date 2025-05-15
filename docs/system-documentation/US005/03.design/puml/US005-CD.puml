@@ -17,6 +17,7 @@ interface Runnable {
 class CreateStationController {
   + buildStation(String typeStr, Map map, int x, int y, Orientation orientation) : Error
   + buildStation(String typeStr, Map map, int x, int y, Orientation orientation,int cost) : Error
+  + getStationRepository() : StationRepository
 }
 
 class MapRepository {
@@ -73,6 +74,9 @@ class City {
     + getCenterY() : int
     + getBlocks() : List<HouseBlock>
     + addBlockManual() : void
+    + getTotalGeneratedPeople() : int
+    + getTotalGeneratedMail() : int
+    + getTotalGeneratedCargo() : int
 }
 
 class Station {
@@ -124,6 +128,36 @@ enum Error {
     INVALID_COORDINATES
 }
 
+class Player {
+    - name : String
+    - email : String
+    - password : String
+    - roleId : String
+    - budget : Budget
+    + getName() : String
+    + getEmail() : String
+    + getPassword() : String
+    + getRoleId() : String
+    + getBudgetValue() : String
+    + getBudget() : Budget
+    + getLocomotives() : List<Locomotive>
+    + setName(String name): void
+    + setEmail(String email) : void
+    + setPassword(String password) : void
+    + setRoleId(String roleId) : void
+    + setBudget(Budget budget) : void
+    + setLocomotives(List<Locomotive> locomotives) : void
+
+}
+
+class Budget {
+    + Budget(int budget)
+    + getBudget() : int
+    + setBudget(int budget) : void
+    + addBudget(int budget) : void
+    + subtractBudget (int budget) : void
+}
+
 BuildStationUI ..> CreateStationController : uses
 CreateStationController ..> MapRepository    : uses
 CreateStationController ..> CityRepository   : uses
@@ -134,5 +168,8 @@ CreateStationController ..> Error
 MapRepository --> Map : returns
 CityRepository --> City : returns
 StationRepository --> Station : creates
+Player ..> Budget : owns
+Player ..> Station : owns
+Player ..> BuildStationUI : requests
 
 @enduml
