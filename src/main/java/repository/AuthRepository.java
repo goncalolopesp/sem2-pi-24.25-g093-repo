@@ -47,7 +47,7 @@ public class AuthRepository {
         return false;
     }
 
-    private boolean doesUserExist(String email) {
+    public boolean doesUserExist(String email) {
         for (User user1 : users) {
             if (user1.getEmail().equals(email)) {
                 return true;

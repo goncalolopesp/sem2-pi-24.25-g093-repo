@@ -72,11 +72,15 @@ public class AuthUI implements Runnable {
         do {
             maxAttempts--;
             String id = Utils.readLineFromConsole("Enter UserId/Email: ");
-            String pwd = Utils.readLineFromConsole("Enter Password: ");
+            if (ctrl.doesUserExist(id)){
+                String pwd = Utils.readLineFromConsole("Enter Password: ");
 
-            success = ctrl.doLogin(id, pwd);
-            if (!success) {
-                System.out.println("Invalid UserId and/or Password. \n You have  " + maxAttempts + " more attempt(s).");
+                success = ctrl.doLogin(id, pwd);
+                if (!success) {
+                    System.out.println("Invalid UserId and/or Password. \n You have  " + maxAttempts + " more attempt(s).");
+                }
+            }else{
+                System.out.println("User does not exist");
             }
 
         } while (!success && maxAttempts > 0);

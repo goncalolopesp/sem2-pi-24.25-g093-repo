@@ -54,4 +54,8 @@ public class AuthController {
         return authRepo.getCurrentUserEmail();
     }
 
+    public boolean doesUserExist(String email) {
+        return authRepo.doesUserExist(email);
+    }
+
 }
