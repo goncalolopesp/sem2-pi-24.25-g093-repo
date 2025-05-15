@@ -4,53 +4,133 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam classAttributeIconSize 0
 
-class BuildStationUI {
-  + openBuildStationForm()
-  + displayForm()
-  + enterData(map, type, x, y)
-  + showSuccess(station: Station)
-  + displaySuccess()
+class BuildStationUI implements Runnable {
+  + buildStation(Map map)
+  + run () : void
+
 }
 
-class BuildStationController {
-  + buildStation(map: String, type: String, x: int, y: int): Station
+interface Runnable {
+    + run() : void
+}
+
+class CreateStationController {
+  + buildStation(String typeStr, Map map, int x, int y, Orientation orientation) : Error
+  + buildStation(String typeStr, Map map, int x, int y, Orientation orientation,int cost) : Error
 }
 
 class MapRepository {
-  + findMap(map: String): Map
+  + add(Map map) : void
+  + getMap(String name) : Optional<Map>
+  + validateMap(Map map) : boolean
+  + checkNameUniqueness(String name) : boolean
+  + getMaps() : List<Map>
 }
 
 class CityRepository {
-  + findClosestCity(map: Map, x: int, y: int): City
+  + add(City c) : void
+  + getCities() : List<City>
+  + isNameUnique(String name, String map) : boolean
+  + existsAtPosition(String map, int x, int y) : boolean
+  + isBlockPositionUnique(String map, HouseBlock b) : boolean
+  + validateBlock(String map, HouseBlock b) : CreateCityController.BlockError
 }
 
 class StationRepository {
-  + createStation(name: String, type: String, x: int, y: int, map: Map): Station
+  + addStation(Station s) : boolean
+  + getStations() : List<Station>
+  + removeStation(Station station) : boolean
 }
 
 class Map {
-  - id: int
-  - name: String
+    - mapName : String
+    - width : int
+    - height : int
+    - location : Location
+    - stations : List<Station>
+    - industries : List<Industry>
+    + Map(String mapName, int width, int height)
+    + getMapName() : String
+    + getWidth() : int
+    + getHeight() : int
+    + getStations() : List<Station>
+    + getIndustries() : List<Industry>
+    + placeIndustry(Industry industry, int positionX, int positionY) : boolean
+    + toString() : String
 }
 
 class City {
-  - id: int
-  - name: String
+    - name : String
+    - mapName : String
+    - centerX : int
+    - centerY : int
+    - blocks : List<HouseBlock>
+    - location : Location
+    + City(String name, String mapName, int centerX, int centerY)
+    + getName() : String
+    + getMapName() : String
+    + getCenterX() : int
+    + getCenterY() : int
+    + getBlocks() : List<HouseBlock>
+    + addBlockManual() : void
 }
 
 class Station {
-  - id: int
-  - name: String
-  - type: String
-  - x: int
-  - y: int
+    - type : Type
+    - name : String
+    - mapName : String
+    - ownerPlayer : String
+    - price : int
+    - capacity : int
+    - capacityOwned : int
+    - x : int
+    - y : int
+    - orientation : Orientation
+    + Station(Type type, String name, String mapName, String ownerPlayer,
+                         int price, int capacity, int capacityOwned, int x, int y, Orientation orientation)
+    + getType()   : Type
+    + getName() : String
+    + getMapName() : String
+    + getOwnerPlayer() : String
+    + getPrice() : int
+    + getCapacity() : int
+    + getCapacityOwned() : int
+    + setCapacityOwned(int capacityOwned) : void
+    + getX() : int
+    + getY() : int
+    + getOrientation() : Orientation
+    + toString() : String
+
 }
 
-BuildStationUI ..> BuildStationController : uses
-BuildStationController ..> MapRepository    : uses
-BuildStationController ..> CityRepository   : uses
-BuildStationController ..> StationRepository: uses
+enum  Type{
+    DEPOT
+    STATION
+    TERMINAL
+}
 
+enum  Orientation{
+    NE
+    SE
+    NW
+    SW
+}
+
+enum Error {
+    OK
+    INVALID_TYPE
+    INSUFFICIENT_FUNDS
+    OVERBUILD
+    INVALID_COORDINATES
+}
+
+BuildStationUI ..> CreateStationController : uses
+CreateStationController ..> MapRepository    : uses
+CreateStationController ..> CityRepository   : uses
+CreateStationController ..> StationRepository: uses
+Station ..> Type
+Station ..> Orientation
+CreateStationController ..> Error
 MapRepository --> Map : returns
 CityRepository --> City : returns
 StationRepository --> Station : creates

@@ -11,7 +11,7 @@ participant ":BuildStationUI" as BuildUI
 activate Player
 Player -> BuildUI : buildStationRequest()
 activate BuildUI
-create ":BuildStationController" as BuildController
+create ":CreateStationController" as BuildController
 BuildUI -> BuildController : create()
 activate BuildController
 participant "repositories\n:Repositories" as Repositories
@@ -32,6 +32,7 @@ deactivate StationRepo
 
 BuildController --> BuildUI : stationData
 deactivate BuildController
+destroy BuildController
 
 BuildUI --> Player : displaySuccess()
 deactivate BuildUI

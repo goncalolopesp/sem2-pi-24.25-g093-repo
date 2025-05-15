@@ -12,7 +12,7 @@ participant ":BuildStationUI" as BuildStationUI
 activate Player
 
 Player -> BuildStationUI : buildStationRequest()
-create ":BuildStaionController" as BuildStationController
+create ":CreateStationController" as BuildStationController
 activate BuildStationUI
 BuildStationUI -> BuildStationController: create()
 participant "repositories\n:Repositories" as Repositories

@@ -4,7 +4,7 @@ skinparam packageStyle rectangle
 skinparam shadowing false
 
 autonumber
-participant ":BuildStationController" as BuildController
+participant ":CreateStationController" as BuildController
 participant "mapRepository\n::MapRepository" as MapRepo
 participant "cityRepository\n::CityRepository" as CityRepo
 participant "stationRepository\n::StationRepository" as StationRepo

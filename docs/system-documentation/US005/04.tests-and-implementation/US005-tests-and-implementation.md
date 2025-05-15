@@ -2,34 +2,117 @@
 
 ## 4. Tests
 
-**Test 1:**  Check that it is not possible to instantiate the Station class with null values. 
-
+**Test 1:**  Validates if the type of station is valid.
 ```java
-@Test(expected = IllegalArgumentException.class)
-public void ensureNullIsNotAllowed() {
-    new Station(null, null, null, null, null);
+    @Test
+void testInvalidType() {
+    Map map = new Map("Map1", 10, 10);
+    var err = controller.buildStation("invalid", map, 5, 5, NE);
+    assertEquals(CreateStationController.Error.INVALID_TYPE, err);
 }
 ```
 	
 
-**Test 2:** Check that overbuilding is not permitted (AC01: Overbuilding is not possible).
+**Test 2:** Validates if there is overbuild
 
 ```java
-@Test(expected = IllegalArgumentException.class)
-public void ensureOverbuildingNotAllowed() {
-    MapRepository mapRepo = new MapRepository();
-    CityRepository cityRepo = new CityRepository();
-    StationRepository stationRepo = new StationRepository();
-    // Assuming that a station already exists on that position, on that Map
-    Station existing = new Station("Depot", "Lisbon Depot", new Position(5, 5), Center.GEOMETRIC, "M1");
-    stationRepo.add(existing);
-
-    // Attempt to build a new station on the same position as an existing one
-    BuildStationController controller = new BuildStationController(mapRepo, cityRepo, stationRepo);
-    controller.buildStation("Depot", new Position(5, 5), null, "M1");
+    @Test
+void testOverbuild(){
+    Map map = new Map("Map1", 10, 10);
+    CurrentUser.getInstance().setUser(user);
+    Station existing = new Station(Station.Type.DEPOT, "Ex", "Map1", "Player@this.app", 50, 100, 0, 4, 4, null);
+    stationRepo.addStation(existing);
+    var err = controller.buildStation("DEPOT", map, 4, 4, null);
+    assertEquals(CreateStationController.Error.OVERBUILD, err);
 }
 
 ```
+
+**Test 3:** Validates if the player has enough budget to buy the station
+
+```java
+    @Test
+void testInsufficientFunds(){
+    Map map = new Map("Map1", 10, 10);
+    CurrentUser.getInstance().setUser(user);
+    user.setBudget(new domain.Budget(user.getBudgetValue() - 1000));
+    var err = controller.buildStation("DEPOT", map, 4, 4, null);
+    assertEquals(CreateStationController.Error.INSUFFICIENT_FUNDS, err);
+
+}
+
+```
+
+**Test 4:** Validates if coordinates of the station are within map bounds.
+
+```java
+    void testInvalidCoordinates() {
+    Map map = new Map("Map1", 4, 4);
+    CurrentUser.getInstance().setUser(user);
+    var err = controller.buildStation("TERMINAL", map, 1, 1, null);
+    assertEquals(CreateStationController.Error.INVALID_COORDINATES, err);
+}
+
+```
+
+
+**Test 5:** Validates if the station is effectively built.
+
+```java
+    @Test
+void testSuccessfulBuid(){
+    Map map = new Map("Map2", 10, 10);
+    CurrentUser.getInstance().setUser(user);
+    var err = controller.buildStation("DEPOT", map, 4, 4, null);
+    assertEquals(CreateStationController.Error.OK, err);
+    Optional<Station> station = stationRepo.getStations().stream().filter(s -> s.getType() == Station.Type.DEPOT).findFirst();
+    assertTrue(station.isPresent());
+    assertEquals(4, station.get().getX());
+    assertEquals(4, station.get().getY());
+    assertEquals(NE, station.get().getOrientation());
+}
+
+```
+
+**Test 6:** Validates if the station is effectively built with a custom cost associated.
+
+```java
+    @Test
+void testSuccessfulBuildCustomCost(){
+    Map map = new Map("Map3", 10, 10);
+    CurrentUser.getInstance().setUser(user);
+    var err = controller.buildStation("DEPOT", map, 4, 4, NE,120);
+    assertEquals(CreateStationController.Error.OK, err);
+    Optional<Station> station = stationRepo.getStations().stream().filter(s -> s.getType() == Station.Type.DEPOT).findFirst();
+    assertTrue(station.isPresent());
+    assertEquals(4, station.get().getX());
+    assertEquals(4, station.get().getY());
+    assertEquals(NE, station.get().getOrientation());
+}
+
+```
+
+**Test 7:** Validates if the list of stations is successfully retrieved.
+
+```java
+    @Test
+void testGetStations() {
+    CurrentUser.getInstance().setUser(user);
+    Map map = new Map("Map1", 10, 10);
+    controller.buildStation("DEPOT", map, 4, 4, null);
+    List<String> expected = List.of(
+            "Unknown-DEPOT DEPOT (4,4)",
+            "Unknown-DEPOT DEPOT (4,4)"
+    );
+    List<String> actual = controller.getStations().stream()
+            .map(Station::toString)
+            .collect(Collectors.toList());
+
+    assertEquals(expected, actual);
+}
+
+```
+
 
 
 ## 5. Construction (Implementation)
@@ -39,67 +122,256 @@ public void ensureOverbuildingNotAllowed() {
 ```java
 package controller;
 
-import domain.Station;
-import domain.Position;
+import domain.CurrentUser;
 import domain.Map;
+import domain.Station;
+import domain.Station.Orientation;
+import domain.User;
 import domain.City;
-import domain.Center;
-import domain.Scenario;
 import repository.Repositories;
-import repository.MapRepository;
-import repository.CityRepository;
-import repository.ScenarioRepository;
+import repository.StationRepository;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CreateStationController {
+    public enum Error { OK, INVALID_TYPE, INSUFFICIENT_FUNDS, OVERBUILD, INVALID_COORDINATES }
 
-    private final MapRepository mapRepository;
-    private final CityRepository cityRepository;
-    private final ScenarioRepository scenarioRepository;
-    private final StationRepository stationRepository;
+    /**
+     * Constructs a Repository for Station objects.
+     */
+    private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
 
-    public BuildStationController() {
-        Repositories repos = Repositories.getInstance();
-        this.mapRepository = repos.getMapRepository();
-        this.cityRepository = repos.getCityRepository();
-        this.scenarioRepository = repos.getScenarioRepository();
-        this.stationRepository = repos.getStationRepository();
+    private static final int COST_DEPOT = 50, CAP_DEPOT = 100;
+    private static final int COST_STATION = 100, CAP_STATION = 200;
+    private static final int COST_TERMINAL = 200, CAP_TERMINAL = 400;
+
+    /**
+     * Method responsible to build a station on the given map.
+     * @param typeStr the type of station to be built
+     * @param map     the map where the station will be built
+     * @param x       the x-coordinate of the station's center
+     * @param y       the y-coordinate of the station's center
+     * @param orientation the station's orientation
+     * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
+     */
+    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation) {
+        Station.Type type;
+        try {
+            type = Station.Type.valueOf(typeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Error.INVALID_TYPE;
+        }
+        User user = CurrentUser.getInstance().getUser();
+        int cost, capacity;
+        switch (type) {
+            case DEPOT:
+                cost = COST_DEPOT; capacity = CAP_DEPOT; break;
+            case STATION:
+                cost = COST_STATION; capacity = CAP_STATION; break;
+            case TERMINAL:
+                cost = COST_TERMINAL; capacity = CAP_TERMINAL; break;
+            default:
+                return Error.INVALID_TYPE;
+        }
+        if (user.getBudgetValue() < cost) return Error.INSUFFICIENT_FUNDS;
+
+        int origX = x;
+        int origY = y;
+        int centerX, centerY;
+        int areaW, areaH;
+
+        int difx= 0,dify = 0;
+        if (type == Station.Type.STATION) {
+            int dx = 0,dy = 0;
+            areaW = areaH = 4;
+            if(orientation == Orientation.NE) dx = 1;
+            else if(orientation == Orientation.SW) dy = 1;
+            else if(orientation == Orientation.SE){
+                dx=1;
+                dy=1;
+            }
+            origX += dx;
+            origY += dy;
+            centerX = origX;
+            centerY = origY;
+            difx = dx;
+            dify=dy;
+        }  else {
+            areaW = (type == Station.Type.DEPOT ? 3 : 5);
+            areaH = areaW;
+            centerX = origX;
+            centerY = origY;
+        }
+        int originX = centerX - (areaW - 1) / 2;
+        int originY = centerY - (areaH - 1) / 2;
+        if (originX < 1 || originY < 1 || originX + areaW - 1 > map.getWidth() || originY + areaH - 1 > map.getHeight()) {
+            return Error.INVALID_COORDINATES;
+        }
+        List<City> cities = new DisplayMapController().getCities().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        for (int dx = 0; dx < areaW; dx++) {
+            for (int dy = 0; dy < areaH; dy++) {
+                int cx = originX + dx;
+                int cy = originY + dy;
+                boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
+                boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
+                        .anyMatch(b -> b.getX() == cx && b.getY() == cy);
+                if (onCity || onBlock) return Error.OVERBUILD;
+                String owner = user.getEmail();
+                for (Station s : stationRepo.getStations()) {
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    int sw, sh, sox, soy;
+                    if (s.getType() == Station.Type.STATION) {
+                        sw = sh = 4;
+                        int sbX = s.getX();
+                        int sbY = s.getY();
+                        int sdx = (s.getOrientation() == Orientation.NE || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        int sdy = (s.getOrientation() == Orientation.SW || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        sox = sbX + sdx - 1;
+                        soy = sbY + sdy - 1;
+                    } else {
+                        sw = (s.getType() == Station.Type.DEPOT ? 3 : 5);
+                        sh = sw;
+                        sox = s.getX() - sw/2;
+                        soy = s.getY() - sh/2;
+                    }
+                    if (cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh) return Error.OVERBUILD;
+                }
+            }
+        }
+        final int nameRefX = origX - difx;
+        final int nameRefY = origY - dify;
+        String name = cities.stream()
+                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
+                .map(City::getName)
+                .orElse("Unknown") + "-" + type.name();
+        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        stationRepo.addStation(st);
+        map.getStations().add(st);
+        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
+        return Error.OK;
     }
 
-    public Station buildStation(String type,
-                                Position position,
-                                Center centerOption,
-                                String mapName,
-                                String scenarioName) {
-        if (type == null || position == null || mapName == null || scenarioName == null) {
-            System.out.println("Error: Parameters must not be null.");
-            return null;
+    /**
+     * Method responsible to try to build a station on the given map (used to upgrade the station).
+     * @param typeStr the type of station to be built
+     * @param map     the map where the station will be built
+     * @param x       the x-coordinate of the station's center
+     * @param y       the y-coordinate of the station's center
+     * @param orientation the station's orientation
+     * @param cost the cost of the upgrade
+     * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
+     */
+    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation,int cost) {
+        Station.Type type;
+        try {
+            type = Station.Type.valueOf(typeStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return Error.INVALID_TYPE;
+        }
+        User user = CurrentUser.getInstance().getUser();
+        int capacity;
+        switch (type) {
+            case DEPOT:
+                capacity = CAP_DEPOT; break;
+            case STATION:
+                capacity = CAP_STATION; break;
+            case TERMINAL:
+                capacity = CAP_TERMINAL; break;
+            default:
+                return Error.INVALID_TYPE;
         }
 
-        Map map = mapRepository.getByName(mapName);
-        if (map == null) {
-            System.out.println("Error: Map not found.");
-            return null;
+        int origX = x;
+        int origY = y;
+        int centerX, centerY;
+        int areaW, areaH;
+
+        int difx= 0,dify = 0;
+        if (type == Station.Type.STATION) {
+            int dx = 0,dy = 0;
+            areaW = areaH = 4;
+            if(orientation == Orientation.NE) dx = 1;
+            else if(orientation == Orientation.SW) dy = 1;
+            else if(orientation == Orientation.SE){
+                dx=1;
+                dy=1;
+            }
+            origX += dx;
+            origY += dy;
+            centerX = origX;
+            centerY = origY;
+            difx = dx;
+            dify=dy;
+        }  else {
+            areaW = (type == Station.Type.DEPOT ? 3 : 5);
+            areaH = areaW;
+            centerX = origX;
+            centerY = origY;
         }
-
-        Scenario scenario = scenarioRepository.findByName(scenarioName);
-        if (scenario == null || !scenario.getMapName().equals(mapName)) {
-            System.out.println("Error: Scenario not found for the given map");
-            return null;
+        int originX = centerX - (areaW - 1) / 2;
+        int originY = centerY - (areaH - 1) / 2;
+        if (originX < 1 || originY < 1 || originX + areaW - 1 > map.getWidth() || originY + areaH - 1 > map.getHeight()) {
+            return Error.INVALID_COORDINATES;
         }
-
-        City nearestCity = cityRepository.findClosest(position);
-        if (nearestCity == null) {
-            System.out.println("Error: No city found near the given position for the station");
-            return null;
+        List<City> cities = new DisplayMapController().getCities().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        for (int dx = 0; dx < areaW; dx++) {
+            for (int dy = 0; dy < areaH; dy++) {
+                int cx = originX + dx;
+                int cy = originY + dy;
+                boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
+                boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
+                        .anyMatch(b -> b.getX() == cx && b.getY() == cy);
+                if (onCity || onBlock) return Error.OVERBUILD;
+                String owner = user.getEmail();
+                for (Station s : stationRepo.getStations()) {
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    int sw, sh, sox, soy;
+                    if (s.getType() == Station.Type.STATION) {
+                        sw = sh = 4;
+                        int sbX = s.getX();
+                        int sbY = s.getY();
+                        int sdx = (s.getOrientation() == Orientation.NE || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        int sdy = (s.getOrientation() == Orientation.SW || s.getOrientation() == Orientation.SE) ? 1 : 0;
+                        sox = sbX + sdx - 1;
+                        soy = sbY + sdy - 1;
+                    } else {
+                        sw = (s.getType() == Station.Type.DEPOT ? 3 : 5);
+                        sh = sw;
+                        sox = s.getX() - sw/2;
+                        soy = s.getY() - sh/2;
+                    }
+                    if (cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh) return Error.OVERBUILD;
+                }
+            }
         }
+        final int nameRefX = origX - difx;
+        final int nameRefY = origY - dify;
+        String name = cities.stream()
+                .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
+                .map(City::getName)
+                .orElse("Unknown") + "-" + type.name();
+        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        stationRepo.addStation(st);
+        map.getStations().add(st);
+        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
+        return Error.OK;
+    }
 
-        String displayName = nearestCity.getName() + " " + type;
-        Station station = new Station(type, displayName, position, centerOption, mapName, scenarioName);
-
-        Station station = stationRepository.add(station);
-        return station;
+    /**
+     * Goes to the repository and returns a defensive copy of all stations.
+     * @return a list of all stored stations in the repository
+     */
+    public List<Station> getStations() {
+        return stationRepo.getStations();
     }
 }
+
 ```
 
 ### Class StationRepository
@@ -108,43 +380,43 @@ public class CreateStationController {
 package repository;
 
 import domain.Station;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
+/**
+ * Repository for storing and querying Station instances.
+ * <p>
+ * Provides methods to add stations and get a list of all the stations created.
+ * </p>
+ */
 public class StationRepository {
-
     private final List<Station> stations = new ArrayList<>();
-    
-    public Station add(Station station) {
-        boolean overlaps = stations.stream()
-                .anyMatch(existing -> existing.overlaps(station));
-        if (overlaps) {
-            System.out.println("Error: Overbuilding not allowed.");
-            return null;
-        }
-        stations.add(station);
-        return station;
+
+    /**
+     * Add a new station to the repository.
+     * @param s the station to add
+     * @return true if added successfully
+     */
+    public boolean addStation(Station s) {
+        return stations.add(s);
     }
-    
-    public List<Station> getAll() {
-        return new ArrayList<>(stations);
+
+    /**
+     * Returns a defensive copy of all stations.
+     * @return unmodifiable list of stored Station objects
+     */
+    public List<Station> getStations() {
+        return List.copyOf(stations);
     }
-    
-    public boolean exists(String mapName, String scenarioName, String stationName) {
-        String key = mapName + ":" + scenarioName;
-        return stations.stream()
-                .anyMatch(s -> s.getMapScenarioId().equals(key)
-                        && s.getType().equals(stationName));
+
+    /**
+     * Removes a certain station from the list of all the stations.
+     */
+    public boolean removeStation(Station station) {
+        return stations.remove(station);
     }
-    
-    public List<Station> getByMapScenario(String mapName, String scenarioName) {
-        String key = mapName + ":" + scenarioName;
-        return stations.stream()
-                .filter(s -> s.getMapScenarioId().equals(key))
-                .collect(Collectors.toList());
-    }
+
 }
 ```
 

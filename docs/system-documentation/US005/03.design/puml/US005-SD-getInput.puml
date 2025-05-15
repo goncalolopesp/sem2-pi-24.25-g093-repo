@@ -22,7 +22,7 @@ BuildUI --> BuildUI : keepLocation(location)
 Player -> BuildUI : select type
 BuildUI --> BuildUI : keepType(type)
 
-alt type == "Depot" or type == "Terminal"
+alt type == "STATION"
   Player -> BuildUI : select center
   BuildUI --> BuildUI : keepCenter(center)
 end
