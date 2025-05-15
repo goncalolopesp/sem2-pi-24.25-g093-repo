@@ -56,7 +56,7 @@ public class BuyLocomotiveUI implements Runnable {
     public void listLocomotives() {
         List<Locomotive> locomotiveList = locomotiveController.getLocomotives(scenario);
         for (Locomotive locomotive : locomotiveList) {
-            System.out.print(locomotive.getModelName() + " - " + locomotive.getPrice() + "  |  ");
+            System.out.printf("%-20s | %-20s | %-20s%n", "Name: " + locomotive.getModelName(), "Price: " + locomotive.getPrice(), "topSpeed: " + locomotive.getTopSpeed());
         }
     }
 
