@@ -16,6 +16,7 @@ public class Repositories {
     private final StationRepository stationRepository;
     private final BuildingRepository buildingRepository;
     private final IndustryRepository industryRepository;
+    private final LocomotiveRepository locomotiveRepository;
 
     /**
      * Private constructor to prevent external instantiation.
@@ -29,6 +30,7 @@ public class Repositories {
         buildingRepository = new BuildingRepository();
         industryRepository = new IndustryRepository();
         stationRepository = new StationRepository();
+        locomotiveRepository = new LocomotiveRepository();
     }
 
     /**
@@ -108,4 +110,6 @@ public class Repositories {
     public IndustryRepository getIndustryRepository() {
         return industryRepository;
     }
+
+    public LocomotiveRepository getLocomotiveRepository() { return locomotiveRepository; }
 }

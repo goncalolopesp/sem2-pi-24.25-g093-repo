@@ -6,6 +6,8 @@ import domain.Budget;
 import domain.CurrentUser;
 import repository.AuthRepository;
 import repository.LocomotiveRepository;
+import repository.Repositories;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,9 +31,8 @@ public class Bootstrap {
         //TODO: add Locomotive models here: should be created for each locomotive in the game
         //get locomotive repository
 
-        LocomotiveRepository lr = new LocomotiveRepository();
-        CurrentUser session = CurrentUser.getInstance();
-        session.setLocomotiveRepository(lr);
+        Repositories repositories = Repositories.getInstance();
+        LocomotiveRepository lr = repositories.getLocomotiveRepository();
 
         BuyLocomotiveController buyLocomotiveController = new BuyLocomotiveController();
         buyLocomotiveController.createLocomotive("Trevithick-1", 10, "Steam", 8, 6, 1800, 1835, 10);

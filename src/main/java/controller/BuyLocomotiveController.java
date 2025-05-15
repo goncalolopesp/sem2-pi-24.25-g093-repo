@@ -4,6 +4,7 @@ import domain.CurrentUser;
 import domain.Locomotive;
 import domain.Scenario;
 import repository.LocomotiveRepository;
+import repository.Repositories;
 import repository.ScenarioRepository;
 
 import java.util.*;
@@ -13,7 +14,8 @@ public class BuyLocomotiveController {
     CurrentUser session = CurrentUser.getInstance();
 
     public BuyLocomotiveController() {
-        locomotiveRepository = session.getLocomotiveRepository();
+        Repositories repositories = Repositories.getInstance();
+        locomotiveRepository = repositories.getLocomotiveRepository();
     }
 
     public void buyLocomotive(Locomotive locomotive) {
