@@ -202,8 +202,6 @@ public class UpgradeStationUI implements Runnable{
 
         currentUser.setBudget(new Budget(currentUser.getBudgetValue() - cost));
 
-        System.out.println(ctrl.getBuildings());
-
         return buildingType;
     }
 
