@@ -193,6 +193,11 @@ public class SimulationController {
             return null;
         }
         int idx = Utils.showAndSelectIndex(maps, "Select a map:");
+
+        if (idx == -1) {
+            return null;
+        }
+
         return maps.get(idx);
     }
 
@@ -205,6 +210,11 @@ public class SimulationController {
             return null;
         }
         int idx = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
+
+        if (idx == -1) {
+            return null;
+        }
+
         return scenarios.get(idx);
     }
 
