@@ -72,4 +72,14 @@ public class CreateMapController {
     public List<Map> getMaps() {
         return getMapRepository().getMaps();
     }
+
+    /**
+     * Verifies whether a map with the given name exists.
+     *
+     * @param mapName the name of the map to check
+     * @return {@code true} if a map with the specified name exists; {@code false} otherwise
+     */
+    public boolean verifyIfMapExists(String mapName) {
+        return getMaps().stream().anyMatch(map -> map.getMapName().equals(mapName));
+    }
 }

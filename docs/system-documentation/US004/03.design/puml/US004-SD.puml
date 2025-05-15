@@ -15,35 +15,12 @@ Employee -> CreateScenarioUI : asks to create a new scenario
 activate CreateScenarioUI
 
 create ":CreateScenarioController" as CreateScenarioController
-
 CreateScenarioUI --> CreateScenarioController : create
-CreateScenarioUI --> Employee : requests scenario name
-deactivate CreateScenarioUI
+activate CreateScenarioController
 
 participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
 participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
-
-Employee -> CreateScenarioUI : types scenario name
-activate CreateScenarioUI
-
-CreateScenarioUI --> CreateScenarioUI : keepName(scenarioName)
-CreateScenarioUI --> Employee : requests map selection
-deactivate CreateScenarioUI
-
-Employee -> CreateScenarioUI : selects map
-activate CreateScenarioUI
-
-CreateScenarioUI --> CreateScenarioUI : keepMap(selectedMap)
-CreateScenarioUI --> Employee : requests for time period, technological and historical restrictions
-deactivate CreateScenarioUI
-
-Employee -> CreateScenarioUI : selects time period, technological and historical restrictions
-activate CreateScenarioUI
-
-CreateScenarioUI --> CreateScenarioUI : keepData(timePeriod, techRestriction, historicalRestriction)
-CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-activate CreateScenarioController
 
 CreateScenarioController --> Repositories : getInstance()
 activate Repositories
@@ -56,20 +33,163 @@ activate Repo
 
 Repo --> CreateScenarioController : scenarioRepository
 deactivate Repo
-
-CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-activate scenarioRepository
-
-create "scenario\n:Scenario" as Scenario
-
-scenarioRepository --> Scenario : create()
-scenarioRepository --> scenarioRepository : verifyIfExistsAndSave(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-scenarioRepository --> CreateScenarioController : scenarioData
-deactivate scenarioRepository
-
-CreateScenarioController --> CreateScenarioUI : scenarioData
 deactivate CreateScenarioController
 
-CreateScenarioUI --> Employee : displays operation success message: "Scenario created successfully."
+CreateScenarioUI --> CreateScenarioUI: run()
+CreateScenarioUI --> CreateScenarioUI : requestData()
+
+    CreateScenarioUI --> Employee : requestSelectedMap()
+    CreateScenarioUI --> Employee : requests the map selection
+    deactivate CreateScenarioUI
+
+    Employee -> CreateScenarioUI : types desired map's name
+    activate CreateScenarioUI
+
+    loop while selectedMap doesn't exist
+        CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
+        activate CreateScenarioController
+
+        CreateScenarioController --> scenarioRepository  : verifyIfMapExists(selectedMap)
+        activate scenarioRepository
+
+        scenarioRepository --> scenarioRepository : verifyIfMapExists(selectedMap)
+        scenarioRepository --> CreateScenarioController : return false
+        deactivate scenarioRepository
+
+        CreateScenarioController --> CreateScenarioUI : outputs "Map doesn't exist! Try again: "
+        deactivate CreateScenarioController
+
+        CreateScenarioUI --> Employee : requests the map selection
+        deactivate CreateScenarioUI
+
+        Employee --> CreateScenarioUI : types new desired map's name
+        activate CreateScenarioUI
+    end
+
+    CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
+    activate CreateScenarioController
+
+    CreateScenarioController --> scenarioRepository  : verifyIfMapExists(selectedMap)
+    activate scenarioRepository
+
+    scenarioRepository --> scenarioRepository : verifyIfMapExists(selectedMap)
+    scenarioRepository --> CreateScenarioController : return true
+    deactivate scenarioRepository
+
+    CreateScenarioController --> CreateScenarioUI : returns selectedMap
+    deactivate CreateScenarioController
+
+    CreateScenarioUI --> Employee : requestScenarioName()
+    CreateScenarioUI --> Employee : requests the scenario name
+    deactivate CreateScenarioUI
+
+    Employee -> CreateScenarioUI : types desired scenario name
+    activate CreateScenarioUI
+
+    loop while scenarioName isn't unique
+        CreateScenarioUI --> CreateScenarioController : checkNameUniqueness(selectedMap)
+        activate CreateScenarioController
+
+        CreateScenarioController --> scenarioRepository  : checkNameUniqueness(selectedMap)
+        activate scenarioRepository
+
+        scenarioRepository --> scenarioRepository : checkNameUniqueness(selectedMap)
+        scenarioRepository --> CreateScenarioController : return false
+        deactivate scenarioRepository
+
+        CreateScenarioController --> CreateScenarioUI : outputs "Name not unique. Try again: "
+        deactivate CreateScenarioController
+
+        CreateScenarioUI --> Employee : requests the scenario name
+        deactivate CreateScenarioUI
+
+        Employee --> CreateScenarioUI : types new desired scenario name
+        activate CreateScenarioUI
+    end
+
+    CreateScenarioUI --> CreateScenarioController : checkNameUniqueness(selectedMap)
+    activate CreateScenarioController
+
+    CreateScenarioController --> scenarioRepository  : checkNameUniqueness(selectedMap)
+    activate scenarioRepository
+
+    scenarioRepository --> scenarioRepository : checkNameUniqueness(selectedMap)
+    scenarioRepository --> CreateScenarioController : return true
+    deactivate scenarioRepository
+
+    CreateScenarioController --> CreateScenarioUI : returns trimmed scenario name
+    deactivate CreateScenarioController
+
+    CreateScenarioUI --> Employee : requestTimeRestrictions()
+    CreateScenarioUI --> Employee : requests the starting year
+    deactivate CreateScenarioUI
+
+    Employee -> CreateScenarioUI : types the starting year
+    activate CreateScenarioUI
+
+    loop while startingYear is < 1804 or >= 2025
+        alt Try block
+            CreateScenarioUI --> CreateScenarioUI : parseInt(startingYear) and add to timePeriod array
+        else Exception NumberFormatException e thrown
+            CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+        end
+
+        alt startingYear < 1804 or startingYear >= 2025
+            CreateScenarioUI --> Employee : outputs "Starting Year must be equal or higher than 1804 and lower than 2025. Try again: "
+        end
+
+        CreateScenarioUI --> Employee : requests the starting year
+        deactivate CreateScenarioUI
+
+        Employee --> CreateScenarioUI : types the new starting year
+        activate CreateScenarioUI
+    end
+
+    CreateScenarioUI --> Employee : requests the final year
+    deactivate CreateScenarioUI
+
+    Employee -> CreateScenarioUI : types the final year
+    activate CreateScenarioUI
+
+    loop while finalYear is <= startingYear or > 2025
+        alt Try block
+            CreateScenarioUI --> CreateScenarioUI : parseInt(finalYear) and add to timePeriod array
+        else Exception NumberFormatException e thrown
+            CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+        end
+
+        alt finalYear <= startingYear or finalYear > 2025
+            CreateScenarioUI --> Employee : outputs "Final Year must be higher than the Starting Year and equal or lower than 2025. Try again: "
+        end
+
+        CreateScenarioUI --> Employee : requests the final year
+        deactivate CreateScenarioUI
+
+        Employee --> CreateScenarioUI : types the new final year
+        activate CreateScenarioUI
+    end
+
+CreateScenarioUI --> CreateScenarioUI : submitData()
+    CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    activate CreateScenarioController
+
+    CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    activate scenarioRepository
+
+    create "scenario\n:Scenario" as Scenario
+
+    scenarioRepository --> Scenario : create()
+    scenarioRepository --> scenarioRepository : validateScenario(scenario)
+    scenarioRepository --> scenarioRepository : add(scenario)
+    deactivate scenarioRepository
+
+    CreateScenarioController --> CreateScenarioUI : scenario
+    deactivate CreateScenarioController
+
+    alt scenario is present
+        CreateScenarioUI --> Employee : outputs "Scenario successfully created!"
+    else
+        CreateScenarioUI --> Employee : outputs "Scenario not created!"
+    end
 deactivate CreateScenarioUI
 @enduml
