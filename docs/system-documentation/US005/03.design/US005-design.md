@@ -51,6 +51,8 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+![Sequence Diagram - split](svg/US005-SD-split.svg)
+
 **Get Input Partial SD**
 
 ![Sequence Diagram - Partial - Get Input](svg/US005-SD-getInput.svg)

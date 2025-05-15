@@ -99,6 +99,7 @@ StationRepository --> StationRepository : saveStation()
 StationRepository --> BuildStationController : stationData
 deactivate StationRepository
 
+activate BuildStationUI
 BuildStationController --> BuildStationUI : stationData
 deactivate BuildStationController
 destroy BuildStationController

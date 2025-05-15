@@ -1,0 +1,78 @@
+@startuml US005-SD-split
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as Player
+participant ":BuildStationUI"          as BuildStationUI
+
+
+activate Player
+
+Player -> BuildStationUI : buildStationRequest()
+create ":CreateStationController" as BuildStationController
+activate BuildStationUI
+BuildStationUI -> BuildStationController : create()
+
+BuildStationUI --> Player : request map selection
+
+Player -> BuildStationUI : select map
+
+BuildStationUI --> BuildStationUI : keepMap(map)
+
+BuildStationUI --> Player : request station location
+
+Player -> BuildStationUI : select location
+
+BuildStationUI --> BuildStationUI : keepLocation(location)
+
+BuildStationUI --> Player : request station type (Depot/Station/Terminal)
+deactivate BuildStationUI
+
+Player -> BuildStationUI : select type
+activate BuildStationUI
+BuildStationUI --> BuildStationUI : keepType(type)
+
+activate BuildStationController
+BuildStationUI -> BuildStationController : checkOverbuild(location)
+ref over BuildStationController
+    Verifies overbuilding
+end ref
+
+BuildStationUI -> BuildStationController : checkBudget(type)
+ref over BuildStationController
+    Verifies the type of building budget
+end ref
+
+BuildStationUI -> BuildStationController : getClosestCity(location)
+ref over BuildStationController
+    Determines the nearest city
+end ref
+BuildStationController --> BuildStationUI : proposeName(cityName, type)
+
+alt type == "STATION"
+  BuildStationUI --> Player : request center (geometric)
+  Player -> BuildStationUI : select center
+  BuildStationUI --> BuildStationUI : keepCenter(center)
+  BuildStationUI -> BuildStationController : setCenter(center)
+end
+
+activate BuildStationUI
+BuildStationUI --> BuildStationController : createStation(map, location, type, center)
+deactivate BuildStationUI
+
+create ":station\n:Station" as Station
+
+BuildStationController -> Station: create()
+Station --> BuildStationController : stationData
+activate Station
+BuildStationController --> BuildStationUI : stationData
+
+destroy BuildStationController
+activate BuildStationUI
+BuildStationUI --> Player : display "Station created successfully"
+deactivate BuildStationUI
+deactivate Player
+@enduml
