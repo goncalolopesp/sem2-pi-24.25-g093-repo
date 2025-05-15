@@ -34,8 +34,12 @@ public class BuyLocomotiveController {
         Set<Locomotive> locomotives = locomotiveRepository.getLocomotives();
         List<Locomotive> locomotivesList = new ArrayList<>();
         for (Locomotive locomotive : locomotives) {
-            if(locomotive.getStartYearOfOperation() <= scenario.getTimeRestrictions()[0] && locomotive.getEndYearOfOperation() <= scenario.getTimeRestrictions()[1]) {
-                locomotivesList.add(locomotive);
+            if(locomotive.getStartYearOfOperation() <= scenario.getTimeRestrictions()[0] && locomotive.getEndYearOfOperation() >= scenario.getTimeRestrictions()[0]) {
+                for (String techRestriction : scenario.getTechnologicalRestrictions()){
+                    if (techRestriction.toLowerCase().equals(locomotive.getType().toLowerCase())) {
+                        locomotivesList.add(locomotive);
+                    }
+                }
             }
         }
         return locomotivesList;
@@ -45,8 +49,20 @@ public class BuyLocomotiveController {
         return session.getUser().getLocomotives();
     }
 
-    public boolean buyLocomotive(String modelName){
-        return locomotiveRepository.buyLocomotive(modelName);
+    public boolean canBuyLocomotive(String modelName, Scenario scenario) {
+        for (Locomotive locomotive : this.getLocomotives(scenario)){
+            if (locomotive.getModelName().equals(modelName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean buyLocomotive(String modelName, Scenario scenario){
+        if (canBuyLocomotive(modelName, scenario)){
+            return locomotiveRepository.buyLocomotive(modelName);
+        }
+        return false;
     }
 
 

@@ -35,18 +35,25 @@ public class BuyLocomotiveUI implements Runnable {
     }
 
     public boolean buyLocomotive(String modelName){
-        if (locomotiveController.buyLocomotive(modelName)){
+        if (locomotiveController.buyLocomotive(modelName, scenario)){
 
             System.out.println("Locomotive: " + modelName + " bought!");
             return true;
+
         }else{
 
-            System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
+            if (locomotiveController.canBuyLocomotive(modelName, scenario)){
+                System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
+            }else{
+                System.out.println("Error buying Locomotive " + modelName + ": Locomotive not available!");
+            }
+
             return false;
+
         }
     }
 
-    public void listLocomotives(){
+    public void listLocomotives() {
         List<Locomotive> locomotiveList = locomotiveController.getLocomotives(scenario);
         for (Locomotive locomotive : locomotiveList) {
             System.out.print(locomotive.getModelName() + " - " + locomotive.getPrice() + "  |  ");
