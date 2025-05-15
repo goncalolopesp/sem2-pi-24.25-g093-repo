@@ -3,6 +3,7 @@ package ui.console;
 import controller.CreateScenarioController;
 import controller.DisplayMapController;
 import domain.Scenario;
+import domain.*;
 
 import java.util.*;
 
@@ -93,7 +94,7 @@ public class CreateScenarioUI implements Runnable {
     private String requestSelectedMap() {
         Scanner sc = new Scanner(System.in);
         DisplayMapController mctrl = new DisplayMapController();
-
+        System.out.println(mctrl.getMaps());
         System.out.print("Select Map: ");
 
         do {
