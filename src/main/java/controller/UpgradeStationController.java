@@ -34,7 +34,7 @@ public class UpgradeStationController {
      *
      * @return the BuildingRepository instance
      */
-    private BuildingRepository getBuildingRepository() {
+    public BuildingRepository getBuildingRepository() {
         if (buildingRepository == null) {
             Repositories repositories = Repositories.getInstance();
 
@@ -69,10 +69,10 @@ public class UpgradeStationController {
      * @return true if it does or false if otherwise.
      */
     public boolean verifyIfBuildingExists(Station station, String buildingType) {
-        if (getBuildings().stream().anyMatch(s -> s.getStation().equals(station)) &&
-                getBuildings().stream().anyMatch(type -> type.getBuildingType().equals(buildingType))) {
-            return true;
-        }
-        return false;
+        return getBuildings().stream()
+                .anyMatch(b ->
+                        b.getStation().equals(station) &&
+                                b.getBuildingType().equalsIgnoreCase(buildingType)
+                );
     }
 }

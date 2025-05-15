@@ -2,9 +2,15 @@ package controller;
 
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import repository.StationRepository;
+import ui.console.menu.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicIntegerArray;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class SimulationController {
@@ -12,7 +18,10 @@ public class SimulationController {
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
+    private final StationRepository stationrepo = new CreateStationController().getStationRepository();
     private final DisplayMapController displayCtrl = new DisplayMapController();
+    private final CreateCityController cityCtrl = new CreateCityController();
+    private final List<City> cities = cityCtrl.getCityRepo().getCities();
 
     public void displayMapData(Map map) {
         int width = map.getWidth();
@@ -33,6 +42,64 @@ public class SimulationController {
                 System.out.print(grid[y][x]);
             }
             System.out.println();
+        }
+    }
+
+    public Runnable passTime(Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler) {
+        Runnable task = () -> {
+            if (running.get()) {
+                timePeriod.get().getAndAdd(0, (1));
+                if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
+                    System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ". Type your option: ");
+                    payLocomotiveMaintenance();
+                }
+            }
+            if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
+                scheduler.shutdownNow();
+                timePeriod.set(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
+                options.clear();
+                System.out.print("\nGame Over. Please insert 0 to return to menu: ");
+            }
+        };
+        return task;
+    }
+
+    public Runnable generateCargo(Map selectedMap, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
+        AtomicBoolean printedMaxCapacity = new AtomicBoolean(false);
+        Runnable task = () -> {
+            if (running.get()) {
+                if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
+                    addCargoToStation(selectedMap, printedMaxCapacity);
+                }
+            }
+            if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
+                generationScheduler.shutdownNow();
+            }
+        };
+        return task;
+    }
+
+    public void addCargoToStation(Map selectedMap, AtomicBoolean printedMaxCapacity) {
+        String mapName = selectedMap.getMapName();
+
+        for (City city : cities) {
+            int totalGeneratedCargo = city.getTotalGeneratedCargo();
+
+            stationrepo.getStations().stream()
+                    .filter(s -> s.getMapName().equals(mapName))
+                    .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
+                    .filter(s -> s.getName().contains(city.getName()))
+                    .forEach(station -> {
+                        if (station.getCapacityOwned() < station.getCapacity()) {
+                            station.setCapacityOwned(station.getCapacityOwned() + totalGeneratedCargo);
+                            System.out.printf("\nStored %d cargo for station %s. Type your option: ", station.getCapacityOwned(), station.getName());
+                            printedMaxCapacity.set(false);
+                        } else if (!printedMaxCapacity.get()) {
+                            // only print the first time you hit a full station
+                            System.out.print("\nMax capacity reached for station " + station.getName() + ". Type your option: ");
+                            printedMaxCapacity.set(true);
+                        }
+                    });
         }
     }
 
@@ -171,5 +238,4 @@ public class SimulationController {
         }
         currentUser.setLocomotives(canUse);
     }
-
 }

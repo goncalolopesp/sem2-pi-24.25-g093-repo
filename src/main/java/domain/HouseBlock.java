@@ -11,6 +11,9 @@ import java.util.Objects;
 public class HouseBlock {
     private final int x;
     private final int y;
+    private final int generatedPeople;
+    private final int generatedMail;
+    private final int generatedCargo;
 
     /**
      * Constructs a new HouseBlock at the given coordinates.
@@ -21,6 +24,9 @@ public class HouseBlock {
     public HouseBlock(int x, int y) {
         this.x = x;
         this.y = y;
+        this.generatedPeople = 7;
+        this.generatedMail = 3;
+        this.generatedCargo = generatedPeople + generatedMail;
     }
 
     /**
@@ -35,6 +41,33 @@ public class HouseBlock {
      * @return the y-coordinate
      */
     public int getY() { return y; }
+
+    /**
+     * Returns amount of people the houseblock generates at a certain rate.
+     *
+     * @return the amount of people the houseblock generates
+     */
+    public int getGeneratedPeople() {
+        return generatedPeople;
+    }
+
+    /**
+     * Returns amount of mail the houseblock generates at a certain rate.
+     *
+     * @return the amount of mail the houseblock generates
+     */
+    public int getGeneratedMail() {
+        return generatedMail;
+    }
+
+    /**
+     * Returns the total amount of cargo the houseblock produces
+     *
+     * @return the total amount of cargo the houseblock produces
+     */
+    public int getGeneratedCargo() {
+        return generatedCargo;
+    }
 
     /**
      * Indicates whether some other object is "equal to" this one.

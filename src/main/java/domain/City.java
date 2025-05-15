@@ -16,6 +16,9 @@ public class City {
     private final String mapName;
     private final List<HouseBlock> blocks = new ArrayList<>();
     private final Location location;
+    private int totalGeneratedPeople;
+    private int totalGeneratedMail;
+    private int totalGeneratedCargo;
 
     /**
      * Constructs a new City instance with the specified name, map, and center coordinates.
@@ -59,6 +62,33 @@ public class City {
         return location.getY(); }
 
     /**
+     * Returns the total generated people for that city.
+     *
+     * @return the total generated people for that city
+     */
+    public int getTotalGeneratedPeople() {
+        return totalGeneratedPeople;
+    }
+
+    /**
+     * Returns the total generated mail for that city.
+     *
+     * @return the total generated mail for that city
+     */
+    public int getTotalGeneratedMail() {
+        return totalGeneratedMail;
+    }
+
+    /**
+     * Returns the total generated cargo for that city.
+     *
+     * @return the total generated cargo for that city
+     */
+    public int getTotalGeneratedCargo() {
+        return totalGeneratedCargo;
+    }
+
+    /**
      * Returns an unmodifiable view of the house blocks in the city.
      *
      * @return list of HouseBlocks associated with the city
@@ -67,8 +97,15 @@ public class City {
 
     /**
      * Adds a house block to the city manually.
+     * Updates the city total amount of generated cargo.
      *
      * @param b the HouseBlock to add
+     *
      */
-    public void addBlockManual(HouseBlock b) { blocks.add(b); }
+    public void addBlockManual(HouseBlock b) {
+        blocks.add(b);
+        totalGeneratedCargo += b.getGeneratedCargo();
+        totalGeneratedMail += b.getGeneratedMail();
+        totalGeneratedPeople += b.getGeneratedPeople();
+    }
 }

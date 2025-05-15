@@ -1,8 +1,10 @@
 package ui.console;
 
+import controller.CreateStationController;
 import controller.SimulationController;
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import repository.StationRepository;
 import ui.console.menu.MenuItem;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class SimulationUI implements Runnable {
             System.out.println("No map selected");
             return;
         }
+
         Scenario selectedScenario = ctrl.getScenario(selectedMap);
 
         if (selectedScenario == null) {
@@ -46,26 +49,14 @@ public class SimulationUI implements Runnable {
 
         List<MenuItem> options = new ArrayList<>();
 
+        ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
-        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler);
+        Runnable generationTask = ctrl.generateCargo(selectedMap, timePeriod, running, generationScheduler);
 
-        Runnable task = () -> {
-            if (running.get()) {
-                timePeriod.get().getAndAdd(0, (1));
-                if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                    System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ". Type your option: ");
-                    ctrl.payLocomotiveMaintenance();
-                }
-            }
-            if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
-                scheduler.shutdownNow();
-                timePeriod.set(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
-                options.clear();
-                System.out.print("\nGame Over. Please insert 0 to return to menu: ");
-            }
-        };
-
-        scheduler.scheduleAtFixedRate(task, 5, 5, TimeUnit.SECONDS);
+        timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
+        generationScheduler.scheduleAtFixedRate(generationTask, 2, 2, TimeUnit.SECONDS);
 
         do {
             if (running.get()) {
@@ -78,10 +69,9 @@ public class SimulationUI implements Runnable {
                 if (options.isEmpty()) {
                     options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
                     options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
-                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap)));
+                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, timePeriod)));
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
-                    options.add(new MenuItem("List my Stations", new ListStationsUI()));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();
@@ -114,7 +104,7 @@ public class SimulationUI implements Runnable {
                 } else {
                     options.get(option.get()).run();     // Handle Pause/Resume directly
                 }
-            } else if (option.get() == -1) { running.set(false); scheduler.shutdownNow(); System.out.println("Game stopped."); }
+            } else if (option.get() == -1) { running.set(false); timeScheduler.shutdownNow(); System.out.println("Game stopped."); }
         } while (option.get() != -1);
     }
 }
