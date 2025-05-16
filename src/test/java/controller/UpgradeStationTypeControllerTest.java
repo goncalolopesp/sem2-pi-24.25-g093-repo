@@ -37,7 +37,6 @@ class UpgradeStationTypeControllerTest {
     }
 
     @Test
-    @DisplayName("Successful upgrade replaces station")
     void testSuccessfulUpgrade() {
         CurrentUser.getInstance().setUser(user);
         Station original = new Station(Type.DEPOT, "Depot-1", "TestMap", user.getEmail(), 50, 100, 0, 30, 30, null);
@@ -56,7 +55,6 @@ class UpgradeStationTypeControllerTest {
     }
 
     @Test
-    @DisplayName("Failed upgrade restores original station")
     void testFailedUpgrade() {
         CurrentUser.getInstance().setUser(user);
         Station original = new Station(Type.STATION, "Station-1", "TestMap", user.getEmail(), 100, 200, 0, 6, 6, Orientation.NE);

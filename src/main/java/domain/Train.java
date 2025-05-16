@@ -46,6 +46,14 @@ public class Train {
     }
 
     /**
+     * Method that returns the email of the player who owns the train
+     * @return the email of the player who owns the train
+     */
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    /**
      * Method that attaches a carraige to the train
      * @param carriage the carriage to attach
      */
