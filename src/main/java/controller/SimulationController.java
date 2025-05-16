@@ -5,7 +5,10 @@ import pt.ipp.isep.dei.ui.console.utils.Utils;
 import repository.StationRepository;
 import ui.console.menu.MenuItem;
 
-import java.time.LocalDate;
+import domain.User;
+import domain.City;
+import domain.CurrentUser;
+import domain.Map;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -37,7 +40,6 @@ public class SimulationController {
         addCitiesToMap(grid, map);
         addStationsToMap(grid, map, width, height);
 
-        // Print the grid
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
                 System.out.print(grid[y][x]);
@@ -46,7 +48,7 @@ public class SimulationController {
         }
     }
 
-    public Runnable passTime(Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler) {
+    public Runnable passTime(Map selectedMap, Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler, AtomicBoolean gameOver) {
         Runnable task = () -> {
             if (running.get()) {
                 timePeriod.get().getAndAdd(0, (1));
@@ -61,6 +63,7 @@ public class SimulationController {
                 scheduler.shutdownNow();
                 timePeriod.set(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
                 options.clear();
+                gameOver.set(true);
                 System.out.print("\nGame Over. Please insert 0 to return to menu: ");
             }
         };
@@ -98,12 +101,20 @@ public class SimulationController {
                             System.out.printf("\nStored %d cargo for station %s. Type your option: ", station.getCapacityOwned(), station.getName());
                             printedMaxCapacity.set(false);
                         } else if (!printedMaxCapacity.get()) {
-                            // only print the first time you hit a full station
+                            station.setCapacityOwned(station.getCapacity());
                             System.out.print("\nMax capacity reached for station " + station.getName() + ". Type your option: ");
                             printedMaxCapacity.set(true);
                         }
                     });
         }
+    }
+
+    public void resetGame(Map selectedMap) {
+        currentUser.setBudget(new Budget(1000));
+        stationrepo.removeStationsByMapAndOwner(
+                selectedMap.getMapName(),
+                currentUser.getEmail()
+        );
     }
 
     private void addCitiesToMap(String[][] grid, Map map) {
@@ -123,7 +134,7 @@ public class SimulationController {
         // Draw stations owned by current user
         if (currentUser != null) {
             String owner = currentUser.getEmail();
-            for (Station st : map.getStations()) {
+            for (Station st : stationrepo.getStations()) {
                 if (!st.getMapName().equals(map.getMapName()) || !st.getOwnerPlayer().equals(owner)) {
                     continue;
                 }

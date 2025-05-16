@@ -59,7 +59,7 @@ public class main {
             System.out.println("2. Verify if a route that passes once, and only once, by each railway line exists (US14)");
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
-            String op = sc.nextLine();
+            String op = sc.nextLine().trim();
 
             if (op.equals("1")) {
                 implementUS13(lines);

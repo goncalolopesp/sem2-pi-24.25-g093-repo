@@ -41,16 +41,17 @@ public class SimulationUI implements Runnable {
         AtomicReference<AtomicIntegerArray> timePeriod = new AtomicReference<>(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
 
         AtomicBoolean running = new AtomicBoolean(true);
+        AtomicBoolean gameOver = new AtomicBoolean(false);
         AtomicInteger option = new AtomicInteger();
 
-        System.out.println("Game started on year " + timePeriod.get().get(0));
+        System.out.println("Game started on year " + timePeriod.get().get(0) + " and will finish on year " + timePeriod.get().get(1));
 
         List<MenuItem> options = new ArrayList<>();
 
         ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
-        Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler);
+        Runnable timeTask = ctrl.passTime(selectedMap,selectedScenario, timePeriod, running, options, timeScheduler, gameOver);
         Runnable generationTask = ctrl.generateCargo(selectedMap, timePeriod, running, generationScheduler);
 
         timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
@@ -70,6 +71,7 @@ public class SimulationUI implements Runnable {
                     options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, timePeriod)));
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
+                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap)));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();
@@ -102,7 +104,12 @@ public class SimulationUI implements Runnable {
                 } else {
                     options.get(option.get()).run();     // Handle Pause/Resume directly
                 }
-            } else if (option.get() == -1) { running.set(false); timeScheduler.shutdownNow(); System.out.println("Game stopped."); }
+            } else if (option.get() == -1) {
+                running.set(false); timeScheduler.shutdownNow(); System.out.println("Game stopped.");
+                if (gameOver.get()) {
+                    ctrl.resetGame(selectedMap);
+                }
+            }
         } while (option.get() != -1);
     }
 }

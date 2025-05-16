@@ -1,10 +1,8 @@
 package ui.console;
 
 import controller.SimulationController;
-import domain.CurrentUser;
-import domain.Locomotive;
-import domain.Map;
-import domain.Station;
+import domain.*;
+import domain.Carriage.Type;
 import repository.Repositories;
 import repository.StationRepository;
 
@@ -13,12 +11,6 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
-/**
- * UI for assigning a locomotive to a route.
- * Validates that the player has at least two stations on the map
- * and at least one locomotive before proceeding.
- * Guides the user through selecting locomotive, start, end, and optional intermediate stations.
- */
 public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
@@ -49,88 +41,75 @@ public class AssignTrainUI implements Runnable {
             return;
         }
 
+        // Select locomotive
         System.out.println("Select a locomotive to assign:");
         for (int i = 0; i < userLocos.size(); i++) {
             System.out.printf("[%d] %s (Top Speed: %d)%n", i, userLocos.get(i).getModelName(), userLocos.get(i).getTopSpeed());
         }
-        int locoIndex = -1;
-        boolean locoValid = false;
-        while (!locoValid) {
+        int locoIndex;
+        while (true) {
             System.out.print("Enter locomotive number: ");
             String line = scanner.nextLine();
             try {
                 locoIndex = Integer.parseInt(line);
-                locoValid = (locoIndex >= 0 && locoIndex < userLocos.size());
-            } catch (NumberFormatException e) {
-                locoValid = false;
-            }
-            if (!locoValid) {
-                System.out.println("Invalid selection. Try again.");
-            }
+                if (locoIndex >= 0 && locoIndex < userLocos.size()) break;
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Invalid selection. Try again.");
         }
         Locomotive chosenLoco = userLocos.get(locoIndex);
 
+        // Select route: start, end, and optional intermediates
         Station start;
         Station end;
+        List<Station> intermediates = new ArrayList<>();
         if (stationsOnMap.size() == 2) {
             start = stationsOnMap.get(0);
             end = stationsOnMap.get(1);
             System.out.printf("Start: %s, End: %s%n", start.getName(), end.getName());
-            return;
         } else {
+            // choose start
             System.out.println("Select start station:");
             for (int i = 0; i < stationsOnMap.size(); i++) {
                 Station s = stationsOnMap.get(i);
                 System.out.printf("[%d] %s at (x=%d, y=%d)%n", i, s.getName(), s.getX(), s.getY());
             }
-            int startIndex = -1;
-            boolean startValid = false;
-            while (!startValid) {
+            int startIndex;
+            while (true) {
                 System.out.print("Enter start station number: ");
                 String line = scanner.nextLine();
                 try {
                     startIndex = Integer.parseInt(line);
-                    startValid = (startIndex >= 0 && startIndex < stationsOnMap.size());
-                } catch (NumberFormatException e) {
-                    startValid = false;
-                }
-                if (!startValid) {
-                    System.out.println("Invalid selection. Try again.");
-                }
+                    if (startIndex >= 0 && startIndex < stationsOnMap.size()) break;
+                } catch (NumberFormatException ignored) {}
+                System.out.println("Invalid selection. Try again.");
             }
             start = stationsOnMap.get(startIndex);
 
+            // choose end
             List<Station> remaining = new ArrayList<>(stationsOnMap);
-            remaining.remove(startIndex);
+            remaining.remove(start);
             System.out.println("Select end station:");
             for (int i = 0; i < remaining.size(); i++) {
                 Station s = remaining.get(i);
                 System.out.printf("[%d] %s at (x=%d, y=%d)%n", i, s.getName(), s.getX(), s.getY());
             }
-            int endIndex = -1;
-            boolean endValid = false;
-            while (!endValid) {
+            int endIndex;
+            while (true) {
                 System.out.print("Enter end station number: ");
                 String line = scanner.nextLine();
                 try {
                     endIndex = Integer.parseInt(line);
-                    endValid = (endIndex >= 0 && endIndex < remaining.size());
-                } catch (NumberFormatException e) {
-                    endValid = false;
-                }
-                if (!endValid) {
-                    System.out.println("Invalid selection. Try again.");
-                }
+                    if (endIndex >= 0 && endIndex < remaining.size()) break;
+                } catch (NumberFormatException ignored) {}
+                System.out.println("Invalid selection. Try again.");
             }
             end = remaining.get(endIndex);
 
-            remaining.remove(endIndex);
-            List<Station> intermediates = new ArrayList<>();
+            // optional intermediates
+            remaining.remove(end);
             System.out.print("Add intermediate stations? (Y/N): ");
-            String reply = scanner.nextLine().trim();
-            if (reply.equalsIgnoreCase("y")) {
-                boolean adding = true;
-                while (adding && !remaining.isEmpty()) {
+            if (scanner.nextLine().trim().equalsIgnoreCase("Y")) {
+                while (!remaining.isEmpty()) {
                     System.out.println("Select intermediate station or -1 to finish:");
                     for (int i = 0; i < remaining.size(); i++) {
                         Station s = remaining.get(i);
@@ -145,9 +124,8 @@ public class AssignTrainUI implements Runnable {
                         System.out.println("Invalid selection. Try again.");
                         continue;
                     }
-                    if (idx == -1) {
-                        adding = false;
-                    } else if (idx >= 0 && idx < remaining.size()) {
+                    if (idx == -1) break;
+                    if (idx >= 0 && idx < remaining.size()) {
                         intermediates.add(remaining.get(idx));
                         remaining.remove(idx);
                     } else {
@@ -155,8 +133,56 @@ public class AssignTrainUI implements Runnable {
                     }
                 }
             }
-            System.out.println("Sucesso");
-            return;
         }
+
+        System.out.println("Select cargo type to collect:");
+        System.out.println("[1] People");
+        System.out.println("[2] Mail");
+        System.out.println("[3] Both");
+        int cargoChoice;
+        while (true) {
+            System.out.print("Enter choice: ");
+            String line = scanner.nextLine();
+            try {
+                cargoChoice = Integer.parseInt(line);
+                if (cargoChoice >= 1 && cargoChoice <= 3) break;
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Invalid selection. Try again.");
+        }
+
+        List<Carriage> carriages = new ArrayList<>();
+        if (cargoChoice == 1 || cargoChoice == 3) {
+            System.out.print("Enter number of People carriages: ");
+            int num;
+            while (true) {
+                try {
+                    num = Integer.parseInt(scanner.nextLine());
+                    if (num > 0) break;
+                } catch (NumberFormatException ignored) {}
+                System.out.println("Invalid number. Must be > 0.");
+            }
+            for (int i = 0; i < num; i++) {
+                carriages.add(new Carriage(Type.PEOPLE));
+            }
+        }
+        if (cargoChoice == 2 || cargoChoice == 3) {
+            System.out.print("Enter number of Mail carriages: ");
+            int num;
+            while (true) {
+                try {
+                    num = Integer.parseInt(scanner.nextLine());
+                    if (num > 0) break;
+                } catch (NumberFormatException ignored) {}
+                System.out.println("Invalid number. Must be > 0.");
+            }
+            for (int i = 0; i < num; i++) {
+                carriages.add(new Carriage(Type.MAIL));
+            }
+        }
+
+        User user = CurrentUser.getInstance().getUser();
+
+        Train train = new Train(chosenLoco, carriages, user.getEmail());
+        System.out.println("Success: Train created with " + carriages.size() + " carriages.");
     }
 }

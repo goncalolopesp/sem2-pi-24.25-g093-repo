@@ -6,20 +6,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Repository for storing and querying Station instances.
+ * Thread-safe repository for storing and querying Station instances.
  * <p>
- * Provides methods to add stations and get a list of all the stations created.
+ * Provides methods to add, get, and remove stations safely across threads.
  * </p>
  */
 public class StationRepository {
     private final List<Station> stations = new ArrayList<>();
 
     /**
-     * Add a new station to the repository.
+     * Adds a new station to the repository.
      * @param s the station to add
      * @return true if added successfully
      */
-    public boolean addStation(Station s) {
+    public synchronized boolean addStation(Station s) {
         return stations.add(s);
     }
 
@@ -27,15 +27,28 @@ public class StationRepository {
      * Returns a defensive copy of all stations.
      * @return unmodifiable list of stored Station objects
      */
-    public List<Station> getStations() {
+    public synchronized List<Station> getStations() {
         return List.copyOf(stations);
     }
 
     /**
-     * Removes a certain station from the list of all the stations.
+     * Removes a certain station from the list of all stations.
+     * @param station the station to remove
+     * @return true if removed; false if not
      */
-    public boolean removeStation(Station station) {
+    public synchronized boolean removeStation(Station station) {
         return stations.remove(station);
     }
 
+    /**
+     * Atomically removes all stations matching the given map name and owner.
+     * @param mapName the map name to match
+     * @param ownerEmail the owner email to match
+     */
+    public synchronized void removeStationsByMapAndOwner(String mapName, String ownerEmail) {
+        stations.removeIf(s ->
+                s.getMapName().equalsIgnoreCase(mapName) &&
+                        s.getOwnerPlayer().equalsIgnoreCase(ownerEmail)
+        );
+    }
 }
