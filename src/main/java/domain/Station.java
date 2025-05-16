@@ -117,6 +117,11 @@ public class Station {
      */
     public Orientation getOrientation() { return orientation; }
 
+    /**
+     * Returns a String formatted print.
+     *
+     * @return a String formatted print
+     */
     @Override
     public String toString() {
         return name + " " + type + " (" + x + ',' + y + ')';
