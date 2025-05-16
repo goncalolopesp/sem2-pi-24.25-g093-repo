@@ -40,4 +40,10 @@ public class ScenarioTest {
     void getHistoricalRestrictions() {
         assertEquals(Collections.singletonList("none"), scenario.getHistoricalRestrictions());
     }
+
+    @Test
+    void toStringTest() {
+        String expected = scenario.getScenarioName();
+        assertEquals(expected, scenario.toString());
+    }
 }

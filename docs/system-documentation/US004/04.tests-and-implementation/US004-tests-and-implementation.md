@@ -87,6 +87,15 @@ void getScenarios() {
 }
 ```
 
+**Test 10:** Validates toString print.
+```java
+@Test
+void toStringTest() {
+String expected = scenario.getScenarioName();
+assertEquals(expected, scenario.toString());
+}
+```
+
 ## 5. Construction (Implementation)
 
 ### Class CreateScenarioController
