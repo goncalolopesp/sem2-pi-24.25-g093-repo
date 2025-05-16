@@ -1,8 +1,6 @@
 package controller;
 
-import domain.Carriage;
-import domain.Station;
-import domain.Train;
+import domain.*;
 
 import java.util.List;
 
@@ -94,6 +92,8 @@ public class AssignTrainController {
         System.out.println("Budget earned: " + budget);
         System.out.println("=========================\n");
 
+        User user = CurrentUser.getInstance().getUser();
+        user.setBudget(new domain.Budget(user.getBudgetValue() + budget));
         return budget;
     }
 
