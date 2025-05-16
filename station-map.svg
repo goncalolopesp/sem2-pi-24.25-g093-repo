@@ -1,0 +1,444 @@
+<svg width="832px" height="1556px"
+ viewBox="0.00 0.00 831.79 1556.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1.0 1.0) rotate(0.0) translate(4.0 1552.0)">
+<title>MapaDeEstacoes</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1552 827.79,-1552 827.79,4 -4,4"/>
+<!-- S_Wick -->
+<g id="node1" class="node">
+<title>S_Wick</title>
+<ellipse fill="none" stroke="white" cx="498" cy="-1530" rx="40.6" ry="18"/>
+<text text-anchor="middle" x="498" y="-1524.95" font-family="Times New Roman,serif" font-size="14.00">S_Wick</text>
+</g>
+<!-- T_Glasgow_Queen_Street -->
+<g id="node2" class="node">
+<title>T_Glasgow_Queen_Street</title>
+<ellipse fill="none" stroke="white" cx="174" cy="-1458" rx="108.67" ry="18"/>
+<text text-anchor="middle" x="174" y="-1452.95" font-family="Times New Roman,serif" font-size="14.00">T_Glasgow_Queen_Street</text>
+</g>
+<!-- S_Wick&#45;&#45;T_Glasgow_Queen_Street -->
+<g id="edge1" class="edge">
+<title>S_Wick&#45;&#45;T_Glasgow_Queen_Street</title>
+<path fill="none" stroke="black" stroke-width="4" d="M462.09,-1521.24C408.13,-1509.58 305.33,-1487.37 238.25,-1472.88"/>
+</g>
+<!-- S_Dalmuir -->
+<g id="node3" class="node">
+<title>S_Dalmuir</title>
+<ellipse fill="none" stroke="white" cx="174" cy="-1386" rx="51.86" ry="18"/>
+<text text-anchor="middle" x="174" y="-1380.95" font-family="Times New Roman,serif" font-size="14.00">S_Dalmuir</text>
+</g>
+<!-- T_Glasgow_Queen_Street&#45;&#45;S_Dalmuir -->
+<g id="edge2" class="edge">
+<title>T_Glasgow_Queen_Street&#45;&#45;S_Dalmuir</title>
+<path fill="none" stroke="red" d="M174,-1439.7C174,-1428.85 174,-1414.92 174,-1404.1"/>
+</g>
+<!-- D_Aviemore -->
+<g id="node25" class="node">
+<title>D_Aviemore</title>
+<ellipse fill="none" stroke="white" cx="87" cy="-378" rx="59.03" ry="18"/>
+<text text-anchor="middle" x="87" y="-372.95" font-family="Times New Roman,serif" font-size="14.00">D_Aviemore</text>
+</g>
+<!-- T_Glasgow_Queen_Street&#45;&#45;D_Aviemore -->
+<g id="edge3" class="edge">
+<title>T_Glasgow_Queen_Street&#45;&#45;D_Aviemore</title>
+<path fill="none" stroke="black" stroke-width="4" d="M148.15,-1440.14C135.82,-1430.86 121.86,-1418.32 113,-1404 91.5,-1369.26 90,-1355.86 90,-1315 90,-1315 90,-1315 90,-521 90,-476.12 88.48,-423.28 87.61,-396.49"/>
+</g>
+<!-- D_Crianlarich -->
+<g id="node4" class="node">
+<title>D_Crianlarich</title>
+<ellipse fill="none" stroke="white" cx="297" cy="-1314" rx="63.63" ry="18"/>
+<text text-anchor="middle" x="297" y="-1308.95" font-family="Times New Roman,serif" font-size="14.00">D_Crianlarich</text>
+</g>
+<!-- S_Dalmuir&#45;&#45;D_Crianlarich -->
+<g id="edge4" class="edge">
+<title>S_Dalmuir&#45;&#45;D_Crianlarich</title>
+<path fill="none" stroke="red" d="M200.09,-1370.15C220.54,-1358.52 248.91,-1342.37 269.67,-1330.55"/>
+</g>
+<!-- S_Kingussie -->
+<g id="node26" class="node">
+<title>S_Kingussie</title>
+<ellipse fill="none" stroke="white" cx="165" cy="-306" rx="57.49" ry="18"/>
+<text text-anchor="middle" x="165" y="-300.95" font-family="Times New Roman,serif" font-size="14.00">S_Kingussie</text>
+</g>
+<!-- S_Dalmuir&#45;&#45;S_Kingussie -->
+<g id="edge5" class="edge">
+<title>S_Dalmuir&#45;&#45;S_Kingussie</title>
+<path fill="none" stroke="black" stroke-width="4" d="M174,-1367.51C174,-1340.71 174,-1287.87 174,-1243 174,-1243 174,-1243 174,-449 174,-404.04 169.45,-351.24 166.82,-324.47"/>
+</g>
+<!-- D_Tulloch -->
+<g id="node5" class="node">
+<title>D_Tulloch</title>
+<ellipse fill="none" stroke="white" cx="344" cy="-1242" rx="50.84" ry="18"/>
+<text text-anchor="middle" x="344" y="-1236.95" font-family="Times New Roman,serif" font-size="14.00">D_Tulloch</text>
+</g>
+<!-- D_Crianlarich&#45;&#45;D_Tulloch -->
+<g id="edge6" class="edge">
+<title>D_Crianlarich&#45;&#45;D_Tulloch</title>
+<path fill="none" stroke="red" d="M302.7,-1295.7C309.05,-1284.52 318.79,-1270.08 327.37,-1259.14"/>
+</g>
+<!-- D_Crianlarich&#45;&#45;D_Tulloch -->
+<g id="edge7" class="edge">
+<title>D_Crianlarich&#45;&#45;D_Tulloch</title>
+<path fill="none" stroke="black" stroke-width="4" d="M313.98,-1296.41C322.56,-1285.41 332.23,-1271.03 338.49,-1259.96"/>
+</g>
+<!-- S_Fort_William -->
+<g id="node6" class="node">
+<title>S_Fort_William</title>
+<ellipse fill="none" stroke="white" cx="413" cy="-1170" rx="71.31" ry="18"/>
+<text text-anchor="middle" x="413" y="-1164.95" font-family="Times New Roman,serif" font-size="14.00">S_Fort_William</text>
+</g>
+<!-- D_Tulloch&#45;&#45;S_Fort_William -->
+<g id="edge8" class="edge">
+<title>D_Tulloch&#45;&#45;S_Fort_William</title>
+<path fill="none" stroke="red" d="M360,-1224.76C370.99,-1213.62 385.53,-1198.87 396.6,-1187.63"/>
+</g>
+<!-- D_Attadale -->
+<g id="node20" class="node">
+<title>D_Attadale</title>
+<ellipse fill="none" stroke="white" cx="668" cy="-162" rx="53.4" ry="18"/>
+<text text-anchor="middle" x="668" y="-156.95" font-family="Times New Roman,serif" font-size="14.00">D_Attadale</text>
+</g>
+<!-- D_Tulloch&#45;&#45;D_Attadale -->
+<g id="edge9" class="edge">
+<title>D_Tulloch&#45;&#45;D_Attadale</title>
+<path fill="none" stroke="black" stroke-width="4" d="M390.9,-1234.57C496.94,-1218.73 746,-1173.57 746,-1099 746,-1099 746,-1099 746,-1025 746,-830.93 822,-789.07 822,-595 822,-595 822,-595 822,-305 822,-264.55 829.16,-246.84 803,-216 781.26,-190.37 745.48,-177.06 716.21,-170.18"/>
+</g>
+<!-- S_Mallaig -->
+<g id="node7" class="node">
+<title>S_Mallaig</title>
+<ellipse fill="none" stroke="white" cx="359" cy="-1098" rx="49.82" ry="18"/>
+<text text-anchor="middle" x="359" y="-1092.95" font-family="Times New Roman,serif" font-size="14.00">S_Mallaig</text>
+</g>
+<!-- S_Fort_William&#45;&#45;S_Mallaig -->
+<g id="edge10" class="edge">
+<title>S_Fort_William&#45;&#45;S_Mallaig</title>
+<path fill="none" stroke="red" d="M399.93,-1152.05C391.44,-1141.05 380.42,-1126.76 371.95,-1115.79"/>
+</g>
+<!-- T_Edinburgh -->
+<g id="node11" class="node">
+<title>T_Edinburgh</title>
+<ellipse fill="none" stroke="white" cx="437" cy="-810" rx="60.05" ry="18"/>
+<text text-anchor="middle" x="437" y="-804.95" font-family="Times New Roman,serif" font-size="14.00">T_Edinburgh</text>
+</g>
+<!-- S_Fort_William&#45;&#45;T_Edinburgh -->
+<g id="edge11" class="edge">
+<title>S_Fort_William&#45;&#45;T_Edinburgh</title>
+<path fill="none" stroke="black" stroke-width="4" d="M417.86,-1151.67C424.87,-1125.08 437,-1072.5 437,-1027 437,-1027 437,-1027 437,-953 437,-908.13 437,-855.29 437,-828.49"/>
+</g>
+<!-- S_Dunblane -->
+<g id="node8" class="node">
+<title>S_Dunblane</title>
+<ellipse fill="none" stroke="white" cx="328" cy="-1026" rx="56.47" ry="18"/>
+<text text-anchor="middle" x="328" y="-1020.95" font-family="Times New Roman,serif" font-size="14.00">S_Dunblane</text>
+</g>
+<!-- S_Mallaig&#45;&#45;S_Dunblane -->
+<g id="edge12" class="edge">
+<title>S_Mallaig&#45;&#45;S_Dunblane</title>
+<path fill="none" stroke="black" stroke-width="4" d="M351.5,-1080.05C346.69,-1069.21 340.48,-1055.18 335.65,-1044.28"/>
+</g>
+<!-- T_Stirling -->
+<g id="node9" class="node">
+<title>T_Stirling</title>
+<ellipse fill="none" stroke="white" cx="544" cy="-954" rx="48.79" ry="18"/>
+<text text-anchor="middle" x="544" y="-948.95" font-family="Times New Roman,serif" font-size="14.00">T_Stirling</text>
+</g>
+<!-- S_Dunblane&#45;&#45;T_Stirling -->
+<g id="edge13" class="edge">
+<title>S_Dunblane&#45;&#45;T_Stirling</title>
+<path fill="none" stroke="yellow" d="M366.62,-1012.49C406.78,-999.47 469.15,-979.26 508.23,-966.59"/>
+</g>
+<!-- T_Perth -->
+<g id="node27" class="node">
+<title>T_Perth</title>
+<ellipse fill="none" stroke="white" cx="259" cy="-234" rx="40.6" ry="18"/>
+<text text-anchor="middle" x="259" y="-228.95" font-family="Times New Roman,serif" font-size="14.00">T_Perth</text>
+</g>
+<!-- S_Dunblane&#45;&#45;T_Perth -->
+<g id="edge14" class="edge">
+<title>S_Dunblane&#45;&#45;T_Perth</title>
+<path fill="none" stroke="black" stroke-width="4" d="M308.27,-1008.77C284.87,-983.61 250,-932.88 250,-883 250,-883 250,-883 250,-377 250,-331.89 250,-278.71 253.29,-252.05"/>
+</g>
+<!-- D_Croy -->
+<g id="node10" class="node">
+<title>D_Croy</title>
+<ellipse fill="none" stroke="white" cx="677" cy="-882" rx="40.6" ry="18"/>
+<text text-anchor="middle" x="677" y="-876.95" font-family="Times New Roman,serif" font-size="14.00">D_Croy</text>
+</g>
+<!-- T_Stirling&#45;&#45;D_Croy -->
+<g id="edge15" class="edge">
+<title>T_Stirling&#45;&#45;D_Croy</title>
+<path fill="none" stroke="yellow" d="M571.24,-938.67C594.79,-926.27 628.6,-908.47 651.6,-896.37"/>
+</g>
+<!-- D_Inverkeithing -->
+<g id="node15" class="node">
+<title>D_Inverkeithing</title>
+<ellipse fill="none" stroke="white" cx="608" cy="-594" rx="71.82" ry="18"/>
+<text text-anchor="middle" x="608" y="-588.95" font-family="Times New Roman,serif" font-size="14.00">D_Inverkeithing</text>
+</g>
+<!-- T_Stirling&#45;&#45;D_Inverkeithing -->
+<g id="edge16" class="edge">
+<title>T_Stirling&#45;&#45;D_Inverkeithing</title>
+<path fill="none" stroke="black" stroke-width="4" d="M547.09,-935.73C557.92,-875.12 594.16,-672.44 604.94,-612.09"/>
+</g>
+<!-- D_Croy&#45;&#45;T_Glasgow_Queen_Street -->
+<g id="edge18" class="edge">
+<title>D_Croy&#45;&#45;T_Glasgow_Queen_Street</title>
+<path fill="none" stroke="yellow" d="M698.65,-897.65C729.92,-920.75 784,-968.82 784,-1025 784,-1315 784,-1315 784,-1315 784,-1417.21 455.02,-1445.88 280.25,-1453.9"/>
+</g>
+<!-- D_Croy&#45;&#45;S_Mallaig -->
+<g id="edge19" class="edge">
+<title>D_Croy&#45;&#45;S_Mallaig</title>
+<path fill="none" stroke="black" stroke-width="4" d="M666.15,-899.48C652.84,-918.75 628.71,-950.72 602,-972 535.22,-1025.22 442.21,-1065.4 392.88,-1084.56"/>
+</g>
+<!-- D_Croy&#45;&#45;T_Edinburgh -->
+<g id="edge17" class="edge">
+<title>D_Croy&#45;&#45;T_Edinburgh</title>
+<path fill="none" stroke="red" d="M643.63,-871.27C600.61,-858.72 525.79,-836.9 478.96,-823.24"/>
+</g>
+<!-- S_Bathgate -->
+<g id="node12" class="node">
+<title>S_Bathgate</title>
+<ellipse fill="none" stroke="white" cx="349" cy="-738" rx="53.4" ry="18"/>
+<text text-anchor="middle" x="349" y="-732.95" font-family="Times New Roman,serif" font-size="14.00">S_Bathgate</text>
+</g>
+<!-- T_Edinburgh&#45;&#45;S_Bathgate -->
+<g id="edge20" class="edge">
+<title>T_Edinburgh&#45;&#45;S_Bathgate</title>
+<path fill="none" stroke="yellow" d="M416.59,-792.76C402.27,-781.38 383.22,-766.22 369,-754.91"/>
+</g>
+<!-- T_Inverness -->
+<g id="node22" class="node">
+<title>T_Inverness</title>
+<ellipse fill="none" stroke="white" cx="466" cy="-450" rx="56.47" ry="18"/>
+<text text-anchor="middle" x="466" y="-444.95" font-family="Times New Roman,serif" font-size="14.00">T_Inverness</text>
+</g>
+<!-- T_Edinburgh&#45;&#45;T_Inverness -->
+<g id="edge21" class="edge">
+<title>T_Edinburgh&#45;&#45;T_Inverness</title>
+<path fill="none" stroke="black" stroke-width="4" d="M435.58,-791.52C433.54,-764.74 430,-711.92 430,-667 430,-667 430,-667 430,-593 430,-546.71 448.2,-494.47 458.71,-468.13"/>
+</g>
+<!-- S_Airdrie -->
+<g id="node13" class="node">
+<title>S_Airdrie</title>
+<ellipse fill="none" stroke="white" cx="342" cy="-18" rx="47.26" ry="18"/>
+<text text-anchor="middle" x="342" y="-12.95" font-family="Times New Roman,serif" font-size="14.00">S_Airdrie</text>
+</g>
+<!-- S_Bathgate&#45;&#45;S_Airdrie -->
+<g id="edge22" class="edge">
+<title>S_Bathgate&#45;&#45;S_Airdrie</title>
+<path fill="none" stroke="yellow" d="M344.13,-719.98C341.44,-709.67 338.36,-696.19 337,-684 331.67,-636.3 336.78,-624 337,-576 337.95,-363.25 340.96,-104.81 341.79,-36.33"/>
+</g>
+<!-- T_Dundee -->
+<g id="node14" class="node">
+<title>T_Dundee</title>
+<ellipse fill="none" stroke="white" cx="508" cy="-666" rx="49.82" ry="18"/>
+<text text-anchor="middle" x="508" y="-660.95" font-family="Times New Roman,serif" font-size="14.00">T_Dundee</text>
+</g>
+<!-- S_Bathgate&#45;&#45;T_Dundee -->
+<g id="edge23" class="edge">
+<title>S_Bathgate&#45;&#45;T_Dundee</title>
+<path fill="none" stroke="black" stroke-width="4" d="M380.41,-723.17C408.47,-710.82 449.32,-692.83 477.19,-680.56"/>
+</g>
+<!-- S_Airdrie&#45;&#45;T_Glasgow_Queen_Street -->
+<g id="edge24" class="edge">
+<title>S_Airdrie&#45;&#45;T_Glasgow_Queen_Street</title>
+<path fill="none" stroke="yellow" d="M300.75,-27.04C209.79,-45.95 0,-96.55 0,-161 0,-1315 0,-1315 0,-1315 0,-1380.5 74.94,-1421.19 126.45,-1441.42"/>
+</g>
+<!-- T_Dundee&#45;&#45;T_Stirling -->
+<g id="edge26" class="edge">
+<title>T_Dundee&#45;&#45;T_Stirling</title>
+<path fill="none" stroke="black" stroke-width="4" d="M510.17,-684.23C516.57,-735.12 535.36,-884.36 541.8,-935.54"/>
+</g>
+<!-- T_Dundee&#45;&#45;D_Inverkeithing -->
+<g id="edge25" class="edge">
+<title>T_Dundee&#45;&#45;D_Inverkeithing</title>
+<path fill="none" stroke="red" d="M530.19,-649.46C546.3,-638.19 568.06,-622.96 584.48,-611.47"/>
+</g>
+<!-- D_Inverkeithing&#45;&#45;T_Edinburgh -->
+<g id="edge27" class="edge">
+<title>D_Inverkeithing&#45;&#45;T_Edinburgh</title>
+<path fill="none" stroke="red" d="M602.19,-612.41C595.45,-631.13 583.17,-661.27 567,-684 535.24,-728.65 486.15,-770.67 458.27,-792.79"/>
+</g>
+<!-- S_Dingwall -->
+<g id="node16" class="node">
+<title>S_Dingwall</title>
+<ellipse fill="none" stroke="white" cx="608" cy="-522" rx="54.93" ry="18"/>
+<text text-anchor="middle" x="608" y="-516.95" font-family="Times New Roman,serif" font-size="14.00">S_Dingwall</text>
+</g>
+<!-- D_Inverkeithing&#45;&#45;S_Dingwall -->
+<g id="edge28" class="edge">
+<title>D_Inverkeithing&#45;&#45;S_Dingwall</title>
+<path fill="none" stroke="black" stroke-width="4" d="M608,-575.7C608,-564.85 608,-550.92 608,-540.1"/>
+</g>
+<!-- S_Dingwall&#45;&#45;S_Fort_William -->
+<g id="edge31" class="edge">
+<title>S_Dingwall&#45;&#45;S_Fort_William</title>
+<path fill="none" stroke="black" stroke-width="4" d="M638.28,-537.29C678.91,-558.81 746,-603.64 746,-665 746,-811 746,-811 746,-811 746,-986.28 529.33,-1111.73 445.54,-1153.68"/>
+</g>
+<!-- S_Ardgay -->
+<g id="node17" class="node">
+<title>S_Ardgay</title>
+<ellipse fill="none" stroke="white" cx="666" cy="-378" rx="48.28" ry="18"/>
+<text text-anchor="middle" x="666" y="-372.95" font-family="Times New Roman,serif" font-size="14.00">S_Ardgay</text>
+</g>
+<!-- S_Dingwall&#45;&#45;S_Ardgay -->
+<g id="edge29" class="edge">
+<title>S_Dingwall&#45;&#45;S_Ardgay</title>
+<path fill="none" stroke="red" d="M615,-503.87C626.14,-476.58 647.82,-423.52 658.98,-396.19"/>
+</g>
+<!-- S_Dingwall&#45;&#45;T_Inverness -->
+<g id="edge30" class="edge">
+<title>S_Dingwall&#45;&#45;T_Inverness</title>
+<path fill="none" stroke="red" d="M578.58,-506.5C554.37,-494.56 520.2,-477.72 495.87,-465.73"/>
+</g>
+<!-- D_Helmsdale -->
+<g id="node18" class="node">
+<title>D_Helmsdale</title>
+<ellipse fill="none" stroke="white" cx="678" cy="-306" rx="62.1" ry="18"/>
+<text text-anchor="middle" x="678" y="-300.95" font-family="Times New Roman,serif" font-size="14.00">D_Helmsdale</text>
+</g>
+<!-- S_Ardgay&#45;&#45;D_Helmsdale -->
+<g id="edge32" class="edge">
+<title>S_Ardgay&#45;&#45;D_Helmsdale</title>
+<path fill="none" stroke="red" d="M663.05,-359.7C663.79,-348.85 666.19,-334.92 669.17,-324.1"/>
+</g>
+<!-- S_Ardgay&#45;&#45;D_Helmsdale -->
+<g id="edge33" class="edge">
+<title>S_Ardgay&#45;&#45;D_Helmsdale</title>
+<path fill="none" stroke="black" stroke-width="4" d="M674.78,-360.05C677.79,-349.21 680.21,-335.18 680.95,-324.28"/>
+</g>
+<!-- D_Helmsdale&#45;&#45;S_Wick -->
+<g id="edge34" class="edge">
+<title>D_Helmsdale&#45;&#45;S_Wick</title>
+<path fill="none" stroke="red" d="M701.26,-323.06C732.46,-346.71 784,-394.09 784,-449 784,-595 784,-595 784,-595 784,-691.6 822,-712.4 822,-809 822,-1387 822,-1387 822,-1387 822,-1509.22 626.22,-1527.23 539.03,-1529.19"/>
+</g>
+<!-- S_Kyle_of_Lochalsh -->
+<g id="node19" class="node">
+<title>S_Kyle_of_Lochalsh</title>
+<ellipse fill="none" stroke="white" cx="705" cy="-234" rx="89.23" ry="18"/>
+<text text-anchor="middle" x="705" y="-228.95" font-family="Times New Roman,serif" font-size="14.00">S_Kyle_of_Lochalsh</text>
+</g>
+<!-- D_Helmsdale&#45;&#45;S_Kyle_of_Lochalsh -->
+<g id="edge35" class="edge">
+<title>D_Helmsdale&#45;&#45;S_Kyle_of_Lochalsh</title>
+<path fill="none" stroke="black" stroke-width="4" d="M684.67,-287.7C688.86,-276.85 694.23,-262.92 698.4,-252.1"/>
+</g>
+<!-- S_Kyle_of_Lochalsh&#45;&#45;D_Croy -->
+<g id="edge37" class="edge">
+<title>S_Kyle_of_Lochalsh&#45;&#45;D_Croy</title>
+<path fill="none" stroke="black" stroke-width="4" d="M724.01,-251.62C733.48,-261.18 743.96,-274.05 749,-288 754.43,-303.05 749.96,-308.03 749,-324 739.87,-476.37 708,-512.35 708,-665 708,-739 708,-739 708,-739 708,-784.92 692.33,-837.32 683.27,-863.78"/>
+</g>
+<!-- S_Kyle_of_Lochalsh&#45;&#45;D_Attadale -->
+<g id="edge36" class="edge">
+<title>S_Kyle_of_Lochalsh&#45;&#45;D_Attadale</title>
+<path fill="none" stroke="red" d="M695.85,-215.7C690.12,-204.85 682.76,-190.92 677.04,-180.1"/>
+</g>
+<!-- D_Attadale&#45;&#45;S_Dingwall -->
+<g id="edge38" class="edge">
+<title>D_Attadale&#45;&#45;S_Dingwall</title>
+<path fill="none" stroke="red" d="M643.73,-178.34C630.9,-187.7 615.98,-200.77 607,-216 586.45,-250.84 588,-264.55 588,-305 588,-379 588,-379 588,-379 588,-424.31 598.11,-476.97 603.95,-503.62"/>
+</g>
+<!-- S_Arbroath -->
+<g id="node21" class="node">
+<title>S_Arbroath</title>
+<ellipse fill="none" stroke="white" cx="531" cy="-18" rx="53.91" ry="18"/>
+<text text-anchor="middle" x="531" y="-12.95" font-family="Times New Roman,serif" font-size="14.00">S_Arbroath</text>
+</g>
+<!-- D_Attadale&#45;&#45;S_Arbroath -->
+<g id="edge39" class="edge">
+<title>D_Attadale&#45;&#45;S_Arbroath</title>
+<path fill="none" stroke="black" stroke-width="4" d="M652.02,-144.43C625.62,-117.07 573.21,-62.75 546.88,-35.46"/>
+</g>
+<!-- S_Arbroath&#45;&#45;S_Bathgate -->
+<g id="edge41" class="edge">
+<title>S_Arbroath&#45;&#45;S_Bathgate</title>
+<path fill="none" stroke="black" stroke-width="4" d="M525.32,-35.98C502.84,-103.26 420.45,-351.44 401,-432 374.9,-540.09 357.01,-672.79 351.12,-719.63"/>
+</g>
+<!-- S_Arbroath&#45;&#45;T_Dundee -->
+<g id="edge40" class="edge">
+<title>S_Arbroath&#45;&#45;T_Dundee</title>
+<path fill="none" stroke="yellow" d="M534.84,-36.39C540.4,-63.06 550,-115.73 550,-161 550,-379 550,-379 550,-379 550,-432.32 521.06,-594.18 511.23,-647.65"/>
+</g>
+<!-- T_Inverness&#45;&#45;S_Ardgay -->
+<g id="edge44" class="edge">
+<title>T_Inverness&#45;&#45;S_Ardgay</title>
+<path fill="none" stroke="black" stroke-width="4" d="M503.15,-436C539.98,-423.11 595.93,-403.53 631.72,-391"/>
+</g>
+<!-- S_Elgin -->
+<g id="node23" class="node">
+<title>S_Elgin</title>
+<ellipse fill="none" stroke="white" cx="427" cy="-162" rx="40.6" ry="18"/>
+<text text-anchor="middle" x="427" y="-156.95" font-family="Times New Roman,serif" font-size="14.00">S_Elgin</text>
+</g>
+<!-- T_Inverness&#45;&#45;S_Elgin -->
+<g id="edge42" class="edge">
+<title>T_Inverness&#45;&#45;S_Elgin</title>
+<path fill="none" stroke="yellow" d="M463.62,-431.54C456.64,-380.36 436.29,-231.12 429.35,-180.23"/>
+</g>
+<!-- T_Inverness&#45;&#45;D_Aviemore -->
+<g id="edge43" class="edge">
+<title>T_Inverness&#45;&#45;D_Aviemore</title>
+<path fill="none" stroke="red" d="M418,-440.13C345.69,-426.78 209.54,-401.63 136.41,-388.13"/>
+</g>
+<!-- T_Aberdeen -->
+<g id="node24" class="node">
+<title>T_Aberdeen</title>
+<ellipse fill="none" stroke="white" cx="427" cy="-90" rx="56.98" ry="18"/>
+<text text-anchor="middle" x="427" y="-84.95" font-family="Times New Roman,serif" font-size="14.00">T_Aberdeen</text>
+</g>
+<!-- S_Elgin&#45;&#45;T_Aberdeen -->
+<g id="edge45" class="edge">
+<title>S_Elgin&#45;&#45;T_Aberdeen</title>
+<path fill="none" stroke="yellow" d="M421.08,-143.7C419.97,-132.85 419.97,-118.92 421.1,-108.1"/>
+</g>
+<!-- S_Elgin&#45;&#45;T_Aberdeen -->
+<g id="edge46" class="edge">
+<title>S_Elgin&#45;&#45;T_Aberdeen</title>
+<path fill="none" stroke="black" stroke-width="4" d="M432.92,-143.7C434.03,-132.85 434.03,-118.92 432.9,-108.1"/>
+</g>
+<!-- T_Aberdeen&#45;&#45;S_Airdrie -->
+<g id="edge48" class="edge">
+<title>T_Aberdeen&#45;&#45;S_Airdrie</title>
+<path fill="none" stroke="black" stroke-width="4" d="M407.29,-72.76C393.46,-61.38 375.06,-46.22 361.31,-34.91"/>
+</g>
+<!-- T_Aberdeen&#45;&#45;S_Arbroath -->
+<g id="edge47" class="edge">
+<title>T_Aberdeen&#45;&#45;S_Arbroath</title>
+<path fill="none" stroke="yellow" d="M450.34,-73.29C467.47,-61.76 490.63,-46.17 507.74,-34.66"/>
+</g>
+<!-- D_Aviemore&#45;&#45;S_Dalmuir -->
+<g id="edge50" class="edge">
+<title>D_Aviemore&#45;&#45;S_Dalmuir</title>
+<path fill="none" stroke="black" stroke-width="4" d="M96.31,-395.91C109.75,-421.96 133,-473.84 133,-521 133,-1243 133,-1243 133,-1243 133,-1289.7 153.72,-1341.77 165.7,-1367.97"/>
+</g>
+<!-- D_Aviemore&#45;&#45;S_Kingussie -->
+<g id="edge49" class="edge">
+<title>D_Aviemore&#45;&#45;S_Kingussie</title>
+<path fill="none" stroke="red" d="M105.09,-360.76C117.6,-349.54 134.19,-334.65 146.74,-323.39"/>
+</g>
+<!-- S_Kingussie&#45;&#45;D_Crianlarich -->
+<g id="edge52" class="edge">
+<title>S_Kingussie&#45;&#45;D_Crianlarich</title>
+<path fill="none" stroke="black" stroke-width="4" d="M174.51,-323.89C188.24,-349.91 212,-401.74 212,-449 212,-1171 212,-1171 212,-1171 212,-1222.72 254.02,-1271.91 278.97,-1296.56"/>
+</g>
+<!-- S_Kingussie&#45;&#45;T_Perth -->
+<g id="edge51" class="edge">
+<title>S_Kingussie&#45;&#45;T_Perth</title>
+<path fill="none" stroke="red" d="M186.33,-289.12C202.15,-277.34 223.56,-261.39 239.04,-249.86"/>
+</g>
+<!-- T_Perth&#45;&#45;S_Dunblane -->
+<g id="edge54" class="edge">
+<title>T_Perth&#45;&#45;S_Dunblane</title>
+<path fill="none" stroke="yellow" d="M264.71,-252.05C268,-278.71 268,-331.89 268,-377 268,-883 268,-883 268,-883 268,-932.34 302.11,-982.5 319.24,-1007.93"/>
+</g>
+<!-- T_Perth&#45;&#45;T_Dundee -->
+<g id="edge53" class="edge">
+<title>T_Perth&#45;&#45;T_Dundee</title>
+<path fill="none" stroke="yellow" d="M268.67,-251.7C308.3,-320.13 458.02,-578.68 498.09,-647.88"/>
+</g>
+<!-- T_Perth&#45;&#45;S_Elgin -->
+<g id="edge55" class="edge">
+<title>T_Perth&#45;&#45;S_Elgin</title>
+<path fill="none" stroke="black" stroke-width="4" d="M287.88,-220.97C318.75,-208.11 367.39,-187.84 398.22,-174.99"/>
+</g>
+</g>
+</svg>

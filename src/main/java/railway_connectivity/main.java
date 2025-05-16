@@ -59,7 +59,7 @@ public class main {
             System.out.println("2. Verify if a route that passes once, and only once, by each railway line exists (US14)");
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
-            String op = sc.nextLine().trim();
+            String op = sc.nextLine();
 
             if (op.equals("1")) {
                 implementUS13(lines);
@@ -77,7 +77,7 @@ public class main {
         sc.close();
     }
 
-    private static void implementUS13(File linesFile) throws FileNotFoundException {
+    private static void implementUS13(File linesFile) throws IOException {
         // Load railway data
         List<String[]> edges = loadEdges(linesFile);
 
@@ -95,8 +95,16 @@ public class main {
         System.out.print("Enter destination station: ");
         String destination = sc.nextLine().trim();
 
+        List<String> vertices = new ArrayList<>();
+        for (String[] e : edges) {
+            if (!vertices.contains(e[0])) vertices.add(e[0]);
+            if (!vertices.contains(e[1])) vertices.add(e[1]);
+        }
+
         // Build adjacency list
         Map<String, List<String>> graph = buildGraph(edges, trainType);
+
+        List<String> route = new ArrayList<>(graph.keySet());
 
         // Check connectivity
         boolean canTravel = isConnected(graph, source, destination);
@@ -105,6 +113,24 @@ public class main {
         } else {
             System.out.println("The train cannot travel between " + source + " and " + destination + ".");
         }
+
+        // Build adjacency list
+        Map<String, MutableNode> nodeMap = new HashMap<>();
+        for (String v : vertices) nodeMap.put(v, mutNode(v).add(Color.WHITE));
+        // build graph
+        MutableGraph g = mutGraph("MapaDeEstacoes").setDirected(false)
+                .add(nodeMap.values().toArray(new MutableNode[0]));
+        for (String[] e : edges) {
+            String a = e[0], b = e[1];
+            Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
+            g.add(nodeMap.get(a).addLink(to(nodeMap.get(b)).with(c)));
+        }
+        for (int i = 0; i < route.size() - 1; i++) {
+            g.add(nodeMap.get(route.get(i)).addLink(
+                    to(nodeMap.get(route.get(i + 1))).with(attr("penwidth", "4"))));
+        }
+        Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("station-map.svg"));
+        System.out.println("Graph saved as station-map.svg");
     }
 
     private static Map<String, List<String>> buildGraph(List<String[]> edges, String trainType) {
