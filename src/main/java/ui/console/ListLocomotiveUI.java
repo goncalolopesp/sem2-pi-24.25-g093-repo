@@ -10,7 +10,7 @@ public class ListLocomotiveUI implements Runnable {
         CurrentUser session = CurrentUser.getInstance();
         User user = session.getUser();
         for (Locomotive locomotive : user.getLocomotives()) {
-            System.out.println("*" + locomotive.getModelName());
+            System.out.printf("* Name: %-30s|Type: %-15s|topSpeed: %-15s|maintenanceCost: %-15s|fuelCost: %-15s%n", locomotive.getModelName(), locomotive.getType(), locomotive.getTopSpeed(), locomotive.getMaintenanceCost(), locomotive.getFuelCost());
         }
         System.out.println("==============================");
     }

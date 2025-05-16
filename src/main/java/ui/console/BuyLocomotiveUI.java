@@ -19,12 +19,17 @@ public class BuyLocomotiveUI implements Runnable {
         System.out.println("==========Available locomotives==========");
         listLocomotives();
         System.out.println();
-        System.out.print("Chosen Locomotive: ");
-        String modelName = scanner.nextLine();
-        if (buyLocomotive(modelName)){
-            getPlayerLocomotives();
+        String modelName;
+        do{
+            System.out.print("Chosen Locomotive: ");
+            modelName = scanner.nextLine().trim();
+            if (!(modelName.equalsIgnoreCase("cancel"))){
+                if (!locomotiveController.canBuyLocomotive(modelName, scenario)) System.out.println("Error buying Locomotive " + modelName + ": Locomotive not available!");
+            }
+        }while(!locomotiveController.canBuyLocomotive(modelName, scenario) && !modelName.equalsIgnoreCase("cancel"));
+        if (!(modelName.equalsIgnoreCase("cancel") || modelName.equalsIgnoreCase(""))) {
+            buyLocomotive(modelName);
         }
-
     }
 
     public void getPlayerLocomotives() {
@@ -41,13 +46,7 @@ public class BuyLocomotiveUI implements Runnable {
             return true;
 
         }else{
-
-            if (locomotiveController.canBuyLocomotive(modelName, scenario)){
-                System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
-            }else{
-                System.out.println("Error buying Locomotive " + modelName + ": Locomotive not available!");
-            }
-
+            System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
             return false;
 
         }
@@ -56,8 +55,10 @@ public class BuyLocomotiveUI implements Runnable {
     public void listLocomotives() {
         List<Locomotive> locomotiveList = locomotiveController.getLocomotives(scenario);
         for (Locomotive locomotive : locomotiveList) {
-            System.out.printf("%-20s | %-20s | %-20s%n", "Name: " + locomotive.getModelName(), "Price: " + locomotive.getPrice(), "topSpeed: " + locomotive.getTopSpeed());
+            System.out.printf("Name: %-20s | Price: %-5s | TopSpeed: %-5s | Maintenance Cost per year: %-5s | Fuel Cost per year: %-5s%n", locomotive.getModelName(), locomotive.getPrice(), locomotive.getTopSpeed(), locomotive.getMaintenanceCost(), locomotive.getFuelCost());
         }
+        System.out.println();
+        System.out.println("Cancel");
     }
 
 }
