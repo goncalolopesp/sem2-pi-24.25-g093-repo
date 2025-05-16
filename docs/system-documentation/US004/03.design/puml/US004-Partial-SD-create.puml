@@ -1,0 +1,28 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+participant ":CreateScenarioUI" as CreateScenarioUI
+
+participant ":CreateScenarioController" as CreateScenarioController
+participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+
+activate CreateScenarioUI
+CreateScenarioUI --> CreateScenarioUI : submitData()
+    CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    activate CreateScenarioController
+
+    CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    activate scenarioRepository
+
+    create "scenario\n:Scenario" as Scenario
+
+    scenarioRepository --> Scenario : create()
+    scenarioRepository --> scenarioRepository : validateScenario(scenario)
+    scenarioRepository --> scenarioRepository : add(scenario)
+    deactivate scenarioRepository
+
+@enduml
