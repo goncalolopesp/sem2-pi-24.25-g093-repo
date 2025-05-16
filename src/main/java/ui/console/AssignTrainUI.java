@@ -1,10 +1,12 @@
 package ui.console;
 
-import controller.SimulationController;
+import controller.AssignTrainController;
 import domain.*;
 import domain.Carriage.Type;
 import repository.Repositories;
 import repository.StationRepository;
+import repository.TrainRepository;
+import repository.CarriageRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +17,11 @@ public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
     private final Scanner scanner = new Scanner(System.in);
+    private final AssignTrainController assignTrainController;
 
     public AssignTrainUI(Map selectedMap) {
         this.selectedMap = selectedMap;
+        this.assignTrainController = new AssignTrainController();
     }
 
     @Override
@@ -151,6 +155,10 @@ public class AssignTrainUI implements Runnable {
         }
 
         List<Carriage> carriages = new ArrayList<>();
+        CarriageRepository carriageRepo = Repositories.getInstance().getCarriageRepository();
+
+        List<Type> cargoTypes = new ArrayList<>();
+
         if (cargoChoice == 1 || cargoChoice == 3) {
             System.out.print("Enter number of People carriages: ");
             int num;
@@ -162,8 +170,11 @@ public class AssignTrainUI implements Runnable {
                 System.out.println("Invalid number. Must be > 0.");
             }
             for (int i = 0; i < num; i++) {
-                carriages.add(new Carriage(Type.PEOPLE));
+                Carriage c = new Carriage(Type.PEOPLE);
+                carriageRepo.save(c);
+                carriages.add(c);
             }
+            cargoTypes.add(Type.PEOPLE);
         }
         if (cargoChoice == 2 || cargoChoice == 3) {
             System.out.print("Enter number of Mail carriages: ");
@@ -176,13 +187,28 @@ public class AssignTrainUI implements Runnable {
                 System.out.println("Invalid number. Must be > 0.");
             }
             for (int i = 0; i < num; i++) {
-                carriages.add(new Carriage(Type.MAIL));
+                Carriage c = new Carriage(Type.MAIL);
+                carriageRepo.save(c);
+                carriages.add(c);
             }
+            cargoTypes.add(Type.MAIL);
         }
 
         User user = CurrentUser.getInstance().getUser();
 
         Train train = new Train(chosenLoco, carriages, user.getEmail());
-        System.out.println("Success: Train created with " + carriages.size() + " carriages.");
+        TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
+        trainRepo.save(train);
+
+        // Create the complete route (start -> intermediates -> end)
+        List<Station> completeRoute = new ArrayList<>();
+        completeRoute.add(start);
+        completeRoute.addAll(intermediates);
+        completeRoute.add(end);
+
+        // Send the train, route, and cargo types to the controller
+        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes);
+
+        System.out.println("Success: Train created with " + carriages.size() + " carriages and assigned to route with " + completeRoute.size() + " stations.");
     }
 }

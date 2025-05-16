@@ -17,7 +17,8 @@ public class Repositories {
     private final BuildingRepository buildingRepository;
     private final IndustryRepository industryRepository;
     private final LocomotiveRepository locomotiveRepository;
-
+    private final TrainRepository trainRepository;
+    private final CarriageRepository carriageRepository;
     /**
      * Private constructor to prevent external instantiation.
      * Initializes all repositories.
@@ -31,6 +32,8 @@ public class Repositories {
         industryRepository = new IndustryRepository();
         stationRepository = new StationRepository();
         locomotiveRepository = new LocomotiveRepository();
+        trainRepository = new TrainRepository();
+        carriageRepository = new CarriageRepository();
     }
 
     /**
@@ -111,5 +114,24 @@ public class Repositories {
         return industryRepository;
     }
 
+    /**
+     * Gets the repository for locomotive entities.
+     *
+     * @return the locomotiveRepository
+     */
     public LocomotiveRepository getLocomotiveRepository() { return locomotiveRepository; }
+
+    /**
+     * Gets the repository for train entities.
+     *
+     * @return the trainRepository
+     */
+    public TrainRepository getTrainRepository() { return trainRepository; }
+
+    /**
+     * Gets the repository for carriage entities.
+     *
+     * @return the carriageRepository
+     */
+    public CarriageRepository getCarriageRepository() { return carriageRepository; }
 }
