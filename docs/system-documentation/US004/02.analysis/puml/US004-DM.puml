@@ -7,23 +7,37 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
+class User{
+    username
+    password
+}
+
 class Editor {
+    + createMap(name: String, width: int, height: int)
 }
 
 class Scenario {
     map
-    timeRestrictions
+    timePeriod
+}
+
+class TimePeriod {
     techRestrictions
     historicalEvents
 }
 
+
 class Map {
-    name
-    sizeX
-    sizeY
+     name
+     sizeX
+     sizeY
+     location
 }
 
-Editor "1" -- "*" Scenario : creates
-Scenario "1" -- "1" Map : based on
+Editor --|> User
+
+Editor o-- Scenario
+Scenario *-- Map
+TimePeriod --|> Scenario
 
 @enduml

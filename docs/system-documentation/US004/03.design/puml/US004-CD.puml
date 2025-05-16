@@ -1,37 +1,133 @@
 @startuml
 
-class Editor {
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
 
+class User {
+    -name: String
+    -email: String
+    -password: String
+    -roleId: String
+    -budget: budget
+    -locomotives: List<Locomotive>
+    +getName(): String
+    +getEmail(): String
+    +getPassword(): String
+    +getRoleId(): String
+    +getBudgetValue(): int
+    +getBudget(): Budget
+    +getLocomotives(): List<Locomotive>
+    +setName(): String
+    +setEmail(): String
+    +setPassword(): String
+    +setRoleId(): String
+    +setBudgetValue(): int
+    +setBudget(): Budget
+    +setLocomotives(): List<Locomotive>
+}
+
+class CreateScenarioUI {
+    -ctrl: CreateScenarioController
+    -scenarioName: String
+    -selectedMap: String
+    -timeRestrictions: int[]
+    -technologicalRestrictions: List<String>
+    -historicalRestrictions: List<String>
+    +getScenarioController(): CreateScenarioController
+    +run(): void
+    +submitData(): void
+    +requestData(): void
+    +requestScenarioName(): String
+    +requestSelectedMap(): String
+    +requestTimeRestrictions(): int[]
+    +requestTechnologicalRestrictions(): List<String>
+    +requestHistoricalRestrictions(): List<String>
+
+}
+
+interface Runnable <<interface>>{
+    +run(): void
+}
+
+class CreateScenarioController {
+    -scenarioRepository: ScenarioRepository
+    +getScenarioRepository(): ScenarioRepository
+    +createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions): Scenario
+    +checkNameUniqueness(String name): boolean
+    +getScenarios(): List<Scenario>
+}
+
+class Repositories {
+    -instance: Repositories
+    -scenarioRepository: ScenarioRepository
+    +getInstance(): Repositories
+    +getScenarioRepository(): ScenarioRepository
+}
+
+class ScenarioRepository {
+    -scenarios: List<Scenario>
+    +add(Scenario scenario): void
+    +getScenario(String name): Optional<Scenario>
+    +validateScenario(Scenario scenario): boolean
+    +checkNameUniqueness(String name) boolean
+    +getScenarios(): List<Scenario>
+}
+
+class MapRepository {
+    -maps: List<Map>
+    +add(Map map): void
+    +getMap(String name): Optional<Map>
+    +validateMap(Map map): boolean
+    +checkNameUniqueness(String name): boolean
+    +getMaps(): List<Map>
 }
 
 class Scenario {
     -scenarioName: String
-    -selectedMap: int
-    -timePeriod: int
-    -techRestriction: String
-    -historicalRestriction: int
-    +validateInputs()
+    -selectedMap: String
+    -timeRestrictions: int[]
+    -technologicalRestrictions: List<String>
+    -historicalRestrictions: List<String>
+    +getScenarioName(): String
+    +getSelectedMap(): String
+    +getTimeRestrictions(): int[]
+    +getTechnologicalRestrictions(): List<String>
+    +getHistoricalRestrictions(): List<String>
+    +toString(): String
 }
 
-class ScenarioRepository {
-    +createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-    +verifyIfExistsAndSave(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+class Map {
+    -mapName: String
+    -location: Location
+    -stations: List<Station>
+    -industries: List<Industry>
+    +getMapName(): String
+    +getWidth(): int
+    +getHeight(): int
+    +getStations(): List<Station>
+    +getIndustries(): List<Industry>
+    +placeIndusstry(Industry industry, int positionX, int positionY): boolean
+    +toString(): String
 }
 
-class CreateScenarioUI {
-    +getInput()
-    +showSuccess()
-    +showError()
-}
+User ..> CreateScenarioUI
 
-class CreateScenarioController {
-    +createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-}
+CreateScenarioUI ..|> Runnable
+CreateScenarioUI .> CreateScenarioController
 
-Editor --> Scenario : creates >
-CreateScenarioController --> Scenario : creates >
-CreateScenarioController --> ScenarioRepository : uses
-CreateScenarioController --> Editor : gets current user
-CreateScenarioUI --> CreateScenarioController : interacts
+CreateScenarioController ..> ScenarioRepository : scenarioRepository
+CreateScenarioController ..> MapRepository : mapRepository
+
+Repositories -> Repositories : instance
+Repositories --> "1" ScenarioRepository
+Repositories --> "1" MapRepository
+
+ScenarioRepository "1" --> "*" Scenario
+MapRepository "1" --> "*" Map
+
+Scenario --> User : createdBy
+Map --> User : createdBy
 
 @enduml

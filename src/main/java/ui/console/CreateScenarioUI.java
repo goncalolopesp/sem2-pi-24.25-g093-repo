@@ -1,10 +1,9 @@
 package ui.console;
 
-import controller.CreateMapController;
 import controller.CreateScenarioController;
-import controller.DisplayMapController;
 import domain.Scenario;
-import domain.*;
+import repository.MapRepository;
+import repository.Repositories;
 
 import java.util.*;
 
@@ -14,6 +13,8 @@ import java.util.*;
 public class CreateScenarioUI implements Runnable {
     /** Controller responsible for scenario creation logic. */
     private final CreateScenarioController ctrl;
+    private final Repositories repositories = Repositories.getInstance();
+    private final MapRepository mapRepository = repositories.getMapRepository();
     private String scenarioName;
     private String selectedMap;
     private int[] timeRestrictions;
@@ -60,7 +61,7 @@ public class CreateScenarioUI implements Runnable {
      */
     private void requestData() {
         selectedMap = requestSelectedMap();
-        scenarioName = requestScenarioName();
+        scenarioName = requestScenarioName(selectedMap);
         timeRestrictions = requestTimeRestrictions();
         technologicalRestrictions = requestTechnologicalRestrictions();
         historicalRestrictions = requestHistoricalRestrictions();
@@ -71,17 +72,17 @@ public class CreateScenarioUI implements Runnable {
      *
      * @return the entered and trimmed scenario name
      */
-    private String requestScenarioName() {
+    private String requestScenarioName(String selectedMap) {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Scenario Name: ");
         String scenarioName;
 
         do {
             scenarioName = sc.nextLine();
-            if (!ctrl.checkNameUniqueness(scenarioName)){
+            if (!ctrl.checkNameUniqueness(scenarioName, selectedMap)){
                 System.out.print("\nName not unique. Try again: ");
             }
-        } while (!ctrl.checkNameUniqueness(scenarioName));
+        } while (!ctrl.checkNameUniqueness(scenarioName, selectedMap));
 
         return scenarioName.trim();
     }
@@ -94,16 +95,15 @@ public class CreateScenarioUI implements Runnable {
      */
     private String requestSelectedMap() {
         Scanner sc = new Scanner(System.in);
-        CreateMapController mctrl = new CreateMapController();
-        System.out.println(mctrl.getMaps());
+        System.out.println(mapRepository.getMaps());
         System.out.print("Select Map: ");
 
         do {
             selectedMap = sc.nextLine();
-            if (!mctrl.verifyIfMapExists(selectedMap)) {
+            if (mapRepository.checkNameUniqueness(selectedMap)) {
                 System.out.print("\nMap doesn't exist! Try again: ");
             }
-        } while (!mctrl.verifyIfMapExists(selectedMap));
+        } while (!mapRepository.checkNameUniqueness(selectedMap));
 
         return selectedMap.trim();
     }

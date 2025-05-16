@@ -120,12 +120,7 @@ public class Bootstrap {
 
     private void addScenarios() {
         CreateScenarioController createScenarioController = new CreateScenarioController();
-        int[] timeRestrictions = {1870, 1880};
-        List<String> historicalRestrictions = new ArrayList<>();
-        historicalRestrictions.add("none");
-        List<String> techRestrictions = new ArrayList<>();
-        techRestrictions.add("steam");
-        createScenarioController.createScenario("exampleScenario", "exampleMap", timeRestrictions, techRestrictions, historicalRestrictions);
+        createScenarioController.createScenario("exampleScenario", "exampleMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));
     }
 
 

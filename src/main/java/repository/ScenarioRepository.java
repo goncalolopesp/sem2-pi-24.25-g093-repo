@@ -33,16 +33,6 @@ public class ScenarioRepository {
     }
 
     /**
-     * Retrieves a scenario by its name.
-     *
-     * @param name the name of the scenario to find
-     * @return an Optional containing the found scenario, or empty if not found
-     */
-    public Optional<Scenario> getScenario(String name) {
-        return scenarios.stream().filter(m -> m.getScenarioName().equals(name)).findFirst();
-    }
-
-    /**
      * Validates that a scenario is not already contained in the repository.
      *
      * @param scenario the Scenario instance to validate
@@ -52,8 +42,8 @@ public class ScenarioRepository {
         return !scenarios.contains(scenario);
     }
 
-    public boolean checkNameUniqueness(String name) {
-        return scenarios.stream().noneMatch(s -> s.getScenarioName().equals(name));
+    public boolean checkNameUniqueness(String scenarioName, String selectedMap) {
+        return scenarios.stream().noneMatch(s -> s.getScenarioName().equals(scenarioName) && s.getSelectedMap().equals(selectedMap));
     }
 
     /**

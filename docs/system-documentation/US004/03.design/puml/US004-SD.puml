@@ -176,11 +176,93 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         activate CreateScenarioUI
     end
 
+    CreateScenarioUI --> Employee : requestTechnologicalRestrictions()
+        CreateScenarioUI --> Employee : requests the available locomotive types
+        deactivate CreateScenarioUI
+
+        Employee -> CreateScenarioUI : types desired available locomotive types
+        activate CreateScenarioUI
+
+        loop while locomotive types aren't valid
+            CreateScenarioUI --> CreateScenarioController : validateLocomotiveTypes(locomotiveTypes)
+            activate CreateScenarioController
+
+            CreateScenarioController --> scenarioRepository  : validateLocomotiveTypes(locomotiveTypes)
+            activate scenarioRepository
+
+            scenarioRepository --> scenarioRepository : validateLocomotiveTypes(locomotiveTypes)
+            scenarioRepository --> CreateScenarioController : return false
+            deactivate scenarioRepository
+
+            CreateScenarioController --> CreateScenarioUI : outputs "Invalid input. Please enter only steam, diesel, and/or electric: "
+            deactivate CreateScenarioController
+
+            CreateScenarioUI --> Employee : requests the scenario name
+            deactivate CreateScenarioUI
+
+            Employee --> CreateScenarioUI : types new desired scenario name
+            activate CreateScenarioUI
+        end
+
+        CreateScenarioUI --> CreateScenarioController : validateLocomotiveTypes(locomotiveTypes)
+        activate CreateScenarioController
+
+        CreateScenarioController --> scenarioRepository  : validateLocomotiveTypes(locomotiveTypes)
+        activate scenarioRepository
+
+        scenarioRepository --> scenarioRepository : validateLocomotiveTypes(locomotiveTypes)
+        scenarioRepository --> CreateScenarioController : return true
+        deactivate scenarioRepository
+
+        CreateScenarioController --> CreateScenarioUI : returns list of available locomotive types
+        deactivate CreateScenarioController
+
+        CreateScenarioUI --> Employee : requestHistoricalRestrictions()
+                CreateScenarioUI --> Employee : requests the historical restrictions
+                deactivate CreateScenarioUI
+
+                Employee -> CreateScenarioUI : types desired historical restrictions
+                activate CreateScenarioUI
+
+                loop while historical restrictions aren't valid
+                    CreateScenarioUI --> CreateScenarioController : validateHistoricalRestrictions(historicalRestrictions)
+                    activate CreateScenarioController
+
+                    CreateScenarioController --> scenarioRepository  : validateHistoricalRestrictions(historicalRestrictions)
+                    activate scenarioRepository
+
+                    scenarioRepository --> scenarioRepository : validateHistoricalRestrictions(historicalRestrictions)
+                    scenarioRepository --> CreateScenarioController : return false
+                    deactivate scenarioRepository
+
+                    CreateScenarioController --> CreateScenarioUI : outputs "Invalid input. Please enter only vaccination campaign and/or school program: "
+                    deactivate CreateScenarioController
+
+                    CreateScenarioUI --> Employee : requests the scenario name
+                    deactivate CreateScenarioUI
+
+                    Employee --> CreateScenarioUI : types new desired scenario name
+                    activate CreateScenarioUI
+                end
+
+                CreateScenarioUI --> CreateScenarioController : validateHistoricalRestrictions(historicalRestrictions)
+                activate CreateScenarioController
+
+                CreateScenarioController --> scenarioRepository  : validateHistoricalRestrictions(historicalRestrictions)
+                activate scenarioRepository
+
+                scenarioRepository --> scenarioRepository : validateHistoricalRestrictions(historicalRestrictions)
+                scenarioRepository --> CreateScenarioController : return true
+                deactivate scenarioRepository
+
+                CreateScenarioController --> CreateScenarioUI : returns list of historical restrictions
+                deactivate CreateScenarioController
+
 CreateScenarioUI --> CreateScenarioUI : submitData()
-    CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions)
     activate CreateScenarioController
 
-    CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
+    CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions)
     activate scenarioRepository
 
     create "scenario\n:Scenario" as Scenario

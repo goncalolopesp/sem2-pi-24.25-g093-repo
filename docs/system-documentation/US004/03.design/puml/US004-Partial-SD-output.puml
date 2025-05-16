@@ -1,0 +1,25 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Editor" as Employee
+participant ":CreateScenarioUI" as CreateScenarioUI
+activate Employee
+activate CreateScenarioUI
+
+participant ":CreateScenarioController" as CreateScenarioController
+activate CreateScenarioController
+
+CreateScenarioController --> CreateScenarioUI : scenario
+deactivate CreateScenarioController
+
+    alt scenario is present
+        CreateScenarioUI --> Employee : outputs "Scenario successfully created!"
+    else
+        CreateScenarioUI --> Employee : outputs "Scenario not created!"
+    end
+deactivate CreateScenarioUI
+@enduml
