@@ -49,6 +49,10 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+**Split Diagram**
+
+![Sequence Diagram - Split](svg/US004-SD-split.svg)
+
 **Get Repositories Partial SD**
 
 ![Sequence Diagram - Partial - Get Repositories](svg/US004-Partial-SD-repositories.svg)
