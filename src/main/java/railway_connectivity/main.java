@@ -116,7 +116,7 @@ public class main {
 
         // Build adjacency list
         Map<String, MutableNode> nodeMap = new HashMap<>();
-        for (String v : vertices) nodeMap.put(v, mutNode(v).add(Color.WHITE));
+        for (String v : vertices) nodeMap.put(v, mutNode(v).add(Color.BLACK));
         // build graph
         MutableGraph g = mutGraph("MapaDeEstacoes").setDirected(false)
                 .add(nodeMap.values().toArray(new MutableNode[0]));
@@ -125,10 +125,11 @@ public class main {
             Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
             g.add(nodeMap.get(a).addLink(to(nodeMap.get(b)).with(c)));
         }
+        /*
         for (int i = 0; i < route.size() - 1; i++) {
             g.add(nodeMap.get(route.get(i)).addLink(
                     to(nodeMap.get(route.get(i + 1))).with(attr("penwidth", "4"))));
-        }
+        }*/
         Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("station-map.svg"));
         System.out.println("Graph saved as station-map.svg");
     }
