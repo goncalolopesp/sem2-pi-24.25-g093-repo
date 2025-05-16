@@ -110,6 +110,8 @@ public class SimulationController {
     }
 
     public void resetGame(Map selectedMap) {
+        List<Locomotive> l = new ArrayList<>();
+        currentUser.setLocomotives(l);
         currentUser.setBudget(new Budget(1000));
         stationrepo.removeStationsByMapAndOwner(
                 selectedMap.getMapName(),
