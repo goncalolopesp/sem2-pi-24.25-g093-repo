@@ -5,6 +5,8 @@ import controller.CreateScenarioController;
 import controller.DisplayMapController;
 import domain.Scenario;
 import domain.*;
+import repository.MapRepository;
+import repository.Repositories;
 
 import java.util.*;
 
@@ -14,6 +16,8 @@ import java.util.*;
 public class CreateScenarioUI implements Runnable {
     /** Controller responsible for scenario creation logic. */
     private final CreateScenarioController ctrl;
+    private final Repositories repositories = Repositories.getInstance();
+    private final MapRepository mapRepository = repositories.getMapRepository();
     private String scenarioName;
     private String selectedMap;
     private int[] timeRestrictions;
@@ -94,16 +98,15 @@ public class CreateScenarioUI implements Runnable {
      */
     private String requestSelectedMap() {
         Scanner sc = new Scanner(System.in);
-        CreateMapController mctrl = new CreateMapController();
-        System.out.println(mctrl.getMaps());
+        System.out.println(mapRepository.getMaps());
         System.out.print("Select Map: ");
 
         do {
             selectedMap = sc.nextLine();
-            if (!mctrl.verifyIfMapExists(selectedMap)) {
+            if (mapRepository.checkNameUniqueness(selectedMap)) {
                 System.out.print("\nMap doesn't exist! Try again: ");
             }
-        } while (!mctrl.verifyIfMapExists(selectedMap));
+        } while (!mapRepository.checkNameUniqueness(selectedMap));
 
         return selectedMap.trim();
     }
