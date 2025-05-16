@@ -49,21 +49,21 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+**Get Repositories Partial SD**
+
+![Sequence Diagram - Partial - Get Repositories](svg/US004-Partial-SD-repositories.svg)
+
 **Get Input Partial SD**
 
-![Sequence Diagram - Partial - Get Input](svg/US004-SD-getInput.svg)
+![Sequence Diagram - Partial - Get Input](svg/US004-Partial-SD-input.svg)
 
 **Create Scenario Partial SD**
 
-![Sequence Diagram - Partial - Create Scenario](svg/US004-SD-createScenario.svg)
+![Sequence Diagram - Partial - Create Scenario](svg/US004-Partial-SD-create.svg)
 
-**Verify if Scenario exists Partial SD**
+**Show Output Partial SD**
 
-![Sequence Diagram - Partial - Verification](svg/US004-SD-verify.svg)
-
-**Display Success Message Partial SD**
-
-![Sequence Diagram - Partial - Display Success](svg/US004-SD-displaySuccess.svg)
+![Sequence Diagram - Partial - Show Output](svg/US004-Partial-SD-output.svg)
 
 ## 3.3. Class Diagram (CD)
 
