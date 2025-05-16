@@ -62,8 +62,8 @@ public class CreateScenarioController {
      *
      * @return boolean
      */
-    public boolean checkNameUniqueness(String name) {
-        return getScenarioRepository().checkNameUniqueness(name);
+    public boolean checkNameUniqueness(String scenarioName, String mapName) {
+        return getScenarioRepository().checkNameUniqueness(scenarioName, mapName);
     }
 
     /**

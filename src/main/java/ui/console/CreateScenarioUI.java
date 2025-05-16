@@ -1,10 +1,7 @@
 package ui.console;
 
-import controller.CreateMapController;
 import controller.CreateScenarioController;
-import controller.DisplayMapController;
 import domain.Scenario;
-import domain.*;
 import repository.MapRepository;
 import repository.Repositories;
 
@@ -64,7 +61,7 @@ public class CreateScenarioUI implements Runnable {
      */
     private void requestData() {
         selectedMap = requestSelectedMap();
-        scenarioName = requestScenarioName();
+        scenarioName = requestScenarioName(selectedMap);
         timeRestrictions = requestTimeRestrictions();
         technologicalRestrictions = requestTechnologicalRestrictions();
         historicalRestrictions = requestHistoricalRestrictions();
@@ -75,17 +72,17 @@ public class CreateScenarioUI implements Runnable {
      *
      * @return the entered and trimmed scenario name
      */
-    private String requestScenarioName() {
+    private String requestScenarioName(String selectedMap) {
         Scanner sc = new Scanner(System.in);
         System.out.print("Enter Scenario Name: ");
         String scenarioName;
 
         do {
             scenarioName = sc.nextLine();
-            if (!ctrl.checkNameUniqueness(scenarioName)){
+            if (!ctrl.checkNameUniqueness(scenarioName, selectedMap)){
                 System.out.print("\nName not unique. Try again: ");
             }
-        } while (!ctrl.checkNameUniqueness(scenarioName));
+        } while (!ctrl.checkNameUniqueness(scenarioName, selectedMap));
 
         return scenarioName.trim();
     }

@@ -1,6 +1,5 @@
 package controller;
 
-import controller.CreateCityController;
 import domain.City;
 import domain.HouseBlock;
 import domain.Map;
