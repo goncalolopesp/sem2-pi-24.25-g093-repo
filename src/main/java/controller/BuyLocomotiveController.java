@@ -18,14 +18,6 @@ public class BuyLocomotiveController {
         locomotiveRepository = repositories.getLocomotiveRepository();
     }
 
-    public void buyLocomotive(Locomotive locomotive) {
-        locomotiveRepository.buyLocomotive(locomotive);
-    }
-
-    public void createLocomotive(Locomotive locomotive) {
-        locomotiveRepository.addLocomotive(locomotive);
-    }
-
     public void createLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) {
         locomotiveRepository.addLocomotive(modelName, price, type, fuelCost, maintenanceCost, startYearOfOperation, endYearOfOperation, topSpeed);
     }

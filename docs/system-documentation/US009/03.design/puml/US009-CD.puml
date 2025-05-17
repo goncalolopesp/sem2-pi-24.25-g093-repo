@@ -4,52 +4,165 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam classAttributeIconSize 0
 
-class BuyLocomotiveUI {
-  + buyRequest(locomotive: Locomotive)
-  + showLocomotives(locomotives: List<Locomotive>)
-  + storeBoughtLocomotive(locomotive: Locomotive)
-  + showConfirmation()
-  + showSuccess(message: String)
+'Domains
+
+class CurrentUser{
+    - session : CurrentUser
+    - usr : Map<String, User>
+    + getInstance() : CurrentUser
+    + getUser() : User
+    + setUSer(User user) : void
+    + doLogin(User user) : boolean
+    + clear() : void
+    + doLogout() : boolean
 }
 
-class BuyLocomotiveController {
-  + buyRequest(locomotive: Locomotive)
-  + buyLocomotive(locomotive: Locomotive): boolean
+class Budget{
+    - budget : int
+    + getBudget() : int
+    + setBudget(int budget) : void
+    + addBudget(int budget) : void
+    + subtractBudget(int budget) : void
 }
 
-class LocomotiveRepository {
-  + getAvailableLocomotives(): List<Locomotive>
-  + buyLocomotive(locomotive: Locomotive) : boolean
-}
-
-class ScenarioRepository {
-  + getAvailableLocomotives(scenario: Scenario): List<Locomotive>
-}
-
-class Locomotive {
-  - name: String
-  - price: int
-  - type : String
-  - fuelCost : int
-  - maintenanceCost : int
-  - startYearOfOperation : int
-  - endYearOfOperation : int
-  - topSpeed : double
+class Locomotive{
+    - modelName : String
+    - price : int
+    - type : String
+    - fuelCost : int
+    - maintenanceCost : int
+    - startYearOfOperation : int
+    - endYearOfOperation : int
+    - topSpeed : int
+    - available : boolean
+    + getModelName() : String
+    + setModelName(String modelName) : void
+    + getPrice() : int
+    + setPrice(int price) : void
+    + getType() : String
+    + setType(String type) : void
+    + getFuelCost() : int
+    + setFuelCost(int fuelCost) : void
+    + getMaintenanceCost() : int
+    + setMaintenanceCost(int maintenanceCost) : void
+    + getStartYearOfOperation() : int
+    + setStartYearOfOperation(int startYearOfOperation) : void
+    + getEndYearOfOperation() : int
+    + setEndYearOfOperation(int endYearOfOperation) : void
+    + getTopSpeed() : int
+    + setTopSpeed(int topSpeed) : void
+    + getAvailability() : boolean
+    + setAvailability(boolean available) : void
 }
 
 class Scenario {
-  - scenarioName : String
-  - techRestriction : String
-  - startYear : int
-  - endYear : int
-  - historicalRestriction : String
+    - scenarioName : String
+    - selectedMap : String
+    - timeRestrictions : int[]
+    - technologicalRestrictions : List<String>
+    - historicalRestrictions : List<String>
+    + getScenarioName(): String
+    + getSelectedMap(): String
+    + getTimeRestrictions(): int[]
+    + getTechnologicalRestrictions(): List<String>
+    + getHistoricalRestrictions(): List<String>
+    + toString(): String
 }
 
-BuyLocomotiveUI ..> BuyLocomotiveController     : uses
-BuyLocomotiveController ..> LocomotiveRepository   : uses
-BuyLocomotiveController ..> ScenarioRepository    : uses
+class User {
+    - name : String
+    - email : String
+    - password : String
+    - roleId : String
+    - budget : Budget
+    - locomotives : List<Locomotive>
+    + getName(): String
+    + getEmail(): String
+    + getPassword(): String
+    + getRoleId(): String
+    + getBudgetValue(): int
+    + getBudget(): Budget
+    + getLocomotives(): List<Locomotive>
+    + setName(): String
+    + setEmail(): String
+    + setPassword(): String
+    + setRoleId(): String
+    + setBudgetValue(): int
+    + setBudget(): Budget
+    + setLocomotives(): List<Locomotive>
+}
 
-LocomotiveRepository --> Locomotive    : returns
-ScenarioRepository  --> Scenario     : returns
+'UI
+
+class BuyLocomotiveUI{
+    - scenario : Scenario
+    - locomotiveController : BuyLocomotiveController
+    + buyLocomotive(String modelName) : boolean
+    + listLocomotives() : void
+}
+
+class ListLocomotiveUI {
+
+}
+
+'interface
+interface Runnable <<interface>>{
+    +run(): void
+}
+
+'Controllers
+class BuyLocomotiveController{
+    - locomotiveRepository : LocomotiveRepository
+    - session : CurrentUser
+    + createLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) : void
+    + getLocomotives(Scenario scenario) : List<Locomotive>
+    + getPlayerLocomotives() : List<Locomotive>
+    + canBuyLocomotive(String modelName, Scenario scenario) : boolean
+    + buyLocomotive(String modelName, Scenario scenario) : boolean
+}
+
+'Repositories
+class Repositories {
+    - instance : Repositories
+    - locomotiveRepository : LocomotiveRepository
+    + getInstance() : Repositories
+    + getLocomotiveRepository() : LocomotiveRepository
+}
+
+class LocomotiveRepository{
+    - locomotives : Set<Locomotive>
+    - session : CurrentUser
+    + addLocomotive(Locomotive locomotive) : boolean
+    + addLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) : boolean
+    + checkIfLocomotiveExists(Locomotive locomotive) : boolean
+    + buyLocomotive(Locomotive locomotive) : boolean
+    + buyLocomotive(String modelName) : boolean
+    + deleteLocomotive(Locomotive locomotive) : boolean
+    + getLocomotive(String modelName) : Optional<Locomotive>
+    + getLocomotives() : Set<Locomotive>
+}
+
+'Connections
+
+User ..> ListLocomotiveUI
+User ..> BuyLocomotiveUI
+
+ListLocomotiveUI ..|> Runnable
+BuyLocomotiveUI ..|> Runnable
+
+BuyLocomotiveUI .> BuyLocomotiveController
+
+BuyLocomotiveController ..> LocomotiveRepository : locomotiveRepository
+
+Repositories -> Repositories : instance
+Repositories --> "1" LocomotiveRepository
+
+CurrentUser -> CurrentUser : instance
+
+LocomotiveRepository "1" ..> "2" Locomotive
+
+Locomotive --> User : owned by
+Scenario --> User : created by
+Locomotive --> Scenario : belongs to
 
 @enduml

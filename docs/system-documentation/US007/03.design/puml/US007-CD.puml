@@ -4,42 +4,146 @@ skinparam shadowing false
 skinparam linetype polyline
 skinparam classAttributeIconSize 0
 
-class StationsListUI {
-  + showStations()
-  + showDetails(stationId: int)
+'Domains
+class User {
+    - name : String
+    - email : String
+    - password : String
+    - roleId : String
+    - budget : Budget
+    - locomotives : List<Locomotive>
+    + getName() : String
+    + getEmail() : String
+    + getPassword() : String
+    + getRoleId() : String
+    + getBudgetValue() : int
+    + getBudget() : Budget
+    + getLocomotives() : List<Locomotive>
+    + setName() : String
+    + setEmail() : String
+    + setPassword() : String
+    + setRoleId() : String
+    + setBudgetValue() : int
+    + setBudget() : Budget
+    + setLocomotives() : List<Locomotive>
 }
 
-class StationsListController {
-    + showStations()
-    + showDetails(stationId: int)
-}
-
-class StationRepository {
-  + getStationData(stationId: int): Station
-  + getStations()
-}
-
-class BuildingRepository {
-    + getBuildingData(buildingId: int): Building
-}
-
-class Building {
-  - id: int
-  - name: String
-  - cost: int
+class Building{
+    - station : Station
+    - buildingType : String
+    + getStation() : Station
+    + getBuildingType() : String
 }
 
 class Station {
-  - id: int
-  - level: int
-  - building: Building
+    - type : Type
+    - name : String
+    - mapName : String
+    - ownerPlayer : String
+    - price : int
+    - capacity : int
+    - capacityOwned : int
+    - x : int
+    - y : int
+    - orientation : Orientation
+    + Station(Type type, String name, String mapName, String ownerPlayer,
+                         int price, int capacity, int capacityOwned, int x, int y, Orientation orientation)
+    + getType() : Type
+    + getName() : String
+    + getMapName() : String
+    + getOwnerPlayer() : String
+    + getPrice() : int
+    + getCapacity() : int
+    + getCapacityOwned() : int
+    + setCapacityOwned(int capacityOwned) : void
+    + getX() : int
+    + getY() : int
+    + getOrientation() : Orientation
+    + toString() : String
+
 }
 
-StationsListUI ..> StationsListController      : uses
-StationsListController ..> StationRepository   : uses
-StationsListController ..> BuildingRepository  : uses
+class CurrentUser{
+    - session : CurrentUser
+    - usr : Map<String, User>
+    + getInstance() : CurrentUser
+    + getUser() : User
+    + setUSer(User user) : void
+    + doLogin(User user) : boolean
+    + clear() : void
+    + doLogout() : boolean
+}
 
-StationRepository --> Station       : returns
-BuildingRepository  --> Building     : returns
+class Budget{
+    - budget : int
+    + getBudget() : int
+    + setBudget(int budget) : void
+    + addBudget(int budget) : void
+    + subtractBudget(int budget) : void
+}
+
+'UI
+class ListStationsUI {
+  + listStations()
+}
+
+'interface
+interface Runnable <<interface>>{
+    +run(): void
+}
+
+'Controller
+class ListStationController{
+    - repositories : Repositories
+    - sr : StationRepository
+    - br : BuildingRepository
+    + getStations() : List<Station>
+    + getBuildingByStation(Station station) : List<Building>
+}
+
+'Repository
+class Repositories {
+    - instance : Repositories
+    - stationRepository : StationRepository
+    - buildingRepository : BuildingRepository
+    + getInstance() : Repositories
+    + getStationRepository() : StationRepository
+    + getBuildingRepository() : BuildingRepository
+}
+
+class BuildingRepository {
+  + BuildingRepository()
+  + add(Building building) : void
+  + validateBuilding(Building building) : boolean
+  + getBuildings() : List<Building>
+}
+
+class StationRepository {
+  + addStation(Station s) : boolean
+  + getStations() : List<Station>
+  + removeStation(Station station) : boolean
+}
+
+'Connections
+User ..> ListStationsUI
+
+ListStationsUI ..|> Runnable
+ListStationsUI .> ListStationController
+
+ListStationController ..> StationRepository : sr
+ListStationController ..> BuildingRepository : br
+
+Repositories -> Repositories : instance
+Repositories --> "1" StationRepository
+Repositories --> "1" BuildingRepository
+
+StationRepository "1" --> "*" Station
+BuildingRepository "1" --> "*" Building
+
+Building --> User : bought by
+Building --> Station : owned by
+Station --> User : owned by
+
+
 
 @enduml
