@@ -17,6 +17,7 @@ public class Station {
     private final int price;
     private final int capacity;
     private int capacityOwned;
+    private transient boolean maxCapacityNotified = false;
     private final int x, y;
     private final Orientation orientation;
 
@@ -126,6 +127,13 @@ public class Station {
      * @return the center's orientation of a station (null for DEPOT and TERMINAL)
      */
     public Orientation getOrientation() { return orientation; }
+
+    public boolean isMaxCapacityNotified() {
+        return maxCapacityNotified;
+    }
+    public void setMaxCapacityNotified(boolean b) {
+        this.maxCapacityNotified = b;
+    }
 
     /**
      * Returns a String formatted print.

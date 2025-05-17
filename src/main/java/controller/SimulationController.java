@@ -25,7 +25,6 @@ public class SimulationController {
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final StationRepository stationrepo = new CreateStationController().getStationRepository();
-    private final BudgetRepository budgetRepository = Repositories.getInstance().getBudgetRepository();
     private final DisplayMapController displayCtrl = new DisplayMapController();
     private final CreateCityController cityCtrl = new CreateCityController();
     private final List<City> cities = cityCtrl.getCityRepo().getCities();
@@ -68,7 +67,7 @@ public class SimulationController {
                 // write it back into the same Budget
                 budget.setCurrentYear(nextYear);
 
-                if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
+                if (timePeriod.get().get(0) < timePeriod.get().get(1)) {
                     System.out.print("\nYou have reached year " + nextYear + ". ");
                     removeOutdatedLocomotives(nextYear);
                     payLocomotiveMaintenance(budget);
@@ -77,7 +76,7 @@ public class SimulationController {
             }
 
             // if we’ve gone past the scenario’s end…
-            if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
+            if (timePeriod.get().get(0) >= timePeriod.get().get(1)) {
                 scheduler.shutdownNow();
 
                 // reset the saved year back to the scenario start
@@ -90,17 +89,16 @@ public class SimulationController {
                 options.clear();
                 gameOver.set(true);
 
-                System.out.print("\nGame Over. Please insert 0 to return to menu: ");
+                System.out.print("\nGame Over. Final Year was reached. Please insert 0 to return to menu: ");
             }
         };
     }
 
     public Runnable generateCargo(Map selectedMap,Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
-        AtomicBoolean printedMaxCapacity = new AtomicBoolean(false);
         Runnable task = () -> {
             if (running.get()) {
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                    addCargoToStation(selectedMap,selectedScenario, printedMaxCapacity);
+                    addCargoToStation(selectedMap,selectedScenario);
                 }
             }
             if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
@@ -110,34 +108,57 @@ public class SimulationController {
         return task;
     }
 
-    public void addCargoToStation(Map selectedMap, Scenario selectedScenario, AtomicBoolean printedMaxCapacity) {
+    public void addCargoToStation(
+            Map selectedMap,
+            Scenario selectedScenario
+    ) {
         String mapName = selectedMap.getMapName();
 
         for (City city : cities) {
             int totalGeneratedCargo = city.getTotalGeneratedCargo();
+
             stationrepo.getStations().stream()
                     .filter(s -> s.getMapName().equals(mapName))
                     .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getName().contains(city.getName()))
                     .forEach(station -> {
+                        // 1) If there’s still room…
                         if (station.getCapacityOwned() < station.getCapacity()) {
+
+                            // a) refill the flag so at some future tick we could re-notify again
+                            station.setMaxCapacityNotified(false);
+
+                            // b) add cargo (double if School Program)
                             boolean isSchoolProgram = selectedScenario.getHistoricalRestrictions()
                                     .stream()
                                     .anyMatch(r -> r.equalsIgnoreCase("school program"));
-                            if(isSchoolProgram){
-                                station.setCapacityOwned(station.getCapacityOwned() + (totalGeneratedCargo * 2));
-                            }
-                            else{
-                                station.setCapacityOwned(station.getCapacityOwned() + totalGeneratedCargo);
-                            }
 
-                            System.out.printf("\nStored %d cargo for station %s. Type your option: ", station.getCapacityOwned(), station.getName());
-                            printedMaxCapacity.set(false);
-                        } else if (!printedMaxCapacity.get()) {
-                            station.setCapacityOwned(station.getCapacity());
-                            System.out.print("\nMax capacity reached for station " + station.getName() + ". Type your option: ");
-                            printedMaxCapacity.set(true);
+                            int toAdd = isSchoolProgram
+                                    ? totalGeneratedCargo * 2
+                                    : totalGeneratedCargo;
+                            station.setCapacityOwned(
+                                    station.getCapacityOwned() + toAdd
+                            );
+
+                            System.out.printf(
+                                    "\nStored %d cargo for station %s. Type your option: ",
+                                    toAdd,
+                                    station.getName()
+                            );
+
+                        }
+                        // 2) Otherwise—we’re at (or above) capacity…
+                        else {
+                            // only notify *once* per station
+                            if (!station.isMaxCapacityNotified()) {
+                                station.setCapacityOwned(station.getCapacity());  // cap it
+                                System.out.printf(
+                                        "\nMax capacity reached for station %s. Type your option: ",
+                                        station.getName()
+                                );
+                                station.setMaxCapacityNotified(true);
+                            }
                         }
                     });
         }

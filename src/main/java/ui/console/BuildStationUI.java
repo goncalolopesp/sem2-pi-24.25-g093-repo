@@ -102,7 +102,7 @@ public class BuildStationUI implements Runnable {
                         List<Station> all = ctrl.getStations();
                         Station st = all.get(all.size() - 1);
                         System.out.println("Station '" + st.getName() +
-                                "' built successfully at (" + st.getX() + "," + st.getY() + ")." + st.getMapName() + st.getScenarioName());
+                                "' built successfully at (" + st.getX() + "," + st.getY() + ")." + st.getMapName() + "." + st.getScenarioName());
                     placed = true;
                     break;
                 case INVALID_COORDINATES:
