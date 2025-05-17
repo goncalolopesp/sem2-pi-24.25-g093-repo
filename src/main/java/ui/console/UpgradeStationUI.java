@@ -187,6 +187,7 @@ public class UpgradeStationUI implements Runnable{
                             ctrl.getBuildingRepository().remove(station, "telephone");
                         }
                     }
+                    checkMutualExclusivity(ctrl.getBuildings(), buildingType);
                 } else if (buildingType == null) {
                     return null;
                 }
@@ -205,21 +206,17 @@ public class UpgradeStationUI implements Runnable{
         return buildingType;
     }
 
-    /**
-     * Collects all stations owned by the current player in order to display them.
-     * @return the available stations owned by the current player.
-     */
-    private List<Station> displayStationList() {
-        CreateStationController sctrl = new CreateStationController();
-        List<Station> availableStations = new ArrayList<>();
+    private String checkMutualExclusivity(List<Building> existingBuildings, String newType) {
+        String newLower = newType.toLowerCase();
 
-        for (int i = 0; i < sctrl.getStations().size(); i++) {
-            Station station = sctrl.getStations().get(i);
-            if (station.getOwnerPlayer().equals(currentUser.getEmail())) {
-                availableStations.add(station);
+        for (Building building : existingBuildings) {
+            String existing = building.getBuildingType().toLowerCase();
+            if (!existing.equals(newLower) &&
+                    ((existing.contains("hotel") && newLower.contains("hotel")) ||
+                            (existing.contains("cafe") && newLower.contains("cafe")))) {
+                return existing;
             }
         }
-
-        return availableStations;
+        return null;
     }
 }
