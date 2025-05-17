@@ -1,0 +1,41 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+activate atui
+
+create ":AssignTrainController" as atc
+
+participant ":Repositories" as repositories
+
+atui --> atc : create()
+activate atc
+
+atc --> repositories : getInstance()
+activate repositories
+
+repositories --> atc : repositories
+deactivate repositories
+
+atc --> repositories : getStationRepository()
+activate repositories
+
+repositories --> atc : stationRepository
+deactivate repositories
+
+atc --> repositories : getCarriageRepository()
+activate repositories
+
+repositories --> atc : carriageRepository
+deactivate repositories
+
+atc --> repositories : getTrainRepository()
+activate repositories
+
+repositories --> atc : trainRepository
+deactivate repositories
+deactivate atc
+@enduml
