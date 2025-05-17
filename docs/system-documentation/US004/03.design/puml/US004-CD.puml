@@ -10,21 +10,16 @@ class User {
     -email: String
     -password: String
     -roleId: String
-    -budget: budget
     -locomotives: List<Locomotive>
     +getName(): String
     +getEmail(): String
     +getPassword(): String
     +getRoleId(): String
-    +getBudgetValue(): int
-    +getBudget(): Budget
     +getLocomotives(): List<Locomotive>
     +setName(): String
     +setEmail(): String
     +setPassword(): String
     +setRoleId(): String
-    +setBudgetValue(): int
-    +setBudget(): Budget
     +setLocomotives(): List<Locomotive>
 }
 
