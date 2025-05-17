@@ -25,6 +25,7 @@ public class SimulationController {
     private final CreateMapController mapCtrl = new CreateMapController();
     private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
     private final StationRepository stationrepo = new CreateStationController().getStationRepository();
+    private final BudgetRepository budgetRepository = Repositories.getInstance().getBudgetRepository();
     private final DisplayMapController displayCtrl = new DisplayMapController();
     private final CreateCityController cityCtrl = new CreateCityController();
     private final List<City> cities = cityCtrl.getCityRepo().getCities();
@@ -50,26 +51,48 @@ public class SimulationController {
         }
     }
 
-    public Runnable passTime(Map selectedMap, Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler, AtomicBoolean gameOver, Budget budget) {
-        Runnable task = () -> {
+    public Runnable passTime(
+            Scenario selectedScenario,
+            AtomicReference<AtomicIntegerArray> timePeriod,
+            AtomicBoolean running,
+            List<MenuItem> options,
+            ScheduledExecutorService scheduler,
+            AtomicBoolean gameOver,
+            Budget budget
+    ) {
+        return () -> {
             if (running.get()) {
-                timePeriod.get().getAndAdd(0, (1));
+                // advance the year
+                int nextYear = timePeriod.get().addAndGet(0, 1);
+
+                // write it back into the same Budget
+                budget.setCurrentYear(nextYear);
+
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                    System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ".");
-                    removeOutdatedLocomotives(timePeriod.get().get(0));
+                    System.out.print("\nYou have reached year " + nextYear + ". ");
+                    removeOutdatedLocomotives(nextYear);
                     payLocomotiveMaintenance(budget);
                     System.out.print("Type your option: ");
                 }
             }
+
+            // if we’ve gone past the scenario’s end…
             if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
                 scheduler.shutdownNow();
-                timePeriod.set(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
+
+                // reset the saved year back to the scenario start
+                int resetYear = selectedScenario.getTimeRestrictions()[0];
+                budget.setCurrentYear(resetYear);
+
+                timePeriod.set(new AtomicIntegerArray(
+                        selectedScenario.getTimeRestrictions()
+                ));
                 options.clear();
                 gameOver.set(true);
+
                 System.out.print("\nGame Over. Please insert 0 to return to menu: ");
             }
         };
-        return task;
     }
 
     public Runnable generateCargo(Map selectedMap,Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {

@@ -6,12 +6,14 @@ public class Budget {
     Map map;
     Scenario scenario;
     User user;
+    private int currentYear;
 
     public Budget(int budget, Map map, Scenario scenario, User user) {
         this.budget = budget;
         this.map = map;
         this.scenario = scenario;
         this.user = user;
+        this.currentYear = scenario.getTimeRestrictions()[0];
     }
 
     public int getBudget() {
@@ -53,5 +55,9 @@ public class Budget {
     public void setUser(User user) {
         this.user = user;
     }
+
+    public int getCurrentYear() { return currentYear; }
+
+    public void setCurrentYear(int year) { this.currentYear = year; }
 
 }

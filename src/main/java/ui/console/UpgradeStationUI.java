@@ -1,10 +1,8 @@
 package ui.console;
 
-import controller.CreateStationController;
 import controller.UpgradeStationController;
 import domain.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
@@ -19,7 +17,6 @@ import java.util.stream.Collectors;
 public class UpgradeStationUI implements Runnable{
     /** Controller responsible for station upgrade logic. */
     private final UpgradeStationController ctrl;
-    private final User currentUser = CurrentUser.getInstance().getUser();
     private Station station;
     private String buildingType;
     Budget budget;

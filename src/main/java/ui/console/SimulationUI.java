@@ -45,20 +45,28 @@ public class SimulationUI implements Runnable {
 
         userBudget = checkOrCreateBudget(selectedMap, selectedScenario);
 
-        AtomicReference<AtomicIntegerArray> timePeriod = new AtomicReference<>(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
+        // With something like:
+        int startYear = userBudget.getCurrentYear();
+        int endYear   = selectedScenario.getTimeRestrictions()[1];
+        AtomicReference<AtomicIntegerArray> timePeriod =
+                new AtomicReference<>(new AtomicIntegerArray(new int[]{ startYear, endYear }));
+
+        if (startYear == selectedScenario.getTimeRestrictions()[0]) {
+            System.out.println("Game started on year " + startYear + " and will finish on year " + endYear);
+        } else {
+            System.out.println("Resuming game on year " + startYear + ", will finish on year " + endYear);
+        }
 
         AtomicBoolean running = new AtomicBoolean(true);
         AtomicBoolean gameOver = new AtomicBoolean(false);
         AtomicInteger option = new AtomicInteger();
-
-        System.out.println("Game started on year " + timePeriod.get().get(0) + " and will finish on year " + timePeriod.get().get(1));
 
         List<MenuItem> options = new ArrayList<>();
 
         ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
-        Runnable timeTask = ctrl.passTime(selectedMap,selectedScenario, timePeriod, running, options, timeScheduler, gameOver,userBudget);
+        Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler, gameOver,userBudget);
         Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
 
         timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
