@@ -74,7 +74,7 @@ public class Station {
      *
      * @return the name of the scenario where a staion is placed
      */
-    public String getScenarioName()      { return mapName; }
+    public String getScenarioName()      { return scenarioName; }
     /**
      * Returns the owner of a station.
      *

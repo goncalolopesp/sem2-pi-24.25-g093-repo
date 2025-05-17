@@ -3,16 +3,19 @@ package ui.console;
 import controller.SimulationController;
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import repository.Repositories;
 import ui.console.menu.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
+import repository.BudgetRepository;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -22,6 +25,8 @@ public class SimulationUI implements Runnable {
 
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationController ctrl = new SimulationController();
+    private final BudgetRepository budgetRepository = Repositories.getInstance().getBudgetRepository();
+    Budget userBudget;
 
     @Override
     public void run() {
@@ -38,6 +43,8 @@ public class SimulationUI implements Runnable {
             return;
         }
 
+        userBudget = checkOrCreateBudget(selectedMap, selectedScenario);
+
         AtomicReference<AtomicIntegerArray> timePeriod = new AtomicReference<>(new AtomicIntegerArray(selectedScenario.getTimeRestrictions()));
 
         AtomicBoolean running = new AtomicBoolean(true);
@@ -51,7 +58,7 @@ public class SimulationUI implements Runnable {
         ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
-        Runnable timeTask = ctrl.passTime(selectedMap,selectedScenario, timePeriod, running, options, timeScheduler, gameOver);
+        Runnable timeTask = ctrl.passTime(selectedMap,selectedScenario, timePeriod, running, options, timeScheduler, gameOver,userBudget);
         Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
 
         timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
@@ -61,16 +68,16 @@ public class SimulationUI implements Runnable {
             if (running.get()) {
                 ctrl.displayMapData(selectedMap,selectedScenario);
                 if (currentUser != null) {
-                    System.out.println("Your budget is: " + currentUser.getBudgetValue());
+                    System.out.println("Your budget is: " + userBudget.getBudget());
                 }
 
                 if (options.isEmpty()) {
-                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario)));
-                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario)));
-                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, timePeriod)));
-                    options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
+                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario,userBudget)));
+                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario, userBudget)));
+                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, selectedScenario,timePeriod, userBudget)));
+                    options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario,selectedMap)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
-                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario)));
+                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario, userBudget)));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();
@@ -90,25 +97,49 @@ public class SimulationUI implements Runnable {
             option.set(Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------"));
 
             if (option.get() >= 0 && option.get() < options.size()) {
-                // Only pause/resume if the selected option isn't Pause/Resume
                 String selectedLabel = options.get(option.get()).toString();
 
                 if (!selectedLabel.equals("Pause Game") && !selectedLabel.equals("Resume Game")) {
-                    boolean wasRunning = running.get();  // Store previous state
-                    if (wasRunning) running.set(false);  // Pause timer
+                    boolean wasRunning = running.get();
+                    if (wasRunning) running.set(false);
 
-                    options.get(option.get()).run();     // Run the menu item
+                    options.get(option.get()).run();
 
-                    if (wasRunning) running.set(true);   // Resume timer if it was running before
+                    if (wasRunning) running.set(true);
                 } else {
-                    options.get(option.get()).run();     // Handle Pause/Resume directly
+                    options.get(option.get()).run();
                 }
             } else if (option.get() == -1) {
                 running.set(false); timeScheduler.shutdownNow(); System.out.println("Game stopped.");
                 if (gameOver.get()) {
-                    ctrl.resetGame(selectedMap);
+                    ctrl.resetGame(selectedMap,selectedScenario,userBudget);
                 }
             }
         } while (option.get() != -1);
+    }
+
+    /**
+     * Checks if a budget exists for the current user, map and scenario.
+     * If not, creates a new one with 1000 as the initial value.
+     *
+     * @param selectedMap The selected map
+     * @param selectedScenario The selected scenario
+     * @return The budget for the user
+     */
+    private Budget checkOrCreateBudget(Map selectedMap, Scenario selectedScenario) {
+        Budget budget = null;
+
+        if (currentUser != null) {
+            Optional<Budget> existingBudget = budgetRepository.getUserBudgetFromScenarioInMap(
+                    selectedScenario, selectedMap, currentUser);
+
+            if (existingBudget.isPresent()) {
+                budget = existingBudget.get();
+            } else {
+                budget = new Budget(1000, selectedMap, selectedScenario, currentUser);
+                budgetRepository.createBudget(budget);
+            }
+        }
+        return budget;
     }
 }

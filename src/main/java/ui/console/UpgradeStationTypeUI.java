@@ -1,9 +1,6 @@
 package ui.console;
 
-import domain.CurrentUser;
-import domain.Map;
-import domain.Scenario;
-import domain.Station;
+import domain.*;
 import domain.Station.Orientation;
 import domain.Station.Type;
 import controller.UpgradeStationTypeController;
@@ -18,13 +15,14 @@ import java.util.stream.Collectors;
 public class UpgradeStationTypeUI implements Runnable {
     private final Map selectedMap;
     private final Scenario selectedScenario;
-
+    Budget budget;
     /**
      * Gets the selected map.
      */
-    public UpgradeStationTypeUI(Map selectedMap, Scenario selectedScenario) {
+    public UpgradeStationTypeUI(Map selectedMap, Scenario selectedScenario, Budget budget) {
         this.selectedMap = selectedMap;
         this.selectedScenario = selectedScenario;
+        this.budget = budget;
     }
 
     /**
@@ -89,7 +87,6 @@ public class UpgradeStationTypeUI implements Runnable {
             cost = 100;
         }
 
-        // If upgrading to STATION, ask for orientation
         if (targetType == Type.STATION) {
             System.out.println("Enter new center orientation (NW, NE, SW, SE): ");
             while (orientation == null) {
@@ -103,14 +100,13 @@ public class UpgradeStationTypeUI implements Runnable {
             orientation = station.getOrientation();
         }
 
-        int budget = CurrentUser.getInstance().getUser().getBudgetValue();
-        if (budget < cost) {
+        if (budget.getBudget() < cost) {
             System.out.println("Insufficient budget. Required: " + cost + ", Available: " + budget);
             return;
         }
 
-        UpgradeStationTypeController controller = new UpgradeStationTypeController(selectedMap, selectedScenario);
-        boolean success = controller.upgradeType(station, targetType, orientation,cost);
+        UpgradeStationTypeController controller = new UpgradeStationTypeController(selectedMap, selectedScenario, budget);
+        boolean success = controller.upgradeType(station, targetType, orientation,budget,cost);
         if (success) {
             System.out.println("Upgrade to " + targetType + " completed.");
         }
@@ -124,7 +120,7 @@ public class UpgradeStationTypeUI implements Runnable {
      */
     private Station requestStation() {
         List<Station> owned = selectedMap.getStations().stream()
-                .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail()))
+                .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail())).filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                 .collect(Collectors.toList());
         if (owned.isEmpty()) {
             System.out.println("You have no stations on this map.");

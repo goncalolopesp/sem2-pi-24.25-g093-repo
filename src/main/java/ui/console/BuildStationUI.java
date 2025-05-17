@@ -17,14 +17,16 @@ public class BuildStationUI implements Runnable {
 
     private final Map map;
     private final Scenario scenario;
+    Budget budget;
     /** Controller handling station creation and validation. */
     private final CreateStationController ctrl = new CreateStationController();
     private static final List<String> VALID_ORIENTS =
             List.of("NE", "SE", "NW", "SW");
 
-    public BuildStationUI(Map map, Scenario scenario) {
+    public BuildStationUI(Map map, Scenario scenario, Budget budget) {
         this.map = map;
         this.scenario = scenario;
+        this.budget = budget;
     }
 
     /**
@@ -67,8 +69,8 @@ public class BuildStationUI implements Runnable {
                 return;
         }
 
-        if (user.getBudgetValue() < cost) {
-            System.out.println("Insufficient funds. You have " + user.getBudget() + ", but this station costs " + cost + ".");
+        if (budget.getBudget() < cost) {
+            System.out.println("Insufficient funds. You have " + budget.getBudget() + ", but this station costs " + cost + ".");
             return;
         }
 
@@ -94,13 +96,13 @@ public class BuildStationUI implements Runnable {
                 }
             }
 
-            Error result = ctrl.buildStation(typeName, map, scenario, x, y, orientation);
+            Error result = ctrl.buildStation(typeName, map, scenario, x, y, orientation, budget);
             switch (result) {
                 case OK:
                         List<Station> all = ctrl.getStations();
                         Station st = all.get(all.size() - 1);
                         System.out.println("Station '" + st.getName() +
-                                "' built successfully at (" + st.getX() + "," + st.getY() + ").");
+                                "' built successfully at (" + st.getX() + "," + st.getY() + ")." + st.getMapName() + st.getScenarioName());
                     placed = true;
                     break;
                 case INVALID_COORDINATES:

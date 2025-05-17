@@ -22,7 +22,9 @@ public class UpgradeStationUI implements Runnable{
     private final User currentUser = CurrentUser.getInstance().getUser();
     private Station station;
     private String buildingType;
+    Budget budget;
     private final Map selectedMap;
+    private final Scenario selectedScenario;
     private final AtomicReference<AtomicIntegerArray> timePeriod;
     private static final int COST_TELEGRAPH = 250,  COST_TELEPHONE = 270;
     private static final int COST_SCAFE = 340, COST_LCAFE = 430;
@@ -30,7 +32,7 @@ public class UpgradeStationUI implements Runnable{
     private static final int COST_SHOTEL = 940, COST_LHOTEL = 1170;
     private static final int COST_SILO = 1450, COST_LSTORAGE = 1750;
 
-    public UpgradeStationUI(Map selectedMap, AtomicReference<AtomicIntegerArray> timePeriod) { ctrl = new UpgradeStationController(); this.selectedMap = selectedMap; this.timePeriod = timePeriod; }
+    public UpgradeStationUI(Map selectedMap, Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, Budget budget) { ctrl = new UpgradeStationController(); this.selectedMap = selectedMap; this.selectedScenario = selectedScenario;this.timePeriod = timePeriod; this.budget = budget; }
 
     /**
      * Returns the controller used to upgrade Stations.
@@ -88,6 +90,7 @@ public class UpgradeStationUI implements Runnable{
     private Station requestStation() {
         List<Station> owned = selectedMap.getStations().stream()
                 .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail()))
+                .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                 .collect(Collectors.toList());
         if (owned.isEmpty()) {
             System.out.println("You have no stations on this map.");
@@ -201,7 +204,7 @@ public class UpgradeStationUI implements Runnable{
 
         } while (!valid || ctrl.verifyIfBuildingExists(station, buildingType));
 
-        currentUser.setBudget(new Budget(currentUser.getBudgetValue() - cost));
+        budget.subtractBudget(cost);
 
         return buildingType;
     }

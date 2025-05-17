@@ -43,12 +43,13 @@ public class StationRepository {
     /**
      * Atomically removes all stations matching the given map name and owner.
      * @param mapName the map name to match
+     * @param scenarioName the name of the scenario
      * @param ownerEmail the owner email to match
      */
-    public synchronized void removeStationsByMapAndOwner(String mapName, String ownerEmail) {
+    public synchronized void removeStationsByMapScenarioAndOwner(String mapName,String scenarioName, String ownerEmail) {
         stations.removeIf(s ->
                 s.getMapName().equalsIgnoreCase(mapName) &&
-                        s.getOwnerPlayer().equalsIgnoreCase(ownerEmail)
+                        s.getOwnerPlayer().equalsIgnoreCase(ownerEmail) && s.getScenarioName().equalsIgnoreCase(scenarioName)
         );
     }
 }

@@ -18,9 +18,11 @@ public class AssignTrainController {
      * @param train The train to assign
      * @param route The ordered list of stations the train will visit
      * @param cargoTypes The types of cargo this train will collect
+     * @param scenario the scenario to check the scenario effects on the route
+     * @param budget the player's budget
      * @return Budget earned from this route
      */
-    public int assignTrainToRoute(Train train, List<Station> route, List<Carriage.Type> cargoTypes, Scenario scenario) {
+    public int assignTrainToRoute(Train train, List<Station> route, List<Carriage.Type> cargoTypes, Scenario scenario, Budget budget) {
         int totalPeopleCollected = 0;
         int totalMailCollected = 0;
 
@@ -84,13 +86,13 @@ public class AssignTrainController {
                 .stream()
                 .anyMatch(r -> r.equalsIgnoreCase("vaccination campaign"));
 
-        int budget;
+        int moneyWon = 0;
         if(isVaccinationCampaign){
-            budget = ((totalPeopleCollected * PEOPLE_VALUE) * 2) + (totalMailCollected * MAIL_VALUE);
+            moneyWon = ((totalPeopleCollected * PEOPLE_VALUE) * 2) + (totalMailCollected * MAIL_VALUE);
         }
 
         else{
-            budget = (totalPeopleCollected * PEOPLE_VALUE) + (totalMailCollected * MAIL_VALUE);
+            moneyWon = (totalPeopleCollected * PEOPLE_VALUE) + (totalMailCollected * MAIL_VALUE);
         }
 
 
@@ -103,8 +105,8 @@ public class AssignTrainController {
         System.out.println("=========================\n");
 
         User user = CurrentUser.getInstance().getUser();
-        user.setBudget(new domain.Budget(user.getBudgetValue() + budget));
-        return budget;
+        budget.addBudget(moneyWon);
+        return moneyWon;
     }
 
     /**

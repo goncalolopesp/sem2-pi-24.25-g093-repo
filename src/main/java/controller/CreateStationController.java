@@ -29,9 +29,10 @@ public class CreateStationController {
      * @param x       the x-coordinate of the station's center
      * @param y       the y-coordinate of the station's center
      * @param orientation the station's orientation
+     * @param budget the budget the player has on this map and scenario
      * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
      */
-    public Error buildStation(String typeStr, Map map,Scenario scenario, int x, int y, Orientation orientation) {
+    public Error buildStation(String typeStr, Map map,Scenario scenario, int x, int y, Orientation orientation, Budget budget) {
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -50,7 +51,7 @@ public class CreateStationController {
             default:
                 return Error.INVALID_TYPE;
         }
-        if (user.getBudgetValue() < cost) return Error.INSUFFICIENT_FUNDS;
+        if (budget.getBudget() < cost) return Error.INSUFFICIENT_FUNDS;
 
         int origX = x;
         int origY = y;
@@ -129,7 +130,7 @@ public class CreateStationController {
         Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(),user.getEmail(), cost, capacity,0,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
-        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
+        budget.subtractBudget(cost);
         return Error.OK;
     }
 
@@ -141,10 +142,11 @@ public class CreateStationController {
      * @param x       the x-coordinate of the station's center
      * @param y       the y-coordinate of the station's center
      * @param orientation the station's orientation
+     * @param budget the players budget on thsi map and scenario
      * @param cost the cost of the upgrade
      * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
      */
-    public Error buildStation(String typeStr, Map map, Scenario scenario, int x, int y, Orientation orientation, int cost) {
+    public Error buildStation(String typeStr, Map map, Scenario scenario, int x, int y, Orientation orientation,Budget budget, int cost) {
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -209,7 +211,7 @@ public class CreateStationController {
                 if (onCity || onBlock) return Error.OVERBUILD;
                 String owner = user.getEmail();
                 for (Station s : stationRepo.getStations()) {
-                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner) || !s.getScenarioName().equals(scenario.getScenarioName())) continue;
                     int sw, sh, sox, soy;
                     if (s.getType() == Station.Type.STATION) {
                         sw = sh = 4;
@@ -238,7 +240,7 @@ public class CreateStationController {
         Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
-        user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
+        budget.subtractBudget(cost);
         return Error.OK;
     }
 

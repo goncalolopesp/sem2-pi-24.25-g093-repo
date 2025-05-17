@@ -21,12 +21,14 @@ public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
     private final Scenario selectedScenario;
+    Budget budget;
     private final Scanner scanner = new Scanner(System.in);
     private final AssignTrainController assignTrainController;
 
-    public AssignTrainUI(Map selectedMap, Scenario selectedScenario) {
+    public AssignTrainUI(Map selectedMap, Scenario selectedScenario, Budget budget) {
         this.selectedMap = selectedMap;
         this.selectedScenario = selectedScenario;
+        this.budget = budget;
         this.assignTrainController = new AssignTrainController();
     }
 
@@ -44,6 +46,7 @@ public class AssignTrainUI implements Runnable {
         StationRepository stationRepo = Repositories.getInstance().getStationRepository();
         List<Station> stationsOnMap = stationRepo.getStations().stream()
                 .filter(s -> s.getMapName().equals(selectedMap.getMapName()))
+                .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                 .filter(s -> s.getOwnerPlayer().equals(playerEmail))
                 .collect(Collectors.toList());
         if (stationsOnMap.size() < 2) {
@@ -57,7 +60,6 @@ public class AssignTrainUI implements Runnable {
             return;
         }
 
-        // Select locomotive
         System.out.println("Select a locomotive to assign:");
         for (int i = 0; i < userLocos.size(); i++) {
             System.out.printf("[%d] %s (Top Speed: %d)%n", i, userLocos.get(i).getModelName(), userLocos.get(i).getTopSpeed());
@@ -121,7 +123,6 @@ public class AssignTrainUI implements Runnable {
             }
             end = remaining.get(endIndex);
 
-            // optional intermediates
             remaining.remove(end);
             System.out.print("Add intermediate stations? (Y/N): ");
             if (scanner.nextLine().trim().equalsIgnoreCase("Y")) {
@@ -216,7 +217,7 @@ public class AssignTrainUI implements Runnable {
         completeRoute.addAll(intermediates);
         completeRoute.add(end);
 
-        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes, selectedScenario);
+        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes, selectedScenario, budget);
 
         System.out.println("Success: Train created with " + carriages.size() + " carriages and assigned to route with " + completeRoute.size() + " stations.");
     }

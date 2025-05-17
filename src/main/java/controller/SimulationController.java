@@ -2,6 +2,8 @@ package controller;
 
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import repository.BudgetRepository;
+import repository.Repositories;
 import repository.StationRepository;
 import ui.console.menu.MenuItem;
 
@@ -48,14 +50,14 @@ public class SimulationController {
         }
     }
 
-    public Runnable passTime(Map selectedMap, Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler, AtomicBoolean gameOver) {
+    public Runnable passTime(Map selectedMap, Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler, AtomicBoolean gameOver, Budget budget) {
         Runnable task = () -> {
             if (running.get()) {
                 timePeriod.get().getAndAdd(0, (1));
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
                     System.out.print("\nYou have reached year " + timePeriod.get().get(0) + ".");
                     removeOutdatedLocomotives(timePeriod.get().get(0));
-                    payLocomotiveMaintenance();
+                    payLocomotiveMaintenance(budget);
                     System.out.print("Type your option: ");
                 }
             }
@@ -92,6 +94,7 @@ public class SimulationController {
             int totalGeneratedCargo = city.getTotalGeneratedCargo();
             stationrepo.getStations().stream()
                     .filter(s -> s.getMapName().equals(mapName))
+                    .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getName().contains(city.getName()))
                     .forEach(station -> {
@@ -117,12 +120,13 @@ public class SimulationController {
         }
     }
 
-    public void resetGame(Map selectedMap) {
+    public void resetGame(Map selectedMap, Scenario selectedScenario, Budget budget) {
         List<Locomotive> l = new ArrayList<>();
         currentUser.setLocomotives(l);
-        currentUser.setBudget(new Budget(1000));
-        stationrepo.removeStationsByMapAndOwner(
+        budget.setBudget(1000);
+        stationrepo.removeStationsByMapScenarioAndOwner(
                 selectedMap.getMapName(),
+                selectedScenario.getScenarioName(),
                 currentUser.getEmail()
         );
     }
@@ -241,7 +245,7 @@ public class SimulationController {
         return scenarios.get(idx);
     }
 
-    public void payLocomotiveMaintenance(){
+    public void payLocomotiveMaintenance(Budget budget){
         boolean canPay = true;
         int yearlyBudget = 0;
         int yearlyManagementCost = 0;
@@ -249,22 +253,22 @@ public class SimulationController {
         for (Locomotive loc : currentUser.getLocomotives()){
             yearlyBudget = loc.getFuelCost();
             yearlyManagementCost = loc.getMaintenanceCost();
-            if ((yearlyManagementCost > currentUser.getBudgetValue())) {
+            if ((yearlyManagementCost > budget.getBudget())) {
                 canPay = false;
             }else{
                 canPay = true;
             }
 
             if (canPay){
-                currentUser.getBudget().subtractBudget(yearlyManagementCost);
-                if (yearlyBudget > currentUser.getBudgetValue()) {
+                budget.subtractBudget(yearlyManagementCost);
+                if (yearlyBudget > budget.getBudget()) {
                     loc.setAvailability(false);
                 }else{
                     loc.setAvailability(true);
                 }
                 canUse.add(loc);
                 if (loc.getAvailability())
-                    currentUser.getBudget().subtractBudget(yearlyBudget);
+                    budget.subtractBudget(yearlyBudget);
 
             }
 
