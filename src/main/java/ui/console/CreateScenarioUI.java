@@ -97,15 +97,20 @@ public class CreateScenarioUI implements Runnable {
         Scanner sc = new Scanner(System.in);
         System.out.println(mapRepository.getMaps());
         System.out.print("Select Map: ");
+        String mapName;
 
         do {
-            selectedMap = sc.nextLine();
-            if (mapRepository.checkNameUniqueness(selectedMap)) {
-                System.out.print("\nMap doesn't exist! Try again: ");
+            mapName = sc.nextLine().trim();
+            if (mapName.isEmpty()) {
+                System.out.print("Map name cannot be empty. Try again: ");
+                continue;
             }
-        } while (!mapRepository.checkNameUniqueness(selectedMap));
+            if (mapRepository.checkNameUniqueness(mapName)) {
+                System.out.print("Map doesn't exist! Try again: ");
+            }
+        } while (mapName.isEmpty() || mapRepository.checkNameUniqueness(mapName));
 
-        return selectedMap.trim();
+        return mapName;
     }
 
     /**
@@ -200,7 +205,7 @@ public class CreateScenarioUI implements Runnable {
         String[] validEvents = {"none", "vaccination campaign", "school program"};
         boolean valid;
 
-        System.out.print("Enter Historical Events (comma-separated: none, vaccination campaign, school program): ");
+        System.out.print("Enter Historical Events (comma-separated: none, vaccination campaign (People give double the budget), school program [House Blocks produce double the cargo]): ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");

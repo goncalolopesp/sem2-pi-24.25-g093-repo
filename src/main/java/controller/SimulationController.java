@@ -70,12 +70,12 @@ public class SimulationController {
         return task;
     }
 
-    public Runnable generateCargo(Map selectedMap, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
+    public Runnable generateCargo(Map selectedMap,Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
         AtomicBoolean printedMaxCapacity = new AtomicBoolean(false);
         Runnable task = () -> {
             if (running.get()) {
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                    addCargoToStation(selectedMap, printedMaxCapacity);
+                    addCargoToStation(selectedMap,selectedScenario, printedMaxCapacity);
                 }
             }
             if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
@@ -85,19 +85,27 @@ public class SimulationController {
         return task;
     }
 
-    public void addCargoToStation(Map selectedMap, AtomicBoolean printedMaxCapacity) {
+    public void addCargoToStation(Map selectedMap, Scenario selectedScenario, AtomicBoolean printedMaxCapacity) {
         String mapName = selectedMap.getMapName();
 
         for (City city : cities) {
             int totalGeneratedCargo = city.getTotalGeneratedCargo();
-
             stationrepo.getStations().stream()
                     .filter(s -> s.getMapName().equals(mapName))
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getName().contains(city.getName()))
                     .forEach(station -> {
                         if (station.getCapacityOwned() < station.getCapacity()) {
-                            station.setCapacityOwned(station.getCapacityOwned() + totalGeneratedCargo);
+                            boolean isSchoolProgram = selectedScenario.getHistoricalRestrictions()
+                                    .stream()
+                                    .anyMatch(r -> r.equalsIgnoreCase("school program"));
+                            if(isSchoolProgram){
+                                station.setCapacityOwned(station.getCapacityOwned() + (totalGeneratedCargo * 2));
+                            }
+                            else{
+                                station.setCapacityOwned(station.getCapacityOwned() + totalGeneratedCargo);
+                            }
+
                             System.out.printf("\nStored %d cargo for station %s. Type your option: ", station.getCapacityOwned(), station.getName());
                             printedMaxCapacity.set(false);
                         } else if (!printedMaxCapacity.get()) {
@@ -120,7 +128,6 @@ public class SimulationController {
     }
 
     private void addCitiesToMap(String[][] grid, Map map) {
-        // Draw cities and house blocks
         List<City> cities = displayCtrl.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());

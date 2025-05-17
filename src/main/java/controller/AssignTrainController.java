@@ -21,7 +21,7 @@ public class AssignTrainController {
      * @param cargoTypes The types of cargo this train will collect
      * @return Budget earned from this route
      */
-    public int assignTrainToRoute(Train train, List<Station> route, List<Carriage.Type> cargoTypes) {
+    public int assignTrainToRoute(Train train, List<Station> route, List<Carriage.Type> cargoTypes, Scenario scenario) {
         int totalPeopleCollected = 0;
         int totalMailCollected = 0;
 
@@ -81,8 +81,19 @@ public class AssignTrainController {
             }
         }
 
-        // Calculate total budget earned
-        int budget = (totalPeopleCollected * PEOPLE_VALUE) + (totalMailCollected * MAIL_VALUE);
+        boolean isVaccinationCampaign = scenario.getHistoricalRestrictions()
+                .stream()
+                .anyMatch(r -> r.equalsIgnoreCase("vaccination campaign"));
+
+        int budget;
+        if(isVaccinationCampaign){
+            budget = ((totalPeopleCollected * PEOPLE_VALUE) * 2) + (totalMailCollected * MAIL_VALUE);
+        }
+
+        else{
+            budget = (totalPeopleCollected * PEOPLE_VALUE) + (totalMailCollected * MAIL_VALUE);
+        }
+
 
         // Print summary
         System.out.println("\n=== Train Route Summary ===");

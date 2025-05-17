@@ -52,7 +52,7 @@ public class SimulationUI implements Runnable {
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
         Runnable timeTask = ctrl.passTime(selectedMap,selectedScenario, timePeriod, running, options, timeScheduler, gameOver);
-        Runnable generationTask = ctrl.generateCargo(selectedMap, timePeriod, running, generationScheduler);
+        Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
 
         timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
         generationScheduler.scheduleAtFixedRate(generationTask, 2, 2, TimeUnit.SECONDS);
@@ -71,7 +71,7 @@ public class SimulationUI implements Runnable {
                     options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, timePeriod)));
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
-                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap)));
+                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario)));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();

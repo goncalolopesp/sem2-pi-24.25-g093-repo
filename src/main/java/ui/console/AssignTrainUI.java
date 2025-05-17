@@ -16,11 +16,13 @@ import java.util.stream.Collectors;
 public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
+    private final Scenario selectedScenario;
     private final Scanner scanner = new Scanner(System.in);
     private final AssignTrainController assignTrainController;
 
-    public AssignTrainUI(Map selectedMap) {
+    public AssignTrainUI(Map selectedMap, Scenario selectedScenario) {
         this.selectedMap = selectedMap;
+        this.selectedScenario = selectedScenario;
         this.assignTrainController = new AssignTrainController();
     }
 
@@ -199,15 +201,12 @@ public class AssignTrainUI implements Runnable {
         Train train = new Train(chosenLoco, carriages, user.getEmail());
         TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
         trainRepo.save(train);
-
-        // Create the complete route (start -> intermediates -> end)
         List<Station> completeRoute = new ArrayList<>();
         completeRoute.add(start);
         completeRoute.addAll(intermediates);
         completeRoute.add(end);
 
-        // Send the train, route, and cargo types to the controller
-        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes);
+        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes, selectedScenario);
 
         System.out.println("Success: Train created with " + carriages.size() + " carriages and assigned to route with " + completeRoute.size() + " stations.");
     }
