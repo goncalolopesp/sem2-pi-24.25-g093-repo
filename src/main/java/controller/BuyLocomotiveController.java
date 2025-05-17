@@ -55,7 +55,6 @@ public class BuyLocomotiveController {
 
     public boolean buyLocomotive(String modelName, Scenario scenario, domain.Map map) {
         if (canBuyLocomotive(modelName, scenario)){
-            return locomotiveRepository.buyLocomotive(modelName);
             return locomotiveRepository.buyLocomotive(modelName, budgetRepository.getUserBudgetFromScenarioInMap(scenario, map, session.getUser()).get());
         }
         return false;

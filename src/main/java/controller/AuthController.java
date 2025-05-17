@@ -19,14 +19,8 @@ public class AuthController {
     }
 
 
-    public boolean createNewUser(String name, String email, String pwd, String roleId, Optional<Budget> budget){
-        Budget budget1;
-        if (budget.isPresent()) {
-            budget1 = budget.get();
-        }else{
-            budget1 = new Budget(0);
-        }
-        User user = new User(name, email, pwd, roleId, budget1);
+    public boolean createNewUser(String name, String email, String pwd, String roleId){
+        User user = new User(name, email, pwd, roleId);
         return authRepo.createNewUser(user);
     }
 
