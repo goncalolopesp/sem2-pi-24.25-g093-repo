@@ -9,9 +9,9 @@ import java.util.List;
 public class UserMenuUI {
 
     public void run() {
-        List<MenuItem> options = new ArrayList<MenuItem>();
+        List<MenuItem> options = new ArrayList<>();
         options.add(new MenuItem("Play Game", new SimulationUI()));
-        int option = 0;
+        int option;
         do {
             option = Utils.showAndSelectIndex(options, "\n\n--- PLAYER MENU --------------------------");
 

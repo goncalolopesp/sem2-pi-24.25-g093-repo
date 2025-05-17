@@ -1,7 +1,5 @@
 package ui.console.menu;
 
-import pt.ipp.isep.dei.ui.console.DevTeamUI;
-import pt.ipp.isep.dei.ui.console.authorization.AuthenticationUI;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import ui.console.*;
 
@@ -11,11 +9,11 @@ import java.util.List;
 public class InitialMenuUI {
 
     public void run() {
-        List<MenuItem> options = new ArrayList<MenuItem>();
+        List<MenuItem> options = new ArrayList<>();
         options.add(new MenuItem("Do Login", new AuthUI(1)));
         options.add(new MenuItem("Create user", new AuthUI(2)));
         options.add(new MenuItem("Know the Development Team", new DevelopmentTeamUI()));
-        int option = 0;
+        int option;
         do {
             option = Utils.showAndSelectIndex(options, "\n\n--- MAIN MENU --------------------------");
 
