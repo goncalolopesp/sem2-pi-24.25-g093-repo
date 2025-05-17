@@ -49,21 +49,25 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+**Split Diagram**
+
+![Sequence Diagram - Split](svg/US010-SD-split.svg)
+
+**Get Repositories Partial SD**
+
+![Sequence Diagram - Partial - Get Repositories](svg/US010-Partial-SD-repositories.svg)
+
 **Get Input Partial SD**
 
-![Sequence Diagram - Partial - Get Input](svg/US010-SD-getInput.svg)
+![Sequence Diagram - Partial - Get Input](svg/US010-Partial-SD-input.svg)
 
 **Assign Train Partial SD**
 
-![Sequence Diagram - Partial - Assign Train](svg/US010-SD-assignTrain.svg)
+![Sequence Diagram - Partial - Assign Train](svg/US010-Partial-SD-assignTrain.svg)
 
-**Verify if train was successfully assigned Partial SD**
+**Get Output Partial SD**
 
-![Sequence Diagram - Partial - Verification](svg/US010-SD-verify.svg)
-
-**Display Success Message Partial SD**
-
-![Sequence Diagram - Partial - Display Success](svg/US010-SD-displaySuccess.svg)
+![Sequence Diagram - Partial - Get Output](svg/US010-Partial-SD-output.svg)
 
 ## 3.3. Class Diagram (CD)
 

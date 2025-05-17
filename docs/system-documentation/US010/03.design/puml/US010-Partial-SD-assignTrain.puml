@@ -1,0 +1,39 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+participant "AssignTrainUI" as atui
+
+activate atui
+
+create ":AssignTrainController" as atc
+
+participant "trainRepository\n:TrainRepository" as trepo
+
+atui --> atc : create()
+atui --> atui : new Train(locomotive, carriages, playerEmail)
+
+create "train\n:Train" as train
+
+atui --> train : create()
+atui --> atc : add(train)
+activate atc
+
+atc --> trepo : add(train)
+activate trepo
+
+trepo --> atc : returns train
+deactivate trepo
+
+atc --> atui : returns train
+deactivate atc
+
+atui --> atui : creates route with the selected inputs
+atui --> atc : assignTrainToRoute(train, route, cargo)
+activate atc
+
+atc --> atc : runs train route
+@enduml
