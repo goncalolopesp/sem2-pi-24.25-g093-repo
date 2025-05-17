@@ -11,8 +11,7 @@ public class AssignTrainController {
     private static final int MAIL_VALUE = 3;
 
     // Cargo distribution constants
-    private static final double PEOPLE_RATIO = 0.7;  // 70% people
-    private static final double MAIL_RATIO = 0.3;    // 30% mail
+    private static final double PEOPLE_RATIO = 0.7;  // 70% people (the rest is Mail)
 
     /**
      * Assigns a train to a specific route with defined cargo types to collect
