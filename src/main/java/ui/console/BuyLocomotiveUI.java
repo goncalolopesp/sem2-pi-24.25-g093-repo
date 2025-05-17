@@ -32,13 +32,6 @@ public class BuyLocomotiveUI implements Runnable {
         }
     }
 
-    public void getPlayerLocomotives() {
-        for (Locomotive locomotive : locomotiveController.getPlayerLocomotives()){
-            System.out.print(locomotive.getModelName() + "  |  ");
-        }
-        System.out.println();
-    }
-
     public boolean buyLocomotive(String modelName){
         if (locomotiveController.buyLocomotive(modelName, scenario)){
 
