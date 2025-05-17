@@ -101,7 +101,7 @@ public class AssignTrainController {
         System.out.println("Total cargo collected: " + (totalPeopleCollected + totalMailCollected));
         System.out.println("People collected: " + totalPeopleCollected);
         System.out.println("Mail collected: " + totalMailCollected);
-        System.out.println("Budget earned: " + budget);
+        System.out.println("Budget earned: " + budget.getBudget());
         System.out.println("=========================\n");
 
         User user = CurrentUser.getInstance().getUser();
