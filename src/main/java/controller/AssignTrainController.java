@@ -104,7 +104,6 @@ public class AssignTrainController {
         System.out.println("Budget earned: " + budget.getBudget());
         System.out.println("=========================\n");
 
-        User user = CurrentUser.getInstance().getUser();
         budget.addBudget(moneyWon);
         return moneyWon;
     }
