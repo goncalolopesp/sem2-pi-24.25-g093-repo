@@ -19,10 +19,19 @@ class CurrentUser{
 
 class Budget{
     - budget : int
+    - map : Map
+    - scenario : Scenario
+    - user : User
     + getBudget() : int
     + setBudget(int budget) : void
     + addBudget(int budget) : void
     + subtractBudget(int budget) : void
+    + getMap() : Map
+    + setMap(Map map) : void
+    + getScenario() : Scenario
+    + setScenario(Scenario scenario) : void
+    + getUser() : User
+    + setUser(User user) : void
 }
 
 class Locomotive{
@@ -74,21 +83,17 @@ class User {
     - email : String
     - password : String
     - roleId : String
-    - budget : Budget
     - locomotives : List<Locomotive>
     + getName(): String
     + getEmail(): String
     + getPassword(): String
     + getRoleId(): String
     + getBudgetValue(): int
-    + getBudget(): Budget
     + getLocomotives(): List<Locomotive>
     + setName(): String
     + setEmail(): String
     + setPassword(): String
     + setRoleId(): String
-    + setBudgetValue(): int
-    + setBudget(): Budget
     + setLocomotives(): List<Locomotive>
 }
 
@@ -125,8 +130,10 @@ class BuyLocomotiveController{
 class Repositories {
     - instance : Repositories
     - locomotiveRepository : LocomotiveRepository
+    - budgetRepository : BudgetRepository
     + getInstance() : Repositories
     + getLocomotiveRepository() : LocomotiveRepository
+    + getBudgetRepository() : BudgetRepository
 }
 
 class LocomotiveRepository{
@@ -140,6 +147,14 @@ class LocomotiveRepository{
     + deleteLocomotive(Locomotive locomotive) : boolean
     + getLocomotive(String modelName) : Optional<Locomotive>
     + getLocomotives() : Set<Locomotive>
+}
+
+class BudgetRepository{
+    - budgets : Set<Budget>
+    - session : CurrentUser
+    + createBudget(Budget budget) : boolean
+    + doesBudgetExist(Budget budget) : boolean
+    + getUserBudgetFromScenarioInMap(Scenario scenario, domain.Map map, User user) : Optional<Budget>
 }
 
 'Connections
@@ -159,8 +174,14 @@ Repositories --> "1" LocomotiveRepository
 
 CurrentUser -> CurrentUser : instance
 
-LocomotiveRepository "1" ..> "2" Locomotive
+LocomotiveRepository "1" ..> "*" Locomotive
+BudgetRepository "1"..>"*" Budget
 
+
+Budget --> Scenario
+Budget --> Map
+Budget --> User
+CurrentUser --> User : stores session
 Locomotive --> User : owned by
 Scenario --> User : created by
 Locomotive --> Scenario : belongs to
