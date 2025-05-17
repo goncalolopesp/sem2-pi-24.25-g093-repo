@@ -1,5 +1,6 @@
 package controller;
 
+import domain.Budget;
 import domain.Scenario;
 import repository.Repositories;
 import repository.ScenarioRepository;
@@ -51,8 +52,8 @@ public class CreateScenarioController {
      * @param historicalRestrictions
      * @return the created Scenario instance
      */
-    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions) {
-        Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions);
+    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions, Budget budget) {
+        Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions, budget);
         getScenarioRepository().add(scenario);
         return scenario;
     }

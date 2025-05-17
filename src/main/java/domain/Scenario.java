@@ -1,6 +1,7 @@
 package domain;
 
 import java.util.List;
+import domain.Budget;
 
 public class Scenario {
     /**
@@ -14,6 +15,7 @@ public class Scenario {
     private final int[] timeRestrictions;
     private final List<String> technologicalRestrictions;
     private final List<String> historicalRestrictions;
+    private Budget budget;
 
     /**
      * Constructs a new Scenario instance.
@@ -24,12 +26,13 @@ public class Scenario {
      * @param technologicalRestrictions the technological restrictions associated with the scenario
      * @param historicalRestrictions the historical restrictions associated with the scenario
      */
-    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions) {
+    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions, Budget budget) {
         this.scenarioName = scenarioName;
         this.selectedMap = selectedMap;
         this.timeRestrictions = timeRestrictions;
         this.technologicalRestrictions = technologicalRestrictions;
         this.historicalRestrictions = historicalRestrictions;
+        this.budget = budget;
     }
 
     /**
@@ -78,6 +81,11 @@ public class Scenario {
      *
      * @return the scenario name
      */
+
+    public int getBudgetValue() { return budget.getBudget(); }
+    public Budget getBudget() { return budget; }
+    public void setBudget(Budget budget) { this.budget = budget; }
+
     @Override
     public String toString() {
         return getScenarioName();

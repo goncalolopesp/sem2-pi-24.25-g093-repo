@@ -21,8 +21,8 @@ public class Bootstrap {
         //get authentication repository
         AuthController authController = new AuthController();
 
-        authController.createNewUser("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR, Optional.empty());
-        authController.createNewUser("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER, Optional.of(new Budget(1000)));
+        authController.createNewUser("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR);
+        authController.createNewUser("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER);
     }
 
     private void createLocomotives() {
@@ -120,7 +120,7 @@ public class Bootstrap {
 
     private void addScenarios() {
         CreateScenarioController createScenarioController = new CreateScenarioController();
-        createScenarioController.createScenario("exampleScenario", "exampleMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));
+        createScenarioController.createScenario("exampleScenario", "exampleMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"), new Budget(1000));
     }
 
 

@@ -52,7 +52,7 @@ public class BuyLocomotiveController {
 
     public boolean buyLocomotive(String modelName, Scenario scenario){
         if (canBuyLocomotive(modelName, scenario)){
-            return locomotiveRepository.buyLocomotive(modelName);
+            return locomotiveRepository.buyLocomotive(modelName, scenario);
         }
         return false;
     }

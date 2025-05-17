@@ -2,10 +2,7 @@ package repository;
 
 import java.util.*;
 
-import domain.Budget;
-import domain.CurrentUser;
-import domain.Locomotive;
-import domain.User;
+import domain.*;
 
 public class LocomotiveRepository {
 
@@ -41,9 +38,9 @@ public class LocomotiveRepository {
         return false;
     }
 
-    public boolean buyLocomotive(Locomotive locomotive){
+    public boolean buyLocomotive(Locomotive locomotive, Scenario scenario){
         User user = session.getUser();
-        Budget money = user.getBudget();
+        Budget money = scenario.getBudget();
         if (money.getBudget() < locomotive.getPrice()) {
             return false;
         }
@@ -54,10 +51,10 @@ public class LocomotiveRepository {
         return true;
     }
 
-    public boolean buyLocomotive(String modelName){
+    public boolean buyLocomotive(String modelName, Scenario scenario){
         Optional<Locomotive> locomotive = getLocomotive(modelName);
         if (locomotive.isPresent()) {
-            return buyLocomotive(locomotive.get());
+            return buyLocomotive(locomotive.get(), scenario);
         }else{
             return false;
         }
