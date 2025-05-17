@@ -8,4 +8,4 @@
 
 [Design](03.design/US004-design.md)
 
-[Tests & Implementation](04.tests-and-implementation/USXXX-tests-and-implementation.md)
+[Tests & Implementation](04.tests-and-implementation/US004-tests-and-implementation.md)

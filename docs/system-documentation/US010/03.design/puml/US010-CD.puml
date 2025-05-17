@@ -1,34 +1,160 @@
 @startuml
 
-class Player {
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype polyline
+skinparam classAttributeIconSize 0
 
+class User {
+    -name: String
+    -email: String
+    -password: String
+    -roleId: String
+    -locomotives: List<Locomotive>
+    +getName(): String
+    +getEmail(): String
+    +getPassword(): String
+    +getRoleId(): String
+    +getLocomotives(): List<Locomotive>
+    +setName(): String
+    +setEmail(): String
+    +setPassword(): String
+    +setRoleId(): String
+    +setLocomotives(): List<Locomotive>
 }
 
-class AssignedTrain {
-    -selectedTrain: int
-    -selectedRoute: String[]
-    -cargoList: String[]
-    +validateInputs()
+class AssignTrainUI {
+    -selectedMap: Map
+    -selectedScenario: Scenario
+    -budget: Budget
+    -assignTrainController: AssignTrainController
+    +run(): void
 }
 
-class AssignedTrainRepository {
-    +assignTrain(selectedTrain, selectedRoute, cargoesList)
-    +verifyIfAssignedAndSaves(selectedTrain, selectedRoute, cargoesList)
+interface Runnable <<interface>>{
+    +run(): void
 }
 
-class AssignedTrainUI {
-    +getInput()
-    +showSuccess()
-    +showError()
+class AssignTrainController {
+    -PEOPLE_VALUE: int
+    -MAIL_VALUE: int
+    -PEOPLE_RATIO: double
+    +assignTrainToRoute(Train train, List<Station> route, List<Carriage.Type> cargoTypes, Scenario scenario, Budget budget): int
+    +collectCargo(List<Carriage> carriages, Carriage.Type cargoType, int availableCargo): int
 }
 
-class AssignedTrainController {
-    +assignTrain(selectedTrain, selectedRoute, cargoesList)
+class Repositories {
+    - instance : Repositories
+    - locomotiveRepository : LocomotiveRepository
+    + getInstance() : Repositories
+    + getLocomotiveRepository() : LocomotiveRepository
 }
 
-AssignedTrainRepository --> AssignedTrain : creates >
-AssignedTrainController --> AssignedTrainRepository : uses
-AssignedTrainController --> Player : gets current user
-AssignedTrainUI --> AssignedTrainController : interacts
+class LocomotiveRepository{
+    - locomotives : Set<Locomotive>
+    - session : CurrentUser
+    + addLocomotive(Locomotive locomotive) : boolean
+    + addLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) : boolean
+    + checkIfLocomotiveExists(Locomotive locomotive) : boolean
+    + buyLocomotive(Locomotive locomotive) : boolean
+    + buyLocomotive(String modelName) : boolean
+    + deleteLocomotive(Locomotive locomotive) : boolean
+    + getLocomotive(String modelName) : Optional<Locomotive>
+    + getLocomotives() : Set<Locomotive>
+}
+
+class CarriageRepository {
+    -carriages: List<Carriage>
+    +save(Carriage carriage): Carriage
+    +delete(Carriage carriage): boolean
+    +findAll(): List<Carriage>
+    +find(Carriage carriage): List<Carriage>
+}
+
+class TrainRepository {
+    -trains: List<Train>
+    +save(Train train): Train
+    +delete(Train train): boolean
+    +getTrains(): List<Train>
+    +findTrain(Train train): Optional<Train>
+}
+
+class Train {
+    -locomotive: Locomotive
+    -carriages: List<Carriage>
+    -userEmail: String
+    +getLocomotive(): Locomotive
+    +getCarriages(): List<Carriage>
+    +getUserEmail(): String
+    +addCarriage(): void
+    +removeCarriage(): boolean
+}
+
+class Locomotive{
+    - modelName : String
+    - price : int
+    - type : String
+    - fuelCost : int
+    - maintenanceCost : int
+    - startYearOfOperation : int
+    - endYearOfOperation : int
+    - topSpeed : int
+    - available : boolean
+    + getModelName() : String
+    + setModelName(String modelName) : void
+    + getPrice() : int
+    + setPrice(int price) : void
+    + getType() : String
+    + setType(String type) : void
+    + getFuelCost() : int
+    + setFuelCost(int fuelCost) : void
+    + getMaintenanceCost() : int
+    + setMaintenanceCost(int maintenanceCost) : void
+    + getStartYearOfOperation() : int
+    + setStartYearOfOperation(int startYearOfOperation) : void
+    + getEndYearOfOperation() : int
+    + setEndYearOfOperation(int endYearOfOperation) : void
+    + getTopSpeed() : int
+    + setTopSpeed(int topSpeed) : void
+    + getAvailability() : boolean
+    + setAvailability(boolean available) : void
+}
+
+class Carriage {
+    -type: Type
+    -capacity: int
+    -capacityOwned: int
+    +getType(): Type
+    +getCapacity(): int
+    +getCapacityOwned(): int
+    +setCapacityOwned(): void
+    +toString(): String
+}
+
+enum Type {
+    PEOPLE
+    MAIL
+}
+
+User ..> AssignTrainUI
+
+AssignTrainUI ..|> Runnable
+AssignTrainUI .> AssignTrainController
+
+AssignTrainController ..> TrainRepository : trainRepository
+AssignTrainController ..> LocomotiveRepository : locomotiveRepository
+AssignTrainController ..> CarriageRepository : carriageRepository
+
+Repositories -> Repositories : instance
+Repositories --> "1" TrainRepository
+Repositories --> "1" LocomotiveRepository
+Repositories --> "1" CarriageRepository
+
+TrainRepository "1" --> "*" Train
+LocomotiveRepository "1" --> "*" Locomotive
+CarriageRepository "1" --> "*" Carriage
+
+Train --> User : createdBy
+Carriage ..> Type
 
 @enduml
