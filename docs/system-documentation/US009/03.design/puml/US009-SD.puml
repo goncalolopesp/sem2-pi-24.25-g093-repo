@@ -24,6 +24,7 @@ participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
 participant "locomotiveRepository\n:LocomotiveRepository" as locomotiveRepository
 participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
+participant "budgetRepository\n:BudgetRepository" as budgetRepository
 
 BuyLocomotiveController --> Repositories : getInstance()
 activate BuyLocomotiveController
@@ -87,7 +88,15 @@ activate Repo
 Repo --> BuyLocomotiveController : locomotiveRepository
 deactivate Repo
 
-BuyLocomotiveController --> BuyLocomotiveController : getBudget()
+BuyLocomotiveController --> Repo : getBudgetRepository()
+activate Repo
+Repo --> BuyLocomotiveController : budgetRepository
+deactivate Repo
+
+BuyLocomotiveController --> budgetRepository : getBudget()
+activate budgetRepository
+budgetRepository --> BuyLocomotiveController : budget
+deactivate budgetRepository
 
 BuyLocomotiveController --> locomotiveRepository : getPrice(locomotive)
 activate locomotiveRepository
