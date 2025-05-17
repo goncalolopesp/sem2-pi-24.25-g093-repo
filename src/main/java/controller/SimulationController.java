@@ -78,6 +78,7 @@ public class SimulationController {
             // if we’ve gone past the scenario’s end…
             if (timePeriod.get().get(0) >= timePeriod.get().get(1)) {
                 scheduler.shutdownNow();
+                running.set(false);              // ← tell the UI we’re no longer “running”
 
                 // reset the saved year back to the scenario start
                 int resetYear = selectedScenario.getTimeRestrictions()[0];

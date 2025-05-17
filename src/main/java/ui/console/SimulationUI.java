@@ -74,11 +74,10 @@ public class SimulationUI implements Runnable {
 
         do {
             if (running.get()) {
-                ctrl.displayMapData(selectedMap,selectedScenario);
+                ctrl.displayMapData(selectedMap, selectedScenario);
                 if (currentUser != null) {
                     System.out.println("Your budget is: " + userBudget.getBudget());
                 }
-
                 if (options.isEmpty()) {
                     options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario,userBudget)));
                     options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario, userBudget)));
@@ -92,9 +91,8 @@ public class SimulationUI implements Runnable {
                         System.out.println("Game paused.");
                     }));
                 }
-
             } else {
-                // Game is paused: only show resume
+                options.clear();
                 options.add(new MenuItem("Resume Game", () -> {
                     running.set(true);
                     options.clear();
@@ -102,25 +100,43 @@ public class SimulationUI implements Runnable {
                 }));
             }
 
-            option.set(Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------"));
+            // Show whatever menu we built and get the user’s choice
+            option.set( Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------") );
 
+            // Execute it (or handle “Cancel” = -1)
             if (option.get() >= 0 && option.get() < options.size()) {
-                String selectedLabel = options.get(option.get()).toString();
+                String label = options.get(option.get()).toString();
 
-                if (!selectedLabel.equals("Pause Game") && !selectedLabel.equals("Resume Game")) {
+                // for any “real” option (not Pause/Resume) we pause the game…
+                if (!label.equals("Pause Game") && !label.equals("Resume Game")) {
                     boolean wasRunning = running.get();
-                    if (wasRunning) running.set(false);
+                    if (wasRunning) {
+                        running.set(false);
+                        System.out.println("[Game paused while you work]");
+                    }
 
+                    // run your submenu (e.g. BuildStationUI, etc)
                     options.get(option.get()).run();
 
-                    if (wasRunning) running.set(true);
-                } else {
+                    // then resume if we were running
+                    if (wasRunning) {
+                        running.set(true);
+                        System.out.println("[Game resumed]");
+                    }
+                }
+                else {
+                    // Pause Game or Resume Game just toggle running themselves
                     options.get(option.get()).run();
                 }
-            } else if (option.get() == -1) {
-                running.set(false); timeScheduler.shutdownNow(); System.out.println("Game stopped.");
+            }
+            else if (option.get() == -1) {
+                // This branch will also catch the “0 – Cancel” keypress
+                running.set(false);
+                timeScheduler.shutdownNow();
+                generationScheduler.shutdownNow();
+                System.out.println("Game stopped.");
                 if (gameOver.get()) {
-                    ctrl.resetGame(selectedMap,selectedScenario,userBudget);
+                    ctrl.resetGame(selectedMap, selectedScenario, userBudget);
                 }
             }
         } while (option.get() != -1);
