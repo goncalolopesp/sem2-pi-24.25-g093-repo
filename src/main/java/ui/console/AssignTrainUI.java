@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * Launches the user interface responsible to help the player select a locomotive, gather carriage and earn budget.
+ */
+
 public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
@@ -26,6 +30,12 @@ public class AssignTrainUI implements Runnable {
         this.assignTrainController = new AssignTrainController();
     }
 
+    /**
+     * Runs the "Assign Train" user interface.
+     * <p>
+     * Asks for the player to choose the locomotive to be used, all the stations that the route will pass, the type(s) of cargo to be picked and the ammount of carriages the train will have
+     * </p>
+     */
     @Override
     public void run() {
         var currentUser = CurrentUser.getInstance().getUser();
