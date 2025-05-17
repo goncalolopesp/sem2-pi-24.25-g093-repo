@@ -3,9 +3,15 @@ package domain;
 public class Budget {
 
     int budget;
+    Map map;
+    Scenario scenario;
+    User user;
 
-    public Budget(int budget) {
+    public Budget(int budget, Map map, Scenario scenario, User user) {
         this.budget = budget;
+        this.map = map;
+        this.scenario = scenario;
+        this.user = user;
     }
 
     public int getBudget() {
@@ -22,6 +28,30 @@ public class Budget {
 
     public void subtractBudget(int budget) {
         this.budget -= budget;
+    }
+
+    public Map getMap() {
+        return map;
+    }
+
+    public void setMap(Map map) {
+        this.map = map;
+    }
+
+    public Scenario getScenario() {
+        return scenario;
+    }
+
+    public void setScenario(Scenario scenario) {
+        this.scenario = scenario;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
 }

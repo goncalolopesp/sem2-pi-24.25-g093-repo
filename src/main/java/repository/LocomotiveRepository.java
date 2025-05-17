@@ -41,9 +41,9 @@ public class LocomotiveRepository {
         return false;
     }
 
-    public boolean buyLocomotive(Locomotive locomotive){
+
+    public boolean buyLocomotive(Locomotive locomotive, Budget money) {
         User user = session.getUser();
-        Budget money = user.getBudget();
         if (money.getBudget() < locomotive.getPrice()) {
             return false;
         }
@@ -54,10 +54,11 @@ public class LocomotiveRepository {
         return true;
     }
 
-    public boolean buyLocomotive(String modelName){
+
+    public boolean buyLocomotive(String modelName, Budget money){
         Optional<Locomotive> locomotive = getLocomotive(modelName);
         if (locomotive.isPresent()) {
-            return buyLocomotive(locomotive.get());
+            return buyLocomotive(locomotive.get(), money);
         }else{
             return false;
         }

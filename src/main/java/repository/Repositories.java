@@ -19,6 +19,7 @@ public class Repositories {
     private final LocomotiveRepository locomotiveRepository;
     private final TrainRepository trainRepository;
     private final CarriageRepository carriageRepository;
+    private final BudgetRepository budgetRepository;
     /**
      * Private constructor to prevent external instantiation.
      * Initializes all repositories.
@@ -34,6 +35,7 @@ public class Repositories {
         locomotiveRepository = new LocomotiveRepository();
         trainRepository = new TrainRepository();
         carriageRepository = new CarriageRepository();
+        budgetRepository = new BudgetRepository();
     }
 
     /**
@@ -134,4 +136,6 @@ public class Repositories {
      * @return the carriageRepository
      */
     public CarriageRepository getCarriageRepository() { return carriageRepository; }
+
+    public BudgetRepository getBudgetRepository() { return budgetRepository; }
 }

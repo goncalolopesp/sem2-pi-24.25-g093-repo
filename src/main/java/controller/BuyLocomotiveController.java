@@ -3,6 +3,7 @@ package controller;
 import domain.CurrentUser;
 import domain.Locomotive;
 import domain.Scenario;
+import repository.BudgetRepository;
 import repository.LocomotiveRepository;
 import repository.Repositories;
 import repository.ScenarioRepository;
@@ -12,10 +13,12 @@ import java.util.*;
 public class BuyLocomotiveController {
     private LocomotiveRepository locomotiveRepository;
     CurrentUser session = CurrentUser.getInstance();
+    private BudgetRepository budgetRepository;
 
     public BuyLocomotiveController() {
         Repositories repositories = Repositories.getInstance();
         locomotiveRepository = repositories.getLocomotiveRepository();
+        budgetRepository = repositories.getBudgetRepository();
     }
 
     public void createLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) {
@@ -50,9 +53,10 @@ public class BuyLocomotiveController {
         return false;
     }
 
-    public boolean buyLocomotive(String modelName, Scenario scenario){
+    public boolean buyLocomotive(String modelName, Scenario scenario, domain.Map map) {
         if (canBuyLocomotive(modelName, scenario)){
             return locomotiveRepository.buyLocomotive(modelName);
+            return locomotiveRepository.buyLocomotive(modelName, budgetRepository.getUserBudgetFromScenarioInMap(scenario, map, session.getUser()).get());
         }
         return false;
     }

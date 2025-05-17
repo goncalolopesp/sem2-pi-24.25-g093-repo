@@ -2,16 +2,19 @@ package ui.console;
 
 import controller.BuyLocomotiveController;
 import domain.*;
+import domain.Map;
 
 import java.util.*;
 
 public class BuyLocomotiveUI implements Runnable {
 
     private Scenario scenario;
+    private Map map;
     private BuyLocomotiveController locomotiveController = new BuyLocomotiveController();
 
-    public BuyLocomotiveUI(Scenario scenario) {
+    public BuyLocomotiveUI(Scenario scenario, Map map) {
         this.scenario = scenario;
+        this.map = map;
     }
 
     @Override public void run() {
@@ -28,12 +31,12 @@ public class BuyLocomotiveUI implements Runnable {
             }
         }while(!locomotiveController.canBuyLocomotive(modelName, scenario) && !modelName.equalsIgnoreCase("cancel"));
         if (!(modelName.equalsIgnoreCase("cancel") || modelName.equalsIgnoreCase(""))) {
-            buyLocomotive(modelName);
+            buyLocomotive(modelName, scenario, map);
         }
     }
 
-    public boolean buyLocomotive(String modelName){
-        if (locomotiveController.buyLocomotive(modelName, scenario)){
+    public boolean buyLocomotive(String modelName, Scenario scenario, Map map) {
+        if (locomotiveController.buyLocomotive(modelName, scenario, map)){
 
             System.out.println("Locomotive: " + modelName + " bought!");
             return true;
