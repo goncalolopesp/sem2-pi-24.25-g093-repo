@@ -1,11 +1,7 @@
 package controller;
 
-import domain.CurrentUser;
-import domain.Map;
-import domain.Station;
+import domain.*;
 import domain.Station.Orientation;
-import domain.User;
-import domain.City;
 import repository.Repositories;
 import repository.StationRepository;
 
@@ -29,12 +25,13 @@ public class CreateStationController {
      * Method responsible to build a station on the given map.
      * @param typeStr the type of station to be built
      * @param map     the map where the station will be built
+     * @param scenario     the scenario where the station will be built
      * @param x       the x-coordinate of the station's center
      * @param y       the y-coordinate of the station's center
      * @param orientation the station's orientation
      * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
      */
-    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation) {
+    public Error buildStation(String typeStr, Map map,Scenario scenario, int x, int y, Orientation orientation) {
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -100,7 +97,7 @@ public class CreateStationController {
                 if (onCity || onBlock) return Error.OVERBUILD;
                 String owner = user.getEmail();
                 for (Station s : stationRepo.getStations()) {
-                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner)) continue;
+                    if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner) || !s.getScenarioName().equals(scenario.getScenarioName())) continue;
                     int sw, sh, sox, soy;
                     if (s.getType() == Station.Type.STATION) {
                         sw = sh = 4;
@@ -129,7 +126,7 @@ public class CreateStationController {
                 .orElse("Unknown") + "-" + type.name();
 
 
-        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(),user.getEmail(), cost, capacity,0,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
         user.setBudget(new domain.Budget(user.getBudgetValue() - cost));
@@ -140,13 +137,14 @@ public class CreateStationController {
      * Method responsible to try to build a station on the given map (used to upgrade the station).
      * @param typeStr the type of station to be built
      * @param map     the map where the station will be built
+     * @param scenario     the scenario where the station will be built
      * @param x       the x-coordinate of the station's center
      * @param y       the y-coordinate of the station's center
      * @param orientation the station's orientation
      * @param cost the cost of the upgrade
      * @return Error#OK if valid;Error#INSUFFICIENT_FUNDS if the player doesn't have enough budget; Error#INVALID_COORDINATES if the player tries to place the station or its area outside the map;Error#OVERBUILD if the player tries to build the station in the same position as another structure; Error#INVALID_TYPE if the station isn't from a valid type;
      */
-    public Error buildStation(String typeStr, Map map, int x, int y, Orientation orientation,int cost) {
+    public Error buildStation(String typeStr, Map map, Scenario scenario, int x, int y, Orientation orientation, int cost) {
         Station.Type type;
         try {
             type = Station.Type.valueOf(typeStr.toUpperCase());
@@ -237,7 +235,7 @@ public class CreateStationController {
                 .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
                 .map(City::getName)
                 .orElse("Unknown") + "-" + type.name();
-        Station st = new Station(type, name, map.getMapName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
         user.setBudget(new domain.Budget(user.getBudgetValue() - cost));

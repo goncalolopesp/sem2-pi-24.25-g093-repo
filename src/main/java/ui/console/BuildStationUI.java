@@ -2,10 +2,7 @@ package ui.console;
 
 import controller.CreateStationController;
 import controller.CreateStationController.Error;
-import domain.Map;
-import domain.CurrentUser;
-import domain.User;
-import domain.Station;
+import domain.*;
 import domain.Station.Orientation;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 
@@ -19,13 +16,15 @@ import java.util.Scanner;
 public class BuildStationUI implements Runnable {
 
     private final Map map;
+    private final Scenario scenario;
     /** Controller handling station creation and validation. */
     private final CreateStationController ctrl = new CreateStationController();
     private static final List<String> VALID_ORIENTS =
             List.of("NE", "SE", "NW", "SW");
 
-    public BuildStationUI(Map map) {
+    public BuildStationUI(Map map, Scenario scenario) {
         this.map = map;
+        this.scenario = scenario;
     }
 
     /**
@@ -95,7 +94,7 @@ public class BuildStationUI implements Runnable {
                 }
             }
 
-            Error result = ctrl.buildStation(typeName, map, x, y, orientation);
+            Error result = ctrl.buildStation(typeName, map, scenario, x, y, orientation);
             switch (result) {
                 case OK:
                         List<Station> all = ctrl.getStations();

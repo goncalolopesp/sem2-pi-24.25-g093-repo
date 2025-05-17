@@ -59,15 +59,14 @@ public class SimulationUI implements Runnable {
 
         do {
             if (running.get()) {
-                // Game is running: show game actions
-                ctrl.displayMapData(selectedMap);
+                ctrl.displayMapData(selectedMap,selectedScenario);
                 if (currentUser != null) {
                     System.out.println("Your budget is: " + currentUser.getBudgetValue());
                 }
 
                 if (options.isEmpty()) {
-                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap)));
-                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap)));
+                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario)));
+                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario)));
                     options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, timePeriod)));
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));

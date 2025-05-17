@@ -18,18 +18,13 @@ public class main {
     static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) throws IOException {
-        // Searches all CSV files in the current directory
         String csvDir = (args.length > 0 ? args[0] : ".");
         File cwd = new File(csvDir);
         System.out.println("Trying to find .csv files in: " + cwd.getAbsolutePath());
-
-        // Verifies the existence of the directory and if it's a directory
         if (!cwd.exists() || !cwd.isDirectory()) {
             System.err.println("Directory does not exist or isn't a valid directory: " + cwd.getAbsolutePath());
             System.exit(1);
         }
-
-        // Lists all the files in the directory and verifies if they are CSV files
         File[] csvFiles = cwd.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
         if (csvFiles == null || csvFiles.length < 2) {
             System.err.println("There needs to be at least 2 .csv here (1 for stations, 1 for lines): " + cwd.getAbsolutePath());
@@ -41,7 +36,6 @@ public class main {
             System.out.println(" - " + f.getName());
         }
 
-        // Ask the name of the CSV files
         String linesFile = askFileName(sc, csvFiles, "Enter lines CSV file name: ");
         String stationsFile = askFileName(sc, csvFiles, "Enter station CSV file name: ");
 

@@ -2,6 +2,7 @@ package controller;
 
 import controller.CreateStationController;
 import domain.Map;
+import domain.Scenario;
 import domain.Station;
 import domain.Station.Orientation;
 import domain.Station.Type;
@@ -14,16 +15,18 @@ import repository.StationRepository;
  */
 public class UpgradeStationTypeController {
     private final Map map;
+    private final Scenario scenario;
     private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
     private final CreateStationController createCtrl = new CreateStationController();
 
-    public UpgradeStationTypeController(Map map) {
+    public UpgradeStationTypeController(Map map, Scenario scenario) {
         this.map = map;
+        this.scenario = scenario;
     }
 
     public boolean upgradeType(Station station, Type targetType, Orientation orientation,int cost) {
         Station copy = new Station(
-                station.getType(), station.getName(), station.getMapName(), station.getOwnerPlayer(),
+                station.getType(), station.getName(), station.getMapName(),station.getScenarioName(), station.getOwnerPlayer(),
                 station.getPrice(), station.getCapacity(), station.getCapacityOwned(),station.getX(), station.getY(), station.getOrientation()
         );
 
@@ -31,7 +34,7 @@ public class UpgradeStationTypeController {
         map.getStations().remove(station);
 
         CreateStationController.Error err = createCtrl.buildStation(
-                targetType.name(), map,
+                targetType.name(), map, scenario,
                 station.getX(), station.getY(), orientation, cost
         );
         if (err == CreateStationController.Error.OK) {

@@ -27,7 +27,7 @@ public class SimulationController {
     private final CreateCityController cityCtrl = new CreateCityController();
     private final List<City> cities = cityCtrl.getCityRepo().getCities();
 
-    public void displayMapData(Map map) {
+    public void displayMapData(Map map, Scenario scenario) {
         int width = map.getWidth();
         int height = map.getHeight();
         String[][] grid = new String[height + 1][width + 1];
@@ -38,7 +38,7 @@ public class SimulationController {
         }
 
         addCitiesToMap(grid, map);
-        addStationsToMap(grid, map, width, height);
+        addStationsToMap(grid, map,scenario, width, height);
 
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
@@ -139,12 +139,13 @@ public class SimulationController {
         }
     }
 
-    private void addStationsToMap(String[][] grid, Map map, int width, int height) {
-        // Draw stations owned by current user
+    private void addStationsToMap(String[][] grid, Map map, Scenario scenario, int width, int height) {
         if (currentUser != null) {
             String owner = currentUser.getEmail();
             for (Station st : stationrepo.getStations()) {
-                if (!st.getMapName().equals(map.getMapName()) || !st.getOwnerPlayer().equals(owner)) {
+                if (!st.getMapName().equals(map.getMapName()) ||
+                        !st.getOwnerPlayer().equals(owner) ||
+                        !st.getScenarioName().equals(scenario.getScenarioName())) {
                     continue;
                 }
 
@@ -154,7 +155,6 @@ public class SimulationController {
                         w = h = 3;
                         ox = st.getX() - 1;
                         oy = st.getY() - 1;
-                        // paint 3x3
                         paintArea(grid, width, height, st.getX(), st.getY(), ox, oy, w, h);
                         break;
                     case TERMINAL:

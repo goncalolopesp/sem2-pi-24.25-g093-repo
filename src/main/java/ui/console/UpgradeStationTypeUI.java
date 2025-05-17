@@ -2,6 +2,7 @@ package ui.console;
 
 import domain.CurrentUser;
 import domain.Map;
+import domain.Scenario;
 import domain.Station;
 import domain.Station.Orientation;
 import domain.Station.Type;
@@ -16,12 +17,14 @@ import java.util.stream.Collectors;
  */
 public class UpgradeStationTypeUI implements Runnable {
     private final Map selectedMap;
+    private final Scenario selectedScenario;
 
     /**
      * Gets the selected map.
      */
-    public UpgradeStationTypeUI(Map selectedMap) {
+    public UpgradeStationTypeUI(Map selectedMap, Scenario selectedScenario) {
         this.selectedMap = selectedMap;
+        this.selectedScenario = selectedScenario;
     }
 
     /**
@@ -106,7 +109,7 @@ public class UpgradeStationTypeUI implements Runnable {
             return;
         }
 
-        UpgradeStationTypeController controller = new UpgradeStationTypeController(selectedMap);
+        UpgradeStationTypeController controller = new UpgradeStationTypeController(selectedMap, selectedScenario);
         boolean success = controller.upgradeType(station, targetType, orientation,cost);
         if (success) {
             System.out.println("Upgrade to " + targetType + " completed.");

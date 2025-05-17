@@ -12,6 +12,7 @@ public class Station {
     private final Type type;
     private final String name;
     private final String mapName;
+    private final String scenarioName;
     private final String ownerPlayer;
     private final int price;
     private final int capacity;
@@ -25,6 +26,7 @@ public class Station {
      * @param type         station type
      * @param name         generated station name
      * @param mapName      name of the map where station is placed
+     * @param scenarioName name of the scenario where the station is placed
      * @param ownerPlayer  email of the player who owns this station
      * @param price        cost to build the station
      * @param capacity     maximum cargo capacity
@@ -33,11 +35,12 @@ public class Station {
      * @param y            y-coordinate on the map
      * @param orientation  orientation of the center (null for DEPOT and TERMINAL)
      */
-    public Station(Type type, String name, String mapName, String ownerPlayer,
+    public Station(Type type, String name, String mapName,String scenarioName, String ownerPlayer,
                    int price, int capacity, int capacityOwned, int x, int y, Orientation orientation) {
         this.type        = type;
         this.name        = name;
         this.mapName     = mapName;
+        this.scenarioName = scenarioName;
         this.ownerPlayer = ownerPlayer;
         this.price       = price;
         this.capacity    = capacity;
@@ -65,6 +68,13 @@ public class Station {
      * @return the name of the map where a staion is placed
      */
     public String getMapName()      { return mapName; }
+
+    /**
+     * Returns the name of the scenario where a staion is placed.
+     *
+     * @return the name of the scenario where a staion is placed
+     */
+    public String getScenarioName()      { return mapName; }
     /**
      * Returns the owner of a station.
      *
