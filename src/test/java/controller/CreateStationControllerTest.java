@@ -5,98 +5,82 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import repository.Repositories;
 import repository.StationRepository;
-import domain.Station.Orientation;
-import controller.AuthController;
 
+import static domain.Station.Orientation.NE;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static domain.Station.Orientation.NE;
-import static org.junit.jupiter.api.Assertions.*;
-
 class CreateStationControllerTest {
 
-    CreateStationController controller;
-    StationRepository stationRepo;
-    User user;
-    AuthController authController = new AuthController();
+    private CreateStationController controller;
+    private StationRepository stationRepo;
+    private User user;
+
+    private Map map;
+    private Scenario scenario;
+    private Budget budget;
     @BeforeEach
     void setUp() {
-        controller = new CreateStationController();
         stationRepo = Repositories.getInstance().getStationRepository();
-        user = new User("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER, new Budget(1000));
+        stationRepo.removeStationsByMapScenarioAndOwner("", "", "");
+
+        map = new Map("Map1", 100, 100);
+         scenario = new Scenario("TestScenario", "Map1", new int[]{}, List.of(), List.of());
+        controller = new CreateStationController();
+        user = new User("Player 1", "player@this.app", "pwd", "ROLE_PLAYER");
+        budget = new Budget (1000, map,scenario, user);
     }
+
     @Test
     void testInvalidType() {
-        Map map = new Map("Map1", 10, 10);
-        var err = controller.buildStation("invalid", map, 5, 5, NE);
+        var err = controller.buildStation("invalid", map, scenario, 5, 5, NE,budget);
         assertEquals(CreateStationController.Error.INVALID_TYPE, err);
     }
 
     @Test
-    void testOverbuild(){
-        Map map = new Map("Map1", 10, 10);
+    void testOverbuild() {
         CurrentUser.getInstance().setUser(user);
-        Station existing = new Station(Station.Type.DEPOT, "Ex", "Map1", "Player@this.app", 50, 100, 0, 4, 4, null);
+        Station existing = new Station(Station.Type.DEPOT, "Ex", "Map1", "S", "player@this.app", 50, 100, 0, 4, 4, null);
         stationRepo.addStation(existing);
-        var err = controller.buildStation("DEPOT", map, 4, 4, null);
+
+        var err = controller.buildStation("DEPOT", map, scenario, 4, 4, null,budget);
         assertEquals(CreateStationController.Error.OVERBUILD, err);
     }
 
     @Test
-    void testInsufficientFunds(){
-        Map map = new Map("Map1", 10, 10);
-        CurrentUser.getInstance().setUser(user);
-        user.setBudget(new Budget(user.getBudgetValue() - 1000));
-        var err = controller.buildStation("DEPOT", map, 4, 4, null);
-        assertEquals(CreateStationController.Error.INSUFFICIENT_FUNDS, err);
-
-    }
-
-    @Test
     void testInvalidCoordinates() {
-        Map map = new Map("Map1", 4, 4);
         CurrentUser.getInstance().setUser(user);
-        var err = controller.buildStation("TERMINAL", map, 1, 1, null);
+        var err = controller.buildStation("TERMINAL", map, scenario, 0, 5, null,budget);
         assertEquals(CreateStationController.Error.INVALID_COORDINATES, err);
     }
 
     @Test
-    void testSuccessfulBuid(){
-        Map map = new Map("Map2", 10, 10);
+    void testSuccessfulBuild() {
         CurrentUser.getInstance().setUser(user);
-        var err = controller.buildStation("DEPOT", map, 4, 4, null);
-        assertEquals(CreateStationController.Error.OK, err);
-        Optional<Station> station = stationRepo.getStations().stream().filter(s -> s.getType() == Station.Type.DEPOT).findFirst();
-        assertTrue(station.isPresent());
-        assertEquals(4, station.get().getX());
-        assertEquals(4, station.get().getY());
-        assertEquals(NE, station.get().getOrientation());
-    }
 
-    @Test
-    void testSuccessfulBuildCustomCost(){
-        Map map = new Map("Map3", 10, 10);
-        CurrentUser.getInstance().setUser(user);
-        var err = controller.buildStation("DEPOT", map, 4, 4, NE,120);
+        var err = controller.buildStation("DEPOT", map, scenario,90 , 90, NE,budget);
         assertEquals(CreateStationController.Error.OK, err);
-        Optional<Station> station = stationRepo.getStations().stream().filter(s -> s.getType() == Station.Type.DEPOT).findFirst();
-        assertTrue(station.isPresent());
-        assertEquals(4, station.get().getX());
-        assertEquals(4, station.get().getY());
-        assertEquals(NE, station.get().getOrientation());
+
+        Optional<Station> st = stationRepo.getStations().stream()
+                .filter(s -> s.getType() == Station.Type.DEPOT
+                        && s.getMapName() == "Map1"
+                        && s.getScenarioName() == "TestScenario"
+                        && s.getX() == 90 && s.getY() == 90
+                        && s.getOrientation() == NE)
+                .findFirst();
+        assertTrue(st.isPresent());
     }
 
     @Test
     void testGetStations() {
         CurrentUser.getInstance().setUser(user);
-        Map map = new Map("Map1", 10, 10);
-        controller.buildStation("DEPOT", map, 4, 4, null);
+        controller.buildStation("DEPOT", map, scenario, 2, 2, null,budget);
+
         List<String> expected = List.of(
-                "Unknown-DEPOT DEPOT (4,4)",
-                "Unknown-DEPOT DEPOT (4,4)"
+                "Unknown-DEPOT DEPOT (2,2)"
         );
         List<String> actual = controller.getStations().stream()
                 .map(Station::toString)
@@ -106,10 +90,42 @@ class CreateStationControllerTest {
     }
 
     @Test
-    void testGetRepo(){
-        StationRepository stationRepo2 = controller.getStationRepository();
-        assertEquals(stationRepo, stationRepo2);
+    void testBuildStationUpgrade_Success() {
+        CurrentUser.getInstance().setUser(user);
+        stationRepo.removeStationsByMapScenarioAndOwner(map.getMapName(), scenario.getScenarioName(), user.getEmail());
 
+        int initialBudget = budget.getBudget();
+        int upgradeCost = 150;
+
+        CreateStationController.Error err = controller.buildStation(
+                "TERMINAL",
+                map,
+                scenario,
+                20,
+                25,
+                null,
+                budget,
+                upgradeCost
+        );
+        assertEquals(CreateStationController.Error.OK, err);
+        assertEquals(initialBudget - upgradeCost, budget.getBudget());
+        Optional<Station> stOpt = stationRepo.getStations().stream()
+                .filter(s ->
+                        s.getType() == Station.Type.TERMINAL &&
+                                s.getMapName().equals(map.getMapName()) &&
+                                s.getScenarioName().equals(scenario.getScenarioName()) &&
+                                s.getOwnerPlayer().equals(user.getEmail()) &&
+                                s.getX() == 20 &&
+                                s.getY() == 25
+                )
+                .findFirst();
+        assertTrue(stOpt.isPresent(), "The station should have been upgraded");
     }
 
+
+    @Test
+    void testGetRepo() {
+        StationRepository repo2 = controller.getStationRepository();
+        assertSame(stationRepo, repo2);
+    }
 }

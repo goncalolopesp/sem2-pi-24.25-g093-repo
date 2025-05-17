@@ -14,7 +14,7 @@ class StationTest {
 
     @BeforeEach
     void setUp() {
-        station = new Station(Station.Type.STATION,"madrid-STATION","MapTest","Player@this.app",100,200,0,5,5,NE);
+        station = new Station(Station.Type.STATION,"madrid-STATION","MapTest","Test","Player@this.app",100,200,0,5,5,NE);
     }
 
     @Test
@@ -30,6 +30,11 @@ class StationTest {
     @Test
     void getMap_ReturnsCorrectValue() {
         assertEquals("MapTest"   , station.getMapName());
+    }
+
+    @Test
+    void getScenario_ReturnsCorrectValue() {
+        assertEquals("Test"   , station.getScenarioName());
     }
 
     @Test
