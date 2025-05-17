@@ -69,8 +69,8 @@ public class SimulationUI implements Runnable {
         Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler, gameOver,userBudget);
         Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
 
-        timeScheduler.scheduleAtFixedRate(timeTask, 5, 5, TimeUnit.SECONDS);
-        generationScheduler.scheduleAtFixedRate(generationTask, 2, 2, TimeUnit.SECONDS);
+        timeScheduler.scheduleAtFixedRate(timeTask, 60, 60, TimeUnit.SECONDS);
+        generationScheduler.scheduleAtFixedRate(generationTask, 10, 10, TimeUnit.SECONDS);
 
         do {
             if (running.get()) {
