@@ -10,21 +10,17 @@ class User {
     - email : String
     - password : String
     - roleId : String
-    - budget : Budget
     - locomotives : List<Locomotive>
     + getName() : String
     + getEmail() : String
     + getPassword() : String
     + getRoleId() : String
-    + getBudgetValue() : int
-    + getBudget() : Budget
     + getLocomotives() : List<Locomotive>
     + setName() : String
     + setEmail() : String
     + setPassword() : String
     + setRoleId() : String
     + setBudgetValue() : int
-    + setBudget() : Budget
     + setLocomotives() : List<Locomotive>
 }
 
@@ -76,10 +72,19 @@ class CurrentUser{
 
 class Budget{
     - budget : int
+    - map : Map
+    - scenario : Scenario
+    - user : User
     + getBudget() : int
     + setBudget(int budget) : void
     + addBudget(int budget) : void
     + subtractBudget(int budget) : void
+    + getMap() : Map
+    + setMap(Map map) : void
+    + getScenario() : Scenario
+    + setScenario(Scenario scenario) : void
+    + getUser() : User
+    + setUser(User user) : void
 }
 
 'UI
@@ -140,6 +145,8 @@ Repositories --> "1" BuildingRepository
 StationRepository "1" --> "*" Station
 BuildingRepository "1" --> "*" Building
 
+Budget ..> User : user
+CurrentUser --> User : uses
 Building --> User : bought by
 Building --> Station : owned by
 Station --> User : owned by

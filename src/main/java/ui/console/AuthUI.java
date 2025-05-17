@@ -29,9 +29,8 @@ public class AuthUI implements Runnable {
             String id = Utils.readLineFromConsole("Enter UserId/Email: ");
             String pwd = Utils.readLineFromConsole("Enter Password: ");
             String roleID = ctrl.ROLE_PLAYER;
-            Optional<Budget> budget = Optional.of(new Budget(1000));
 
-            success = ctrl.createNewUser(name, id, pwd, roleID, budget);
+            success = ctrl.createNewUser(name, id, pwd, roleID);
             if (!success) {
                 System.out.println("User already exists!");
             }
