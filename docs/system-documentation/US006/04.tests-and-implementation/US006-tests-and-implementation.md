@@ -2,64 +2,47 @@
 
 ## 4. Tests
 
-**Test 1:** Ensure that null parameters are not allowed when upgrading a station.
+**Test 1:** Validates if a building is successfully added to a certain station
 
 ```java
-@Test(expected = IllegalArgumentException.class)
-public void ensureNullParametersNotAllowed() {
-    UpgradeStationController controller = new UpgradeStationController();
-    controller.upgradeStation(null, null, null);
+    @Test
+void add() {
+    repo.add(new Building(station, "small cafe"));
+    assertEquals(3, repo.getBuildings().size());
 }
 ```
 	
 
-**Test 2:** Ensure that upgrading a non-existent station fails. 
+**Test 2:** Validates if a building is successfully removed from a station.
 
 ```java
-@Test(expected = IllegalArgumentException.class)
-public void ensureStationMustExistBeforeUpgrade() {
-    Repositories repos = Repositories.getInstance();
-    repos.getStationRepository().getAll().clear();
-
-    UpgradeStationController controller = new UpgradeStationController();
-    controller.upgradeStation("M1", "S1", "Central Depot");
+    @Test
+void remove() {
+    repo.remove(station, "telegraph");
+    assertEquals(1, repo.getBuildings().size());
 }
 
 ```
 
-**Test 3:** Ensure that selecting an unavailable building type fails.
+**Test 3:** Validates if a building is correctly attached to a station 
 
 ```java
-@Test(expected = IllegalArgumentException.class)
-public void ensureBuildingTypeMustBeAvailable() {
-    Repositories repos = Repositories.getInstance();
-    repos.getMapRepository().add(new Map("M1", 100, 100));
-    repos.getScenarioRepository().add(new Scenario("S1", "M1"));
-    Station station = new Station("Depot", "Depot", new Position(0,0), Center.GEOMETRIC, "M1:S1");
-    repos.getStationRepository().add(station);
-    // Building option that doesn't exist
-    UpgradeStationController controller = new UpgradeStationController();
-    controller.upgradeStation("M1", "S1", "Signal Tower");
+    @Test
+void validateBuilding() {
+    assertTrue(repo.getBuildings().contains(building));
+    assertFalse(repo.getBuildings().contains(new Building(station, "large cafe")) );
 }
 
 ```
 
-**Test 4:** Successful upgrade adds the building to the station.
+**Test 4:** Validates if the list of buildings is beeing correctly showcased.
 
 ```java
-@Test
-public void ensureSuccessfulUpgrade() {
-    Repositories repos = Repositories.getInstance();
-    repos.getMapRepository().add(new Map("M1", 100, 100));
-    repos.getScenarioRepository().add(new Scenario("S1", "M1"));
-    Station station = new Station("Depot", "Depot", new Position(1,1), Center.GEOMETRIC, "M1:S1");
-    repos.getStationRepository().add(station);
-    repos.getBuildingRepository().add(new Building("Signal Tower"));
-
-    UpgradeStationController controller = new UpgradeStationController();
-    boolean result = controller.upgradeStation("M1", "S1", "Signal Tower");
-    assertTrue(result);
-    assertTrue(station.getBuildings().contains("Signal Tower"));
+    void getBuildings() {
+    List<Building> buildings = repo.getBuildings();
+    assertEquals(2, buildings.size());
+    assertEquals("telegraph", buildings.get(0).getBuildingType());
+    assertEquals("telephone", buildings.get(1).getBuildingType());
 }
 ```
 
@@ -71,63 +54,83 @@ public void ensureSuccessfulUpgrade() {
 ```java
 package controller;
 
-import domain.Map;
-import domain.Scenario;
-import domain.Station;
 import domain.Building;
-import repository.Repositories;
-import repository.MapRepository;
-import repository.ScenarioRepository;
+import domain.Map;
+import domain.Station;
 import repository.BuildingRepository;
+import repository.Repositories;
 
+import java.util.List;
+
+/**
+ * Controller responsible for the creation and validation of station upgrades.
+ * <p>
+ * Delegates storage to BuildingRepository.
+ * </p>
+ */
 public class UpgradeStationController {
+    private BuildingRepository buildingRepository;
 
-    private final MapRepository mapRepository;
-    private final ScenarioRepository scenarioRepository;
-    private final StationRepository stationRepository;
-    private final BuildingRepository buildingRepository;
+    /**
+     * Constructs an UpgradeStationController using the shared repositories instance.
+     */
+    public UpgradeStationController() { getBuildingRepository(); }
 
-    public UpgradeStationController() {
-        Repositories repos = Repositories.getInstance();
-        this.mapRepository = repos.getMapRepository();
-        this.scenarioRepository = repos.getScenarioRepository();
-        this.stationRepository = repos.getStationRepository();
-        this.buildingRepository = repos.getBuildingRepository();
+    /**
+     * Constructs an UpgradeStationController with a provided BuildingRepository (for testing).
+     *
+     * @param buildingRepository the BuildingRepository to use
+     */
+    public UpgradeStationController(BuildingRepository buildingRepository) { this.buildingRepository = buildingRepository; }
+
+    /**
+     * Returns the BuildingRepository, initializing it if necessary.
+     *
+     * @return the BuildingRepository instance
+     */
+    public BuildingRepository getBuildingRepository() {
+        if (buildingRepository == null) {
+            Repositories repositories = Repositories.getInstance();
+
+            buildingRepository = repositories.getBuildingRepository();
+        }
+        return buildingRepository;
     }
 
-    public boolean upgradeStation(String mapName,
-                                  String scenarioName,
-                                  String buildingName) {
-        if (mapName == null || scenarioName == null || buildingName == null) {
-            throw new IllegalArgumentException("Parameters must not be null");
-        }
+    /**
+     * Upgrades a station with the given name and building type.
+     *
+     * @param station the name of the station to be upgraded
+     * @param buildingType the type of building to be added to the station
+     * @return the created Building instance for the station
+     */
+    public Building upgradeStation(Station station, String buildingType) {
+        Building building = new Building(station, buildingType);
+        getBuildingRepository().add(building);
+        return building;
+    }
 
-        Map map = mapRepository.getByName(mapName);
-        if (map == null) {
-            throw new IllegalArgumentException("Error: Map not found.");
-        }
+    /**
+     * Retrieves the list of all buildings stored in the repository.
+     *
+     * @return unmodifiable list of existing {@link Building} instances
+     */
+    public List<Building> getBuildings() { return getBuildingRepository().getBuildings(); }
 
-        Scenario scenario = scenarioRepository.findByName(scenarioName);
-        if (scenario == null || !scenario.getMapName().equals(mapName)) {
-            throw new IllegalArgumentException("Error: Scenario not found for given map.");
-        }
-
-        Optional<Station> optStation = stationRepository.findByMapScenarioAndName(mapName, scenarioName, buildingName);
-        if (!optStation.isPresent()) {
-            throw new IllegalArgumentException("Error: Station does not exist.");
-        }
-        Station station = optStation.get();
-
-        Building building = buildingRepository.findByName(buildingName);
-        if (building == null) {
-            throw new IllegalArgumentException("Error: Building type not available.");
-        }
-
-        station.addBuilding(buildingName);
-        stationRepository.update(station);
-        return true;
+    /**
+     * Verifies if provided building type already exists in provided station.
+     *
+     * @return true if it does or false if otherwise.
+     */
+    public boolean verifyIfBuildingExists(Station station, String buildingType) {
+        return getBuildings().stream()
+                .anyMatch(b ->
+                        b.getStation().equals(station) &&
+                                b.getBuildingType().equalsIgnoreCase(buildingType)
+                );
     }
 }
+
 ```
 
 ### Class BuildingRepository
@@ -136,23 +139,53 @@ public class UpgradeStationController {
 package repository;
 
 import domain.Building;
+import domain.Station;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BuildingRepository {
-    private final List<Building> buildings = new ArrayList<>();
+    private final List<Building> buildings;
 
-    public Building add(Building building) {
-        buildings.add(building);
-        return building;
+    /**
+     * Constructs a new MapRepository with an empty list of maps.
+     */
+    public BuildingRepository() { buildings = new ArrayList<>(); }
+
+    /**
+     * Adds a building to the repository if it is not already present.
+     *
+     * @param building the Building instance to add
+     */
+    public void add(Building building) {
+        if (validateBuilding(building)) {
+            buildings.add(building);
+        }
     }
 
-    public Building findByName(String name) {
-        Optional<Building> result = buildings.stream()
-                .filter(b -> b.getName().equals(name))
-                .findFirst();
-        return result.orElse(null);
+    public void remove(Station station, String buildingType) {
+        buildings.removeIf(b ->
+                b.getStation().equals(station) &&
+                        b.getBuildingType().equalsIgnoreCase(buildingType)
+        );
+    }
+
+    /**
+     * Validates that a building is not already contained in the repository.
+     *
+     * @param building the Building instance to validate
+     * @return {@code true} if the building is not already present; {@code false} otherwise
+     */
+    private boolean validateBuilding(Building building) { return !buildings.contains(building); }
+
+    /**
+     * Returns a defensive copy of the list of all buildings in the repository.
+     *
+     * @return unmodifiable list of stored Building objects
+     */
+    public List<Building> getBuildings() {
+        //This is a defensive copy, so that the repository cannot be modified from the outside.
+        return List.copyOf(buildings);
     }
 }
 ```
