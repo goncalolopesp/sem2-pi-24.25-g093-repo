@@ -2,9 +2,7 @@ package controller;
 
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
-import repository.BudgetRepository;
-import repository.Repositories;
-import repository.StationRepository;
+import repository.*;
 import ui.console.menu.MenuItem;
 
 import domain.User;
@@ -22,12 +20,11 @@ import java.util.stream.Collectors;
 public class SimulationController {
 
     private final User currentUser = CurrentUser.getInstance().getUser();
-    private final CreateMapController mapCtrl = new CreateMapController();
-    private final CreateScenarioController scenarioCtrl = new CreateScenarioController();
-    private final StationRepository stationrepo = new CreateStationController().getStationRepository();
-    private final DisplayMapController displayCtrl = new DisplayMapController();
-    private final CreateCityController cityCtrl = new CreateCityController();
-    private final List<City> cities = cityCtrl.getCityRepo().getCities();
+    private final MapRepository mapRepo = Repositories.getInstance().getMapRepository();
+    private final ScenarioRepository scenarioRepo = Repositories.getInstance().getScenarioRepository();
+    private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
+    private final CityRepository cityRepo = Repositories.getInstance().getCityRepository();
+    private final List<City> cities = cityRepo.getCities();
 
     public void displayMapData(Map map, Scenario scenario) {
         int width = map.getWidth();
@@ -177,7 +174,7 @@ public class SimulationController {
     }
 
     private void addCitiesToMap(String[][] grid, Map map) {
-        List<City> cities = displayCtrl.getCities().stream()
+        List<City> cities = cityRepo.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
         for (City city : cities) {
@@ -259,7 +256,7 @@ public class SimulationController {
     }
 
     public Map getMap() {
-        List<Map> maps = mapCtrl.getMaps();
+        List<Map> maps = mapRepo.getMaps();
         if (maps.isEmpty()) {
             System.out.println("No maps available.");
             return null;
@@ -274,7 +271,7 @@ public class SimulationController {
     }
 
     public Scenario getScenario(Map selectedMap) {
-        List<Scenario> scenarios = scenarioCtrl.getScenarios().stream()
+        List<Scenario> scenarios = scenarioRepo.getScenarios().stream()
                 .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
                 .collect(Collectors.toList());
         if (scenarios.isEmpty()) {

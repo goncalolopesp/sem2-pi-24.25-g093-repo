@@ -5,63 +5,135 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Player
-participant "SimulationUI" as ATUI
+actor "Player" as player
+activate player
 
-activate Player
+participant ":SimulationUI" as ui
 
-Player -> ATUI : asks to create a simulator
-activate ATUI
+player -> ui : I want to create a simulator
+activate ui
 
-create ":SimulationController" as ATC
+create ":SimulationController" as ctrl
 
-participant ":Repositories" as REPO
-participant "repositories\n:Repositories" as repo
-participant "simulationRepository\n:SimulationRepository" as ATREPO
+ui --> ctrl : create()
+activate ctrl
 
-ATUI --> ATC : create()
-ATUI --> Player : requests map selection
-deactivate ATUI
+participant ":Repositories" as repositories
+participant "repo\n:Repositories" as repo
+participant "mapRepo\n:MapRepository" as mrepo
+participant "scenarioRepo\n:ScenarioRepository" as srepo
+participant "stationRepo\n:StationRepository" as stationrepo
+participant "cityRepo\n:CityRepository" as crepo
+participant "budgetRepo\n:BudgetRepository" as brepo
 
-Player -> ATUI : selects map
-activate ATUI
+ctrl --> repositories : getInstance()
+activate repositories
 
-ATUI --> ATUI : keepSelectedMap(selectedMap)
-ATUI --> Player : provides option to start the simulation
-deactivate ATUI
+repositories --> ctrl : repositories
+deactivate repositories
 
-Player -> ATUI : starts the simulation
-activate ATUI
-
-ATUI --> ATC : startSimulation(selectedMap)
-activate ATC
-
-ATC --> REPO : getInstance()
-activate REPO
-
-REPO --> ATC : repositories
-deactivate REPO
-
-ATC --> repo : getSimulationRepository()
+ctrl --> repo : getMapRepository()
 activate repo
 
-repo --> ATC : SimulationRepository
+repo --> ctrl : mapRepo
 deactivate repo
 
-ATC --> ATREPO : startSimulation(selectedMap)
-activate ATREPO
+ctrl --> repo : getScenarioRepository()
+activate repo
 
-create "simulation\n:Simulation" as AT
+repo --> ctrl : scenarioRepo
+deactivate repo
 
-ATREPO --> AT : create()
-ATREPO --> ATREPO : verifyIfExistsAndSaves(selectedMap)
-ATREPO --> ATC : SimulationData
-deactivate ATREPO
+ctrl --> repo : getStationRepository()
+activate repo
 
-ATC --> ATUI : SimulationData
-deactivate ATC
+repo --> ctrl : stationRepo
+deactivate repo
 
-ATUI --> Player : displays operation success and shows simulation progression
-ATUI --> Player : provides option to pause or leave the simulation
-deactivate ATUI
+ctrl --> repo : getCityRepository()
+activate repo
+
+repo --> ctrl : cityRepo
+deactivate repo
+deactivate ctrl
+
+ui --> ui : run()
+ui --> ctrl : asks for selected map and scenario
+activate ctrl
+
+ctrl --> mrepo : asks for list of available maps
+activate mrepo
+
+alt if there are no maps available
+    mrepo --> player : outputs "No maps available"
+    mrepo --> ctrl : returns null
+end
+
+mrepo --> ctrl : returns list of available maps
+deactivate mrepo
+
+ctrl --> srepo : asks for list of available scenarios
+activate srepo
+
+alt if there are no scenarios available
+    srepo --> player : outputs "No scenarios available"
+    srepo --> ctrl : returns null
+end
+
+srepo --> ctrl : returns list of available scenarios
+deactivate srepo
+
+ctrl --> player : asks for map and scenario selection
+
+loop while player chooses unavailable map/scenario
+    player --> ctrl : selects map/scenario
+    ctrl --> ctrl : checks if map/scenario exists
+    ctrl --> player : asks for map/scenario selection
+end
+
+player --> ctrl : selects map and scenario
+ctrl --> ctrl : checks if map and scenario exists
+ctrl --> ui : returns map and scenario
+deactivate ctrl
+
+ui --> brepo : checks for player budget in present map and scenario
+activate brepo
+
+brepo --> ui : returns player budget
+deactivate brepo
+
+alt budget is null
+    ui --> ui : creates new budget for selected map and scenario
+    ui --> brepo : asks to save new budget
+    activate brepo
+
+    brepo --> brepo : saves new created budget
+    deactivate brepo
+end
+
+ui --> ui : gets the time period from the scenario
+ui --> ctrl : asks to execute the passage of time and generation of cargo
+activate ctrl
+
+par
+    ctrl --> ctrl : executes the passage of time and generation of cargo in parallel with the rest of the simulation
+
+    alt if player picks an option from the game menu
+        ctrl --> ctrl : pauses both operations until action is over
+    end
+end
+
+deactivate ctrl
+
+ui --> player : displays the game information
+ui --> player : displays the game menu and asks for player to select an option
+deactivate ui
+
+player --> ui : selects option
+activate ui
+
+ui --> ui : executes the UI responsible for selected option
+ui --> player : displays updated game information
+ui --> player : displays menu and asks for option again
+deactivate ui
 @enduml
