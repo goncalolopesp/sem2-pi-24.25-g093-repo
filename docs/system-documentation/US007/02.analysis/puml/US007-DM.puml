@@ -7,17 +7,23 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class Player{
-
+class Player {
+    username
+    password
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
 }
 
-class Station{
+class Station {
+    name
+    location
     type
     building
     cargo
 }
 
-class Building{
+class Building {
+    name
+    availability
     type
     upgrade
 }
@@ -27,9 +33,9 @@ class Cargo{
     status
 }
 
-Player "1"--"*" Station : Lists
+Player *-- Station
 
-Station "*"--"*" Building : Has
-Station "*"--"*" Cargo : Has
+Station *-- Building
+Station o-- Cargo
 
 @enduml
