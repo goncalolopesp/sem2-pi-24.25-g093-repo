@@ -12,28 +12,56 @@ hide methods
 class Train{
     locomotives
     carriages
+    cargoType
 }
 
 class Locomotive{
     typeOfFuel
+    locomotiveType
+}
+
+class SteamLocomotive{
     requiredRail
+    price
+    startYearOfOperation
     power
     acceleration
     topSpeed
-    startYearOfOperation
+}
+
+class DieselLocomotive{
+    requiredRail
     price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
+}
+
+class ElectricLocomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
 }
 
 class Carriage{
     typeOfCargo
 }
 
-class Player{
+class Player {
+    username
+    password
     + buyTrain(carriage: Carriage, locomotive: Locomotive)
 }
 
-Player "1"--"*" Train : Chooses
-Train "*"--"*" Locomotive : Contains
-Train "*"--"*" Carriage : Contains
+Player *-- Train
+Train *-- Locomotive
+Train o-- Carriage
+SteamLocomotive --|> Locomotive
+DieselLocomotive --|> Locomotive
+ElectricLocomotive --|> Locomotive
 
 @enduml
