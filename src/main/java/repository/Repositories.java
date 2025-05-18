@@ -137,5 +137,10 @@ public class Repositories {
      */
     public CarriageRepository getCarriageRepository() { return carriageRepository; }
 
+    /**
+     * Gets the repository for Budget entities.
+     *
+     * @return the BudgetRepository
+     */
     public BudgetRepository getBudgetRepository() { return budgetRepository; }
 }
