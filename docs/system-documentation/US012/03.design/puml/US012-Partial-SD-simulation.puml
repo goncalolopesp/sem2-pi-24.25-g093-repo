@@ -1,0 +1,59 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as player
+activate player
+
+participant ":SimulationUI" as ui
+activate ui
+
+participant ":SimulationController" as ctrl
+participant ":Repositories" as repositories
+participant "repo\n:Repositories" as repo
+participant "budgetRepo\n:BudgetRepository" as brepo
+
+ui --> brepo : checks for player budget in present map and scenario
+activate brepo
+
+brepo --> ui : returns player budget
+deactivate brepo
+
+alt budget is null
+    ui --> ui : creates new budget for selected map and scenario
+    ui --> brepo : asks to save new budget
+    activate brepo
+
+    brepo --> brepo : saves new created budget
+    deactivate brepo
+end
+
+ui --> ui : gets the time period from the scenario
+ui --> ctrl : asks to execute the passage of time and generation of cargo
+activate ctrl
+
+par
+    ctrl --> ctrl : executes the passage of time and generation of cargo in parallel with the rest of the simulation
+
+    alt if player picks an option from the game menu
+        ctrl --> ctrl : pauses both operations until action is over
+    end
+end
+
+deactivate ctrl
+
+ui --> player : displays the game information
+ui --> player : displays the game menu and asks for player to select an option
+deactivate ui
+
+player --> ui : selects option
+activate ui
+
+ui --> ui : executes the UI responsible for selected option
+ui --> player : displays updated game information
+ui --> player : displays menu and asks for option again
+deactivate ui
+@enduml

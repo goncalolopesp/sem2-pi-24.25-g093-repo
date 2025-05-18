@@ -49,21 +49,17 @@ The following diagram shows the same sequence of interactions between the classe
 
 It uses Interaction Occurrence (a.k.a. Interaction Use).
 
+**Get Repositories Partial SD**
+
+![Sequence Diagram - Partial - Verification](svg/US012-Partial-SD-repositories.svg)
+
 **Get Input Partial SD**
 
-![Sequence Diagram - Partial - Get Input](svg/US012-SD-getInput.svg)
+![Sequence Diagram - Partial - Get Input](svg/US012-Partial-SD-input.svg)
 
-**Start Simulation Partial SD**
+**Simulation Partial SD**
 
-![Sequence Diagram - Partial - Start Simulation](svg/US012-SD-startSimulation.svg)
-
-**Verify if simulation exists Partial SD**
-
-![Sequence Diagram - Partial - Verification](svg/US012-SD-verify.svg)
-
-**Display Success Message Partial SD**
-
-![Sequence Diagram - Partial - Display Success](svg/US012-SD-displaySuccess.svg)
+![Sequence Diagram - Partial - Start Simulation](svg/US012-Partial-SD-simulation.svg)
 
 ## 3.3. Class Diagram (CD)
 

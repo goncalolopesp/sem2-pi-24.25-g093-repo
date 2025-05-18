@@ -1,0 +1,54 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+participant ":SimulationUI" as ui
+activate ui
+
+create ":SimulationController" as ctrl
+
+ui --> ctrl : create()
+activate ctrl
+
+participant ":Repositories" as repositories
+participant "repo\n:Repositories" as repo
+participant "mapRepo\n:MapRepository" as mrepo
+participant "scenarioRepo\n:ScenarioRepository" as srepo
+participant "stationRepo\n:StationRepository" as stationrepo
+participant "cityRepo\n:CityRepository" as crepo
+participant "budgetRepo\n:BudgetRepository" as brepo
+
+ctrl --> repositories : getInstance()
+activate repositories
+
+repositories --> ctrl : repositories
+deactivate repositories
+
+ctrl --> repo : getMapRepository()
+activate repo
+
+repo --> ctrl : mapRepo
+deactivate repo
+
+ctrl --> repo : getScenarioRepository()
+activate repo
+
+repo --> ctrl : scenarioRepo
+deactivate repo
+
+ctrl --> repo : getStationRepository()
+activate repo
+
+repo --> ctrl : stationRepo
+deactivate repo
+
+ctrl --> repo : getCityRepository()
+activate repo
+
+repo --> ctrl : cityRepo
+deactivate repo
+deactivate ctrl
+@enduml

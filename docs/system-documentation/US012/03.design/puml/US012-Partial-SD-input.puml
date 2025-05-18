@@ -1,0 +1,62 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as player
+participant "SimulationUI" as ui
+
+activate player
+
+player -> ui : I want to create a simulator
+activate ui
+
+participant ":SimulationController" as ctrl
+participant ":Repositories" as repositories
+participant "repo\n:Repositories" as repo
+participant "mapRepo\n:MapRepository" as mrepo
+participant "scenarioRepo\n:ScenarioRepository" as srepo
+participant "stationRepo\n:StationRepository" as stationrepo
+participant "cityRepo\n:CityRepository" as crepo
+participant "budgetRepo\n:BudgetRepository" as brepo
+
+ui --> ctrl : asks for selected map and scenario
+activate ctrl
+
+ctrl --> mrepo : asks for list of available maps
+activate mrepo
+
+alt if there are no maps available
+    mrepo --> player : outputs "No maps available"
+    mrepo --> ctrl : returns null
+end
+
+mrepo --> ctrl : returns list of available maps
+deactivate mrepo
+
+ctrl --> srepo : asks for list of available scenarios
+activate srepo
+
+alt if there are no scenarios available
+    srepo --> player : outputs "No scenarios available"
+    srepo --> ctrl : returns null
+end
+
+srepo --> ctrl : returns list of available scenarios
+deactivate srepo
+
+ctrl --> player : asks for map and scenario selection
+
+loop while player chooses unavailable map/scenario
+    player --> ctrl : selects map/scenario
+    ctrl --> ctrl : checks if map/scenario exists
+    ctrl --> player : asks for map/scenario selection
+end
+
+player --> ctrl : selects map and scenario
+ctrl --> ctrl : checks if map and scenario exists
+ctrl --> ui : returns map and scenario
+deactivate ctrl
+@enduml
