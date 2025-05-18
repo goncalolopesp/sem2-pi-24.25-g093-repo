@@ -5,11 +5,23 @@ import domain.CurrentUser;
 
 import java.util.*;
 
+/**
+ * Repository class for managing user authentication and authorization
+ * Handles user creation, login, logout, and role management operations
+ */
 public class AuthRepository {
 
+    /** Collection of all users in the system */
     Set<User> users = new HashSet<>();
+
+    /** Current user session for authentication context */
     CurrentUser session = CurrentUser.getInstance();
 
+    /**
+     * Creates a new user in the system if the email is not already in use
+     * @param user The user object to add to the repository
+     * @return true if user was successfully created, false if email already exists
+     */
     public boolean createNewUser(User user) {
         if (!doesUserExist(user)) {
             users.add(user);
@@ -18,6 +30,10 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Gets all users registered in the system
+     * @return List of all users
+     */
     public List<User> getAllUsers(){
 
         List<User> userList = new ArrayList<>();
@@ -28,6 +44,11 @@ public class AuthRepository {
         return userList;
     }
 
+    /**
+     * Finds a user by their email address
+     * @param email The email to search for
+     * @return Optional containing the user if found, empty otherwise
+     */
     public Optional<User> getUserByEmail(String email) {
 
         for (User user : users) {
@@ -38,6 +59,11 @@ public class AuthRepository {
         return Optional.empty();
     }
 
+    /**
+     * Checks if a user object already exists in the repository based on email
+     * @param user The user to check for existence
+     * @return true if a user with the same email exists, false otherwise
+     */
     private boolean doesUserExist(User user){
         for (User user1 : users) {
             if (user1.getEmail().equals(user.getEmail())) {
@@ -47,6 +73,11 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Checks if a user with the specified email exists in the repository
+     * @param email The email to check
+     * @return true if a user with the email exists, false otherwise
+     */
     public boolean doesUserExist(String email) {
         for (User user1 : users) {
             if (user1.getEmail().equals(email)) {
@@ -56,6 +87,12 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Validates a user's password against stored credentials
+     * @param email The user's email address
+     * @param password The password to validate
+     * @return true if password is valid, false otherwise
+     */
     private boolean isPasswordValid(String email, String password) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
@@ -66,6 +103,11 @@ public class AuthRepository {
         }
     }
 
+    /**
+     * Deletes a user from the system by email
+     * @param email The email of the user to delete
+     * @return true if user was successfully deleted, false if user not found
+     */
     public boolean deleteUser(String email) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
@@ -78,6 +120,11 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Deletes a user from the system by user object
+     * @param user The user object to delete
+     * @return true if user was successfully deleted, false if user not found
+     */
     public boolean deleteUser(User user) {
         if (doesUserExist(user.getEmail())) {
             users.remove(user);
@@ -89,6 +136,12 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Changes a user's role by email
+     * @param email The email of the user
+     * @param roleId The new role to assign
+     * @return true if role was successfully changed, false if user not found
+     */
     public boolean changeRole(String email, String roleId) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
@@ -98,6 +151,12 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Changes a user's role by user object
+     * @param user The user object
+     * @param roleId The new role to assign
+     * @return true if role was successfully changed, false if user not found
+     */
     public boolean changeRole(User user, String roleId) {
         if (doesUserExist(user)) {
             user.setRoleId(roleId);
@@ -106,6 +165,12 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Authenticates a user with email and password
+     * @param email The user's email address
+     * @param password The user's password
+     * @return true if login was successful, false otherwise
+     */
     public boolean doLogin(String email, String password) {
         if (isPasswordValid(email, password)){
             Optional<User> usr = getUserByEmail(email);
@@ -114,18 +179,30 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Logs out the currently authenticated user
+     * @return true indicating successful logout
+     */
     public boolean doLogout() {
         session.doLogout();
         return true;
     }
 
+    /**
+     * Gets the role of a specific user by email
+     * @param email The email of the user
+     * @return The role of the specified user
+     */
     public String getRole(String email) {
         Optional<User> usr = getUserByEmail(email);
         return usr.get().getRoleId();
     }
 
+    /**
+     * Gets the email of the currently authenticated user
+     * @return Email address of the current user
+     */
     public String getCurrentUserEmail() {
         return session.getUser().getEmail();
     }
-
 }
