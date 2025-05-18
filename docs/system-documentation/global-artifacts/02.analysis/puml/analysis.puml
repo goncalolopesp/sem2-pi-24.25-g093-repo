@@ -214,7 +214,7 @@ Editor *-- City
 
 Station "1" -- "1" City
 Train "1" -- "1" Route
-Editor "1" -- "1" Simulator
+Player "1" -- "1" Simulator
 Scenario "1"--"*" Locomotive
 
 @enduml

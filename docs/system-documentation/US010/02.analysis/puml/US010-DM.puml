@@ -7,25 +7,99 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class Player {
+class User{
+    username
+    password
 }
 
-class Train {
-    locomotiveType
+class Player {
+    username
+    password
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+}
+
+class Train{
+    locomotives
+    carriages
     cargoType
 }
 
-class Route {
-    stations
+class Locomotive{
+    typeOfFuel
+    locomotiveType
+}
+
+class SteamLocomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
+}
+
+class DieselLocomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
+}
+
+class ElectricLocomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
+}
+
+class Carriage{
+    typeOfCargo
 }
 
 class Station {
-    type
+    name
     location
+    type
+    building
+    cargo
 }
 
-Player "1" -- "*" Train : owns
-Train "1" -- "1" Route : assigned to
-Route "*" -- "*" Station : includes
+class Travel{
+
+}
+
+class Departure{
+
+}
+
+class Arrival{
+
+}
+
+class Time{
+
+}
+
+SteamLocomotive --|> Locomotive
+DieselLocomotive --|> Locomotive
+ElectricLocomotive --|> Locomotive
+Player --|> User
+
+Travel o-- Cost
+Travel o-- Departure
+Travel o-- Arrival
+Travel o-- Time
+Travel o-- Train
+Route o-- Station
+Station o-- Cargo
+Train o-- Carriage
+
+Route *-- Travel
+Train *-- Locomotive
+Player *-- Train
 
 @enduml

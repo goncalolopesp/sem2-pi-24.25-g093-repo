@@ -8,6 +8,26 @@ hide circle
 hide methods
 
 class Player {
+    username
+    password
+    + buyTrain(carriage: Carriage, locomotive: Locomotive)
+}
+
+class Map {
+     name
+     sizeX
+     sizeY
+     location
+}
+
+class Scenario {
+    map
+    timePeriod
+}
+
+class TimePeriod {
+    techRestrictions
+    historicalEvents
 }
 
 class Simulator {
@@ -15,17 +35,28 @@ class Simulator {
     cargoGenerationRate
 }
 
+class Cargo{
+    type
+    status
+}
+
 class Station {
-    type
+    name
     location
-}
-
-class Cargo {
     type
+    building
+    cargo
 }
 
-Player "1" -- "1" Simulator : controls
-Simulator "1" -- "*" Station : manages
-Station "*" -- "*" Cargo : stores
+Simulator *-- Station
+Station o-- Cargo
+
+TimePeriod --|> Scenario
+
+Scenario *-- Map
+
+Player "1" -- "1" Simulator
+Simulator "1" -- "1" Map
+
 
 @enduml
