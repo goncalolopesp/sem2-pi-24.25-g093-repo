@@ -14,6 +14,7 @@ import java.util.List;
 public class Map {
     private final String mapName;
     private final Location location;
+    private final int scale;
     private final List<Station> stations = new ArrayList<>();
     private final List<Industry> industries = new ArrayList<>();
 
@@ -24,9 +25,10 @@ public class Map {
      * @param width   the width of the map (must be positive)
      * @param height  the height of the map (must be positive)
      */
-    public Map(String mapName, int width, int height) {
+    public Map(String mapName, int width, int height, int scale) {
         this.mapName = mapName;
         this.location = new Location(width, height);
+        this.scale = scale;
     }
 
     /**
@@ -64,6 +66,10 @@ public class Map {
      * @return the industries on the map
      */
     public List<Industry> getIndustries() { return industries; }
+
+    public int getScale() {
+        return scale;
+    }
 
     /**
      * Adds a station to the map at the specified coordinates.

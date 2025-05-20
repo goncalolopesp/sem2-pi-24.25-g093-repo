@@ -1,15 +1,9 @@
 import controller.*;
-import domain.Budget;
 import domain.City;
-import domain.CurrentUser;
-import repository.AuthRepository;
 import repository.LocomotiveRepository;
 import repository.Repositories;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 public class Bootstrap {
     public void run() {
@@ -105,7 +99,7 @@ public class Bootstrap {
 
     private void addMaps() {
         CreateMapController createMapController = new CreateMapController();
-        createMapController.createMap("exampleMap", 50, 50);
+        createMapController.createMap("exampleMap", 50, 50, 5);
     }
 
     private void addCities() {

@@ -16,6 +16,7 @@ public class CreateMapUI implements Runnable{
     private String mapName;
     private int width;
     private int height;
+    private int scale;
 
     /**
      * Constructs a new CreateMapUI, initializing its controller.
@@ -44,7 +45,7 @@ public class CreateMapUI implements Runnable{
      * Prints a success or failure message based on the result.
      */
     private void submitData() {
-        Optional<Map> map = Optional.ofNullable(getMapController().createMap(mapName, width, height));
+        Optional<Map> map = Optional.ofNullable(getMapController().createMap(mapName, width, height, scale));
 
         if (map.isPresent()) {
             System.out.println("\nMap successfully created!");
@@ -60,6 +61,7 @@ public class CreateMapUI implements Runnable{
         mapName = requestMapName();
         width = requestWidth();
         height = requestHeight();
+        scale = requestScale();
     }
 
     /**
@@ -146,5 +148,26 @@ public class CreateMapUI implements Runnable{
         } while(!ctrl.checkNameUniqueness(mapName) || !mapName.matches(pattern) || mapName.isEmpty());
 
         return mapName.trim();
+    }
+
+    private int requestScale() {
+        Scanner sc = new Scanner(System.in);
+        int s = 0;
+
+        System.out.print("Enter Map Scale (km): ");
+
+        do {
+            String input = sc.nextLine().trim();
+            try {
+                s = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
+            }
+            if (s <= 0 || s > 256) {
+                System.out.print("Invalid scale. Must be positive and below 256. Try again: ");
+            }
+        } while (s <= 0 || s > 256);
+
+        return s;
     }
 }
