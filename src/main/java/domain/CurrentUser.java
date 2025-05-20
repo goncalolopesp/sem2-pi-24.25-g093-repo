@@ -1,7 +1,5 @@
 package domain;
 
-import repository.LocomotiveRepository;
-
 import java.util.Map;
 import java.util.HashMap;
 

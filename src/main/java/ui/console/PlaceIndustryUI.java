@@ -1,11 +1,9 @@
 package ui.console;
 
-import controller.CreateMapController;
 import controller.PlaceIndustryController;
 import domain.Industry;
 import domain.Map;
 
-import java.util.Optional;
 import java.util.Scanner;
 
 public class PlaceIndustryUI implements Runnable {

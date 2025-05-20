@@ -5,9 +5,10 @@ import controller.CreateCityController.CenterError;
 import controller.CreateCityController.NameMapError;
 import controller.CreateCityController.BlockError;
 
-import controller.DisplayMapController;
 import domain.City;
 import domain.HouseBlock;
+import repository.MapRepository;
+import repository.Repositories;
 
 import java.util.Scanner;
 
@@ -43,8 +44,8 @@ public class CreateCityUI implements Runnable {
                     System.out.println("Invalid city name. Please enter a valid name. No special characters nor digits are allowed.");
                 }
             } while (!cityName.matches(pattern));
-            DisplayMapController mctrl = new DisplayMapController();
-            System.out.println(mctrl.getMaps());
+            MapRepository mrepo = Repositories.getInstance().getMapRepository();
+            System.out.println(mrepo.getMaps());
             do {
                 System.out.print("Enter Map Name: ");
                 mapName = sc.nextLine().trim();

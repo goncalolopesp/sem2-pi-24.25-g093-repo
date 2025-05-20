@@ -1,6 +1,5 @@
 package controller;
 
-import domain.Budget;
 import domain.User;
 import repository.AuthRepository;
 import repository.Repositories;
