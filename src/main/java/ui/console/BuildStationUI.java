@@ -7,7 +7,6 @@ import domain.Station.Orientation;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 /**

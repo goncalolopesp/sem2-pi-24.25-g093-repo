@@ -14,10 +14,7 @@ import java.util.List;
  */
 
 public class ScenarioRepository {
-    private final List<Scenario> scenarios
-     /**
-     * Constructs a new ScenarioRepository with an empty list of scenarios.
-     */;
+    private final List<Scenario> scenarios;
     public ScenarioRepository() { scenarios = new ArrayList<>(); }
 
     /**

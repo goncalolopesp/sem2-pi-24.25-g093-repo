@@ -178,7 +178,7 @@ public class UpgradeStationUI implements Runnable{
                             ctrl.getBuildingRepository().remove(station, "telegraph");
                         }
 
-                    } else if (currentYear < 1876 || currentYear > 2026) {
+                    } else {
                         if (buildingType.equals("telephone")) {
                             System.out.println("Telephone can only be built in the year 1876-Present.");
                             valid = false;
@@ -187,14 +187,15 @@ public class UpgradeStationUI implements Runnable{
                             ctrl.getBuildingRepository().remove(station, "telephone");
                         }
                     }
-                    checkMutualExclusivity(ctrl.getBuildings(), buildingType);
-                } else if (buildingType == null) {
-                    return null;
+                    if (checkMutualExclusivity(ctrl.getBuildings(), buildingType)) {
+                        System.out.println("Mutually exclusive building already exists in this station.");
+                        valid = false;
+                    }
                 }
             }
 
             if (!valid) {
-                System.out.print("Invalid input. Building type doesn't exist/isn't available in the current year or Player doesn't have enough budget. Please try again: ");
+                System.out.print("Invalid input. Please try again: ");
             } else if (ctrl.verifyIfBuildingExists(station, buildingType)) {
                 System.out.print(buildingType + " already exists in station " + station.getName() + ". Please try again: ");
             }
@@ -206,7 +207,7 @@ public class UpgradeStationUI implements Runnable{
         return buildingType;
     }
 
-    private String checkMutualExclusivity(List<Building> existingBuildings, String newType) {
+    private boolean checkMutualExclusivity(List<Building> existingBuildings, String newType) {
         String newLower = newType.toLowerCase();
 
         for (Building building : existingBuildings) {
@@ -214,9 +215,9 @@ public class UpgradeStationUI implements Runnable{
             if (!existing.equals(newLower) &&
                     ((existing.contains("hotel") && newLower.contains("hotel")) ||
                             (existing.contains("cafe") && newLower.contains("cafe")))) {
-                return existing;
+                return true;
             }
         }
-        return null;
+        return false;
     }
 }

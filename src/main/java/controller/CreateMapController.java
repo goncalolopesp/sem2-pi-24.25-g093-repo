@@ -52,7 +52,7 @@ public class CreateMapController {
      * @param mapName the unique name for the map
      * @param width   the width of the map (must be positive)
      * @param height  the height of the map (must be positive)
-     * @param scale
+     * @param scale   the scale of the map (must be positive)
      * @return the created Map instance, or null if name is not unique
      */
     public Map createMap(String mapName, int width, int height, int scale) {

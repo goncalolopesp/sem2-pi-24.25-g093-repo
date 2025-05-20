@@ -93,7 +93,7 @@ public class SimulationController {
     }
 
     public Runnable generateCargo(Map selectedMap,Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
-        Runnable task = () -> {
+        return () -> {
             if (running.get()) {
                 if (timePeriod.get().get(0) <= timePeriod.get().get(1)) {
                     addCargoToStation(selectedMap,selectedScenario);
@@ -103,7 +103,6 @@ public class SimulationController {
                 generationScheduler.shutdownNow();
             }
         };
-        return task;
     }
 
     public void addCargoToStation(
@@ -217,11 +216,12 @@ public class SimulationController {
                         int sdx = 1, sdy = 1;
                         switch (st.getOrientation()) {
                             case NW:
-                                sdx = 1; sdy = 1; break;
+                                break;
                             case NE:
-                                sdx = 2; sdy = 1; break;
+                                sdx = 2;
+                                break;
                             case SW:
-                                sdx = 1; sdy = 2; break;
+                                sdy = 2; break;
                             case SE:
                                 sdx = 2; sdy = 2; break;
                         }
@@ -288,26 +288,18 @@ public class SimulationController {
     }
 
     public void payLocomotiveMaintenance(Budget budget){
-        boolean canPay = true;
-        int yearlyBudget = 0;
-        int yearlyManagementCost = 0;
+        boolean canPay;
+        int yearlyBudget;
+        int yearlyManagementCost;
         List<Locomotive> canUse = new ArrayList<>();
         for (Locomotive loc : currentUser.getLocomotives()){
             yearlyBudget = loc.getFuelCost();
             yearlyManagementCost = loc.getMaintenanceCost();
-            if ((yearlyManagementCost > budget.getBudget())) {
-                canPay = false;
-            }else{
-                canPay = true;
-            }
+            canPay = yearlyManagementCost <= budget.getBudget();
 
             if (canPay){
                 budget.subtractBudget(yearlyManagementCost);
-                if (yearlyBudget > budget.getBudget()) {
-                    loc.setAvailability(false);
-                }else{
-                    loc.setAvailability(true);
-                }
+                loc.setAvailability(yearlyBudget <= budget.getBudget());
                 canUse.add(loc);
                 if (loc.getAvailability())
                     budget.subtractBudget(yearlyBudget);

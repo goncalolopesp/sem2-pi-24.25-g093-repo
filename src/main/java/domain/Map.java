@@ -67,6 +67,11 @@ public class Map {
      */
     public List<Industry> getIndustries() { return industries; }
 
+    /**
+     * Returns the scale of the map.
+     *
+     * @return the scale of the map
+     */
     public int getScale() {
         return scale;
     }

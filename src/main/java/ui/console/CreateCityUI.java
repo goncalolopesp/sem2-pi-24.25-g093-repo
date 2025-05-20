@@ -92,7 +92,7 @@ public class CreateCityUI implements Runnable {
                     }
                 }
 
-                ce = ctrl.validateCenter(cityName, mapName, cx, cy);
+                ce = ctrl.validateCenter(mapName, cx, cy);
                 if (ce == CenterError.OUT_OF_BOUNDS)
                     System.out.println("Error: Center (" + cx + "," + cy + ") outside map bounds.");
                 else if (ce == CenterError.POSITION_TAKEN)

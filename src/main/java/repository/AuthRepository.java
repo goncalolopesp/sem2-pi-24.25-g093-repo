@@ -36,12 +36,7 @@ public class AuthRepository {
      */
     public List<User> getAllUsers(){
 
-        List<User> userList = new ArrayList<>();
-        for (User user : users) {
-            userList.add(user);
-        }
-
-        return userList;
+        return new ArrayList<>(users);
     }
 
     /**
@@ -96,8 +91,13 @@ public class AuthRepository {
     private boolean isPasswordValid(String email, String password) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
-            String userPwd = usr.get().getPassword();
-            return userPwd.equals(password.toString());
+            String userPwd = "";
+
+            if (usr.isPresent()) {
+                userPwd = usr.get().getPassword();
+            }
+
+            return userPwd.equals(password);
         }else{
             return false;
         }
@@ -111,8 +111,10 @@ public class AuthRepository {
     public boolean deleteUser(String email) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
-            users.remove(usr.get());
-            if (session.getUser().equals(usr.get())) {
+
+            usr.ifPresent(user -> users.remove(user));
+
+            if (usr.isPresent() && session.getUser().equals(usr.get())) {
                 doLogout();
             }
             return true;
@@ -145,7 +147,9 @@ public class AuthRepository {
     public boolean changeRole(String email, String roleId) {
         if (doesUserExist(email)) {
             Optional<User> usr = getUserByEmail(email);
-            usr.get().setRoleId(roleId);
+
+            usr.ifPresent(user -> user.setRoleId(roleId));
+
             return true;
         }
         return false;

@@ -77,11 +77,9 @@ public class CityRepository {
      * for actual validation.
      * </p>
      *
-     * @param map the map name where the block is placed
-     * @param b   the HouseBlock to validate
      * @return a {@link CreateCityController.BlockError} indicating the validation result
      */
-    public CreateCityController.BlockError validateBlock(String map, HouseBlock b) {
+    public CreateCityController.BlockError validateBlock() {
         // delegated to controller, stub here
         return CreateCityController.BlockError.OK;
     }

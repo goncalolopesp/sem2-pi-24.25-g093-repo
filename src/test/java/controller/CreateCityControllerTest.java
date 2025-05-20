@@ -46,19 +46,19 @@ class CreateCityControllerTest {
     @Test
     void validateCenter_OutOfBounds() {
         assertEquals(CreateCityController.CenterError.OUT_OF_BOUNDS,
-                controller.validateCenter("NewCity", "TestMap", 0, 11));
+                controller.validateCenter("TestMap", 0, 11));
     }
 
     @Test
     void validateCenter_PositionTaken() {
         assertEquals(CreateCityController.CenterError.POSITION_TAKEN,
-                controller.validateCenter("NewCity", "TestMap", 2, 2));
+                controller.validateCenter("TestMap", 2, 2));
     }
 
     @Test
     void validateCenter_OK() {
         assertEquals(CreateCityController.CenterError.OK,
-                controller.validateCenter("NewCity", "TestMap", 5, 5));
+                controller.validateCenter("TestMap", 5, 5));
     }
 
     @Test
@@ -96,7 +96,7 @@ class CreateCityControllerTest {
         repos.getCityRepository().add(c);
         c.addBlockManual(new HouseBlock(15, 15));
         assertEquals(CreateCityController.CenterError.BLOCK_PRESENT,
-                controller.validateCenter("OK", "TestMap", 15, 15));
+                controller.validateCenter("TestMap", 15, 15));
     }
 
     @Test

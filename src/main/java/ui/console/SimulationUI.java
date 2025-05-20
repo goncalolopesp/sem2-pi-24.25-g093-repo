@@ -84,6 +84,7 @@ public class SimulationUI implements Runnable {
                     options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, selectedScenario,timePeriod, userBudget)));
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario,selectedMap)));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
+                    options.add(new MenuItem("List my stations", new ListStationsUI()));
                     options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario, userBudget)));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);

@@ -36,12 +36,12 @@ public class DisplayMapUI implements Runnable{
      * Prints the map grid on the console.
      */
     private void displayMap() {
-        for (int i = 0; i < mapArray.length; i++) {
+        for (String[] strings : mapArray) {
             for (int j = 0; j < mapArray[0].length; j++) {
                 if (j == mapArray[0].length - 1) {
-                    System.out.print(mapArray[i][j]); // no space after the last one
+                    System.out.print(strings[j]); // no space after the last one
                 } else {
-                    System.out.print(mapArray[i][j] + " ");
+                    System.out.print(strings[j] + " ");
                 }
             }
             System.out.println();
@@ -58,14 +58,14 @@ public class DisplayMapUI implements Runnable{
     /**
      * Initializes the map array based on selected map dimensions, populates it,
      * and returns the array for rendering.
-     *
-     * @return the array that represents the map
      */
-    private String[][] submitData() {
+    private void submitData() {
         int width = 0; int height = 0;
         Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
-        width = matchingMap.get().getWidth();
-        height = matchingMap.get().getHeight();
+        if (matchingMap.isPresent()) {
+            width = matchingMap.get().getWidth();
+            height = matchingMap.get().getHeight();
+        }
 
         mapArray = new String[height][width];
 
@@ -82,7 +82,6 @@ public class DisplayMapUI implements Runnable{
             addStationsToMap();
         }
 
-        return mapArray;
     }
 
     /**
@@ -107,10 +106,10 @@ public class DisplayMapUI implements Runnable{
         for (int i = 0; i < citiesList.size(); i++) {
             if (citiesList.stream().anyMatch(city -> city.getMapName().equals(mapName))){
                 List<HouseBlock> houseBlockList = citiesList.get(i).getBlocks();
-                for (int j = 0; j < houseBlockList.size(); j++) {
-                    int posX = houseBlockList.get(j).getX();
-                    int posY = houseBlockList.get(j).getY();
-                    mapArray[posY-1][posX-1] = "🌆";
+                for (HouseBlock houseBlock : houseBlockList) {
+                    int posX = houseBlock.getX();
+                    int posY = houseBlock.getY();
+                    mapArray[posY - 1][posX - 1] = "🌆";
                 }
             }
         }
@@ -121,12 +120,14 @@ public class DisplayMapUI implements Runnable{
             String me = currentUser.getEmail();
             Optional<Map> matchingMap = ctrl.getMaps().stream().filter(map -> map.getMapName().equals(mapName)).findFirst();
 
-            for (Station st : matchingMap.get().getStations()) {
-                if (st.getMapName().equals(matchingMap.get().getMapName())
-                        && st.getOwnerPlayer().equals(me)) {
-                    int sy = st.getY();
-                    int sx = st.getX();
-                    mapArray[sy][sx] = "🚉";
+            if (matchingMap.isPresent()) {
+                for (Station st : matchingMap.get().getStations()) {
+                    if (st.getMapName().equals(matchingMap.get().getMapName())
+                            && st.getOwnerPlayer().equals(me)) {
+                        int sy = st.getY();
+                        int sx = st.getX();
+                        mapArray[sy][sx] = "🚉";
+                    }
                 }
             }
         }

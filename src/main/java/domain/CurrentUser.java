@@ -12,7 +12,7 @@ public class CurrentUser {
     private static CurrentUser session = null;
 
     /** Map to store the current user - using a map with a constant key for flexibility */
-    private Map<String, User> usr;
+    private final Map<String, User> usr;
 
     /**
      * Private constructor prevents instantiation from outside

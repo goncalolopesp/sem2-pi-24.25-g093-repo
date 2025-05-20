@@ -7,7 +7,7 @@ import java.util.List;
 
 public class IndustryRepository {
     private static IndustryRepository instance;
-    private List<Industry> industries;
+    private final List<Industry> industries;
 
     public IndustryRepository() {
         industries = new ArrayList<>();

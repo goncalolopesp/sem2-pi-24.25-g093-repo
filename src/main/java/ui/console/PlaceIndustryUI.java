@@ -31,13 +31,11 @@ public class PlaceIndustryUI implements Runnable {
     }
 
 
-    private boolean submitData() {
+    private void submitData() {
         if (ctrl.placeIndustryOnMap(industry, positionX, positionY, map)) {
             System.out.println("Industry placed successfully.");
-            return true;
         } else {
             System.out.println("Failed to place industry. Position may be occupied or invalid.");
-            return false;
         }
     }
 

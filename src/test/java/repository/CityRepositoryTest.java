@@ -56,6 +56,6 @@ class CityRepositoryTest {
     @Test
     void validateBlock_AlwaysOK() {
         assertEquals(CreateCityController.BlockError.OK,
-                repo.validateBlock("Map1", new HouseBlock(0,0)));
+                repo.validateBlock());
     }
 }

@@ -13,7 +13,7 @@ import java.util.*;
 public class AuthController {
 
     /** Repository for authentication and user operations */
-    AuthRepository authRepo = new AuthRepository();
+    AuthRepository authRepo;
 
     /** Constant representing the player role */
     public static final String ROLE_PLAYER = "PLAYER";

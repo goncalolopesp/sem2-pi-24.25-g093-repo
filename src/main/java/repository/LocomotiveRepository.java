@@ -106,11 +106,7 @@ public class LocomotiveRepository {
      */
     public boolean buyLocomotive(String modelName, Budget money){
         Optional<Locomotive> locomotive = getLocomotive(modelName);
-        if (locomotive.isPresent()) {
-            return buyLocomotive(locomotive.get(), money);
-        } else {
-            return false;
-        }
+        return locomotive.filter(value -> buyLocomotive(value, money)).isPresent();
     }
 
     /**

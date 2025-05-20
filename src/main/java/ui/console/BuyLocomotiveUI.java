@@ -8,9 +8,9 @@ import java.util.*;
 
 public class BuyLocomotiveUI implements Runnable {
 
-    private Scenario scenario;
-    private Map map;
-    private BuyLocomotiveController locomotiveController = new BuyLocomotiveController();
+    private final Scenario scenario;
+    private final Map map;
+    private final BuyLocomotiveController locomotiveController = new BuyLocomotiveController();
 
     public BuyLocomotiveUI(Scenario scenario, Map map) {
         this.scenario = scenario;
@@ -35,15 +35,13 @@ public class BuyLocomotiveUI implements Runnable {
         }
     }
 
-    public boolean buyLocomotive(String modelName, Scenario scenario, Map map) {
+    public void buyLocomotive(String modelName, Scenario scenario, Map map) {
         if (locomotiveController.buyLocomotive(modelName, scenario, map)){
 
             System.out.println("Locomotive: " + modelName + " bought!");
-            return true;
 
-        }else{
+        } else {
             System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
-            return false;
 
         }
     }

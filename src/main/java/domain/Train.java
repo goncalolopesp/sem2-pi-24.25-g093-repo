@@ -7,8 +7,8 @@ import java.util.List;
  * Represents a train consisting of a single locomotive and one or more carriages.
  */
 public class Train {
-    private Locomotive locomotive;
-    private List<Carriage> carriages;
+    private final Locomotive locomotive;
+    private final List<Carriage> carriages;
     private final String userEmail;
 
     /**

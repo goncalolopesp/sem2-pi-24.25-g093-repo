@@ -13,9 +13,6 @@ public class BudgetRepository {
     /** Collection of all budgets in the system */
     Set<Budget> budgets = new HashSet<>();
 
-    /** Current user session for context awareness */
-    CurrentUser session = CurrentUser.getInstance();
-
     /**
      * Creates a new budget in the repository if it doesn't already exist
      * @param budget The budget object to add to the repository

@@ -65,18 +65,13 @@ public class CreateCityController {
             return false;
         }
 
-        CenterError centerError = validateCenter(cityName, mapName, x, y);
-        if (centerError != CenterError.OK) {
-            return false;
-        }
-
-        return true;
+        CenterError centerError = validateCenter(mapName, x, y);
+        return centerError == CenterError.OK;
     }
 
     /**
      * Validates the center coordinates for a new city on a map.
      *
-     * @param name the city name (unused for validation but kept for symmetry)
      * @param map  the map name where the city will be placed
      * @param x    the x-coordinate of the center
      * @param y    the y-coordinate of the center
@@ -85,7 +80,7 @@ public class CreateCityController {
      *         CenterError#POSITION_TAKEN if another city center exists there;
      *         CenterError#BLOCK_PRESENT if a house block occupies the position
      */
-    public CenterError validateCenter(String name, String map, int x, int y) {
+    public CenterError validateCenter(String map, int x, int y) {
         Optional<domain.Map> m = mapRepo.getMap(map);
         if (m.isEmpty()) return CenterError.OUT_OF_BOUNDS;
         var mp = m.get();
@@ -128,7 +123,7 @@ public class CreateCityController {
      * @throws IllegalStateException if the name or center validation fails
      */
     public City createCity(String name, String map, int x, int y) {
-        if (validateNameMap(name, map) != NameMapError.OK || validateCenter(name, map, x, y) != CenterError.OK) {
+        if (validateNameMap(name, map) != NameMapError.OK || validateCenter(map, x, y) != CenterError.OK) {
             throw new IllegalStateException("Cannot create city: validation failed");
         }
         City c = new City(name, map, x, y);

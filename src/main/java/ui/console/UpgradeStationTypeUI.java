@@ -41,8 +41,8 @@ public class UpgradeStationTypeUI implements Runnable {
 
         Type current = station.getType();
         Orientation orientation = null;
-        Type targetType = null;
-        int cost = 0;
+        Type targetType;
+        int cost;
         Scanner sc = new Scanner(System.in);
 
         switch (current) {

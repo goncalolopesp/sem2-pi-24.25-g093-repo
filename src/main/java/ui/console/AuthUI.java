@@ -1,18 +1,14 @@
 package ui.console;
 
 import controller.AuthController;
-import domain.Budget;
-import pt.ipp.isep.dei.controller.AuthenticationController;
-import pt.ipp.isep.dei.ui.console.menu.AdminUI;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import ui.console.menu.MainMenuUI;
 import ui.console.menu.UserMenuUI;
 
-import java.util.Optional;
 
 public class AuthUI implements Runnable {
     private final AuthController ctrl;
-    private int op;
+    private final int op;
 
     public AuthUI(int op){
         ctrl = new AuthController();
@@ -22,13 +18,13 @@ public class AuthUI implements Runnable {
     public void createUser(){
         System.out.println("\n\n--- REGISTRATION UI ---------------------------");
 
-        boolean success = false;
+        boolean success;
         do {
 
             String name = Utils.readLineFromConsole("Enter your name: ");
             String id = Utils.readLineFromConsole("Enter UserId/Email: ");
             String pwd = Utils.readLineFromConsole("Enter Password: ");
-            String roleID = ctrl.ROLE_PLAYER;
+            String roleID = AuthController.ROLE_PLAYER;
 
             success = ctrl.createNewUser(name, id, pwd, roleID);
             if (!success) {

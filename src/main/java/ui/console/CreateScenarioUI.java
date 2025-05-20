@@ -170,26 +170,25 @@ public class CreateScenarioUI implements Runnable {
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");
 
-            for (int i = 0; i < input.length; i++) {
+            for (String s : input) {
                 valid = true;
-                String item = input[i];
 
-                for (int j = 0; j < validTypes.length; j++) {
-                    if (item.equalsIgnoreCase(validTypes[j]) && !availableTypes.contains("none")) {
-                        availableTypes.add(validTypes[j]); // Store the normalized lowercase version
+                for (String validType : validTypes) {
+                    if (s.equalsIgnoreCase(validType) && !availableTypes.contains("none")) {
+                        availableTypes.add(validType); // Store the normalized lowercase version
                     } else {
                         valid = false;
                     }
                 }
-                if (!valid && !availableTypes.contains(item)) {
-                    System.out.println("Invalid Type. Type '" + item + "' not added.");
+                if (!valid && !availableTypes.contains(s)) {
+                    System.out.println("Invalid Type. Type '" + s + "' not added.");
                 }
             }
 
-            if (availableTypes.size() == 0) {
+            if (availableTypes.isEmpty()) {
                 System.out.print("Invalid input. Please enter only steam, diesel, and/or electric: ");
             }
-        } while (availableTypes.size() == 0);
+        } while (availableTypes.isEmpty());
 
         return availableTypes;
     }
@@ -210,26 +209,25 @@ public class CreateScenarioUI implements Runnable {
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");
 
-            for (int i = 0; i < input.length; i++) {
+            for (String s : input) {
                 valid = true;
-                String item = input[i];
 
-                for (int j = 0; j < validEvents.length; j++) {
-                    if (item.equalsIgnoreCase(validEvents[j]) && !historicalEvents.contains("none")) {
-                        historicalEvents.add(validEvents[j]); // Store the normalized lowercase version
+                for (String validEvent : validEvents) {
+                    if (s.equalsIgnoreCase(validEvent) && !historicalEvents.contains("none")) {
+                        historicalEvents.add(validEvent); // Store the normalized lowercase version
                     } else {
                         valid = false;
                     }
                 }
-                if (!valid && !historicalEvents.contains(item)) {
-                    System.out.println("Invalid Event. Event '" + item + "' not added.");
+                if (!valid && !historicalEvents.contains(s)) {
+                    System.out.println("Invalid Event. Event '" + s + "' not added.");
                 }
             }
 
-            if (historicalEvents.size() == 0) {
+            if (historicalEvents.isEmpty()) {
                 System.out.print("Invalid input. Please enter only vaccination campaign and/or school program: ");
             }
-        } while (historicalEvents.size() == 0);
+        } while (historicalEvents.isEmpty());
 
         return historicalEvents;
     }

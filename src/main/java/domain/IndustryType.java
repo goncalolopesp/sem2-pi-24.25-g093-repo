@@ -14,5 +14,5 @@ public enum IndustryType {
     BAKERY,
     TEXTILE,
     AUTOMOBILE,
-    STEEL_MILL;
+    STEEL_MILL
 }

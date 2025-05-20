@@ -15,13 +15,13 @@ import java.util.*;
  */
 public class BuyLocomotiveController {
     /** Repository for locomotive management */
-    private LocomotiveRepository locomotiveRepository;
+    private final LocomotiveRepository locomotiveRepository;
 
     /** Current user session */
     CurrentUser session = CurrentUser.getInstance();
 
     /** Repository for budget management */
-    private BudgetRepository budgetRepository;
+    private final BudgetRepository budgetRepository;
 
     /**
      * Constructor initializes repositories from the singleton repositories instance
@@ -58,7 +58,7 @@ public class BuyLocomotiveController {
         for (Locomotive locomotive : locomotives) {
             if(locomotive.getStartYearOfOperation() <= scenario.getTimeRestrictions()[0] && locomotive.getEndYearOfOperation() >= scenario.getTimeRestrictions()[0]) {
                 for (String techRestriction : scenario.getTechnologicalRestrictions()){
-                    if (techRestriction.toLowerCase().equals(locomotive.getType().toLowerCase())) {
+                    if (techRestriction.equalsIgnoreCase(locomotive.getType())) {
                         locomotivesList.add(locomotive);
                     }
                 }

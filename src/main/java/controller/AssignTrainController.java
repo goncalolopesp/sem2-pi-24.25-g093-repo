@@ -86,7 +86,7 @@ public class AssignTrainController {
                 .stream()
                 .anyMatch(r -> r.equalsIgnoreCase("vaccination campaign"));
 
-        int moneyWon = 0;
+        int moneyWon;
         if(isVaccinationCampaign){
             moneyWon = ((totalPeopleCollected * PEOPLE_VALUE) * 2) + (totalMailCollected * MAIL_VALUE);
         }

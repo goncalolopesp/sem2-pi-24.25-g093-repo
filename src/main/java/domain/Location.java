@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class Location {
 
-    private int positionX;
-    private int positionY;
+    private final int positionX;
+    private final int positionY;
 
     public Location(int X, int Y) {
         this.positionX = X;

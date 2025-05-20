@@ -12,8 +12,8 @@ import java.util.List;
 
 public class PlaceIndustryController {
 
-    private  IndustryRepository instanceIndustryRepository;
-    private MapRepository instanceMapRepository;
+    private final IndustryRepository instanceIndustryRepository;
+    private final MapRepository instanceMapRepository;
 
     public PlaceIndustryController() {
         this.instanceIndustryRepository = repository.Repositories.getInstance().getIndustryRepository();
