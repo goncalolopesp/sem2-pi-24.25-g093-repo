@@ -209,6 +209,7 @@ public class main {
             // find non-zero degree vertices
             List<Integer> nonZero = new ArrayList<>();
             for (int i = 0; i < vertices.size(); i++) if (!adj.get(i).isEmpty()) nonZero.add(i);
+
             // check connectivity
             List<Boolean> visited = new ArrayList<>();
             for (int i = 0; i < vertices.size(); i++) visited.add(false);
@@ -221,48 +222,208 @@ public class main {
             // count odd degree vertices
             List<Integer> odd = new ArrayList<>();
             for (int i : nonZero) if (adj.get(i).size() % 2 != 0) odd.add(i);
+
             if (odd.size() != 0 && odd.size() != 2) {
                 System.out.println("No Eulerian route (" + odd.size() + " odd-degree vertices).");
                 return;
             }
 
-            // determine start points
-            List<Integer> starts = odd.isEmpty() ? nonZero : odd;
-            System.out.println((odd.isEmpty() ? "Any station with edges is a valid start: " : "Stations which the maintenance can start: ")
-                    + getNames(vertices, starts));
+            System.out.println("Eulerian route is possible!");
 
-            // ask for start
-            int start;
-            do {
-                System.out.print("Enter start station from list: ");
-                String s = sc.nextLine().trim();
-                start = vertices.indexOf(s);
-                if (start < 0 || !starts.contains(start))
-                    System.out.println("Invalid start. Choose from: " + getNames(vertices, starts));
-            } while (!starts.contains(start));
-
-            // find Eulerian route
-            List<String> route = findEulerianRoute(start, vertices, adj, edges);
-            System.out.println("Maintenance route (start -> finish): " + route);
-
-            // --- Visualization ---
-            // create nodes
-            Map<String, MutableNode> nodeMap = new HashMap<>();
-            for (String v : vertices) nodeMap.put(v, mutNode(v).add(Color.BLACK));
-            // build graph
-            MutableGraph g = mutGraph("RotaEuleriana").setDirected(false)
-                    .add(nodeMap.values().toArray(new MutableNode[0]));
-            for (String[] e : edges) {
-                String a = e[0], b = e[1];
-                Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
-                g.add(nodeMap.get(a).addLink(to(nodeMap.get(b)).with(c)));
+            // Find the complete Eulerian route
+            List<String> completeRoute;
+            if (odd.size() == 0) {
+                // Eulerian cycle - start from any vertex
+                completeRoute = findEulerianRoute(nonZero.get(0), vertices, adj, edges);
+            } else {
+                // Eulerian path - start from one odd vertex
+                completeRoute = findEulerianRoute(odd.get(0), vertices, adj, edges);
             }
-            Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("eulerian-route.svg"));
-            System.out.println("Graph saved as eulerian-route.svg");
+
+            System.out.println("\n=== COMPLETE EULERIAN ROUTE ===");
+            System.out.println("Full maintenance route: " + completeRoute);
+            System.out.println("Total stations in route: " + completeRoute.size());
+
+            // Ask user if they want to see complete or partial route
+            System.out.println("\nRoute Options:");
+            System.out.println("1. Generate graph for complete route");
+            System.out.println("2. Generate graph for partial route (choose start and end stations)");
+            System.out.print("Choose option: ");
+            String routeChoice = sc.nextLine().trim();
+
+            if (routeChoice.equals("1")) {
+                // Generate complete route visualization
+                generateCompleteRouteVisualization(completeRoute, edges, vertices);
+            } else if (routeChoice.equals("2")) {
+                // Get valid start and end stations for partial route
+                System.out.println("\nAvailable stations: " + getNames(vertices, nonZero));
+
+                int start = getValidStation(vertices, nonZero, "Enter start station for the route: ");
+                int end = getValidStation(vertices, nonZero, "Enter end station for the route: ", start);
+
+                // Extract the partial route from start to end
+                List<String> partialRoute = extractPartialRoute(completeRoute, vertices.get(start), vertices.get(end));
+
+                if (partialRoute == null || partialRoute.isEmpty()) {
+                    System.out.println("Could not find a route from " + vertices.get(start) + " to " + vertices.get(end));
+                    return;
+                }
+
+                System.out.println("\n=== PARTIAL ROUTE ===");
+                System.out.println("Maintenance route (" + vertices.get(start) + " -> " + vertices.get(end) + "): " + partialRoute);
+                System.out.println("Stations in partial route: " + partialRoute.size());
+
+                // Generate partial route visualization
+                generatePartialRouteVisualization(partialRoute, edges, vertices, start, end);
+            } else {
+                System.out.println("Invalid option selected.");
+                return;
+            }
 
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static int getValidStation(List<String> vertices, List<Integer> nonZero, String prompt) {
+        return getValidStation(vertices, nonZero, prompt, -1);
+    }
+
+    private static int getValidStation(List<String> vertices, List<Integer> nonZero, String prompt, int excludeStation) {
+        int station;
+        do {
+            System.out.print(prompt);
+            String s = sc.nextLine().trim();
+            station = vertices.indexOf(s);
+
+            if (station < 0) {
+                System.out.println("Station not found. Choose from available stations: " + getNames(vertices, nonZero));
+            } else if (!nonZero.contains(station)) {
+                System.out.println("Invalid station (not in the maintenance network). Choose from: " + getNames(vertices, nonZero));
+            } else if (station == excludeStation) {
+                System.out.println("Start and end stations cannot be the same. Please choose a different station.");
+            } else {
+                break; // Valid station found
+            }
+            station = -1; // Reset to continue loop
+        } while (true);
+
+        return station;
+    }
+
+    private static void generateCompleteRouteVisualization(List<String> completeRoute, List<String[]> edges, List<String> vertices) throws IOException {
+        // Create nodes for all stations in the complete route
+        Set<String> routeStations = new HashSet<>(completeRoute);
+        Map<String, MutableNode> nodeMap = new HashMap<>();
+
+        // Color the first and last stations differently
+        String firstStation = completeRoute.get(0);
+        String lastStation = completeRoute.get(completeRoute.size() - 1);
+
+        for (String station : routeStations) {
+            Color nodeColor = Color.BLACK;
+            if (station.equals(firstStation)) {
+                nodeColor = Color.GREEN;
+            } else if (station.equals(lastStation) && !station.equals(firstStation)) {
+                nodeColor = Color.RED;
+            }
+            nodeMap.put(station, mutNode(station).add(nodeColor)
+                    .add(attr("shape", "circle"))
+                    .add(attr("width", "1.2"))
+                    .add(attr("height", "1.2"))
+                    .add(attr("fontsize", "10")));
+        }
+
+        // Build graph with better layout attributes
+        MutableGraph g = mutGraph("CompleteEulerianRoute").setDirected(false)
+                .graphAttrs().add(attr("layout", "neato"))
+                .graphAttrs().add(attr("overlap", "false"))
+                .graphAttrs().add(attr("splines", "true"))
+                .graphAttrs().add(attr("sep", "2.0"))
+                .graphAttrs().add(attr("esep", "1.5"))
+                .graphAttrs().add(attr("mindist", "2.0"))
+                .graphAttrs().add(attr("K", "3.0"))
+                .add(nodeMap.values().toArray(new MutableNode[0]));
+
+        // Add all edges that are part of the complete route with better styling
+        Set<String> addedEdges = new HashSet<>(); // To avoid duplicate edges
+        for (int i = 0; i < completeRoute.size() - 1; i++) {
+            String from = completeRoute.get(i);
+            String to = completeRoute.get(i + 1);
+            String edgeKey = from.compareTo(to) < 0 ? from + "-" + to : to + "-" + from;
+
+            if (!addedEdges.contains(edgeKey)) {
+                // Find the edge between these two vertices
+                for (String[] e : edges) {
+                    if ((e[0].equals(from) && e[1].equals(to)) || (e[0].equals(to) && e[1].equals(from))) {
+                        Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
+                        g.add(nodeMap.get(from).addLink(to(nodeMap.get(to))
+                                .with(c)
+                                .with(attr("penwidth", "2.5"))
+                                .with(attr("len", "2.0"))));
+                        addedEdges.add(edgeKey);
+                        break;
+                    }
+                }
+            }
+        }
+
+        Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("complete-eulerian-route.svg"));
+        System.out.println("Complete route graph saved as complete-eulerian-route.svg");
+        System.out.println("(Green = Start station, Red = End station, Yellow = Electrified lines, Red lines = Non-electrified)");
+    }
+
+    private static void generatePartialRouteVisualization(List<String> partialRoute, List<String[]> edges,
+                                                          List<String> vertices, int start, int end) throws IOException {
+        // Create nodes (only those in the partial route)
+        Set<String> routeStations = new HashSet<>(partialRoute);
+        Map<String, MutableNode> nodeMap = new HashMap<>();
+        for (String station : routeStations) {
+            Color nodeColor = Color.BLACK;
+            if (station.equals(vertices.get(start))) nodeColor = Color.GREEN;
+            else if (station.equals(vertices.get(end))) nodeColor = Color.RED;
+            nodeMap.put(station, mutNode(station).add(nodeColor)
+                    .add(attr("shape", "circle"))
+                    .add(attr("width", "1.2"))
+                    .add(attr("height", "1.2"))
+                    .add(attr("fontsize", "10")));
+        }
+
+        // Build graph with better layout for partial route
+        MutableGraph g = mutGraph("PartialEulerianRoute").setDirected(false)
+                .graphAttrs().add(attr("layout", "neato"))
+                .graphAttrs().add(attr("overlap", "false"))
+                .graphAttrs().add(attr("splines", "true"))
+                .graphAttrs().add(attr("sep", "1.8"))
+                .graphAttrs().add(attr("esep", "1.2"))
+                .graphAttrs().add(attr("mindist", "1.5"))
+                .graphAttrs().add(attr("K", "2.5"))
+                .add(nodeMap.values().toArray(new MutableNode[0]));
+
+        // Add only edges that are part of the partial route with sequence numbering
+        for (int i = 0; i < partialRoute.size() - 1; i++) {
+            String from = partialRoute.get(i);
+            String to = partialRoute.get(i + 1);
+
+            // Find the edge between these two vertices
+            for (String[] e : edges) {
+                if ((e[0].equals(from) && e[1].equals(to)) || (e[0].equals(to) && e[1].equals(from))) {
+                    Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
+                    g.add(nodeMap.get(from).addLink(to(nodeMap.get(to))
+                            .with(c)
+                            .with(attr("penwidth", "3.0"))
+                            .with(attr("len", "2.0"))
+                            .with(attr("fontsize", "8"))
+                            .with(attr("labelfontcolor", "blue"))));
+                    break;
+                }
+            }
+        }
+
+        Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("partial-eulerian-route.svg"));
+        System.out.println("Partial route graph saved as partial-eulerian-route.svg");
+        System.out.println("(Green = Start station, Red = End station");
+        System.out.println("(Yellow = Electrified lines, Red lines = Non-electrified)");
     }
 
     private static void dfs(int u, List<List<Integer>> adj, List<String[]> edges,
@@ -292,6 +453,48 @@ public class main {
             route.add(vertices.get(u));
         }
         return route;
+    }
+
+    private static List<String> extractPartialRoute(List<String> completeRoute, String startStation, String endStation) {
+        int startIndex = -1;
+        int endIndex = -1;
+
+        // Find the first occurrence of startStation and the first occurrence of endStation after that
+        for (int i = 0; i < completeRoute.size(); i++) {
+            if (completeRoute.get(i).equals(startStation) && startIndex == -1) {
+                startIndex = i;
+            } else if (completeRoute.get(i).equals(endStation) && startIndex != -1 && endIndex == -1) {
+                endIndex = i;
+                break;
+            }
+        }
+
+        // If we didn't find the pattern startStation -> ... -> endStation,
+        // try the reverse: endStation -> ... -> startStation
+        if (startIndex == -1 || endIndex == -1) {
+            startIndex = -1;
+            endIndex = -1;
+            for (int i = 0; i < completeRoute.size(); i++) {
+                if (completeRoute.get(i).equals(endStation) && startIndex == -1) {
+                    startIndex = i;
+                } else if (completeRoute.get(i).equals(startStation) && startIndex != -1 && endIndex == -1) {
+                    endIndex = i;
+                    break;
+                }
+            }
+
+            // If found in reverse, extract and reverse the sublist
+            if (startIndex != -1 && endIndex != -1) {
+                List<String> partialRoute = new ArrayList<>(completeRoute.subList(startIndex, endIndex + 1));
+                Collections.reverse(partialRoute);
+                return partialRoute;
+            }
+        } else {
+            // Found in normal order
+            return new ArrayList<>(completeRoute.subList(startIndex, endIndex + 1));
+        }
+
+        return null; // Could not find a path from start to end
     }
 
     private static List<String[]> loadEdges(File f) throws FileNotFoundException {
