@@ -6,34 +6,39 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildUI
+participant ":BuildStationUI" as BuildStationUI
+participant ":CreateStationController" as CreateStationController
+participant "repositories\n:Repositories" as Repositories
+participant "stationRepository\n:StationRepository" as StationRepository
 
 activate Player
-Player -> BuildUI : buildStationRequest()
-activate BuildUI
-create ":CreateStationController" as BuildController
-BuildUI -> BuildController : create()
-activate BuildController
-participant "repositories\n:Repositories" as Repositories
-participant "stationRepository\n:StationRepository" as StationRepo
+Player -> BuildStationUI : buildStationRequest()
+activate BuildStationUI
+create CreateStationController
+BuildStationUI -> CreateStationController : create()
+activate CreateStationController
 
-BuildController -> Repositories : getInstance()
+BuildStationUI -> CreateStationController : getRepositories()
+CreateStationController -> Repositories : getInstance()
 activate Repositories
-Repositories --> BuildController : repositories
+Repositories --> CreateStationController : repositories
 deactivate Repositories
-BuildController -> StationRepo : createStation(map,name, location, type, center)
-activate StationRepo
 
-create "station\n:Station" as Station
-StationRepo -> Station         : create()
-StationRepo -> StationRepo     : saveStation(Station)
-StationRepo --> BuildController : stationData
-deactivate StationRepo
+BuildStationUI -> CreateStationController : createStation(map, location, type, center)
+CreateStationController -> StationRepository : createStation(map, location, type, center)
+activate StationRepository
 
-BuildController --> BuildUI : stationData
-deactivate BuildController
-destroy BuildController
+create ":station\n:Station" as Station
+StationRepository -> Station : create()
+StationRepository -> StationRepository : saveStation()
+StationRepository --> CreateStationController : stationData
+deactivate StationRepository
 
-BuildUI --> Player : displaySuccess()
-deactivate BuildUI
+CreateStationController --> BuildStationUI : result
+deactivate CreateStationController
+destroy CreateStationController
+
+BuildStationUI --> Player : display "Station created successfully"
+deactivate BuildStationUI
+deactivate Player
 @enduml

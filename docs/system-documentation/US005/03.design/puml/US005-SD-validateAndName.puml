@@ -4,34 +4,36 @@ skinparam packageStyle rectangle
 skinparam shadowing false
 
 autonumber
-participant ":CreateStationController" as BuildController
-participant "mapRepository\n::MapRepository" as MapRepo
-participant "cityRepository\n::CityRepository" as CityRepo
-participant "stationRepository\n::StationRepository" as StationRepo
+participant ":CreateStationController" as CreateStationController
+participant "mapRepository\n:MapRepository" as MapRepository
+participant "cityRepository\n:CityRepository" as CityRepository
+participant "stationRepository\n:StationRepository" as StationRepository
 
-activate BuildController
+activate CreateStationController
 
-BuildController -> MapRepo : findMap(map)
-activate MapRepo
-MapRepo --> BuildController : map
-deactivate MapRepo
+CreateStationController -> MapRepository : findMap(map)
+activate MapRepository
+MapRepository --> CreateStationController : map
+deactivate MapRepository
 
-BuildController -> CityRepo : findClosestCity(map, x, y)
-activate CityRepo
-CityRepo --> BuildController : city
-deactivate CityRepo
+CreateStationController -> StationRepository : verifyNoOverbuild(location)
+activate StationRepository
+StationRepository --> CreateStationController : noConflict
+deactivate StationRepository
 
-BuildController -> StationRepo : verifyNoOverbuild(map, x, y)
-activate StationRepo
-StationRepo --> BuildController : noConflict
-deactivate StationRepo
+CreateStationController -> StationRepository : verifyBudget(type)
+activate StationRepository
+StationRepository --> CreateStationController : budgetOK
+deactivate StationRepository
 
-BuildController -> StationRepo : verifyBudget(type)
-activate StationRepo
-StationRepo --> BuildController : budgetOK
-deactivate StationRepo
+CreateStationController -> CityRepository : getClosestCity(location)
+activate CityRepository
+CityRepository --> CreateStationController : cityName
+deactivate CityRepository
 
-BuildController -> BuildController : generateName(City, type)
-BuildController --> BuildController : stationName
+CreateStationController -> StationRepository : proposeName(cityName, type)
+activate StationRepository
+StationRepository --> CreateStationController : proposedName
+deactivate StationRepository
 
 @enduml

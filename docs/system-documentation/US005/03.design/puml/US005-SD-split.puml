@@ -6,73 +6,89 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI"          as BuildStationUI
-
+participant ":BuildStationUI" as BuildStationUI
+participant ":CreateStationController" as CreateStationController
 
 activate Player
 
 Player -> BuildStationUI : buildStationRequest()
-create ":CreateStationController" as BuildStationController
+create CreateStationController
 activate BuildStationUI
-BuildStationUI -> BuildStationController : create()
+BuildStationUI -> CreateStationController: create()
 
 BuildStationUI --> Player : request map selection
-
+deactivate BuildStationUI
 Player -> BuildStationUI : select map
-
+activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepMap(map)
 
 BuildStationUI --> Player : request station location
-
 Player -> BuildStationUI : select location
-
 BuildStationUI --> BuildStationUI : keepLocation(location)
+
+BuildStationUI -> CreateStationController : checkOverbuild(location)
+ref over CreateStationController
+    Verifies no overbuild at location
+end ref
 
 BuildStationUI --> Player : request station type (Depot/Station/Terminal)
 deactivate BuildStationUI
-
 Player -> BuildStationUI : select type
 activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepType(type)
 
-activate BuildStationController
-BuildStationUI -> BuildStationController : checkOverbuild(location)
-ref over BuildStationController
-    Verifies overbuilding
-end ref
-
-BuildStationUI -> BuildStationController : checkBudget(type)
-ref over BuildStationController
+BuildStationUI -> CreateStationController : checkBudget(type)
+activate CreateStationController
+ref over CreateStationController
     Verifies the type of building budget
 end ref
 
-BuildStationUI -> BuildStationController : getClosestCity(location)
-ref over BuildStationController
+BuildStationUI -> CreateStationController : getClosestCity(location)
+ref over CreateStationController
     Determines the nearest city
 end ref
-BuildStationController --> BuildStationUI : proposeName(cityName, type)
+
+BuildStationUI -> CreateStationController : proposeName(cityName, type)
+ref over CreateStationController
+    Proposes station name based on city and type
+end ref
 
 alt type == "STATION"
   BuildStationUI --> Player : request center (geometric)
   Player -> BuildStationUI : select center
   BuildStationUI --> BuildStationUI : keepCenter(center)
-  BuildStationUI -> BuildStationController : setCenter(center)
+
+  loop until valid orientation
+    BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
+    Player -> BuildStationUI : enter orientation
+    alt invalid orientation
+      BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
+    end
+  end
 end
 
-activate BuildStationUI
-BuildStationUI --> BuildStationController : createStation(map, location, type, center)
+loop until station placed or abort
+  BuildStationUI --> Player : request coordinates
+  Player -> BuildStationUI : enter X, Y coordinates
+
+  BuildStationUI -> CreateStationController : createStation(map, location, type, center)
+  deactivate BuildStationUI
+  ref over CreateStationController
+    Creates station instance and saves to repository
+  end ref
+
+  CreateStationController --> BuildStationUI : result
+  deactivate CreateStationController
+
+  alt result == OK
+    BuildStationUI --> Player : display "Station created successfully"
+  else result == INVALID_COORDINATES
+    BuildStationUI --> Player : display "Coordinates out of map bounds. Please try again."
+  else result == OVERBUILD
+    BuildStationUI --> Player : display "Cannot build on occupied cell. Please choose different coordinates."
+  end
+end
+
+destroy CreateStationController
 deactivate BuildStationUI
-
-create ":station\n:Station" as Station
-
-BuildStationController -> Station: create()
-Station --> BuildStationController : stationData
-activate Station
-BuildStationController --> BuildStationUI : stationData
-
-destroy BuildStationController
-activate BuildStationUI
-BuildStationUI --> Player : display "Station created successfully"
-deactivate BuildStationUI
-deactivate Player
 @enduml
