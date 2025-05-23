@@ -51,6 +51,7 @@ public class main {
             System.out.println("\n=== Menu ===");
             System.out.println("1. Verify if a train can travel between two stations (US13)");
             System.out.println("2. Verify if a route that passes once, and only once, by each railway line exists (US14)");
+            System.out.println("3. Find shortest route through specified stations (US27)");
             System.out.println("3. Exit");
             System.out.print("Choose an option: ");
             String op = sc.nextLine();
@@ -61,7 +62,11 @@ public class main {
             } else if (op.equals("2")) {
                 implementUS14(lines);
                 break;
-            } else if (op.equals("3")) {
+            }
+            else if (op.equals("3")) {
+                implementUS27(lines,stations);
+                break;
+            }else if (op.equals("4")) {
                 System.out.println("Closing...");
                 break;
             } else {
@@ -370,7 +375,6 @@ public class main {
 
         Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("complete-eulerian-route.svg"));
         System.out.println("Complete route graph saved as complete-eulerian-route.svg");
-        System.out.println("(Green = Start station, Red = End station, Yellow = Electrified lines, Red lines = Non-electrified)");
     }
 
     private static void generatePartialRouteVisualization(List<String> partialRoute, List<String[]> edges,
@@ -495,6 +499,333 @@ public class main {
         }
 
         return null; // Could not find a path from start to end
+    }
+
+
+    private static void implementUS27(File linesFile, File stationsFile) throws IOException {
+        List<String[]> edges = loadEdges(linesFile);
+        List<String> allStations = loadStations(stationsFile);
+
+        System.out.println("\nShortest Route Through Specified Stations");
+
+        System.out.println("\nAvailable stations:");
+        for (int i = 0; i < allStations.size(); i++) {
+            System.out.println((i + 1) + ". " + allStations.get(i));
+        }
+
+        String sourceStation = getValidStationFromList(allStations, "Enter the name of the source station: ");
+
+        String destinationStation;
+        do {
+            destinationStation = getValidStationFromList(allStations, "Enter the name of the destination station: ");
+            if (sourceStation.equals(destinationStation)) {
+                System.out.println("Source and destination cannot be the same. Please choose a different destination.");
+            }
+        } while (sourceStation.equals(destinationStation));
+
+        List<String> intermediateStations = new ArrayList<>();
+        System.out.println("\n Add intermediate stations in the order you want to visit them.");
+
+        while (true) {
+            System.out.print("Enter intermediate station (or 'done' to finish): ");
+            String input = sc.nextLine().trim();
+
+            if (input.equalsIgnoreCase("done") || input.isEmpty()) {
+                break;
+            }
+
+            if (!allStations.contains(input)) {
+                System.out.println("Station '" + input + "' not found. Please choose from the available stations.");
+                continue;
+            }
+            if (input.equals(sourceStation)) {
+                System.out.println("This is already your source station. Please choose a different station.");
+                continue;
+            }
+
+            if (input.equals(destinationStation)) {
+                System.out.println("This is already your destination station. Please choose a different station.");
+                continue;
+            }
+            if (intermediateStations.contains(input)) {
+                System.out.println("Station '" + input + "' is already in your intermediate stations list.");
+                continue;
+            }
+
+            intermediateStations.add(input);
+            System.out.println("Added '" + input + "' to intermediate stations.");
+        }
+        List<String> routeSequence = new ArrayList<>();
+        routeSequence.add(sourceStation);
+        routeSequence.addAll(intermediateStations);
+        routeSequence.add(destinationStation);
+        ShortestPathResult result = findShortestPathThroughStations(edges, allStations, routeSequence);
+
+        if (result == null || result.path.isEmpty()) {
+            System.out.println("No valid route found through the specified stations.");
+            return;
+        }
+        System.out.println("\nShortest Route Found:");
+        System.out.println("Complete path: " + String.join(" -> ", result.path));
+        generateShortestRouteVisualization(result.path, edges, allStations, routeSequence);
+    }
+
+    private static ShortestPathResult findShortestPathThroughStations(List<String[]> edges,
+                                                                      List<String> allStations,
+                                                                      List<String> routeSequence) {
+        List<String> completePath = new ArrayList<>();
+        int totalDistance = 0;
+        for (int i = 0; i < routeSequence.size() - 1; i++) {
+            String from = routeSequence.get(i);
+            String to = routeSequence.get(i + 1);
+
+            DijkstraResult segmentResult = dijkstraShortestPath(edges, allStations, from, to);
+
+            if (segmentResult == null || segmentResult.path.isEmpty()) {
+                return null;
+            }
+            if (i == 0) {
+                completePath.addAll(segmentResult.path);
+            } else {
+                for (int j = 1; j < segmentResult.path.size(); j++) {
+                    completePath.add(segmentResult.path.get(j));
+                }
+            }
+
+            totalDistance += segmentResult.distance;
+        }
+
+        return new ShortestPathResult(completePath, totalDistance);
+    }
+
+    private static class DijkstraResult {
+        List<String> path;
+        int distance;
+
+        DijkstraResult(List<String> path, int distance) {
+            this.path = path;
+            this.distance = distance;
+        }
+    }
+
+    private static DijkstraResult dijkstraShortestPath(List<String[]> edges, List<String> allStations,
+                                                       String source, String destination) {
+        Map<String, List<Edge>> graph = new HashMap<>();
+        for (String station : allStations) {
+            graph.put(station, new ArrayList<>());
+        }
+
+        for (String[] edge : edges) {
+            String from = edge[0];
+            String to = edge[1];
+            int weight = Integer.parseInt(edge[3]);
+
+            graph.get(from).add(new Edge(to, weight));
+            graph.get(to).add(new Edge(from, weight));
+        }
+
+        Map<String, Integer> distances = new HashMap<>();
+        Map<String, String> previous = new HashMap<>();
+        Set<String> unvisited = new HashSet<>();
+
+        for (String station : allStations) {
+            distances.put(station, Integer.MAX_VALUE);
+            unvisited.add(station);
+        }
+        distances.put(source, 0);
+
+        while (!unvisited.isEmpty()) {
+            String current = null;
+            int minDistance = Integer.MAX_VALUE;
+            for (String station : unvisited) {
+                if (distances.get(station) < minDistance) {
+                    minDistance = distances.get(station);
+                    current = station;
+                }
+            }
+
+            if (current == null || distances.get(current) == Integer.MAX_VALUE) {
+                break;
+            }
+
+            unvisited.remove(current);
+
+            if (current.equals(destination)) {
+                break;
+            }
+
+            for (Edge edge : graph.get(current)) {
+                if (unvisited.contains(edge.to)) {
+                    int newDistance = distances.get(current) + edge.weight;
+                    if (newDistance < distances.get(edge.to)) {
+                        distances.put(edge.to, newDistance);
+                        previous.put(edge.to, current);
+                    }
+                }
+            }
+        }
+
+        List<String> path = new ArrayList<>();
+        String current = destination;
+
+        if (!previous.containsKey(destination) && !source.equals(destination)) {
+            return null;
+        }
+
+        while (current != null) {
+            path.add(0, current);
+            current = previous.get(current);
+        }
+
+        return new DijkstraResult(path, distances.get(destination));
+    }
+
+    private static class Edge {
+        String to;
+        int weight;
+
+        Edge(String to, int weight) {
+            this.to = to;
+            this.weight = weight;
+        }
+    }
+
+
+    private static void generateShortestRouteVisualization(List<String> shortestPath, List<String[]> edges,
+                                                           List<String> allStations, List<String> routeSequence) throws IOException {
+        Map<String, MutableNode> nodeMap = new HashMap<>();
+
+        // Create nodes with different colors and shapes for different types of stations
+        for (String station : shortestPath) {
+            Color nodeColor = Color.BLACK;
+            String shape = "circle";
+            double size = 1.2;
+
+            if (station.equals(routeSequence.get(0))) {
+                nodeColor = Color.GREEN;
+                size = 1.5;
+                shape = "doublecircle";
+            } else if (station.equals(routeSequence.get(routeSequence.size() - 1))) {
+                nodeColor = Color.RED;
+                size = 1.5;
+                shape = "doublecircle";
+            } else if (routeSequence.contains(station)) {
+                // Intermediate stations
+                nodeColor = Color.BLUE;
+                size = 1.3;
+                shape = "diamond";
+            }
+
+            nodeMap.put(station, mutNode(station).add(nodeColor)
+                    .add(attr("shape", shape))
+                    .add(attr("width", String.valueOf(size)))
+                    .add(attr("height", String.valueOf(size)))
+                    .add(attr("fontsize", "10"))
+                    .add(attr("fontname", "Arial Bold")));
+        }
+
+        // Create directed graph for better path visualization
+        MutableGraph g = mutGraph("ShortestRouteVisualization").setDirected(true)
+                .graphAttrs().add(attr("layout", "dot"))
+                .graphAttrs().add(attr("rankdir", "TB"))
+                .graphAttrs().add(attr("overlap", "false"))
+                .graphAttrs().add(attr("splines", "true"))
+                .graphAttrs().add(attr("sep", "2.0"))
+                .graphAttrs().add(attr("nodesep", "1.5"))
+                .graphAttrs().add(attr("ranksep", "2.0"))
+                .add(nodeMap.values().toArray(new MutableNode[0]));
+
+        // Add edges with sequence numbers and directions
+        Map<String, Integer> edgeCount = new HashMap<>(); // Track multiple edges between same nodes
+
+        for (int i = 0; i < shortestPath.size() - 1; i++) {
+            String from = shortestPath.get(i);
+            String to = shortestPath.get(i + 1);
+
+            // Create unique edge key for tracking multiple edges
+            String edgeKey = from + "->" + to;
+            int edgeNumber = edgeCount.getOrDefault(edgeKey, 0) + 1;
+            edgeCount.put(edgeKey, edgeNumber);
+
+            // Find the corresponding edge in the original data to get type and weight
+            String edgeType = "0"; // default
+            String weight = "1";   // default
+
+            for (String[] edge : edges) {
+                if ((edge[0].equals(from) && edge[1].equals(to)) ||
+                        (edge[0].equals(to) && edge[1].equals(from))) {
+                    edgeType = edge[2];
+                    weight = edge[3];
+                    break;
+                }
+            }
+
+            // Color based on electrification
+            Color edgeColor = edgeType.equals("1") ? Color.YELLOW : Color.RED;
+
+            // Create label with step number and weight
+            String edgeLabel = String.format("%d", i + 1);
+
+            // Add different styling if this is a repeated edge
+            String penwidth = edgeNumber > 1 ? "4.0" : "3.0";
+            String style = edgeNumber > 1 ? "dashed" : "solid";
+
+            g.add(nodeMap.get(from).addLink(to(nodeMap.get(to))
+                    .with(edgeColor)
+                    .with(attr("penwidth", penwidth))
+                    .with(attr("style", style))
+                    .with(attr("label", edgeLabel))
+                    .with(attr("fontsize", "12"))
+                    .with(attr("fontcolor", "black"))
+                    .with(attr("fontname", "Arial Bold"))
+                    .with(attr("labelfontcolor", "black"))
+                    .with(attr("arrowsize", "1.2"))
+                    .with(attr("arrowhead", "normal"))));
+        }
+
+        Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("shortest-route.svg"));
+        System.out.println("\nGraph saved as shortest-route.svg");
+    }
+
+    private static String getValidStationFromList(List<String> stations, String prompt) {
+        String station;
+        do {
+            System.out.print(prompt);
+            station = sc.nextLine().trim();
+
+            if (!stations.contains(station)) {
+                System.out.println("Station '" + station + "' not found. Please choose from the available stations listed above.");
+                station = null;
+            }
+        } while (station == null);
+
+        return station;
+    }
+
+    private static List<String> loadStations(File stationsFile) throws FileNotFoundException {
+        Scanner scf = new Scanner(stationsFile);
+        List<String> stations = new ArrayList<>();
+
+        if (scf.hasNextLine()) {
+            String line = scf.nextLine().trim();
+            String[] stationArray = line.split(";");
+            for (String station : stationArray) {
+                stations.add(station.trim());
+            }
+        }
+
+        scf.close();
+        return stations;
+    }
+
+    private static class ShortestPathResult {
+        List<String> path;
+        int totalDistance;
+
+        ShortestPathResult(List<String> path, int totalDistance) {
+            this.path = path;
+            this.totalDistance = totalDistance;
+        }
     }
 
     private static List<String[]> loadEdges(File f) throws FileNotFoundException {

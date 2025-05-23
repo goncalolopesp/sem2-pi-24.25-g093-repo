@@ -15,6 +15,7 @@ Player -> BuildStationUI : buildStationRequest()
 create CreateStationController
 activate BuildStationUI
 BuildStationUI -> CreateStationController: create()
+deactivate CreateStationController
 
 BuildStationUI --> Player : request map selection
 deactivate BuildStationUI
@@ -23,13 +24,17 @@ activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepMap(map)
 
 BuildStationUI --> Player : request station location
+deactivate BuildStationUI
 Player -> BuildStationUI : select location
+activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepLocation(location)
 
 BuildStationUI -> CreateStationController : checkOverbuild(location)
+activate CreateStationController
 ref over CreateStationController
     Verifies no overbuild at location
 end ref
+deactivate CreateStationController
 
 BuildStationUI --> Player : request station type (Depot/Station/Terminal)
 deactivate BuildStationUI
@@ -42,25 +47,34 @@ activate CreateStationController
 ref over CreateStationController
     Verifies the type of building budget
 end ref
+deactivate CreateStationController
 
 BuildStationUI -> CreateStationController : getClosestCity(location)
+activate CreateStationController
 ref over CreateStationController
     Determines the nearest city
 end ref
+deactivate CreateStationController
 
 BuildStationUI -> CreateStationController : proposeName(cityName, type)
+activate CreateStationController
 ref over CreateStationController
     Proposes station name based on city and type
 end ref
+deactivate CreateStationController
 
 alt type == "STATION"
   BuildStationUI --> Player : request center (geometric)
+  deactivate BuildStationUI
   Player -> BuildStationUI : select center
+  activate BuildStationUI
   BuildStationUI --> BuildStationUI : keepCenter(center)
 
   loop until valid orientation
     BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
+    deactivate BuildStationUI
     Player -> BuildStationUI : enter orientation
+    activate BuildStationUI
     alt invalid orientation
       BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
     end
@@ -69,10 +83,12 @@ end
 
 loop until station placed or abort
   BuildStationUI --> Player : request coordinates
+  deactivate BuildStationUI
   Player -> BuildStationUI : enter X, Y coordinates
+  activate BuildStationUI
 
   BuildStationUI -> CreateStationController : createStation(map, location, type, center)
-  deactivate BuildStationUI
+  activate CreateStationController
   ref over CreateStationController
     Creates station instance and saves to repository
   end ref
@@ -91,4 +107,5 @@ end
 
 destroy CreateStationController
 deactivate BuildStationUI
+deactivate Player
 @enduml

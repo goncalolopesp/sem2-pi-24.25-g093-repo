@@ -1,0 +1,156 @@
+<svg width="202px" height="1669px"
+ viewBox="0.00 0.00 201.85 1668.82" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph0" class="graph" transform="scale(1.0 1.0) rotate(0.0) translate(4.0 1664.82)">
+<title>ShortestRouteVisualization</title>
+<polygon fill="white" stroke="none" points="-4,4 -4,-1664.82 197.85,-1664.82 197.85,4 -4,4"/>
+<!-- D_Croy -->
+<g id="node1" class="node">
+<title>D_Croy</title>
+<polygon fill="none" stroke="blue" points="121.03,-1660.82 74.23,-1614.02 121.03,-1567.22 167.83,-1614.02 121.03,-1660.82"/>
+<text text-anchor="middle" x="121.03" y="-1610.52" font-family="Arial Bold" font-size="10.00">D_Croy</text>
+</g>
+<!-- T_Glasgow_Queen_Street -->
+<g id="node2" class="node">
+<title>T_Glasgow_Queen_Street</title>
+<ellipse fill="none" stroke="green" cx="121.03" cy="-1336.15" rx="68.82" ry="68.82"/>
+<ellipse fill="none" stroke="green" cx="121.03" cy="-1336.15" rx="72.82" ry="72.82"/>
+<text text-anchor="middle" x="121.03" y="-1332.65" font-family="Arial Bold" font-size="10.00">T_Glasgow_Queen_Street</text>
+</g>
+<!-- D_Croy&#45;&gt;T_Glasgow_Queen_Street -->
+<g id="edge1" class="edge">
+<title>D_Croy&#45;&gt;T_Glasgow_Queen_Street</title>
+<path fill="none" stroke="yellow" stroke-width="3" d="M100.87,-1586.68C84.78,-1563.87 63.48,-1529.29 54.53,-1495.22 46.87,-1466.06 55.67,-1435.24 69.11,-1408.64"/>
+<polygon fill="yellow" stroke="yellow" stroke-width="3" points="72.69,-1410.85 74.79,-1398.31 65.33,-1406.8 72.69,-1410.85"/>
+<text text-anchor="middle" x="61.28" y="-1483.82" font-family="Arial Bold" font-size="12.00">12</text>
+</g>
+<!-- T_Glasgow_Queen_Street&#45;&gt;D_Croy -->
+<g id="edge3" class="edge">
+<title>T_Glasgow_Queen_Street&#45;&gt;D_Croy</title>
+<path fill="none" stroke="yellow" stroke-width="3" d="M121.03,-1409.28C121.03,-1452.95 121.03,-1508.12 121.03,-1550.03"/>
+<polygon fill="yellow" stroke="yellow" stroke-width="3" points="116.83,-1549.99 121.03,-1561.99 125.23,-1549.99 116.83,-1549.99"/>
+<text text-anchor="middle" x="127.41" y="-1483.82" font-family="Arial Bold" font-size="12.00">11</text>
+</g>
+<!-- S_Dalmuir -->
+<g id="node3" class="node">
+<title>S_Dalmuir</title>
+<ellipse fill="none" stroke="black" cx="121.03" cy="-1061.89" rx="43.2" ry="43.2"/>
+<text text-anchor="middle" x="121.03" y="-1058.39" font-family="Arial Bold" font-size="10.00">S_Dalmuir</text>
+</g>
+<!-- T_Glasgow_Queen_Street&#45;&gt;S_Dalmuir -->
+<g id="edge2" class="edge">
+<title>T_Glasgow_Queen_Street&#45;&gt;S_Dalmuir</title>
+<path fill="none" stroke="red" stroke-width="3" d="M67.5,-1286.66C43.21,-1261.01 17.08,-1227.4 4.28,-1191.34 -10.64,-1149.28 30.77,-1112.9 68.33,-1089.7"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="70.25,-1093.44 78.49,-1083.76 66.01,-1086.19 70.25,-1093.44"/>
+<text text-anchor="middle" x="7.66" y="-1179.94" font-family="Arial Bold" font-size="12.00">1</text>
+</g>
+<!-- T_Glasgow_Queen_Street&#45;&gt;S_Dalmuir -->
+<g id="edge4" class="edge">
+<title>T_Glasgow_Queen_Street&#45;&gt;S_Dalmuir</title>
+<path fill="none" stroke="red" stroke-width="4" stroke-dasharray="5,2" d="M118.3,-1263.16C117.58,-1236.16 117.1,-1205.22 117.53,-1177.09 117.8,-1159.68 118.29,-1140.79 118.83,-1123.47"/>
+<polygon fill="red" stroke="red" stroke-width="4" points="123.03,-1123.63 119.22,-1111.5 114.63,-1123.36 123.03,-1123.63"/>
+<text text-anchor="middle" x="124.28" y="-1179.94" font-family="Arial Bold" font-size="12.00">13</text>
+</g>
+<!-- S_Dalmuir&#45;&gt;T_Glasgow_Queen_Street -->
+<g id="edge6" class="edge">
+<title>S_Dalmuir&#45;&gt;T_Glasgow_Queen_Street</title>
+<path fill="none" stroke="red" stroke-width="3" d="M127.87,-1104.79C131.04,-1126.33 134.46,-1153.04 136.03,-1177.09 137.53,-1199.99 136.47,-1224.73 134.35,-1247.67"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="130.18,-1247.13 133.11,-1259.5 138.54,-1248 130.18,-1247.13"/>
+<text text-anchor="middle" x="143.36" y="-1179.94" font-family="Arial Bold" font-size="12.00">10</text>
+</g>
+<!-- D_Crianlarich -->
+<g id="node4" class="node">
+<title>D_Crianlarich</title>
+<ellipse fill="none" stroke="black" cx="121.03" cy="-817.24" rx="43.2" ry="43.2"/>
+<text text-anchor="middle" x="121.03" y="-813.74" font-family="Arial Bold" font-size="10.00">D_Crianlarich</text>
+</g>
+<!-- S_Dalmuir&#45;&gt;D_Crianlarich -->
+<g id="edge5" class="edge">
+<title>S_Dalmuir&#45;&gt;D_Crianlarich</title>
+<path fill="none" stroke="red" stroke-width="3" d="M84.92,-1037.71C57.03,-1017.49 20.55,-985.37 4.28,-946.69 -13.16,-905.22 29.45,-868.43 68,-844.97"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="69.94,-848.69 78.24,-839.06 65.74,-841.42 69.94,-848.69"/>
+<text text-anchor="middle" x="7.66" y="-935.29" font-family="Arial Bold" font-size="12.00">2</text>
+</g>
+<!-- S_Dalmuir&#45;&gt;D_Crianlarich -->
+<g id="edge7" class="edge">
+<title>S_Dalmuir&#45;&gt;D_Crianlarich</title>
+<path fill="none" stroke="red" stroke-width="4" stroke-dasharray="5,2" d="M119.42,-1018.32C118.68,-996.84 117.89,-970.39 117.53,-946.69 117.19,-924.52 117.64,-900.2 118.32,-878.75"/>
+<polygon fill="red" stroke="red" stroke-width="4" points="122.52,-878.95 118.75,-866.81 114.12,-878.65 122.52,-878.95"/>
+<text text-anchor="middle" x="124.28" y="-935.29" font-family="Arial Bold" font-size="12.00">14</text>
+</g>
+<!-- D_Crianlarich&#45;&gt;S_Dalmuir -->
+<g id="edge9" class="edge">
+<title>D_Crianlarich&#45;&gt;S_Dalmuir</title>
+<path fill="none" stroke="red" stroke-width="3" d="M129.74,-859.79C134.04,-884.89 137.94,-917.56 136.03,-946.69 134.83,-965 132.57,-984.86 130.15,-1002.81"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="126.02,-1002.02 128.5,-1014.49 134.34,-1003.19 126.02,-1002.02"/>
+<text text-anchor="middle" x="139.9" y="-935.29" font-family="Arial Bold" font-size="12.00">9</text>
+</g>
+<!-- D_Tulloch -->
+<g id="node5" class="node">
+<title>D_Tulloch</title>
+<ellipse fill="none" stroke="red" cx="121.03" cy="-557.79" rx="54" ry="54"/>
+<ellipse fill="none" stroke="red" cx="121.03" cy="-557.79" rx="58" ry="58"/>
+<text text-anchor="middle" x="121.03" y="-554.29" font-family="Arial Bold" font-size="10.00">D_Tulloch</text>
+</g>
+<!-- D_Crianlarich&#45;&gt;D_Tulloch -->
+<g id="edge8" class="edge">
+<title>D_Crianlarich&#45;&gt;D_Tulloch</title>
+<path fill="none" stroke="red" stroke-width="3" d="M82.31,-797.68C41.71,-775.34 -13.87,-734.89 4.28,-687.79 16.49,-656.1 40.49,-627.37 63.57,-605.11"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="66.2,-608.4 72.15,-597.16 60.49,-602.23 66.2,-608.4"/>
+<text text-anchor="middle" x="7.66" y="-690.64" font-family="Arial Bold" font-size="12.00">3</text>
+</g>
+<!-- D_Crianlarich&#45;&gt;D_Tulloch -->
+<g id="edge10" class="edge">
+<title>D_Crianlarich&#45;&gt;D_Tulloch</title>
+<path fill="none" stroke="red" stroke-width="4" stroke-dasharray="5,2" d="M119.42,-773.67C118.68,-752.19 117.89,-725.74 117.53,-702.04 117.19,-679.88 117.51,-655.8 118.07,-633.82"/>
+<polygon fill="red" stroke="red" stroke-width="4" points="122.27,-634.11 118.42,-621.99 113.87,-633.87 122.27,-634.11"/>
+<text text-anchor="middle" x="124.28" y="-690.64" font-family="Arial Bold" font-size="12.00">15</text>
+</g>
+<!-- D_Tulloch&#45;&gt;D_Crianlarich -->
+<g id="edge12" class="edge">
+<title>D_Tulloch&#45;&gt;D_Crianlarich</title>
+<path fill="none" stroke="red" stroke-width="3" d="M131.38,-615.17C135.07,-641.52 137.91,-673.34 136.03,-702.04 134.83,-720.35 132.57,-740.21 130.15,-758.16"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="126.02,-757.37 128.5,-769.84 134.34,-758.54 126.02,-757.37"/>
+<text text-anchor="middle" x="139.92" y="-690.64" font-family="Arial Bold" font-size="12.00">8</text>
+</g>
+<!-- S_Fort_William -->
+<g id="node6" class="node">
+<title>S_Fort_William</title>
+<ellipse fill="none" stroke="black" cx="121.03" cy="-296.69" rx="44.84" ry="44.84"/>
+<text text-anchor="middle" x="121.03" y="-293.19" font-family="Arial Bold" font-size="10.00">S_Fort_William</text>
+</g>
+<!-- D_Tulloch&#45;&gt;S_Fort_William -->
+<g id="edge11" class="edge">
+<title>D_Tulloch&#45;&gt;S_Fort_William</title>
+<path fill="none" stroke="red" stroke-width="3" d="M87.05,-510.5C70.85,-482.98 56.52,-447.02 64.28,-413.54 69.37,-391.56 79.24,-368.95 89.34,-349.6"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="92.97,-351.72 95.04,-339.17 85.6,-347.69 92.97,-351.72"/>
+<text text-anchor="middle" x="67.66" y="-416.39" font-family="Arial Bold" font-size="12.00">4</text>
+</g>
+<!-- S_Fort_William&#45;&gt;D_Tulloch -->
+<g id="edge14" class="edge">
+<title>S_Fort_William&#45;&gt;D_Tulloch</title>
+<path fill="none" stroke="red" stroke-width="3" d="M121.03,-341.87C121.03,-380.54 121.03,-437.51 121.03,-483.08"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="116.83,-483.07 121.03,-495.07 125.23,-483.07 116.83,-483.07"/>
+<text text-anchor="middle" x="124.41" y="-416.39" font-family="Arial Bold" font-size="12.00">7</text>
+</g>
+<!-- S_Mallaig -->
+<g id="node7" class="node">
+<title>S_Mallaig</title>
+<polygon fill="none" stroke="blue" points="121.03,-93.6 74.23,-46.8 121.03,0 167.83,-46.8 121.03,-93.6"/>
+<text text-anchor="middle" x="121.03" y="-43.3" font-family="Arial Bold" font-size="10.00">S_Mallaig</text>
+</g>
+<!-- S_Fort_William&#45;&gt;S_Mallaig -->
+<g id="edge13" class="edge">
+<title>S_Fort_William&#45;&gt;S_Mallaig</title>
+<path fill="none" stroke="red" stroke-width="3" d="M97.22,-258.2C84.72,-236.28 70.7,-207.56 64.28,-179.85 56.63,-146.83 73.08,-111.67 90.2,-85.94"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="93.47,-88.6 97.01,-76.39 86.62,-83.73 93.47,-88.6"/>
+<text text-anchor="middle" x="67.66" y="-168.45" font-family="Arial Bold" font-size="12.00">5</text>
+</g>
+<!-- S_Mallaig&#45;&gt;S_Fort_William -->
+<g id="edge15" class="edge">
+<title>S_Mallaig&#45;&gt;S_Fort_William</title>
+<path fill="none" stroke="red" stroke-width="3" d="M121.03,-94.26C121.03,-134.01 121.03,-191.51 121.03,-234.91"/>
+<polygon fill="red" stroke="red" stroke-width="3" points="116.83,-234.83 121.03,-246.83 125.23,-234.83 116.83,-234.83"/>
+<text text-anchor="middle" x="124.41" y="-168.45" font-family="Arial Bold" font-size="12.00">6</text>
+</g>
+</g>
+</svg>
