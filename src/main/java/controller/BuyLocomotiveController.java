@@ -1,5 +1,6 @@
 package controller;
 
+import domain.Budget;
 import domain.CurrentUser;
 import domain.Locomotive;
 import domain.Scenario;
@@ -98,8 +99,22 @@ public class BuyLocomotiveController {
      * @return true if purchase was successful, false otherwise
      */
     public boolean buyLocomotive(String modelName, Scenario scenario, domain.Map map) {
-        if (canBuyLocomotive(modelName, scenario)){
-            return locomotiveRepository.buyLocomotive(modelName, budgetRepository.getUserBudgetFromScenarioInMap(scenario, map, session.getUser()).get());
+        if (canBuyLocomotive(modelName, scenario)) {
+            Optional<Budget> budgetOpt = budgetRepository.getUserBudgetFromScenarioInMap(scenario, map, session.getUser());
+
+            if (budgetOpt.isPresent()) {
+                return locomotiveRepository.buyLocomotive(modelName, budgetOpt.get());
+            } else {
+                System.out.println("Error: No budget found for current user/scenario/map combination");
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean buyLocomotiveWithBudget(String modelName, Scenario scenario, Budget budget) {
+        if (canBuyLocomotive(modelName, scenario)) {
+            return locomotiveRepository.buyLocomotive(modelName, budget);
         }
         return false;
     }

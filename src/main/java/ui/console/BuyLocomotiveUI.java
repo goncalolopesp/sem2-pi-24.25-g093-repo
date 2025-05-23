@@ -10,11 +10,13 @@ public class BuyLocomotiveUI implements Runnable {
 
     private final Scenario scenario;
     private final Map map;
+    private final Budget budget;
     private final BuyLocomotiveController locomotiveController = new BuyLocomotiveController();
 
-    public BuyLocomotiveUI(Scenario scenario, Map map) {
+    public BuyLocomotiveUI(Scenario scenario, Map map, Budget budget) {
         this.scenario = scenario;
         this.map = map;
+        this.budget = budget;
     }
 
     @Override public void run() {
@@ -36,13 +38,11 @@ public class BuyLocomotiveUI implements Runnable {
     }
 
     public void buyLocomotive(String modelName, Scenario scenario, Map map) {
-        if (locomotiveController.buyLocomotive(modelName, scenario, map)){
-
+        // Pass the budget directly instead of looking it up
+        if (locomotiveController.buyLocomotiveWithBudget(modelName, scenario, budget)) {
             System.out.println("Locomotive: " + modelName + " bought!");
-
         } else {
             System.out.println("Error buying Locomotive " + modelName + ": Not Enough Budget!");
-
         }
     }
 
