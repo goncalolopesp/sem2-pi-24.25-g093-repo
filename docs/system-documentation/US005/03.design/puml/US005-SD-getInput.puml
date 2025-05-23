@@ -6,27 +6,43 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildUI
+participant ":BuildStationUI" as BuildStationUI
 
 activate Player
-Player -> BuildUI : buildStationRequest()
-activate BuildUI
-BuildUI --> Player : displayBuildForm()
+Player -> BuildStationUI : buildStationRequest()
+activate BuildStationUI
+BuildStationUI --> Player : request map selection
 
-Player -> BuildUI : select map
-BuildUI --> BuildUI : keepMap(map)
+Player -> BuildStationUI : select map
+BuildStationUI --> BuildStationUI : keepMap(map)
 
-Player -> BuildUI : select location
-BuildUI --> BuildUI : keepLocation(location)
+BuildStationUI --> Player : request station location
+Player -> BuildStationUI : select location
+BuildStationUI --> BuildStationUI : keepLocation(location)
 
-Player -> BuildUI : select type
-BuildUI --> BuildUI : keepType(type)
+BuildStationUI --> Player : request station type (Depot/Station/Terminal)
+Player -> BuildStationUI : select type
+BuildStationUI --> BuildStationUI : keepType(type)
 
 alt type == "STATION"
-  Player -> BuildUI : select center
-  BuildUI --> BuildUI : keepCenter(center)
+  BuildStationUI --> Player : request center (geometric)
+  Player -> BuildStationUI : select center
+  BuildStationUI --> BuildStationUI : keepCenter(center)
+
+  loop until valid orientation
+    BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
+    Player -> BuildStationUI : enter orientation
+    alt invalid orientation
+      BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
+    end
+  end
 end
 
-deactivate BuildUI
-@enduml
+loop until station placed or abort
+  BuildStationUI --> Player : request coordinates
+  Player -> BuildStationUI : enter X, Y coordinates
+end
 
+deactivate BuildStationUI
+deactivate Player
+@enduml

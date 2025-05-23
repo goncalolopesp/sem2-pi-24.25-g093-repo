@@ -1,13 +1,20 @@
 import controller.*;
 import domain.City;
+import domain.Scenario;
 import repository.LocomotiveRepository;
 import repository.Repositories;
+import repository.ScenarioRepository;
 
 import java.util.Collections;
+import java.util.List;
 
 public class Bootstrap {
     public void run() {
-        addUsers(); addMaps(); addCities(); addScenarios(); createLocomotives();
+        addUsers();
+        addMaps();
+        addCities();
+        loadScenarios();
+        createLocomotives();
     }
 
     private void addUsers() {
@@ -94,7 +101,6 @@ public class Bootstrap {
         buyLocomotiveController.createLocomotive("Eurostar", 1600, "Electric", 96, 65, 1994, 99999, 175);
         buyLocomotiveController.createLocomotive("Brenner", 1250, "Electric", 69, 175, 1999, 99999, 140);
         buyLocomotiveController.createLocomotive("Mag-Lev TBX-1", 2500, "Electric", 306, 200, 2008, 99999, 280);
-
     }
 
     private void addMaps() {
@@ -112,10 +118,21 @@ public class Bootstrap {
         createCityController.assignBlocksAuto(city, 5, 2);
     }
 
-    private void addScenarios() {
-        CreateScenarioController createScenarioController = new CreateScenarioController();
-        createScenarioController.createScenario("exampleScenario", "exampleMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));
+    /**
+     * Loads scenarios from the "ScenarioStorage" file.
+     * If no scenarios exist in the file, creates a default example scenario.
+     */
+    private void loadScenarios() {
+        Repositories repositories = Repositories.getInstance();
+        ScenarioRepository scenarioRepository = repositories.getScenarioRepository();
+        List<Scenario> existingScenarios = scenarioRepository.getScenarios();
+
+        if (existingScenarios.isEmpty()) {
+            CreateScenarioController createScenarioController = new CreateScenarioController();
+            createScenarioController.createScenario("exampleScenario", "exampleMap",
+                    new int[]{1870, 1880},
+                    Collections.singletonList("steam"),
+                    Collections.singletonList("none"));
+        }
     }
-
-
 }

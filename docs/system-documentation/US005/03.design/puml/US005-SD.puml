@@ -7,19 +7,30 @@ autonumber
 
 actor "Player" as Player
 participant ":BuildStationUI" as BuildStationUI
-
-
-activate Player
-
-Player -> BuildStationUI : buildStationRequest()
-create ":CreateStationController" as BuildStationController
-activate BuildStationUI
-BuildStationUI -> BuildStationController: create()
+participant ":CreateStationController" as CreateStationController
 participant "repositories\n:Repositories" as Repositories
 participant "mapRepository\n:MapRepository" as MapRepository
 participant "cityRepository\n:CityRepository" as CityRepository
 participant "stationRepository\n:StationRepository" as StationRepository
 
+activate Player
+
+Player -> BuildStationUI : buildStationRequest()
+create CreateStationController
+activate BuildStationUI
+BuildStationUI -> CreateStationController: create()
+
+BuildStationUI -> CreateStationController : getRepositories()
+activate CreateStationController
+CreateStationController -> Repositories : getInstance()
+activate Repositories
+Repositories --> CreateStationController : repositories
+deactivate Repositories
+
+CreateStationController -> MapRepository: findMap(map)
+activate MapRepository
+MapRepository -> CreateStationController: map
+deactivate MapRepository
 
 BuildStationUI --> Player : request map selection
 deactivate BuildStationUI
@@ -27,83 +38,84 @@ Player -> BuildStationUI : select map
 activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepMap(map)
 
-
-BuildStationUI -> BuildStationController : getRepositories()
-activate BuildStationController
-BuildStationController -> Repositories : getInstance()
-activate Repositories
-Repositories --> BuildStationController : repositories
-deactivate Repositories
-
-BuildStationController -> MapRepository: findMap(map)
-activate MapRepository
-MapRepository -> BuildStationController: map
-deactivate MapRepository
-
 BuildStationUI --> Player : request station location
-
 Player -> BuildStationUI : select location
-
 BuildStationUI --> BuildStationUI : keepLocation(location)
 
-BuildStationUI -> BuildStationController : checkOverbuild(location)
-BuildStationController -> StationRepository : verifyNoOverbuild(location)
+BuildStationUI -> CreateStationController : checkOverbuild(location)
+CreateStationController -> StationRepository : verifyNoOverbuild(location)
 activate StationRepository
-StationRepository --> BuildStationController : noConflict
+StationRepository --> CreateStationController : noConflict
 deactivate StationRepository
 
-deactivate BuildStationController
+deactivate CreateStationController
 BuildStationUI --> Player : request station type (Depot/Station/Terminal)
 deactivate BuildStationUI
 Player -> BuildStationUI : select type
 activate BuildStationUI
 BuildStationUI --> BuildStationUI : keepType(type)
 
-BuildStationUI -> BuildStationController : checkBudget(type)
-activate BuildStationController
+BuildStationUI -> CreateStationController : checkBudget(type)
+activate CreateStationController
 BuildStationController -> StationRepository : verifyBudget(type)
-
 activate StationRepository
-StationRepository --> BuildStationController : budgetOK
+StationRepository --> CreateStationController : budgetOK
 deactivate StationRepository
 
-
-
-BuildStationUI -> BuildStationController : getClosestCity(location)
-BuildStationController -> CityRepository: getClosestCity(location)
+BuildStationUI -> CreateStationController : getClosestCity(location)
+CreateStationController -> CityRepository: getClosestCity(location)
 activate CityRepository
-CityRepository --> BuildStationController : cityName
+CityRepository --> CreateStationController : cityName
 deactivate CityRepository
-BuildStationUI -> BuildStationController : proposeName(cityName, type)
-BuildStationController -> StationRepository : proposeName(cityName,type)
+BuildStationUI -> CreateStationController : proposeName(cityName, type)
+CreateStationController -> StationRepository : proposeName(cityName,type)
 activate StationRepository
-StationRepository --> BuildStationController : proposedName
+StationRepository --> CreateStationController : proposedName
 deactivate StationRepository
-
 
 alt type == "STATION"
   BuildStationUI --> Player : request center (geometric)
   Player -> BuildStationUI : select center
   BuildStationUI --> BuildStationUI : keepCenter(center)
+
+  loop until valid orientation
+    BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
+    Player -> BuildStationUI : enter orientation
+    alt invalid orientation
+      BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
+    end
+  end
 end
 
-BuildStationUI --> BuildStationController : createStation(map, location, type, center)
-deactivate BuildStationUI
-BuildStationController -> StationRepository : createStation(map, location, type, center)
-activate StationRepository
-create ":station\n:Station" as Station
+loop until station placed or abort
+  BuildStationUI --> Player : request coordinates
+  Player -> BuildStationUI : enter X, Y coordinates
 
-StationRepository -> Station: create()
+  BuildStationUI --> CreateStationController : createStation(map, location, type, center)
+  deactivate BuildStationUI
+  CreateStationController -> StationRepository : createStation(map, location, type, center)
+  activate StationRepository
+  create ":station\n:Station" as Station
 
-StationRepository --> StationRepository : saveStation()
-StationRepository --> BuildStationController : stationData
-deactivate StationRepository
+  StationRepository -> Station: create()
 
-activate BuildStationUI
-BuildStationController --> BuildStationUI : stationData
-deactivate BuildStationController
-destroy BuildStationController
+  StationRepository --> StationRepository : saveStation()
+  StationRepository --> CreateStationController : stationData
+  deactivate StationRepository
 
-BuildStationUI --> Player : display "Station created successfully"
+  activate BuildStationUI
+  CreateStationController --> BuildStationUI : result
+  deactivate CreateStationController
+
+  alt result == OK
+    BuildStationUI --> Player : display "Station created successfully"
+  else result == INVALID_COORDINATES
+    BuildStationUI --> Player : display "Coordinates out of map bounds. Please try again."
+  else result == OVERBUILD
+    BuildStationUI --> Player : display "Cannot build on occupied cell. Please choose different coordinates."
+  end
+end
+
+destroy CreateStationController
 deactivate BuildStationUI
 @enduml
