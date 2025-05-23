@@ -1,10 +1,12 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Budget entity representing financial resources for a player within a specific map and scenario
  * Manages the budget balance and related game context information
  */
-public class Budget {
+public class Budget implements Serializable {
 
     /** Current budget amount */
     int budget;
@@ -18,9 +20,6 @@ public class Budget {
     /** User who owns this budget */
     User user;
 
-    /** Current year in the game timeline */
-    private int currentYear;
-
     /**
      * Creates a new Budget with the specified parameters
      * @param budget Initial budget amount
@@ -33,7 +32,6 @@ public class Budget {
         this.map = map;
         this.scenario = scenario;
         this.user = user;
-        this.currentYear = scenario.getTimeRestrictions()[0];
     }
 
     /**
@@ -116,16 +114,8 @@ public class Budget {
         this.user = user;
     }
 
-    /**
-     * Gets the current year in the game timeline
-     * @return The current year
-     */
-    public int getCurrentYear() { return currentYear; }
-
-    /**
-     * Sets the current year in the game timeline
-     * @param year The new current year
-     */
-    public void setCurrentYear(int year) { this.currentYear = year; }
-
+    @Override
+    public String toString() {
+        return String.valueOf(budget);
+    }
 }

@@ -3,7 +3,6 @@ package ui.console;
 import controller.SimulationController;
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
-import repository.Repositories;
 import ui.console.menu.MenuItem;
 
 import java.util.ArrayList;
@@ -15,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
-import repository.BudgetRepository;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -23,13 +21,22 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class SimulationUI implements Runnable {
 
-    private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationController ctrl = new SimulationController();
-    private final BudgetRepository budgetRepository = Repositories.getInstance().getBudgetRepository();
-    Budget userBudget;
+    private Simulation sim;
 
     @Override
     public void run() {
+
+        System.out.println("\nChecking for existing simulations...");
+        System.out.println("Available simulations: " + ctrl.getSimulations().size());
+        System.out.println();
+
+        User currentUser = CurrentUser.getInstance().getUser();
+        if (currentUser == null) {
+            System.out.println("No user logged in");
+            return;
+        }
+
         Map selectedMap = ctrl.getMap();
         if (selectedMap == null) {
             System.out.println("No map selected");
@@ -43,10 +50,51 @@ public class SimulationUI implements Runnable {
             return;
         }
 
-        userBudget = checkOrCreateBudget(selectedMap, selectedScenario);
+        if (sim == null) {
+            // DEBUG: Let's see what's in the repository
+            System.out.println("\n=== DEBUGGING SIMULATION LOADING ===");
+            List<Simulation> allSims = ctrl.getSimulations();
+            System.out.println("Total simulations in repository: " + allSims.size());
+
+            for (int i = 0; i < allSims.size(); i++) {
+                Simulation s = allSims.get(i);
+                System.out.println("Simulation " + i + ":");
+                System.out.println("  Map: '" + s.getSelectedMap().getMapName() + "'");
+                System.out.println("  Scenario: '" + s.getSelectedScenario().getScenarioName() + "'");
+                System.out.println("  User: '" + (s.getUser() != null ? s.getUser().getEmail() : "null") + "'");
+                System.out.println("  Year: " + s.getCurrentYear());
+            }
+
+            System.out.println("Looking for:");
+            System.out.println("  Map: '" + selectedMap.getMapName() + "'");
+            System.out.println("  Scenario: '" + selectedScenario.getScenarioName() + "'");
+            System.out.println("  User: '" + currentUser.getEmail() + "'");
+
+            // Try to find existing simulation
+            Optional<Simulation> existingSimulation = ctrl.findBy(selectedMap, selectedScenario);
+
+            if (existingSimulation.isPresent()) {
+                sim = existingSimulation.get();
+                System.out.println("FOUND existing simulation! Resuming from year " + sim.getCurrentYear());
+            } else {
+                System.out.println("NO existing simulation found. Creating new one.");
+                sim = ctrl.createSimulation(
+                        selectedMap,
+                        selectedScenario,
+                        selectedScenario.getTimeRestrictions()[0],
+                        ctrl.checkOrCreateBudget(selectedMap, selectedScenario)
+                );
+                System.out.println("New simulation created for year " + sim.getCurrentYear());
+            }
+            System.out.println("=== END DEBUG ===\n");
+        }
+
+        if (sim.getUserBudget().getUser() != null) {
+            currentUser.setLocomotives(sim.getUserBudget().getUser().getLocomotives());
+        }
 
         // With something like:
-        int startYear = userBudget.getCurrentYear();
+        int startYear = sim.getCurrentYear();
         int endYear   = selectedScenario.getTimeRestrictions()[1];
         AtomicReference<AtomicIntegerArray> timePeriod =
                 new AtomicReference<>(new AtomicIntegerArray(new int[]{ startYear, endYear }));
@@ -66,26 +114,26 @@ public class SimulationUI implements Runnable {
         ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
 
-        Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler, gameOver,userBudget);
+        Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler, gameOver, sim.getUserBudget(), sim);
         Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
 
-        timeScheduler.scheduleAtFixedRate(timeTask, 60, 60, TimeUnit.SECONDS);
+        timeScheduler.scheduleAtFixedRate(timeTask, 20, 20, TimeUnit.SECONDS);
         generationScheduler.scheduleAtFixedRate(generationTask, 10, 10, TimeUnit.SECONDS);
 
         do {
             if (running.get()) {
                 ctrl.displayMapData(selectedMap, selectedScenario);
                 if (currentUser != null) {
-                    System.out.println("Your budget is: " + userBudget.getBudget());
+                    System.out.println("Your budget is: " + sim.getUserBudget().getBudget());
                 }
                 if (options.isEmpty()) {
-                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario,userBudget)));
-                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario, userBudget)));
-                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, selectedScenario,timePeriod, userBudget)));
-                    options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario,selectedMap)));
+                    options.add(new MenuItem("Build A Station", new BuildStationUI(selectedMap,selectedScenario, sim.getUserBudget())));
+                    options.add(new MenuItem("Upgrade A Station (Type)", new UpgradeStationTypeUI(selectedMap,selectedScenario, sim.getUserBudget())));
+                    options.add(new MenuItem("Upgrade A Station (Building)", new UpgradeStationUI(selectedMap, selectedScenario,timePeriod, sim.getUserBudget())));
+                    options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario, selectedMap, sim.getUserBudget())));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
                     options.add(new MenuItem("List my stations", new ListStationsUI()));
-                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario, userBudget)));
+                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario, sim.getUserBudget())));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();
@@ -135,36 +183,20 @@ public class SimulationUI implements Runnable {
                 running.set(false);
                 timeScheduler.shutdownNow();
                 generationScheduler.shutdownNow();
+                ctrl.updateSimulation(
+                        sim.getSelectedMap(),
+                        sim.getSelectedScenario(),
+                        sim.getCurrentYear(),
+                        sim.getUserBudget()
+                );
                 System.out.println("Game stopped.");
                 if (gameOver.get()) {
-                    ctrl.resetGame(selectedMap, selectedScenario, userBudget);
+                    ctrl.resetGame(selectedMap, selectedScenario, sim.getUserBudget());
+                }
+                if (new SimulationFile().save()) {
+                    System.out.println("Game saved.");
                 }
             }
         } while (option.get() != -1);
-    }
-
-    /**
-     * Checks if a budget exists for the current user, map and scenario.
-     * If not, creates a new one with 1000 as the initial value.
-     *
-     * @param selectedMap The selected map
-     * @param selectedScenario The selected scenario
-     * @return The budget for the user
-     */
-    private Budget checkOrCreateBudget(Map selectedMap, Scenario selectedScenario) {
-        Budget budget = null;
-
-        if (currentUser != null) {
-            Optional<Budget> existingBudget = budgetRepository.getUserBudgetFromScenarioInMap(
-                    selectedScenario, selectedMap, currentUser);
-
-            if (existingBudget.isPresent()) {
-                budget = existingBudget.get();
-            } else {
-                budget = new Budget(1000, selectedMap, selectedScenario, currentUser);
-                budgetRepository.createBudget(budget);
-            }
-        }
-        return budget;
     }
 }

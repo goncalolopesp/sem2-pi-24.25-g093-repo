@@ -2,6 +2,7 @@ package repository;
 
 import domain.Station;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  * Provides methods to add, get, and remove stations safely across threads.
  * </p>
  */
-public class StationRepository {
+public class StationRepository implements Serializable {
     private final List<Station> stations = new ArrayList<>();
 
     /**
@@ -51,5 +52,10 @@ public class StationRepository {
                 s.getMapName().equalsIgnoreCase(mapName) &&
                         s.getOwnerPlayer().equalsIgnoreCase(ownerEmail) && s.getScenarioName().equalsIgnoreCase(scenarioName)
         );
+    }
+
+    public void copyFrom(StationRepository other) {
+        this.stations.clear();
+        this.stations.addAll(other.getStations());
     }
 }

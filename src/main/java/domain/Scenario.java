@@ -1,8 +1,10 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
-public class Scenario {
+public class Scenario implements Serializable {
     /**
      * Represents a scenario, defined by a unique name and associated with a specific map, alongside restrictions.
      * <p>
@@ -82,5 +84,18 @@ public class Scenario {
     @Override
     public String toString() {
         return getScenarioName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Scenario scenario = (Scenario) o;
+        return Objects.equals(scenarioName, scenario.scenarioName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(scenarioName);
     }
 }

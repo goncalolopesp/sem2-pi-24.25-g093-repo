@@ -1,7 +1,9 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents a map with a name and fixed dimensions.
@@ -11,7 +13,7 @@ import java.util.List;
  * </p>
  */
 
-public class Map {
+public class Map implements Serializable {
     private final String mapName;
     private final Location location;
     private final int scale;
@@ -95,5 +97,18 @@ public class Map {
     @Override
     public String toString() {
         return getMapName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Map map = (Map) o;
+        return Objects.equals(mapName, map.mapName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mapName);
     }
 }

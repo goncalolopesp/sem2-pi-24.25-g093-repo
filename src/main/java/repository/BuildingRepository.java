@@ -3,10 +3,11 @@ package repository;
 import domain.Building;
 import domain.Station;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BuildingRepository {
+public class BuildingRepository implements Serializable {
     private final List<Building> buildings;
 
     /**
@@ -48,5 +49,10 @@ public class BuildingRepository {
     public List<Building> getBuildings() {
         //This is a defensive copy, so that the repository cannot be modified from the outside.
         return List.copyOf(buildings);
+    }
+
+    public void copyFrom(BuildingRepository other) {
+        this.buildings.clear();
+        this.buildings.addAll(other.getBuildings());
     }
 }

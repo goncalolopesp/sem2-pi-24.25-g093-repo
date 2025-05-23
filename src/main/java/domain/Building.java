@@ -1,12 +1,14 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents a building with a station and type.
  * <p>
  * The Building class encapsulates the building's associated station and its type.
  * </p>
  */
-public class Building {
+public class Building implements Serializable {
     private final Station station;
     private final String buildingType;
 

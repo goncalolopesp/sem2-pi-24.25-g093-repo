@@ -1,10 +1,12 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Locomotive entity representing a train engine in the game
  * Contains all properties and characteristics of train locomotives
  */
-public class Locomotive {
+public class Locomotive implements Serializable {
 
     /** Model name identifier for the locomotive */
     private String modelName;

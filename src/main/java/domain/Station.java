@@ -1,9 +1,11 @@
 package domain;
 
+import java.io.Serializable;
+
 /**
  * Represents a Station within a map, now including orientation.
  */
-public class Station {
+public class Station implements Serializable {
     /** Available types of stations. */
     public enum Type { DEPOT, STATION, TERMINAL }
     /** Orientation if the station is a STATION type. */

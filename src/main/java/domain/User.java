@@ -1,12 +1,13 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.*;
 
 /**
  * User entity representing a player or editor in the system
  * Stores user identification, authentication and role information
  */
-public class User {
+public class User implements Serializable {
 
     /** User's full name */
     String name;
@@ -97,4 +98,16 @@ public class User {
      * @param locomotives The new list of locomotives
      */
     public void setLocomotives(List<Locomotive> locomotives) { this.locomotives = locomotives; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(email, user.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(email);
+    }
 }

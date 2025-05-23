@@ -9,8 +9,10 @@ import domain.User;
 import domain.City;
 import domain.CurrentUser;
 import domain.Map;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -20,10 +22,12 @@ import java.util.stream.Collectors;
 public class SimulationController {
 
     private final User currentUser = CurrentUser.getInstance().getUser();
+    private final SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
     private final MapRepository mapRepo = Repositories.getInstance().getMapRepository();
     private final ScenarioRepository scenarioRepo = Repositories.getInstance().getScenarioRepository();
     private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
     private final CityRepository cityRepo = Repositories.getInstance().getCityRepository();
+    private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final List<City> cities = cityRepo.getCities();
 
     public void displayMapData(Map map, Scenario scenario) {
@@ -54,7 +58,8 @@ public class SimulationController {
             List<MenuItem> options,
             ScheduledExecutorService scheduler,
             AtomicBoolean gameOver,
-            Budget budget
+            Budget budget,
+            Simulation sim
     ) {
         return () -> {
             if (running.get()) {
@@ -62,7 +67,7 @@ public class SimulationController {
                 int nextYear = timePeriod.get().addAndGet(0, 1);
 
                 // write it back into the same Budget
-                budget.setCurrentYear(nextYear);
+                sim.setCurrentYear(nextYear);
 
                 if (timePeriod.get().get(0) < timePeriod.get().get(1)) {
                     System.out.print("\nYou have reached year " + nextYear + ". ");
@@ -72,14 +77,14 @@ public class SimulationController {
                 }
             }
 
-            // if we’ve gone past the scenario’s end…
+            // if we've gone past the scenario's end…
             if (timePeriod.get().get(0) >= timePeriod.get().get(1)) {
                 scheduler.shutdownNow();
-                running.set(false);              // ← tell the UI we’re no longer “running”
+                running.set(false);              // ← tell the UI we're no longer "running"
 
                 // reset the saved year back to the scenario start
                 int resetYear = selectedScenario.getTimeRestrictions()[0];
-                budget.setCurrentYear(resetYear);
+                sim.setCurrentYear(resetYear);
 
                 timePeriod.set(new AtomicIntegerArray(
                         selectedScenario.getTimeRestrictions()
@@ -120,7 +125,7 @@ public class SimulationController {
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getName().contains(city.getName()))
                     .forEach(station -> {
-                        // 1) If there’s still room…
+                        // 1) If there's still room…
                         if (station.getCapacityOwned() < station.getCapacity()) {
 
                             // a) refill the flag so at some future tick we could re-notify again
@@ -145,7 +150,7 @@ public class SimulationController {
                             );
 
                         }
-                        // 2) Otherwise—we’re at (or above) capacity…
+                        // 2) Otherwise—we're at (or above) capacity…
                         else {
                             // only notify *once* per station
                             if (!station.isMaxCapacityNotified()) {
@@ -320,5 +325,49 @@ public class SimulationController {
             }
         }
         currentUser.setLocomotives(locomotives);
+    }
+
+    /**
+     * Checks if a budget exists for the current user, map and scenario.
+     * If not, creates a new one with 1000 as the initial value.
+     *
+     * @param selectedMap The selected map
+     * @param selectedScenario The selected scenario
+     * @return The budget for the user
+     */
+    public Budget checkOrCreateBudget(Map selectedMap, Scenario selectedScenario) {
+        Budget budget = null;
+
+        if (currentUser != null) {
+            Optional<Budget> existingBudget = budgetRepo.getUserBudgetFromScenarioInMap(
+                    selectedScenario, selectedMap, currentUser);
+
+            if (existingBudget.isPresent()) {
+                budget = existingBudget.get();
+            } else {
+                budget = new Budget(1000, selectedMap, selectedScenario, currentUser);
+                budgetRepo.createBudget(budget);
+            }
+        }
+        return budget;
+    }
+
+    public List<Simulation> getSimulations() {
+        return simulationRepo.getSimulations();
+    }
+
+    public Simulation createSimulation(Map selectedMap, Scenario selectedScenario, int currentYear, Budget userBudget) {
+        return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
+    }
+
+    public void updateSimulation(Map map,
+                                 Scenario scenario,
+                                 int newYear,
+                                 Budget newBudget) {
+        simulationRepo.updateSimulation(map, scenario, currentUser, newYear, newBudget);
+    }
+
+    public Optional<Simulation> findBy(Map map, Scenario scenario) {
+        return simulationRepo.findBy(map, scenario, currentUser);
     }
 }

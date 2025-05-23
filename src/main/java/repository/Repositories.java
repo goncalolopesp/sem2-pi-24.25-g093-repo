@@ -1,5 +1,7 @@
 package repository;
 
+import domain.SimulationFile;
+
 /**
  * Singleton holder for all repository instances used by the application.
  * <p>
@@ -20,6 +22,7 @@ public class Repositories {
     private final TrainRepository trainRepository;
     private final CarriageRepository carriageRepository;
     private final BudgetRepository budgetRepository;
+    private SimulationRepository simulationRepository;
     /**
      * Private constructor to prevent external instantiation.
      * Initializes all repositories.
@@ -36,7 +39,12 @@ public class Repositories {
         trainRepository = new TrainRepository();
         carriageRepository = new CarriageRepository();
         budgetRepository = new BudgetRepository();
+        simulationRepository = new SimulationRepository();
+
+        SimulationFile simFile = new SimulationFile();
+        simFile.load(this.simulationRepository, this.stationRepository, this.buildingRepository);
     }
+
 
     /**
      * Returns the singleton instance of Repositories, creating it if necessary.
@@ -143,4 +151,16 @@ public class Repositories {
      * @return the BudgetRepository
      */
     public BudgetRepository getBudgetRepository() { return budgetRepository; }
+
+    /**
+     * Gets the repository for Simulation entities.
+     *
+     * @return the SimulationRepository
+     */
+    public SimulationRepository getSimulationRepository() { return simulationRepository; }
+
+    public void setSimulationRepository(SimulationRepository repo) {
+        this.simulationRepository = repo;
+    }
+
 }
