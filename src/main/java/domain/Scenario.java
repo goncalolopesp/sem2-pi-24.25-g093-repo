@@ -1,8 +1,9 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Scenario {
+public class Scenario implements Serializable {
     /**
      * Represents a scenario, defined by a unique name and associated with a specific map, alongside restrictions.
      * <p>
