@@ -66,7 +66,7 @@ public class LocomotiveRepository {
      */
     public boolean checkIfLocomotiveExists(Locomotive locomotive) {
         for (Locomotive b : locomotives) {
-            if (b.getModelName().equals(locomotive.getModelName())) {
+            if (b.getModelName().equalsIgnoreCase(locomotive.getModelName())) {
                 return true;
             }
         }
@@ -131,7 +131,7 @@ public class LocomotiveRepository {
      */
     public Optional<Locomotive> getLocomotive(String modelName){
         for (Locomotive l : locomotives) {
-            if (l.getModelName().equals(modelName)) {
+            if (l.getModelName().equalsIgnoreCase(modelName)) {
                 return Optional.of(l);
             }
         }
