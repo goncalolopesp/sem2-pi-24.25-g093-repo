@@ -1,0 +1,19 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as player
+participant ":System" as sys
+
+activate player
+
+player -> sys : Requests to load simulation
+activate sys
+
+sys --> player : Display success message: "Simulation loaded successfully!"
+deactivate sys
+
+@enduml
