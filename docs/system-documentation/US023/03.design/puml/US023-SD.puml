@@ -1,0 +1,73 @@
+@startuml
+skinparam monochrome true
+skinparam packageStyle rectangle
+skinparam shadowing false
+
+autonumber
+
+actor "Player" as player
+
+participant ":SimulationUI" as ui
+
+activate player
+player -> ui : leaves simulation
+
+create ":SimulationController" as ctrl
+participant "simFile\n:SimulationFile" as simFile
+
+activate ui
+ui -> ctrl : create()
+
+ui -> ctrl : asks to save simulation
+activate ctrl
+
+ctrl -> simFile : save()
+activate simFile
+
+alt file doesn't exist
+    simFile --> simFile : creates new file
+end
+
+participant ":Repositories" as reps
+participant "repositories\n:Repositories" as repo
+
+simFile -> reps : getInstance()
+activate reps
+
+reps --> simFile : instance
+deactivate reps
+
+simFile -> repo : getSimulationRepository()
+activate repo
+
+repo --> simFile : simulationRepository
+deactivate repo
+
+simFile --> simFile : writes simulation repository in file
+
+simFile -> repo : getStationRepository()
+activate repo
+
+repo --> simFile : stationRepository
+deactivate repo
+
+simFile --> simFile : writes station repository in file
+
+simFile -> repo : getBuildingRepository()
+activate repo
+
+repo --> simFile : buildingRepository
+deactivate repo
+
+simFile --> simFile : writes building repository in file
+
+simFile --> ctrl : confirms that simulation was saved
+deactivate simFile
+
+ctrl --> ui : confirms that simulation was saved
+deactivate ctrl
+
+ui --> player : shows success message on saving simulation
+deactivate ui
+
+@enduml
