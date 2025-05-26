@@ -10,6 +10,14 @@ import java.io.*;
 public class SimulationFile {
     public static final String FILE_NAME = "simulation.sim";
 
+    /**
+     * Loads simulation data from the default simulation file.
+     *
+     * @param simRepo the simulation repository into which the loaded simulation data will be copied
+     * @param stationRepo the station repository into which the loaded station data will be copied
+     * @param buildingRepo the building repository into which the loaded building data will be copied
+     * @return true if the data was successfully loaded or no save file exists; false if an error occurred during loading
+     */
     public boolean load(SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo) {
         return load(FILE_NAME, simRepo, stationRepo, buildingRepo);
     }
@@ -42,6 +50,11 @@ public class SimulationFile {
         }
     }
 
+    /**
+     * Saves simulation data to the default simulation file.
+     *
+     * @return true if the data was successfully saved; false if an error occurred during saving
+     */
     public boolean save() { return save(FILE_NAME); }
 
     public boolean save(String fileName) { return save(new File(fileName)); }
