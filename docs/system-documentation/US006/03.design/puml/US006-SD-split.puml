@@ -6,44 +6,56 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI"          as UpgradeStationUI
-
+participant ":UpgradeStationUI" as UpgradeStationUI
+participant ":UpgradeStationController" as UpgradeStationController
 
 activate Player
 
 Player -> UpgradeStationUI : requests station upgrade
-create ":UpgradeStationController" as UpgradeStationController
 activate UpgradeStationUI
+
+create UpgradeStationController
 UpgradeStationUI -> UpgradeStationController : create()
-participant ":station\n:Station"         as Station
-
-UpgradeStationUI --> Player : requests station and upgrade option
-deactivate UpgradeStationUI
-
-Player -> UpgradeStationUI : selects station and building
-activate UpgradeStationUI
-UpgradeStationUI --> UpgradeStationUI : keepSelection(station, buildingType)
 activate UpgradeStationController
 
-UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
-ref over UpgradeStationController
-    Check availability for buildingType
-end ref
-ref over UpgradeStationController
-    Check budget for buildingType
-end ref
-ref over UpgradeStationController
-    Validate upgrade allowance for station and buildingType
+ref over UpgradeStationUI
+    - Get current user
+    - Filter owned stations by user and scenario
+    - Handle station selection with validation loops
 end ref
 
-UpgradeStationController -> Station : upgrade(buildingType)
-activate Station
-Station --> UpgradeStationController : upgradedStation
-UpgradeStationController --> UpgradeStationUI : upgradedStation
-deactivate UpgradeStationController
+alt station selected successfully
+    ref over UpgradeStationUI, UpgradeStationController
+        - Display available building types with costs
+        - Validate building type selection
+        - Check year restrictions (telegraph/telephone)
+        - Check mutual exclusivity
+        - Subtract budget cost
+    end ref
+
+    UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
+
+    ref over UpgradeStationController
+        - Get repositories instance
+        - Create Building object
+        - Validate building in repository
+        - Add building if valid
+    end ref
+
+    alt building created successfully
+        UpgradeStationController --> UpgradeStationUI : building created successfully
+        UpgradeStationUI --> Player : display "Building successfully created!"
+    else building creation failed
+        UpgradeStationController --> UpgradeStationUI : null
+        UpgradeStationUI --> Player : display "Building not created!"
+    end
+else no station selected
+    UpgradeStationUI --> Player : display "You have no stations on this map."
+end
+
 destroy UpgradeStationController
-
-UpgradeStationUI --> Player : display "Upgrade applied successfully."
+deactivate UpgradeStationController
 deactivate UpgradeStationUI
 deactivate Player
+
 @enduml

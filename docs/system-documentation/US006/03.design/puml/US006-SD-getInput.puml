@@ -7,20 +7,62 @@ autonumber
 
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeStationUI
+participant ":CurrentUser" as CurrentUser
 
 activate Player
 
-Player -> UpgradeStationUI : openUpgradeStationForm()
+Player -> UpgradeStationUI : requests station upgrade
 activate UpgradeStationUI
 
-UpgradeStationUI --> Player : displayStationList(listOfStations)
+UpgradeStationUI -> CurrentUser : getInstance()
+activate CurrentUser
+CurrentUser --> UpgradeStationUI : currentUser
+deactivate CurrentUser
 
-Player -> UpgradeStationUI : selectStation(station)
-UpgradeStationUI --> UpgradeStationUI: keepStation(station)
+UpgradeStationUI -> UpgradeStationUI : filter owned stations by user and scenario
 
-UpgradeStationUI --> Player : displayBuildingOptions(buildingOptions)
+alt no owned stations found
+    UpgradeStationUI --> Player : display "You have no stations on this map."
+else stations found
+    UpgradeStationUI --> Player : display owned stations list
 
-Player -> UpgradeStationUI : chooseBuilding(buildingType)
-UpgradeStationUI --> UpgradeStationUI: keepBuilding(buildingType)
+    loop until valid station selected
+        UpgradeStationUI --> Player : request station name
+        Player -> UpgradeStationUI : provides station name
+
+        alt station name not found
+            UpgradeStationUI --> Player : display "Invalid name. Please try again."
+        else multiple stations with same name
+            UpgradeStationUI --> Player : request coordinates (X, Y)
+            Player -> UpgradeStationUI : provides coordinates
+
+            alt coordinates don't match any station
+                UpgradeStationUI --> Player : display "No station found at those coordinates."
+            else coordinates match
+                UpgradeStationUI -> UpgradeStationUI : keepStation(station)
+            end
+        else single station found
+            UpgradeStationUI -> UpgradeStationUI : keepStation(station)
+        end
+    end
+
+    alt station selected successfully
+        UpgradeStationUI --> Player : display available building types with costs and restrictions
+
+        loop until valid building type selected
+            UpgradeStationUI --> Player : request building type
+            Player -> UpgradeStationUI : provides building type
+
+            alt building type valid and passes all validations
+                UpgradeStationUI -> UpgradeStationUI : keepBuilding(buildingType)
+            else validation failed
+                UpgradeStationUI --> Player : displays error message
+            end
+        end
+    end
+end
+
+deactivate UpgradeStationUI
+deactivate Player
 
 @enduml

@@ -7,59 +7,138 @@ autonumber
 
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeStationUI
+participant ":UpgradeStationController" as UpgradeStationController
+participant "repositories\n:Repositories" as Repo
+participant "buildingRepository\n:BuildingRepository" as BuildingRepository
+participant "stationRepository\n:StationRepository" as StationRepository
+participant ":CurrentUser" as CurrentUser
+participant ":Budget" as Budget
 
 activate Player
 
 Player -> UpgradeStationUI : requests station upgrade
 activate UpgradeStationUI
 
-create ":UpgradeStationController" as UpgradeStationController
+create UpgradeStationController
 UpgradeStationUI -> UpgradeStationController : create()
 activate UpgradeStationController
 
-UpgradeStationUI --> Player : requests station and upgrade option
-deactivate UpgradeStationUI
+UpgradeStationUI -> UpgradeStationUI : requestData()
+UpgradeStationUI -> CurrentUser : getInstance()
+activate CurrentUser
+CurrentUser --> UpgradeStationUI : currentUser
+deactivate CurrentUser
 
-Player -> UpgradeStationUI : selects station and building
-activate UpgradeStationUI
+UpgradeStationUI -> UpgradeStationUI : filter owned stations by user and scenario
 
-UpgradeStationUI --> UpgradeStationUI : keepSelection(station, buildingType)
+alt no owned stations found
+    UpgradeStationUI --> Player : display "You have no stations on this map."
+    UpgradeStationUI -> UpgradeStationUI : return null
+else stations found
+    UpgradeStationUI --> Player : display owned stations list
 
-participant "repositories\n:Repositories" as Repo
-participant "buildingRepository\n:BuildingRepository" as buildingRepository
-participant "stationRepository\n:StationRepository" as stationRepository
+    loop until valid station selected
+        UpgradeStationUI --> Player : request station name
+        Player -> UpgradeStationUI : provides station name
 
-UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
+        alt station name not found
+            UpgradeStationUI --> Player : display "Invalid name. Please try again."
+        else multiple stations with same name
+            UpgradeStationUI --> Player : request coordinates (X, Y)
+            Player -> UpgradeStationUI : provides coordinates
 
-UpgradeStationController -> Repo : getInstance()
-activate Repo
-Repo --> UpgradeStationController : repositories
-deactivate Repo
+            alt coordinates don't match any station
+                UpgradeStationUI --> Player : display "No station found at those coordinates."
+            else coordinates match
+                UpgradeStationUI -> UpgradeStationUI : set chosen station
+            end
+        else single station found
+            UpgradeStationUI -> UpgradeStationUI : set chosen station
+        end
+    end
+end
 
-UpgradeStationController -> buildingRepository : findBuilding(buildingType)
-activate buildingRepository
-buildingRepository --> UpgradeStationController : building
+alt station selected successfully
+    UpgradeStationUI --> Player : display available building types with costs and restrictions
 
-UpgradeStationController -> buildingRepository : checkAvailability(currentDate)
-buildingRepository --> UpgradeStationController : availabilityOk
-UpgradeStationController -> buildingRepository : checkBudget(buildingType)
-buildingRepository --> UpgradeStationController: budgetOk
-deactivate buildingRepository
+    loop until valid building type selected
+        UpgradeStationUI --> Player : request building type
+        Player -> UpgradeStationUI : provides building type
 
+        UpgradeStationUI -> UpgradeStationController : verifyIfBuildingExists(station, buildingType)
 
-UpgradeStationController -> stationRepository : findStation(station)
-activate stationRepository
-stationRepository --> UpgradeStationController : station
+        UpgradeStationController -> BuildingRepository : getBuildings()
+        activate BuildingRepository
+        BuildingRepository --> UpgradeStationController : buildings list
+        deactivate BuildingRepository
+        UpgradeStationController --> UpgradeStationUI : buildingExists
+        deactivate UpgradeStationController
 
-UpgradeStationController -> stationRepository : validateUpgrade(buildingType)
-stationRepository --> UpgradeStationController : upgradeAllowed
-UpgradeStationController -> stationRepository : applyUpgrade(station, buildingType)
-stationRepository --> UpgradeStationController : upgradedStation
-deactivate stationRepository
+        alt building already exists in station
+            UpgradeStationUI --> Player : display "Building already exists in station. Please try again."
+        else building type invalid
+            UpgradeStationUI --> Player : display "Invalid input. Please try again."
+        else building type valid
+            alt telegraph selected AND (year < 1855 OR year > 1875)
+                UpgradeStationUI --> Player : display "Telegraph can only be built in the year 1855-1875."
+            else telephone selected AND year < 1876
+                UpgradeStationUI --> Player : display "Telephone can only be built in the year 1876-Present."
+            else year restrictions satisfied
+                UpgradeStationUI -> UpgradeStationUI : checkMutualExclusivity(existingBuildings, buildingType)
 
-UpgradeStationController --> UpgradeStationUI : upgradedStation
-deactivate UpgradeStationController
+                alt mutually exclusive building exists
+                    UpgradeStationUI --> Player : display "Mutually exclusive building already exists in this station."
+                else no conflicts
+                    alt telegraph exists AND year outside 1855-1875
+                        UpgradeStationUI -> BuildingRepository : remove(station, "telegraph")
+                        activate BuildingRepository
+                        deactivate BuildingRepository
+                    else telephone exists AND year before 1876
+                        UpgradeStationUI -> BuildingRepository : remove(station, "telephone")
+                        activate BuildingRepository
+                        deactivate BuildingRepository
+                    end
+
+                    UpgradeStationUI -> UpgradeStationUI : set valid building type
+                    UpgradeStationUI -> Budget : subtractBudget(cost)
+                    activate Budget
+                    deactivate Budget
+                end
+            end
+        end
+    end
+    UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
+    activate UpgradeStationController
+
+    UpgradeStationController -> Repo : getInstance()
+    activate Repo
+    Repo --> UpgradeStationController : repositories
+    deactivate Repo
+
+    UpgradeStationController -> UpgradeStationController : getBuildingRepository()
+    activate BuildingRepository
+    UpgradeStationController -> BuildingRepository : create Building(station, buildingType)
+    UpgradeStationController -> BuildingRepository : validateBuilding(building)
+
+    alt building is valid (not already present)
+        BuildingRepository -> BuildingRepository : add building to list
+        BuildingRepository --> UpgradeStationController : building added
+        UpgradeStationController --> UpgradeStationUI : building created successfully
+
+        UpgradeStationUI --> Player : display "Building successfully created!"
+    else building validation failed
+        BuildingRepository --> UpgradeStationController : building not added
+        UpgradeStationController --> UpgradeStationUI : null
+
+        UpgradeStationUI --> Player : display "Building not created!"
+    end
+    deactivate BuildingRepository
+    deactivate UpgradeStationController
+else no station selected
+end
+
 destroy UpgradeStationController
-UpgradeStationUI --> Player : display "Upgrade applied successfully."
 deactivate UpgradeStationUI
+deactivate Player
+
 @enduml

@@ -57,7 +57,7 @@ BuildStationUI --> BuildStationUI : keepType(type)
 
 BuildStationUI -> CreateStationController : checkBudget(type)
 activate CreateStationController
-BuildStationController -> StationRepository : verifyBudget(type)
+CreateStationController -> StationRepository : verifyBudget(type)
 activate StationRepository
 StationRepository --> CreateStationController : budgetOK
 deactivate StationRepository

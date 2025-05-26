@@ -2,30 +2,49 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
 actor "Player" as Player
 participant ":UpgradeStationUI" as UpgradeStationUI
-
+participant ":UpgradeStationController" as UpgradeStationController
+participant "repositories\n:Repositories" as Repo
+participant "buildingRepository\n:BuildingRepository" as BuildingRepository
 
 activate Player
 activate UpgradeStationUI
-create ":UpgradeStationController" as UpgradeStationController
-UpgradeStationUI -> UpgradeStationController : create()
+
+Player -> UpgradeStationUI : buildingRequest()
+create UpgradeStationController
+UpgradeStationUI -> UpgradeStationController  : create()
 activate UpgradeStationController
-participant "stationRepository\n:StationRepository" as stationRepository
-UpgradeStationController -> stationRepository : findStation(station)
-activate stationRepository
-stationRepository --> UpgradeStationController : station
+UpgradeStationController -> Repo : getInstance()
+activate Repo
+Repo --> UpgradeStationController : repositories
+deactivate Repo
 
+UpgradeStationController -> UpgradeStationController : getBuildingRepository()
 
-UpgradeStationController -> stationRepository : applyUpgrade(station, buildingType)
-stationRepository --> UpgradeStationController : upgradedStation
-deactivate stationRepository
+UpgradeStationController -> BuildingRepository : create Building(station, buildingType)
+activate BuildingRepository
+UpgradeStationController -> BuildingRepository : validateBuilding(building)
 
-UpgradeStationController --> UpgradeStationUI : upgradedStation
+alt building is valid (not already present in repository)
+    BuildingRepository -> BuildingRepository : add building to list
+    BuildingRepository --> UpgradeStationController : building added successfully
+
+    UpgradeStationController --> UpgradeStationUI : building created successfully
+    UpgradeStationUI --> Player : display "Building successfully created!"
+
+else building validation failed (duplicate)
+    BuildingRepository --> UpgradeStationController : building not added
+
+    UpgradeStationController --> UpgradeStationUI : null
+    UpgradeStationUI --> Player : display "Building not created!"
+end
+
+deactivate BuildingRepository
 deactivate UpgradeStationController
-
-UpgradeStationUI --> Player : display "Upgrade applied successfully."
 deactivate UpgradeStationUI
+
 @enduml

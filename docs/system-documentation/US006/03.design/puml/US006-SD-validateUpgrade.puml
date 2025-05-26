@@ -2,32 +2,58 @@
 skinparam monochrome true
 skinparam packageStyle rectangle
 skinparam shadowing false
+
 autonumber
 
+participant ":UpgradeStationUI" as UpgradeStationUI
 participant ":UpgradeStationController" as UpgradeStationController
-participant "buildingRepository\n:BuildingRepository" as buildingRepository
-participant "stationRepository\n:StationRepository" as stationRepository
+participant "buildingRepository\n:BuildingRepository" as BuildingRepository
+participant ":Budget" as Budget
 
+activate UpgradeStationUI
+UpgradeStationUI -> UpgradeStationController : verifyIfBuildingExists(station, buildingType)
 activate UpgradeStationController
 
-UpgradeStationController -> buildingRepository : findBuilding(buildingType)
-activate buildingRepository
-buildingRepository --> UpgradeStationController : building
+UpgradeStationController -> BuildingRepository : getBuildings()
+activate BuildingRepository
+BuildingRepository --> UpgradeStationController : buildings list
+deactivate BuildingRepository
 
+UpgradeStationController --> UpgradeStationUI : buildingExists
 
-UpgradeStationController -> buildingRepository : checkAvailability(currentDate)
-buildingRepository --> UpgradeStationController : availabilityOk
+alt building already exists
+    UpgradeStationUI --> UpgradeStationUI : validation failed
+else building doesn't exist
+    alt telegraph selected
+        alt year < 1855 OR year > 1875
+            UpgradeStationUI --> UpgradeStationUI : availability failed
+        else year within range
+            UpgradeStationUI --> UpgradeStationUI : availability ok
+        end
+    else telephone selected
+        alt year < 1876
+            UpgradeStationUI --> UpgradeStationUI : availability failed
+        else year >= 1876
+            UpgradeStationUI --> UpgradeStationUI : availability ok
+        end
+    else other building types
+        UpgradeStationUI --> UpgradeStationUI : availability ok
+    end
+    UpgradeStationUI -> UpgradeStationUI : checkMutualExclusivity(existingBuildings, buildingType)
 
-UpgradeStationController -> buildingRepository : checkBudget(buildingType)
-buildingRepository --> UpgradeStationController : budgetOk
-deactivate buildingRepository
-UpgradeStationController -> stationRepository : findStation(station)
-activate stationRepository
-stationRepository --> UpgradeStationController : station
+    alt mutually exclusive building exists
+        UpgradeStationUI --> UpgradeStationUI : exclusivity failed
+    else no conflicts
+        UpgradeStationUI -> Budget : subtractBudget(cost)
+        activate Budget
+        Budget --> UpgradeStationUI : budget updated
+        deactivate Budget
 
-UpgradeStationController -> stationRepository : validateUpgrade(buildingType)
-stationRepository --> UpgradeStationController : upgradeAllowed
-UpgradeStationController --> UpgradeStationController: proceed
-deactivate stationRepository
+        UpgradeStationUI --> UpgradeStationUI : validation successful
+    end
+end
+
+deactivate UpgradeStationController
+deactivate UpgradeStationUI
 
 @enduml
