@@ -84,7 +84,7 @@ public class BuyLocomotiveController {
      */
     public boolean canBuyLocomotive(String modelName, Scenario scenario) {
         for (Locomotive locomotive : this.getLocomotives(scenario)){
-            if (locomotive.getModelName().equals(modelName)){
+            if (locomotive.getModelName().equalsIgnoreCase(modelName)){
                 return true;
             }
         }
