@@ -207,6 +207,17 @@ public class UpgradeStationUI implements Runnable{
         return buildingType;
     }
 
+    /**
+     * Checks whether a new building type violates mutual exclusivity
+     * rules by conflicting with the types of existing buildings.
+     *
+     * Mutual exclusivity is determined if the existing and new building types
+     * belong to categories that cannot coexist (e.g., both are hotels or cafes).
+     *
+     * @param existingBuildings the list of existing buildings associated with the station
+     * @param newType the type of the new building being checked for conflicts
+     * @return true if the new building type violates mutual exclusivity, false otherwise
+     */
     private boolean checkMutualExclusivity(List<Building> existingBuildings, String newType) {
         String newLower = newType.toLowerCase();
 

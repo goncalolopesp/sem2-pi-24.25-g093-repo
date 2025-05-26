@@ -54,6 +54,13 @@ public class StationRepository implements Serializable {
         );
     }
 
+    /**
+     * Copies all stations from another {@code StationRepository} into this repository.
+     * Clears the current repository and replaces its contents with a defensive copy
+     * of the stations retrieved from the specified repository.
+     *
+     * @param other the {@code StationRepository} to copy stations from
+     */
     public void copyFrom(StationRepository other) {
         this.stations.clear();
         this.stations.addAll(other.getStations());

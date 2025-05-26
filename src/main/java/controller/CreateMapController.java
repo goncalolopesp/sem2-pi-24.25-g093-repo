@@ -61,6 +61,12 @@ public class CreateMapController {
         return map;
     }
 
+    /**
+     * Checks if a given map name is unique within the repository.
+     *
+     * @param name the map name to check for uniqueness
+     * @return {@code true} if the name is unique; {@code false} otherwise
+     */
     public boolean checkNameUniqueness(String name) {
         return getMapRepository().checkNameUniqueness(name);
     }

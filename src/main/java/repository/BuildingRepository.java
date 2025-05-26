@@ -51,6 +51,13 @@ public class BuildingRepository implements Serializable {
         return List.copyOf(buildings);
     }
 
+    /**
+     * Copies the list of buildings from another {@code BuildingRepository} instance to this instance.
+     * This operation clears the current list of buildings in this repository and replaces it
+     * with a copy of the buildings from the provided repository.
+     *
+     * @param other the {@code BuildingRepository} instance from which buildings are copied
+     */
     public void copyFrom(BuildingRepository other) {
         this.buildings.clear();
         this.buildings.addAll(other.getBuildings());
