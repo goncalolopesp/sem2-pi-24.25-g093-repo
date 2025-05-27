@@ -38,6 +38,15 @@ public class AuthController {
      */
     public boolean createNewUser(String name, String email, String pwd, String roleId){
         User user = new User(name, email, pwd, roleId);
+        if (authRepo.isPasswordUsable(pwd)){
+            return authRepo.createNewUser(user);
+        }else{
+            return false;
+        }
+    }
+
+    public boolean createNewUserWithoutVerification(String name, String email, String pwd, String roleId){
+        User user = new User(name, email, pwd, roleId);
         return authRepo.createNewUser(user);
     }
 
