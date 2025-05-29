@@ -5,8 +5,6 @@ import domain.*;
 import domain.Carriage.Type;
 import repository.Repositories;
 import repository.StationRepository;
-import repository.TrainRepository;
-import repository.CarriageRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +14,6 @@ import java.util.stream.Collectors;
 /**
  * Launches the user interface responsible to help the player select a locomotive, gather carriage and earn budget.
  */
-
 public class AssignTrainUI implements Runnable {
 
     private final Map selectedMap;
@@ -35,7 +32,7 @@ public class AssignTrainUI implements Runnable {
     /**
      * Runs the "Assign Train" user interface.
      * <p>
-     * Asks for the player to choose the locomotive to be used, all the stations that the route will pass, the type(s) of cargo to be picked and the ammount of carriages the train will have
+     * Asks for the player to choose the locomotive to be used, all the stations that the route will pass, the type(s) of cargo to be picked and the amount of carriages the train will have
      * </p>
      */
     @Override
@@ -151,74 +148,65 @@ public class AssignTrainUI implements Runnable {
                 }
             }
         }
-
-        System.out.println("Select cargo type to collect:");
-        System.out.println("[1] People");
-        System.out.println("[2] Mail");
-        System.out.println("[3] Both");
+        CargoTypes.printCargoOptions();
+        int maxOption = CargoTypes.values().length + 1;
         int cargoChoice;
         while (true) {
-            System.out.print("Enter choice: ");
+            System.out.printf("Enter choice (1–%d): ", maxOption);
             String line = scanner.nextLine();
             try {
                 cargoChoice = Integer.parseInt(line);
-                if (cargoChoice >= 1 && cargoChoice <= 3) break;
+                if (cargoChoice >= 1 && cargoChoice <= maxOption) break;
             } catch (NumberFormatException ignored) {}
             System.out.println("Invalid selection. Try again.");
         }
 
-        List<Carriage> carriages = new ArrayList<>();
-        CarriageRepository carriageRepo = Repositories.getInstance().getCarriageRepository();
-
+        List<CargoTypes> selected = CargoTypes.fromMenuOption(cargoChoice);
         List<Type> cargoTypes = new ArrayList<>();
+        int peopleCarriageCount = 0;
+        int mailCarriageCount = 0;
 
-        if (cargoChoice == 1 || cargoChoice == 3) {
+        if (selected.contains(CargoTypes.PEOPLE)) {
             System.out.print("Enter number of People carriages: ");
-            int num;
             while (true) {
                 try {
-                    num = Integer.parseInt(scanner.nextLine());
-                    if (num > 0) break;
+                    peopleCarriageCount = Integer.parseInt(scanner.nextLine());
+                    if (peopleCarriageCount > 0) break;
                 } catch (NumberFormatException ignored) {}
                 System.out.println("Invalid number. Must be > 0.");
-            }
-            for (int i = 0; i < num; i++) {
-                Carriage c = new Carriage(Type.PEOPLE);
-                carriageRepo.save(c);
-                carriages.add(c);
             }
             cargoTypes.add(Type.PEOPLE);
         }
-        if (cargoChoice == 2 || cargoChoice == 3) {
+
+        if (selected.contains(CargoTypes.MAIL)) {
             System.out.print("Enter number of Mail carriages: ");
-            int num;
             while (true) {
                 try {
-                    num = Integer.parseInt(scanner.nextLine());
-                    if (num > 0) break;
+                    mailCarriageCount = Integer.parseInt(scanner.nextLine());
+                    if (mailCarriageCount > 0) break;
                 } catch (NumberFormatException ignored) {}
                 System.out.println("Invalid number. Must be > 0.");
-            }
-            for (int i = 0; i < num; i++) {
-                Carriage c = new Carriage(Type.MAIL);
-                carriageRepo.save(c);
-                carriages.add(c);
             }
             cargoTypes.add(Type.MAIL);
         }
 
-        User user = CurrentUser.getInstance().getUser();
-
-        Train train = new Train(chosenLoco, carriages, user.getEmail());
-        TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
-        trainRepo.save(train);
         List<Station> completeRoute = new ArrayList<>();
         completeRoute.add(start);
         completeRoute.addAll(intermediates);
         completeRoute.add(end);
 
-        assignTrainController.assignTrainToRoute(train, completeRoute, cargoTypes, selectedScenario, budget);
+        int moneyEarned = assignTrainController.createTrainAndAssignToRoute(
+                chosenLoco,
+                completeRoute,
+                cargoTypes,
+                peopleCarriageCount,
+                mailCarriageCount,
+                selectedScenario,
+                budget,
+                playerEmail
+        );
 
-        System.out.println("Success: Train created with " + carriages.size() + " carriages and assigned to route with " + completeRoute.size() + " stations.");
+        System.out.println("Success: Train assigned to route with " + completeRoute.size() + " stations.");
+        System.out.println("Money earned: " + moneyEarned);
     }
 }

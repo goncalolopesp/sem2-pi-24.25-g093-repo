@@ -1,7 +1,11 @@
 package controller;
 
 import domain.*;
+import repository.Repositories;
+import repository.TrainRepository;
+import repository.CarriageRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AssignTrainController {
@@ -12,6 +16,52 @@ public class AssignTrainController {
 
     // Cargo distribution constants
     private static final double PEOPLE_RATIO = 0.7;  // 70% people (the rest is Mail)
+
+    /**
+     * Creates a train with the specified locomotive and cargo types, then assigns it to a route
+     * @param locomotive The locomotive to use for the train
+     * @param route The ordered list of stations the train will visit
+     * @param cargoTypes The types of cargo this train will collect
+     * @param peopleCarriageCount Number of people carriages to create
+     * @param mailCarriageCount Number of mail carriages to create
+     * @param scenario the scenario to check the scenario effects on the route
+     * @param budget the player's budget
+     * @param playerEmail the email of the player creating the train
+     * @return Budget earned from this route
+     */
+    public int createTrainAndAssignToRoute(Locomotive locomotive, List<Station> route,
+                                           List<Carriage.Type> cargoTypes, int peopleCarriageCount,
+                                           int mailCarriageCount, Scenario scenario, Budget budget,
+                                           String playerEmail) {
+
+        // Create carriages based on the specified counts
+        List<Carriage> carriages = new ArrayList<>();
+        CarriageRepository carriageRepo = Repositories.getInstance().getCarriageRepository();
+
+        // Create people carriages
+        for (int i = 0; i < peopleCarriageCount; i++) {
+            Carriage c = new Carriage(Carriage.Type.PEOPLE);
+            carriageRepo.save(c);
+            carriages.add(c);
+        }
+
+        // Create mail carriages
+        for (int i = 0; i < mailCarriageCount; i++) {
+            Carriage c = new Carriage(Carriage.Type.MAIL);
+            carriageRepo.save(c);
+            carriages.add(c);
+        }
+
+        // Create and save the train
+        Train train = new Train(locomotive, carriages, playerEmail);
+        TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
+        trainRepo.save(train);
+
+        System.out.println("Train created with " + carriages.size() + " carriages.");
+
+        // Now assign the train to the route
+        return assignTrainToRoute(train, route, cargoTypes, scenario, budget);
+    }
 
     /**
      * Assigns a train to a specific route with defined cargo types to collect
@@ -90,18 +140,16 @@ public class AssignTrainController {
         if(isVaccinationCampaign){
             moneyWon = ((totalPeopleCollected * PEOPLE_VALUE) * 2) + (totalMailCollected * MAIL_VALUE);
         }
-
         else{
             moneyWon = (totalPeopleCollected * PEOPLE_VALUE) + (totalMailCollected * MAIL_VALUE);
         }
-
 
         // Print summary
         System.out.println("\n=== Train Route Summary ===");
         System.out.println("Total cargo collected: " + (totalPeopleCollected + totalMailCollected));
         System.out.println("People collected: " + totalPeopleCollected);
         System.out.println("Mail collected: " + totalMailCollected);
-        System.out.println("Budget earned: " + budget.getBudget());
+        System.out.println("Budget earned: " + moneyWon);
         System.out.println("=========================\n");
 
         budget.addBudget(moneyWon);
