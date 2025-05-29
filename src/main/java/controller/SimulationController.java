@@ -30,6 +30,14 @@ public class SimulationController {
     private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final List<City> cities = cityRepo.getCities();
 
+    /**
+     * Displays the map data by printing a visual representation of the map.
+     * The map is represented as a grid with cities and stations marked on it,
+     * and other areas filled with default symbols.
+     *
+     * @param map the map object containing the details of the map to be displayed
+     * @param scenario the scenario object associated with the map, influencing how stations are displayed
+     */
     public void displayMapData(Map map, Scenario scenario) {
         int width = map.getWidth();
         int height = map.getHeight();
@@ -51,6 +59,21 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Advances the simulation's timeline by manipulating the current time period and performing related updates
+     * such as maintenance costs, locomotive updates, and checking for the end of the scenario.
+     * It also interacts with the user interface to provide updates on the game's state.
+     *
+     * @param selectedScenario the scenario associated with the current simulation
+     * @param timePeriod an atomic reference to an array holding the current and final year of the scenario
+     * @param running a flag indicating whether the simulation is actively running
+     * @param options a list of menu items representing possible user actions in the game
+     * @param scheduler the executor service responsible for scheduling game ticks
+     * @param gameOver a flag indicating whether the game has reached its ending condition
+     * @param budget the budget available to the player, utilized within the simulation
+     * @param sim the simulation object containing state information such as the current year
+     * @return a Runnable encapsulating the operations to be performed during each tick of the simulated time
+     */
     public Runnable passTime(
             Scenario selectedScenario,
             AtomicReference<AtomicIntegerArray> timePeriod,
@@ -97,6 +120,18 @@ public class SimulationController {
         };
     }
 
+    /**
+     * Generates a Runnable task for producing cargo to be added to stations based on the selected map and scenario.
+     * The cargo generation process is limited by the provided time period and can be stopped using the running flag.
+     * The task shuts down the given scheduler upon completion of the defined time period.
+     *
+     * @param selectedMap the map object representing the current simulation
+     * @param selectedScenario the scenario object influencing the cargo generation process
+     * @param timePeriod an atomic reference to an array containing the current and final time periods
+     * @param running a flag indicating whether cargo generation is actively running
+     * @param generationScheduler the scheduler responsible for managing cargo generation timing
+     * @return a Runnable task responsible for executing the cargo generation logic
+     */
     public Runnable generateCargo(Map selectedMap,Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running, ScheduledExecutorService generationScheduler) {
         return () -> {
             if (running.get()) {
@@ -110,6 +145,15 @@ public class SimulationController {
         };
     }
 
+    /**
+     * Adds cargo to stations based on the selected map and scenario.
+     * The method considers station capacity and certain scenario-specific
+     * rules (e.g., "School Program") while distributing cargo among stations.
+     * If a station reaches its maximum capacity, notifications are managed accordingly.
+     *
+     * @param selectedMap the map object representing the current simulation
+     * @param selectedScenario the scenario object influencing cargo distribution logic
+     */
     public void addCargoToStation(
             Map selectedMap,
             Scenario selectedScenario
@@ -166,6 +210,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Resets the current game state by performing actions such as clearing locomotives,
+     * resetting the budget, and removing user-specific stations from the selected map and scenario.
+     *
+     * @param selectedMap the map selected for the current simulation
+     * @param selectedScenario the scenario selected for the current simulation
+     * @param budget the budget associated with the player's game session, which will be reset
+     */
     public void resetGame(Map selectedMap, Scenario selectedScenario, Budget budget) {
         List<Locomotive> l = new ArrayList<>();
         currentUser.setLocomotives(l);
@@ -177,6 +229,15 @@ public class SimulationController {
         );
     }
 
+    /**
+     * Populates the given grid with visual representations of cities and their associated house blocks
+     * based on the map's data.
+     * Cities corresponding to the given map are retrieved, and their locations are marked on the grid
+     * with specific symbols. City centers are marked as "🌆", and house blocks are marked as "🏠".
+     *
+     * @param grid a 2D array representing the map's grid where visual city elements will be added
+     * @param map the map object containing information about the cities and their locations
+     */
     private void addCitiesToMap(String[][] grid, Map map) {
         List<City> cities = cityRepo.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
@@ -189,6 +250,17 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Populates the given grid with visual representations of stations based on their type,
+     * owner, map name, and scenario. Stations are displayed with specific symbols
+     * depending on their type (depot, terminal, station) and orientation.
+     *
+     * @param grid a 2D array representing the map's grid where stations will be added
+     * @param map the map object representing the selected map of the simulation
+     * @param scenario the scenario object influencing station-related rules and display
+     * @param width the width of the grid defining the map's horizontal boundary
+     * @param height the height of the grid defining the map's vertical boundary
+     */
     private void addStationsToMap(String[][] grid, Map map, Scenario scenario, int width, int height) {
         if (currentUser != null) {
             String owner = currentUser.getEmail();
@@ -247,6 +319,21 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Fills a specific area of the grid with visual symbols, representing either a station center
+     * (marked as "🚉") or the station area (marked as "🅿️"). The filling process ensures that
+     * the content stays within the defined grid boundaries.
+     *
+     * @param grid the 2D array that represents the map grid to be painted
+     * @param maxW the maximum width limit of the grid
+     * @param maxH the maximum height limit of the grid
+     * @param cx the x-coordinate of the station to be symbolized as "🚉"
+     * @param cy the y-coordinate of the station to be symbolized as "🚉"
+     * @param ox the starting x-coordinate offset for painting the area
+     * @param oy the starting y-coordinate offset for painting the area
+     * @param w the width of the area to be painted
+     * @param h the height of the area to be painted
+     */
     private void paintArea(String[][] grid, int maxW, int maxH,
                            int cx, int cy, int ox, int oy, int w, int h) {
         for (int dy = 0; dy < h; dy++) {
@@ -260,6 +347,13 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Retrieves a map from the repository. If no maps are available,
+     * it returns null after displaying an appropriate message. If there
+     * are maps available, the user is prompted to select one.
+     *
+     * @return the selected map from the repository, or null if no maps are available or no selection is made
+     */
     public Map getMap() {
         List<Map> maps = mapRepo.getMaps();
         if (maps.isEmpty()) {
@@ -275,6 +369,16 @@ public class SimulationController {
         return maps.get(idx);
     }
 
+    /**
+     * Retrieves a scenario associated with the selected map from the repository.
+     * If no scenarios are available for the specified map, a message is displayed,
+     * and null is returned. If scenarios are available, the user is prompted to
+     * select one. The selected scenario is then returned.
+     *
+     * @param selectedMap the map object for which scenarios are to be retrieved
+     * @return the selected scenario associated with the specified map,
+     *         or null if no scenarios are available or no selection is made
+     */
     public Scenario getScenario(Map selectedMap) {
         List<Scenario> scenarios = scenarioRepo.getScenarios().stream()
                 .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
@@ -292,6 +396,13 @@ public class SimulationController {
         return scenarios.get(idx);
     }
 
+    /**
+     * Pays for the maintenance costs of all locomotives owned by the current user
+     * within the constraints of the provided budget. The method evaluates each locomotive's
+     * maintenance and fuel costs, updating their availability and adjusting the budget accordingly.
+     *
+     * @param budget the budget associated with the current user, used to pay for locomotive maintenance and fuel costs
+     */
     public void payLocomotiveMaintenance(Budget budget){
         boolean canPay;
         int yearlyBudget;
@@ -315,6 +426,14 @@ public class SimulationController {
         currentUser.setLocomotives(canUse);
     }
 
+    /**
+     * Removes locomotives owned by the current user that are outdated based on the specified year.
+     * Locomotives with an end year of operation less than or equal to the given year will be removed,
+     * while the others are retained. A message is logged for each removed locomotive.
+     *
+     * @param year the cutoff year; locomotives with an end year of operation less than or equal to this year
+     *             will be considered outdated and removed
+     */
     public void removeOutdatedLocomotives(int year) {
         List<Locomotive> locomotives = new ArrayList<>();
         for (Locomotive locomotive : currentUser.getLocomotives()) {
@@ -352,14 +471,37 @@ public class SimulationController {
         return budget;
     }
 
+    /**
+     * Retrieves a list of all simulations from the simulation repository.
+     *
+     * @return a list of Simulation objects available in the repository
+     */
     public List<Simulation> getSimulations() {
         return simulationRepo.getSimulations();
     }
 
+    /**
+     * Creates a new simulation using the provided map, scenario, year, and user budget.
+     * The simulation is added to the simulation repository and returned as the created object.
+     *
+     * @param selectedMap the map object selected for the simulation
+     * @param selectedScenario the scenario object selected for the simulation
+     * @param currentYear the year in which the simulation starts
+     * @param userBudget the budget allocated to the user for the simulation
+     * @return the newly created Simulation object
+     */
     public Simulation createSimulation(Map selectedMap, Scenario selectedScenario, int currentYear, Budget userBudget) {
         return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
     }
 
+    /**
+     * Updates the simulation with the provided map, scenario, new year, and new budget.
+     *
+     * @param map       The map object associated with the simulation.
+     * @param scenario  The scenario under which the simulation should operate.
+     * @param newYear   The new year to update the simulation to.
+     * @param newBudget The budget details to be applied to the simulation.
+     */
     public void updateSimulation(Map map,
                                  Scenario scenario,
                                  int newYear,
@@ -367,6 +509,13 @@ public class SimulationController {
         simulationRepo.updateSimulation(map, scenario, currentUser, newYear, newBudget);
     }
 
+    /**
+     * Finds a simulation based on the provided map and scenario.
+     *
+     * @param map the map containing key-value pairs for searching the simulation
+     * @param scenario the scenario used as part of the search criteria
+     * @return an Optional containing the Simulation if found, or an empty Optional if not found
+     */
     public Optional<Simulation> findBy(Map map, Scenario scenario) {
         return simulationRepo.findBy(map, scenario, currentUser);
     }

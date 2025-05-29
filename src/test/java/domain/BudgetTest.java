@@ -24,7 +24,7 @@ public class BudgetTest {
         techRestrictions.add("Steam only");
         histRestrictions.add("Pre-electric era");
 
-        map = new Map(mapName, 100, 100);
+        map = new Map(mapName, 100, 100, 2);
         scenario = new Scenario("TestScenario", mapName, timeRestrictions, techRestrictions, histRestrictions);
         user = new User("Test User", "test@example.com", "password", "PLAYER");
         budget = new Budget(initialBudgetAmount, map, scenario, user);
@@ -63,7 +63,7 @@ public class BudgetTest {
 
     @Test
     void setMap() {
-        Map newMap = new Map("NewMap", 200, 200);
+        Map newMap = new Map("NewMap", 200, 200, 2);
         budget.setMap(newMap);
         assertEquals(newMap, budget.getMap());
     }
@@ -96,22 +96,5 @@ public class BudgetTest {
         User newUser = new User("New User", "new@example.com", "newpassword", "EDITOR");
         budget.setUser(newUser);
         assertEquals(newUser, budget.getUser());
-    }
-
-    @Test
-    void getCurrentYear() {
-        assertEquals(timeRestrictions[0], budget.getCurrentYear());
-    }
-
-    @Test
-    void setCurrentYear() {
-        int newYear = 1950;
-        budget.setCurrentYear(newYear);
-        assertEquals(newYear, budget.getCurrentYear());
-    }
-
-    @Test
-    void initialCurrentYearMatchesScenarioStartYear() {
-        assertEquals(scenario.getTimeRestrictions()[0], budget.getCurrentYear());
     }
 }

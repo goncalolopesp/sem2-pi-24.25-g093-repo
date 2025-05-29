@@ -30,6 +30,33 @@ public class AuthRepository {
         return false;
     }
 
+    public boolean isPasswordUsable(String password) {
+        int numOfNums = 0;
+        int numOfCapitals = 0;
+        if (password.length() < 7) {
+            return false;
+        }
+
+        for (int i = 0; i < password.length(); i++) {
+            if (Character.isUpperCase(password.charAt(i))) {
+                numOfCapitals++;
+            }
+            if (Character.isDigit(password.charAt(i))) {
+                numOfNums++;
+            }
+        }
+
+        if (numOfNums < 2) {
+            return false;
+        }
+
+        if (numOfCapitals < 3) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Gets all users registered in the system
      * @return List of all users
@@ -47,7 +74,7 @@ public class AuthRepository {
     public Optional<User> getUserByEmail(String email) {
 
         for (User user : users) {
-            if (user.getEmail().equals(email)) {
+            if (user.getEmail().equalsIgnoreCase(email)) {
                 return Optional.of(user);
             }
         }
@@ -61,7 +88,7 @@ public class AuthRepository {
      */
     private boolean doesUserExist(User user){
         for (User user1 : users) {
-            if (user1.getEmail().equals(user.getEmail())) {
+            if (user1.getEmail().equalsIgnoreCase(user.getEmail())) {
                 return true;
             }
         }
@@ -75,7 +102,7 @@ public class AuthRepository {
      */
     public boolean doesUserExist(String email) {
         for (User user1 : users) {
-            if (user1.getEmail().equals(email)) {
+            if (user1.getEmail().equalsIgnoreCase(email)) {
                 return true;
             }
         }

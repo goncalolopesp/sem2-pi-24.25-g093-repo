@@ -24,6 +24,25 @@ public class SimulationUI implements Runnable {
     private final SimulationController ctrl = new SimulationController();
     private Simulation sim;
 
+    /**
+     * Executes the main logic of the SimulationUI class to manage and run the simulation.
+     * This method is responsible for loading existing simulations or creating new ones,
+     * initializing game components, managing time progression, cargo generation logic,
+     * and presenting a user interface for interactions with options.
+     *
+     * The method verifies the prerequisites required to run a simulation, including the
+     * presence of a logged-in user, a selected map, and a scenario. It checks for existing
+     * simulations in the repository and resumes or creates one as necessary.
+     * After setting up the simulation, it handles periodic tasks such as time progression
+     * and cargo generation using separate scheduled threads.
+     *
+     * A navigational game menu is presented to the user, allowing actions such as building
+     * or upgrading stations, managing locomotives, assigning trains, and pausing or resuming
+     * the game. The menu dynamically adjusts based on the simulation’s running state.
+     *
+     * Upon exit or pause, the method ensures the simulation state is saved, stops periodic
+     * tasks, and provides the option to reset the game if required.
+     */
     @Override
     public void run() {
 

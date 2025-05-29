@@ -23,15 +23,16 @@ public class AuthUI implements Runnable {
 
             String name = Utils.readLineFromConsole("Enter your name: ");
             String id = Utils.readLineFromConsole("Enter UserId/Email: ");
-            String pwd = Utils.readLineFromConsole("Enter Password: ");
+            String pwd = Utils.readLineFromConsole("Enter Password (Include at least 7 characters, including at least 2 numbers and 3 capital letters): ");
             String roleID = AuthController.ROLE_PLAYER;
 
             success = ctrl.createNewUser(name, id, pwd, roleID);
             if (!success) {
-                System.out.println("User already exists!");
+                System.out.println("User already exists or password doesn't meet the requirements");
             }
 
         } while (!success);
+        System.out.println("User created successfully");
     }
 
     public void run() {
@@ -65,13 +66,13 @@ public class AuthUI implements Runnable {
         int maxAttempts = 3;
         boolean success = false;
         do {
-            maxAttempts--;
             String id = Utils.readLineFromConsole("Enter UserId/Email: ");
             if (ctrl.doesUserExist(id)){
                 String pwd = Utils.readLineFromConsole("Enter Password: ");
 
                 success = ctrl.doLogin(id, pwd);
                 if (!success) {
+                    maxAttempts--;
                     System.out.println("Invalid UserId and/or Password. \n You have  " + maxAttempts + " more attempt(s).");
                 }
             }else{

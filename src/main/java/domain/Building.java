@@ -41,6 +41,11 @@ public class Building implements Serializable {
         return buildingType;
     }
 
+    /**
+     * Returns the string representation of this building, which is its type.
+     *
+     * @return the type of the building
+     */
     @Override
     public String toString() {
         return buildingType;

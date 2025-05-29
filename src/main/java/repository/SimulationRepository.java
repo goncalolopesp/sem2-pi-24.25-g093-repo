@@ -11,8 +11,19 @@ import java.util.Optional;
 public class SimulationRepository implements Serializable {
     private final List<Simulation> simulations;
 
+    /**
+     * Default constructor for the SimulationRepository class.
+     * Initializes an empty list of Simulation objects to manage in this repository.
+     */
     public SimulationRepository() { simulations = new ArrayList<>(); }
 
+    /**
+     * Adds a simulation to the repository. If a simulation with the same map, scenario,
+     * and user already exists, updates the existing simulation's year and budget instead.
+     *
+     * @param simulation the simulation to be added or updated in the repository
+     * @return the existing simulation if updated, or the newly added simulation
+     */
     public Simulation add(Simulation simulation) {
         Optional<Simulation> existing = findBy(
                 simulation.getSelectedMap(),
@@ -33,13 +44,26 @@ public class SimulationRepository implements Serializable {
         return simulation;
     }
 
+    /**
+     * Copies the simulations from another SimulationRepository into this repository.
+     * Clears all existing simulations in this repository before copying.
+     *
+     * @param other the SimulationRepository from which simulations will be copied
+     */
     public void copyFrom(SimulationRepository other) {
         this.simulations.clear();
         this.simulations.addAll(other.getSimulations());
     }
 
     /**
-     * Find every Simulation matching map+scenario+user and mutate its year & budget.
+     * Updates the simulation parameters in the repository that match the specified map, scenario, and user.
+     * Updates the simulation's year and budget if a match is found.
+     *
+     * @param map       the map associated with the simulation to update
+     * @param scenario  the scenario associated with the simulation to update
+     * @param user      the user associated with the simulation to update
+     * @param newYear   the new current year to set for the simulation
+     * @param newBudget the new budget to set for the simulation
      */
     public void updateSimulation(Map map,
                                  Scenario scenario,
@@ -57,10 +81,25 @@ public class SimulationRepository implements Serializable {
         }
     }
 
+    /**
+     * Retrieves an immutable copy of the list of simulations managed by this repository.
+     *
+     * @return a list containing all simulations in the repository, returned as an unmodifiable copy
+     */
     public List<Simulation> getSimulations() {
         return List.copyOf(simulations);
     }
 
+    /**
+     * Searches for a simulation in the repository that matches the specified map, scenario, and user.
+     * If a matching simulation is found, it is returned wrapped in an Optional.
+     * If no match is found, an empty Optional is returned.
+     *
+     * @param map the map to match in the simulation
+     * @param scenario the scenario to match in the simulation
+     * @param user the user associated with the simulation to match (can be null)
+     * @return an Optional containing the matching simulation if found, or an empty Optional if no match is found
+     */
     public Optional<Simulation> findBy(Map map, Scenario scenario, User user) {
         System.out.println("=== SEARCHING FOR SIMULATION ===");
         System.out.println("Looking for map: '" + map.getMapName() + "'");
@@ -85,10 +124,5 @@ public class SimulationRepository implements Serializable {
         }
         System.out.println("  NO MATCH FOUND");
         return Optional.empty();
-    }
-
-    // Overloaded method for backward compatibility (without user parameter)
-    public Optional<Simulation> findBy(Map map, Scenario scenario) {
-        return findBy(map, scenario, null);
     }
 }

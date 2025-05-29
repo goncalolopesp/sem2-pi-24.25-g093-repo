@@ -99,6 +99,13 @@ public class Map implements Serializable {
         return getMapName();
     }
 
+    /**
+     * Compares this map to the specified object for equality.
+     * The maps are considered equal if they have the same class and their names are equal.
+     *
+     * @param o the object to compare against this map
+     * @return true if the specified object represents a map with the same name; false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -107,6 +114,12 @@ public class Map implements Serializable {
         return Objects.equals(mapName, map.mapName);
     }
 
+    /**
+     * Computes the hash code for this map.
+     * The hash code is based on the unique name of the map.
+     *
+     * @return the hash code of the map
+     */
     @Override
     public int hashCode() {
         return Objects.hash(mapName);

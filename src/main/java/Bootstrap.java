@@ -22,8 +22,8 @@ public class Bootstrap {
         //get authentication repository
         AuthController authController = new AuthController();
 
-        authController.createNewUser("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR);
-        authController.createNewUser("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER);
+        authController.createNewUserWithoutVerification("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR);
+        authController.createNewUserWithoutVerification("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER);
     }
 
     private void createLocomotives() {

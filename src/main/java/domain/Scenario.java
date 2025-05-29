@@ -86,6 +86,13 @@ public class Scenario implements Serializable {
         return getScenarioName();
     }
 
+    /**
+     * Compares this object with the specified object for equality.
+     * The comparison is based on the scenarioName field.
+     *
+     * @param o the object to be compared for equality with this instance
+     * @return true if the specified object is equal to this instance, false otherwise
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -94,6 +101,11 @@ public class Scenario implements Serializable {
         return Objects.equals(scenarioName, scenario.scenarioName);
     }
 
+    /**
+     * Computes the hash code for this Scenario instance based on its {@code scenarioName} field.
+     *
+     * @return the hash code value for this Scenario instance
+     */
     @Override
     public int hashCode() {
         return Objects.hash(scenarioName);
