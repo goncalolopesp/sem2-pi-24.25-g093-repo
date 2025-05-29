@@ -61,6 +61,12 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Adds industries to a grid map by marking their locations with a specific symbol.
+     *
+     * @param grid a 2D array representing the map grid where industries will be added
+     * @param map the map object containing the name used to filter industries
+     */
     private void addIndustriesToMap(String[][] grid, Map map) {
         List<Industry> industries = industryRepo.getIndustries().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
