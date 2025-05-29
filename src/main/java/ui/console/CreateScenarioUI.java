@@ -1,6 +1,7 @@
 package ui.console;
 
 import controller.CreateScenarioController;
+import domain.Map;
 import domain.Scenario;
 import repository.MapRepository;
 import repository.Repositories;
@@ -16,7 +17,7 @@ public class CreateScenarioUI implements Runnable {
     private final Repositories repositories = Repositories.getInstance();
     private final MapRepository mapRepository = repositories.getMapRepository();
     private String scenarioName;
-    private String selectedMap;
+    private Map selectedMap;
     private int[] timeRestrictions;
     private List<String> technologicalRestrictions;
     private List<String> historicalRestrictions;
@@ -24,7 +25,7 @@ public class CreateScenarioUI implements Runnable {
     /**
      * Constructs a new CreateScenarioUI, initializing its controller.
      */
-    public CreateScenarioUI() { ctrl = new CreateScenarioController(); }
+    public CreateScenarioUI(Map map) { this.selectedMap = map; ctrl = new CreateScenarioController(); }
     /**
      * Returns the controller used to create scenarios.
      *
@@ -47,7 +48,7 @@ public class CreateScenarioUI implements Runnable {
      * Prints a success or failure message based on the result.
      */
     private void submitData() {
-        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap, timeRestrictions, technologicalRestrictions, historicalRestrictions));
+        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap.getMapName(), timeRestrictions, technologicalRestrictions, historicalRestrictions));
 
         if (scenario.isPresent()) {
             System.out.println("\nScenario successfully created!");
@@ -60,8 +61,7 @@ public class CreateScenarioUI implements Runnable {
      * Asks the user for scenario name and map selection.
      */
     private void requestData() {
-        selectedMap = requestSelectedMap();
-        scenarioName = requestScenarioName(selectedMap);
+        scenarioName = requestScenarioName(selectedMap.getMapName());
         timeRestrictions = requestTimeRestrictions();
         technologicalRestrictions = requestTechnologicalRestrictions();
         historicalRestrictions = requestHistoricalRestrictions();
@@ -85,32 +85,6 @@ public class CreateScenarioUI implements Runnable {
         } while (!ctrl.checkNameUniqueness(scenarioName, selectedMap));
 
         return scenarioName.trim();
-    }
-
-    /**
-     * Asks the user to select an existing map by name, verifying its existence.
-     * Repeats until a valid map name is provided.
-     *
-     * @return the entered and trimmed map name
-     */
-    private String requestSelectedMap() {
-        Scanner sc = new Scanner(System.in);
-        System.out.println(mapRepository.getMaps());
-        System.out.print("Select Map: ");
-        String mapName;
-
-        do {
-            mapName = sc.nextLine().trim();
-            if (mapName.isEmpty()) {
-                System.out.print("Map name cannot be empty. Try again: ");
-                continue;
-            }
-            if (mapRepository.checkNameUniqueness(mapName)) {
-                System.out.print("Map doesn't exist! Try again: ");
-            }
-        } while (mapName.isEmpty() || mapRepository.checkNameUniqueness(mapName));
-
-        return mapName;
     }
 
     /**

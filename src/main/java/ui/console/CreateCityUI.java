@@ -7,6 +7,7 @@ import controller.CreateCityController.BlockError;
 
 import domain.City;
 import domain.HouseBlock;
+import domain.Map;
 import repository.MapRepository;
 import repository.Repositories;
 
@@ -17,10 +18,16 @@ import java.util.Scanner;
  */
 
 public class CreateCityUI implements Runnable {
+    private Map map;
+
     /**
      * Controller handling city creation and validation.
      */
     private final CreateCityController ctrl = new CreateCityController();
+
+    public CreateCityUI(Map map) {
+        this.map = map;
+    }
 
     /**
      * Runs the "Create City" user interface.
@@ -44,23 +51,13 @@ public class CreateCityUI implements Runnable {
                     System.out.println("Invalid city name. Please enter a valid name. No special characters nor digits are allowed.");
                 }
             } while (!cityName.matches(pattern));
-            MapRepository mrepo = Repositories.getInstance().getMapRepository();
-            System.out.println(mrepo.getMaps());
             do {
-                System.out.print("Enter Map Name: ");
-                mapName = sc.nextLine().trim();
+                mapName = map.getMapName().trim();
                 nm = ctrl.validateNameMap(cityName, mapName);
 
                 switch (nm) {
-                    case MAP_NOT_FOUND:
-                        System.out.println("Error: Map '" + mapName + "' does not exist.");
-                        break;
                     case NAME_DUPLICATE:
                         System.out.println("Error: City name '" + cityName + "' already used on map '" + mapName + "'.");
-                        break;
-                    case OK:
-                        // Successful validation
-                        System.out.println("Map validated successfully!");
                         break;
                 }
             } while (nm != NameMapError.OK);
