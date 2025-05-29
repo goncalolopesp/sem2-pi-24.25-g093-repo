@@ -191,10 +191,7 @@ public class UpgradeStationUI implements Runnable{
                             ctrl.getBuildingRepository().remove(station, "telephone");
                         }
                     }
-                    if (checkMutualExclusivity(ctrl.getBuildings(), buildingType)) {
-                        System.out.println("Mutually exclusive building already exists in this station.");
-                        valid = false;
-                    }
+                    checkMutualExclusivity(ctrl.getBuildings(), buildingType);
                 }
             }
 
@@ -223,13 +220,19 @@ public class UpgradeStationUI implements Runnable{
      * @return true if the new building type violates mutual exclusivity, false otherwise
      */
     private boolean checkMutualExclusivity(List<Building> existingBuildings, String newType) {
-        String newLower = newType.toLowerCase();
+        String newLower = newType.toLowerCase().trim();
 
         for (Building building : existingBuildings) {
-            String existing = building.getBuildingType().toLowerCase();
-            if (!existing.equals(newLower) &&
-                    ((existing.contains("hotel") && newLower.contains("hotel")) ||
-                            (existing.contains("cafe") && newLower.contains("cafe")))) {
+            String existing = building.getBuildingType().toLowerCase().trim();
+
+            if (existing.equals(newLower)) {
+                return false;
+            }
+
+            if ((existing.contains("hotel") && newLower.contains("hotel")) ||
+                    (existing.contains("cafe") && newLower.contains("cafe"))) {
+
+                ctrl.getBuildingRepository().remove(building.getStation(), building.getBuildingType());
                 return true;
             }
         }
