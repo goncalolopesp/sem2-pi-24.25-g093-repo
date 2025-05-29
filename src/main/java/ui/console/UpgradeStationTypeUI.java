@@ -4,6 +4,8 @@ import domain.*;
 import domain.Station.Orientation;
 import domain.Station.Type;
 import controller.UpgradeStationTypeController;
+import repository.Repositories;
+import repository.StationRepository;
 
 import java.util.List;
 import java.util.Scanner;
@@ -119,8 +121,11 @@ public class UpgradeStationTypeUI implements Runnable {
      * @return the selected station, or null if none was selected
      */
     private Station requestStation() {
-        List<Station> owned = selectedMap.getStations().stream()
-                .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail())).filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
+        StationRepository repo = Repositories.getInstance().getStationRepository();
+        List<Station> owned = repo.getStations().stream()
+                .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail()))
+                .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
+                .filter(s -> s.getMapName().equals(selectedMap.getMapName()))
                 .collect(Collectors.toList());
         if (owned.isEmpty()) {
             System.out.println("You have no stations on this map.");

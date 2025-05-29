@@ -2,6 +2,8 @@ package ui.console;
 
 import controller.UpgradeStationController;
 import domain.*;
+import repository.Repositories;
+import repository.StationRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -85,9 +87,11 @@ public class UpgradeStationUI implements Runnable{
      * @return the validated station name
      */
     private Station requestStation() {
-        List<Station> owned = selectedMap.getStations().stream()
+        StationRepository repo = Repositories.getInstance().getStationRepository();
+        List<Station> owned = repo.getStations().stream()
                 .filter(s -> s.getOwnerPlayer().equals(CurrentUser.getInstance().getUser().getEmail()))
                 .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
+                .filter(s -> s.getMapName().equals(selectedMap.getMapName()))
                 .collect(Collectors.toList());
         if (owned.isEmpty()) {
             System.out.println("You have no stations on this map.");
@@ -178,7 +182,7 @@ public class UpgradeStationUI implements Runnable{
                             ctrl.getBuildingRepository().remove(station, "telegraph");
                         }
 
-                    } else {
+                    } if (currentYear < 1876) {
                         if (buildingType.equals("telephone")) {
                             System.out.println("Telephone can only be built in the year 1876-Present.");
                             valid = false;
