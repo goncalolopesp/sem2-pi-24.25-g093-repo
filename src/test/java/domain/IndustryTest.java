@@ -11,7 +11,7 @@ class IndustryTest {
         int x = 10;
         int y = 20;
 
-        Industry industry = new Industry(type, x, y);
+        Industry industry = new Industry("exampleMap", type, x, y);
 
         assertEquals(type, industry.getType());
         assertEquals(new Location(x, y), industry.getLocation());
@@ -19,7 +19,7 @@ class IndustryTest {
 
     @Test
     void testSetType() {
-        Industry industry = new Industry(IndustryType.AUTOMOBILE, 0, 0);
+        Industry industry = new Industry("exampleMap", IndustryType.AUTOMOBILE, 0, 0);
         industry.setType(IndustryType.BAKERY);
 
         assertEquals(IndustryType.BAKERY, industry.getType());
@@ -27,7 +27,7 @@ class IndustryTest {
 
     @Test
     void testSetLocation() {
-        Industry industry = new Industry(IndustryType.COAL_MINE, 0, 0);
+        Industry industry = new Industry("exampleMap", IndustryType.COAL_MINE, 0, 0);
         Location newLocation = new Location(50, 60);
 
         industry.setLocation(newLocation);
@@ -37,7 +37,7 @@ class IndustryTest {
 
     @Test
     void testToString() {
-        Industry industry = new Industry(IndustryType.COFFEE_FARM, 5, 15);
+        Industry industry = new Industry("exampleMap", IndustryType.COFFEE_FARM, 5, 15);
         String expected = "Industry{type=COFFEE_FARM, location=" + new Location(5, 15).toString() + "}";
 
         assertEquals(expected, industry.toString());

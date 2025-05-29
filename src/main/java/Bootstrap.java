@@ -1,6 +1,9 @@
 import controller.*;
 import domain.City;
+import domain.Industry;
+import domain.IndustryType;
 import domain.Scenario;
+import repository.IndustryRepository;
 import repository.LocomotiveRepository;
 import repository.Repositories;
 import repository.ScenarioRepository;
@@ -12,6 +15,7 @@ public class Bootstrap {
     public void run() {
         addUsers();
         addMaps();
+        addIndustries();
         addCities();
         loadScenarios();
         createLocomotives();
@@ -26,12 +30,47 @@ public class Bootstrap {
         authController.createNewUserWithoutVerification("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER);
     }
 
+    private void addMaps() {
+        CreateMapController createMapController = new CreateMapController();
+        createMapController.createMap("exampleMap", 50, 50, 5);
+    }
+
+    private void addIndustries() {
+        IndustryRepository industryRepository = Repositories.getInstance().getIndustryRepository();
+        industryRepository.addIndustry(new Industry("exampleMap", IndustryType.AUTOMOBILE, 13, 24));
+        industryRepository.addIndustry(new Industry("exampleMap", IndustryType.COAL_MINE, 29, 17));
+    }
+
+    private void addCities() {
+        CreateCityController createCityController = new CreateCityController();
+        City city = createCityController.createCity("exampleCity", "exampleMap", 5, 7);
+        addHouseBlocks(createCityController, city);
+    }
+
+    private void addHouseBlocks(CreateCityController createCityController, City city) {
+        createCityController.assignBlocksAuto(city, 5, 2);
+    }
+
+    /**
+     * Loads scenarios from the "ScenarioStorage" file.
+     * If no scenarios exist in the file, creates a default example scenario.
+     */
+    private void loadScenarios() {
+        Repositories repositories = Repositories.getInstance();
+        ScenarioRepository scenarioRepository = repositories.getScenarioRepository();
+        List<Scenario> existingScenarios = scenarioRepository.getScenarios();
+
+        if (existingScenarios.isEmpty()) {
+            CreateScenarioController createScenarioController = new CreateScenarioController();
+            createScenarioController.createScenario("exampleScenario", "exampleMap",
+                    new int[]{1870, 1880},
+                    Collections.singletonList("steam"),
+                    Collections.singletonList("none"));
+        }
+    }
+
     private void createLocomotives() {
         //TODO: add Locomotive models here: should be created for each locomotive in the game
-        //get locomotive repository
-
-        Repositories repositories = Repositories.getInstance();
-        LocomotiveRepository lr = repositories.getLocomotiveRepository();
 
         BuyLocomotiveController buyLocomotiveController = new BuyLocomotiveController();
         buyLocomotiveController.createLocomotive("Trevithick-1", 10, "Steam", 8, 6, 1800, 1835, 10);
@@ -101,38 +140,5 @@ public class Bootstrap {
         buyLocomotiveController.createLocomotive("Eurostar", 1600, "Electric", 96, 65, 1994, 99999, 175);
         buyLocomotiveController.createLocomotive("Brenner", 1250, "Electric", 69, 175, 1999, 99999, 140);
         buyLocomotiveController.createLocomotive("Mag-Lev TBX-1", 2500, "Electric", 306, 200, 2008, 99999, 280);
-    }
-
-    private void addMaps() {
-        CreateMapController createMapController = new CreateMapController();
-        createMapController.createMap("exampleMap", 50, 50, 5);
-    }
-
-    private void addCities() {
-        CreateCityController createCityController = new CreateCityController();
-        City city = createCityController.createCity("exampleCity", "exampleMap", 5, 7);
-        addHouseBlocks(createCityController, city);
-    }
-
-    private void addHouseBlocks(CreateCityController createCityController, City city) {
-        createCityController.assignBlocksAuto(city, 5, 2);
-    }
-
-    /**
-     * Loads scenarios from the "ScenarioStorage" file.
-     * If no scenarios exist in the file, creates a default example scenario.
-     */
-    private void loadScenarios() {
-        Repositories repositories = Repositories.getInstance();
-        ScenarioRepository scenarioRepository = repositories.getScenarioRepository();
-        List<Scenario> existingScenarios = scenarioRepository.getScenarios();
-
-        if (existingScenarios.isEmpty()) {
-            CreateScenarioController createScenarioController = new CreateScenarioController();
-            createScenarioController.createScenario("exampleScenario", "exampleMap",
-                    new int[]{1870, 1880},
-                    Collections.singletonList("steam"),
-                    Collections.singletonList("none"));
-        }
     }
 }

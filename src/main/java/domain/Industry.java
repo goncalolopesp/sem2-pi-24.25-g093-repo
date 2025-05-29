@@ -1,12 +1,22 @@
 package domain;
 
 public class Industry {
+    private final String mapName;
     private IndustryType type;
     private Location location;
+    private final int generatedIron;
+    private final int generatedCoal;
 
-    public Industry(IndustryType type, int positionX, int positionY) {
+    public Industry(String mapName, IndustryType type, int positionX, int positionY) {
+        this.mapName = mapName;
         this.type = type;
         this.location = new Location(positionX, positionY);
+        this.generatedIron = 6;
+        this.generatedCoal = 4;
+    }
+
+    public String getMapName() {
+        return mapName;
     }
 
     public IndustryType getType() {

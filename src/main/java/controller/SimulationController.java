@@ -24,9 +24,10 @@ public class SimulationController {
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
     private final MapRepository mapRepo = Repositories.getInstance().getMapRepository();
+    private final IndustryRepository industryRepo = Repositories.getInstance().getIndustryRepository();
+    private final CityRepository cityRepo = Repositories.getInstance().getCityRepository();
     private final ScenarioRepository scenarioRepo = Repositories.getInstance().getScenarioRepository();
     private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
-    private final CityRepository cityRepo = Repositories.getInstance().getCityRepository();
     private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final List<City> cities = cityRepo.getCities();
 
@@ -48,6 +49,7 @@ public class SimulationController {
             }
         }
 
+        addIndustriesToMap(grid, map);
         addCitiesToMap(grid, map);
         addStationsToMap(grid, map,scenario, width, height);
 
@@ -56,6 +58,15 @@ public class SimulationController {
                 System.out.print(grid[y][x]);
             }
             System.out.println();
+        }
+    }
+
+    private void addIndustriesToMap(String[][] grid, Map map) {
+        List<Industry> industries = industryRepo.getIndustries().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        for (Industry industry : industries) {
+            grid[industry.getLocation().getY()][industry.getLocation().getX()] = "🏭";
         }
     }
 
