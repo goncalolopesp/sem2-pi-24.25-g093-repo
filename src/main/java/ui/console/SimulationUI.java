@@ -112,7 +112,7 @@ public class SimulationUI implements Runnable {
             currentUser.setLocomotives(sim.getUserBudget().getUser().getLocomotives());
         }
 
-        // With something like:
+        // Get Current Year and Final Year of the simulation
         int startYear = sim.getCurrentYear();
         int endYear   = selectedScenario.getTimeRestrictions()[1];
         AtomicReference<AtomicIntegerArray> timePeriod =
@@ -123,6 +123,8 @@ public class SimulationUI implements Runnable {
         } else {
             System.out.println("Resuming game on year " + startYear + ", will finish on year " + endYear);
         }
+
+        // Start the game by setting up periodic tasks and displaying the menu
 
         AtomicBoolean running = new AtomicBoolean(true);
         AtomicBoolean gameOver = new AtomicBoolean(false);

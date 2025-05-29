@@ -3,8 +3,6 @@ package ui.console;
 import controller.CreateScenarioController;
 import domain.Map;
 import domain.Scenario;
-import repository.MapRepository;
-import repository.Repositories;
 
 import java.util.*;
 
@@ -14,8 +12,6 @@ import java.util.*;
 public class CreateScenarioUI implements Runnable {
     /** Controller responsible for scenario creation logic. */
     private final CreateScenarioController ctrl;
-    private final Repositories repositories = Repositories.getInstance();
-    private final MapRepository mapRepository = repositories.getMapRepository();
     private String scenarioName;
     private Map selectedMap;
     private int[] timeRestrictions;
@@ -97,7 +93,9 @@ public class CreateScenarioUI implements Runnable {
         Scanner sc = new Scanner(System.in);
         int[] timePeriod = new int[2];
 
-        System.out.print("Enter Starting Year (Must be equal or higher than 1804 and lower than 2025): ");
+        System.out.println("\n--- STARTING YEAR --------------------------");
+        System.out.println("Note: Starting Year must be equal or higher than 1804 and lower than 2025.");
+        System.out.print("Enter Starting Year: ");
 
         do{
             String input = sc.nextLine().trim();
@@ -111,7 +109,9 @@ public class CreateScenarioUI implements Runnable {
             }
         } while (timePeriod[0] < 1804 || timePeriod[0] >= 2025);
 
-        System.out.print("Enter Final Year (Must be equal or lower than 2025): ");
+        System.out.println("\n--- FINAL YEAR --------------------------");
+        System.out.println("Note: Final Year must be higher than the Starting Year and equal or lower than 2025.");
+        System.out.print("Enter Final Year: ");
 
         do{
             String input = sc.nextLine().trim();
@@ -139,7 +139,9 @@ public class CreateScenarioUI implements Runnable {
         String[] validTypes = {"steam", "diesel", "electric"};
         boolean valid;
 
-        System.out.print("Enter Available Locomotive Types (comma-separated: steam, diesel, electric): ");
+        System.out.println("\n--- AVAILABLE LOCOMOTIVE TYPES --------------------------");
+        System.out.println("Note: Available Locomotive Types must be either 'steam', 'diesel', and/or 'electric'.");
+        System.out.print("Enter Available Locomotive Types: ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");
@@ -178,7 +180,9 @@ public class CreateScenarioUI implements Runnable {
         String[] validEvents = {"none", "vaccination campaign", "school program"};
         boolean valid;
 
-        System.out.print("Enter Historical Events (comma-separated: none, vaccination campaign (People give double the budget), school program [House Blocks produce double the cargo]): ");
+        System.out.println("\n--- HISTORICAL EVENTS --------------------------");
+        System.out.println("Note: Historical Events must be either 'none', 'vaccination program', and/or 'school program'.");
+        System.out.print("Enter Historical Events: ");
 
         do {
             String[] input = sc.nextLine().split("\\s*,\\s*");

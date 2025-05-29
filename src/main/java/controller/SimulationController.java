@@ -60,6 +60,124 @@ public class SimulationController {
     }
 
     /**
+     * Populates the given grid with visual representations of cities and their associated house blocks
+     * based on the map's data.
+     * Cities corresponding to the given map are retrieved, and their locations are marked on the grid
+     * with specific symbols. City centers are marked as "🌆", and house blocks are marked as "🏠".
+     *
+     * @param grid a 2D array representing the map's grid where visual city elements will be added
+     * @param map the map object containing information about the cities and their locations
+     */
+    private void addCitiesToMap(String[][] grid, Map map) {
+        List<City> cities = cityRepo.getCities().stream()
+                .filter(c -> c.getMapName().equals(map.getMapName()))
+                .collect(Collectors.toList());
+        for (City city : cities) {
+            grid[city.getCenterY()][city.getCenterX()] = "🌆";
+            for (HouseBlock hb : city.getBlocks()) {
+                grid[hb.getY()][hb.getX()] = "🏠";
+            }
+        }
+    }
+
+    /**
+     * Populates the given grid with visual representations of stations based on their type,
+     * owner, map name, and scenario. Stations are displayed with specific symbols
+     * depending on their type (depot, terminal, station) and orientation.
+     *
+     * @param grid a 2D array representing the map's grid where stations will be added
+     * @param map the map object representing the selected map of the simulation
+     * @param scenario the scenario object influencing station-related rules and display
+     * @param width the width of the grid defining the map's horizontal boundary
+     * @param height the height of the grid defining the map's vertical boundary
+     */
+    private void addStationsToMap(String[][] grid, Map map, Scenario scenario, int width, int height) {
+        if (currentUser != null) {
+            String owner = currentUser.getEmail();
+            for (Station st : stationrepo.getStations()) {
+                if (!st.getMapName().equals(map.getMapName()) ||
+                        !st.getOwnerPlayer().equals(owner) ||
+                        !st.getScenarioName().equals(scenario.getScenarioName())) {
+                    continue;
+                }
+
+                int w, h, ox, oy;
+                switch (st.getType()) {
+                    case DEPOT:
+                        w = h = 3;
+                        ox = st.getX() - 1;
+                        oy = st.getY() - 1;
+                        paintArea(grid, width, height, st.getX(), st.getY(), ox, oy, w, h);
+                        break;
+                    case TERMINAL:
+                        w = h = 5;
+                        ox = st.getX() - 2;
+                        oy = st.getY() - 2;
+                        // paint 5x5
+                        paintArea(grid, width, height, st.getX(), st.getY(), ox, oy, w, h);
+                        break;
+                    case STATION:
+                        w = h = 4;
+                        ox = st.getX() - 1;
+                        oy = st.getY() - 1;
+                        int sdx = 1, sdy = 1;
+                        switch (st.getOrientation()) {
+                            case NW:
+                                break;
+                            case NE:
+                                sdx = 2;
+                                break;
+                            case SW:
+                                sdy = 2; break;
+                            case SE:
+                                sdx = 2; sdy = 2; break;
+                        }
+                        for (int dy = 0; dy < h; dy++) {
+                            for (int dx = 0; dx < w; dx++) {
+                                int gx = ox + dx;
+                                int gy = oy + dy;
+                                if (gx >= 1 && gx <= width && gy >= 1 && gy <= height) {
+                                    grid[gy][gx] = (dx == sdx && dy == sdy) ? "🚉" : "🅿️";
+                                }
+                            }
+                        }
+                        break;
+                    default:
+                        grid[st.getY()][st.getX()] = "🚉";
+                }
+            }
+        }
+    }
+
+    /**
+     * Fills a specific area of the grid with visual symbols, representing either a station center
+     * (marked as "🚉") or the station area (marked as "🅿️"). The filling process ensures that
+     * the content stays within the defined grid boundaries.
+     *
+     * @param grid the 2D array that represents the map grid to be painted
+     * @param maxW the maximum width limit of the grid
+     * @param maxH the maximum height limit of the grid
+     * @param cx the x-coordinate of the station to be symbolized as "🚉"
+     * @param cy the y-coordinate of the station to be symbolized as "🚉"
+     * @param ox the starting x-coordinate offset for painting the area
+     * @param oy the starting y-coordinate offset for painting the area
+     * @param w the width of the area to be painted
+     * @param h the height of the area to be painted
+     */
+    private void paintArea(String[][] grid, int maxW, int maxH,
+                           int cx, int cy, int ox, int oy, int w, int h) {
+        for (int dy = 0; dy < h; dy++) {
+            for (int dx = 0; dx < w; dx++) {
+                int x = ox + dx;
+                int y = oy + dy;
+                if (x >= 1 && x <= maxW && y >= 1 && y <= maxH) {
+                    grid[y][x] = (x == cx && y == cy) ? "🚉" : "🅿️";
+                }
+            }
+        }
+    }
+
+    /**
      * Advances the simulation's timeline by manipulating the current time period and performing related updates
      * such as maintenance costs, locomotive updates, and checking for the end of the scenario.
      * It also interacts with the user interface to provide updates on the game's state.
@@ -211,140 +329,76 @@ public class SimulationController {
     }
 
     /**
-     * Resets the current game state by performing actions such as clearing locomotives,
-     * resetting the budget, and removing user-specific stations from the selected map and scenario.
+     * Pays for the maintenance costs of all locomotives owned by the current user
+     * within the constraints of the provided budget. The method evaluates each locomotive's
+     * maintenance and fuel costs, updating their availability and adjusting the budget accordingly.
      *
-     * @param selectedMap the map selected for the current simulation
-     * @param selectedScenario the scenario selected for the current simulation
-     * @param budget the budget associated with the player's game session, which will be reset
+     * @param budget the budget associated with the current user, used to pay for locomotive maintenance and fuel costs
      */
-    public void resetGame(Map selectedMap, Scenario selectedScenario, Budget budget) {
-        List<Locomotive> l = new ArrayList<>();
-        currentUser.setLocomotives(l);
-        budget.setBudget(1000);
-        stationrepo.removeStationsByMapScenarioAndOwner(
-                selectedMap.getMapName(),
-                selectedScenario.getScenarioName(),
-                currentUser.getEmail()
-        );
+    public void payLocomotiveMaintenance(Budget budget){
+        boolean canPay;
+        int yearlyBudget;
+        int yearlyManagementCost;
+        List<Locomotive> canUse = new ArrayList<>();
+        for (Locomotive loc : currentUser.getLocomotives()){
+            yearlyBudget = loc.getFuelCost();
+            yearlyManagementCost = loc.getMaintenanceCost();
+            canPay = yearlyManagementCost <= budget.getBudget();
+
+            if (canPay){
+                budget.subtractBudget(yearlyManagementCost);
+                loc.setAvailability(yearlyBudget <= budget.getBudget());
+                canUse.add(loc);
+                if (loc.getAvailability())
+                    budget.subtractBudget(yearlyBudget);
+
+            }
+
+        }
+        currentUser.setLocomotives(canUse);
     }
 
     /**
-     * Populates the given grid with visual representations of cities and their associated house blocks
-     * based on the map's data.
-     * Cities corresponding to the given map are retrieved, and their locations are marked on the grid
-     * with specific symbols. City centers are marked as "🌆", and house blocks are marked as "🏠".
+     * Removes locomotives owned by the current user that are outdated based on the specified year.
+     * Locomotives with an end year of operation less than or equal to the given year will be removed,
+     * while the others are retained. A message is logged for each removed locomotive.
      *
-     * @param grid a 2D array representing the map's grid where visual city elements will be added
-     * @param map the map object containing information about the cities and their locations
+     * @param year the cutoff year; locomotives with an end year of operation less than or equal to this year
+     *             will be considered outdated and removed
      */
-    private void addCitiesToMap(String[][] grid, Map map) {
-        List<City> cities = cityRepo.getCities().stream()
-                .filter(c -> c.getMapName().equals(map.getMapName()))
-                .collect(Collectors.toList());
-        for (City city : cities) {
-            grid[city.getCenterY()][city.getCenterX()] = "🌆";
-            for (HouseBlock hb : city.getBlocks()) {
-                grid[hb.getY()][hb.getX()] = "🏠";
+    public void removeOutdatedLocomotives(int year) {
+        List<Locomotive> locomotives = new ArrayList<>();
+        for (Locomotive locomotive : currentUser.getLocomotives()) {
+            if (!(locomotive.getEndYearOfOperation() <= year)) {
+                locomotives.add(locomotive);
+            }else{
+                System.out.println("\n" + locomotive.getModelName() + " removed from user's locomotives since the end of its operation is " + year);
             }
         }
+        currentUser.setLocomotives(locomotives);
     }
 
     /**
-     * Populates the given grid with visual representations of stations based on their type,
-     * owner, map name, and scenario. Stations are displayed with specific symbols
-     * depending on their type (depot, terminal, station) and orientation.
+     * Retrieves a list of all simulations from the simulation repository.
      *
-     * @param grid a 2D array representing the map's grid where stations will be added
-     * @param map the map object representing the selected map of the simulation
-     * @param scenario the scenario object influencing station-related rules and display
-     * @param width the width of the grid defining the map's horizontal boundary
-     * @param height the height of the grid defining the map's vertical boundary
+     * @return a list of Simulation objects available in the repository
      */
-    private void addStationsToMap(String[][] grid, Map map, Scenario scenario, int width, int height) {
-        if (currentUser != null) {
-            String owner = currentUser.getEmail();
-            for (Station st : stationrepo.getStations()) {
-                if (!st.getMapName().equals(map.getMapName()) ||
-                        !st.getOwnerPlayer().equals(owner) ||
-                        !st.getScenarioName().equals(scenario.getScenarioName())) {
-                    continue;
-                }
-
-                int w, h, ox, oy;
-                switch (st.getType()) {
-                    case DEPOT:
-                        w = h = 3;
-                        ox = st.getX() - 1;
-                        oy = st.getY() - 1;
-                        paintArea(grid, width, height, st.getX(), st.getY(), ox, oy, w, h);
-                        break;
-                    case TERMINAL:
-                        w = h = 5;
-                        ox = st.getX() - 2;
-                        oy = st.getY() - 2;
-                        // paint 5x5
-                        paintArea(grid, width, height, st.getX(), st.getY(), ox, oy, w, h);
-                        break;
-                    case STATION:
-                        w = h = 4;
-                        ox = st.getX() - 1;
-                        oy = st.getY() - 1;
-                        int sdx = 1, sdy = 1;
-                        switch (st.getOrientation()) {
-                            case NW:
-                                break;
-                            case NE:
-                                sdx = 2;
-                                break;
-                            case SW:
-                                sdy = 2; break;
-                            case SE:
-                                sdx = 2; sdy = 2; break;
-                        }
-                        for (int dy = 0; dy < h; dy++) {
-                            for (int dx = 0; dx < w; dx++) {
-                                int gx = ox + dx;
-                                int gy = oy + dy;
-                                if (gx >= 1 && gx <= width && gy >= 1 && gy <= height) {
-                                    grid[gy][gx] = (dx == sdx && dy == sdy) ? "🚉" : "🅿️";
-                                }
-                            }
-                        }
-                        break;
-                    default:
-                        grid[st.getY()][st.getX()] = "🚉";
-                }
-            }
-        }
+    public List<Simulation> getSimulations() {
+        return simulationRepo.getSimulations();
     }
 
     /**
-     * Fills a specific area of the grid with visual symbols, representing either a station center
-     * (marked as "🚉") or the station area (marked as "🅿️"). The filling process ensures that
-     * the content stays within the defined grid boundaries.
+     * Creates a new simulation using the provided map, scenario, year, and user budget.
+     * The simulation is added to the simulation repository and returned as the created object.
      *
-     * @param grid the 2D array that represents the map grid to be painted
-     * @param maxW the maximum width limit of the grid
-     * @param maxH the maximum height limit of the grid
-     * @param cx the x-coordinate of the station to be symbolized as "🚉"
-     * @param cy the y-coordinate of the station to be symbolized as "🚉"
-     * @param ox the starting x-coordinate offset for painting the area
-     * @param oy the starting y-coordinate offset for painting the area
-     * @param w the width of the area to be painted
-     * @param h the height of the area to be painted
+     * @param selectedMap the map object selected for the simulation
+     * @param selectedScenario the scenario object selected for the simulation
+     * @param currentYear the year in which the simulation starts
+     * @param userBudget the budget allocated to the user for the simulation
+     * @return the newly created Simulation object
      */
-    private void paintArea(String[][] grid, int maxW, int maxH,
-                           int cx, int cy, int ox, int oy, int w, int h) {
-        for (int dy = 0; dy < h; dy++) {
-            for (int dx = 0; dx < w; dx++) {
-                int x = ox + dx;
-                int y = oy + dy;
-                if (x >= 1 && x <= maxW && y >= 1 && y <= maxH) {
-                    grid[y][x] = (x == cx && y == cy) ? "🚉" : "🅿️";
-                }
-            }
-        }
+    public Simulation createSimulation(Map selectedMap, Scenario selectedScenario, int currentYear, Budget userBudget) {
+        return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
     }
 
     /**
@@ -397,56 +451,6 @@ public class SimulationController {
     }
 
     /**
-     * Pays for the maintenance costs of all locomotives owned by the current user
-     * within the constraints of the provided budget. The method evaluates each locomotive's
-     * maintenance and fuel costs, updating their availability and adjusting the budget accordingly.
-     *
-     * @param budget the budget associated with the current user, used to pay for locomotive maintenance and fuel costs
-     */
-    public void payLocomotiveMaintenance(Budget budget){
-        boolean canPay;
-        int yearlyBudget;
-        int yearlyManagementCost;
-        List<Locomotive> canUse = new ArrayList<>();
-        for (Locomotive loc : currentUser.getLocomotives()){
-            yearlyBudget = loc.getFuelCost();
-            yearlyManagementCost = loc.getMaintenanceCost();
-            canPay = yearlyManagementCost <= budget.getBudget();
-
-            if (canPay){
-                budget.subtractBudget(yearlyManagementCost);
-                loc.setAvailability(yearlyBudget <= budget.getBudget());
-                canUse.add(loc);
-                if (loc.getAvailability())
-                    budget.subtractBudget(yearlyBudget);
-
-            }
-
-        }
-        currentUser.setLocomotives(canUse);
-    }
-
-    /**
-     * Removes locomotives owned by the current user that are outdated based on the specified year.
-     * Locomotives with an end year of operation less than or equal to the given year will be removed,
-     * while the others are retained. A message is logged for each removed locomotive.
-     *
-     * @param year the cutoff year; locomotives with an end year of operation less than or equal to this year
-     *             will be considered outdated and removed
-     */
-    public void removeOutdatedLocomotives(int year) {
-        List<Locomotive> locomotives = new ArrayList<>();
-        for (Locomotive locomotive : currentUser.getLocomotives()) {
-            if (!(locomotive.getEndYearOfOperation() <= year)) {
-                locomotives.add(locomotive);
-            }else{
-                System.out.println("\n" + locomotive.getModelName() + " removed from user's locomotives since the end of its operation is " + year);
-            }
-        }
-        currentUser.setLocomotives(locomotives);
-    }
-
-    /**
      * Checks if a budget exists for the current user, map and scenario.
      * If not, creates a new one with 1000 as the initial value.
      *
@@ -472,29 +476,6 @@ public class SimulationController {
     }
 
     /**
-     * Retrieves a list of all simulations from the simulation repository.
-     *
-     * @return a list of Simulation objects available in the repository
-     */
-    public List<Simulation> getSimulations() {
-        return simulationRepo.getSimulations();
-    }
-
-    /**
-     * Creates a new simulation using the provided map, scenario, year, and user budget.
-     * The simulation is added to the simulation repository and returned as the created object.
-     *
-     * @param selectedMap the map object selected for the simulation
-     * @param selectedScenario the scenario object selected for the simulation
-     * @param currentYear the year in which the simulation starts
-     * @param userBudget the budget allocated to the user for the simulation
-     * @return the newly created Simulation object
-     */
-    public Simulation createSimulation(Map selectedMap, Scenario selectedScenario, int currentYear, Budget userBudget) {
-        return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
-    }
-
-    /**
      * Updates the simulation with the provided map, scenario, new year, and new budget.
      *
      * @param map       The map object associated with the simulation.
@@ -507,6 +488,25 @@ public class SimulationController {
                                  int newYear,
                                  Budget newBudget) {
         simulationRepo.updateSimulation(map, scenario, currentUser, newYear, newBudget);
+    }
+
+    /**
+     * Resets the current game state by performing actions such as clearing locomotives,
+     * resetting the budget, and removing user-specific stations from the selected map and scenario.
+     *
+     * @param selectedMap the map selected for the current simulation
+     * @param selectedScenario the scenario selected for the current simulation
+     * @param budget the budget associated with the player's game session, which will be reset
+     */
+    public void resetGame(Map selectedMap, Scenario selectedScenario, Budget budget) {
+        List<Locomotive> l = new ArrayList<>();
+        currentUser.setLocomotives(l);
+        budget.setBudget(1000);
+        stationrepo.removeStationsByMapScenarioAndOwner(
+                selectedMap.getMapName(),
+                selectedScenario.getScenarioName(),
+                currentUser.getEmail()
+        );
     }
 
     /**
