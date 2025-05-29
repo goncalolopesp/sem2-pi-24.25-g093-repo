@@ -9,9 +9,7 @@ import static guru.nidi.graphviz.model.Factory.*;
 import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.model.MutableNode;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class main {
@@ -52,9 +50,11 @@ public class main {
             System.out.println("1. Verify if a train can travel between two stations (US13)");
             System.out.println("2. Verify if a route that passes once, and only once, by each railway line exists (US14)");
             System.out.println("3. Find shortest route through specified stations (US27)");
-            System.out.println("3. Exit");
+            System.out.println("4. Performance Testing for Variable-Sized Inputs (US29)");
+            System.out.println("5. Exit");
             System.out.print("Choose an option: ");
             String op = sc.nextLine();
+            System.out.println();
 
             if (op.equals("1")) {
                 implementUS13(lines);
@@ -62,11 +62,13 @@ public class main {
             } else if (op.equals("2")) {
                 implementUS14(lines);
                 break;
-            }
-            else if (op.equals("3")) {
-                implementUS27(lines,stations);
+            } else if (op.equals("3")) {
+                implementUS27(lines, stations);
                 break;
-            }else if (op.equals("4")) {
+            } else if (op.equals("4")) {
+                implementUS29();
+                break;
+            } else if (op.equals("5")) {
                 System.out.println("Closing...");
                 break;
             } else {
@@ -126,10 +128,9 @@ public class main {
 
             Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("station-map.svg"));
             System.out.println("Graph saved as station-map.svg");
-        }else{
+        } else {
             System.out.println("The train cannot travel between " + source + " and " + destination + ": the type of the stations are different.");
         }
-
     }
 
     private static Map<String, List<String>> buildGraph(List<String[]> edges, String trainType) {
@@ -219,10 +220,11 @@ public class main {
             List<Boolean> visited = new ArrayList<>();
             for (int i = 0; i < vertices.size(); i++) visited.add(false);
             dfs(nonZero.get(0), adj, edges, vertices, visited);
-            for (int idx : nonZero) if (!visited.get(idx)) {
-                System.out.println("Graph is disconnected. No Eulerian route exists.");
-                return;
-            }
+            for (int idx : nonZero)
+                if (!visited.get(idx)) {
+                    System.out.println("Graph is disconnected. No Eulerian route exists.");
+                    return;
+                }
 
             // count odd degree vertices
             List<Integer> odd = new ArrayList<>();
@@ -287,6 +289,280 @@ public class main {
 
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static void implementUS29() throws IOException {
+        System.out.println("=== US29 - Performance Testing for Variable-Sized Inputs ===");
+        System.out.println("Testing asymptotic behavior of US13 and US14 procedures\n");
+
+        // Directory containing test files
+        System.out.print("Insert directory path for test files: ");
+        String testDataDirectory = sc.nextLine(); // Change this to your directory path
+
+        // Discover all CSV files in the directory
+        File directory = new File(testDataDirectory);
+        if (!directory.exists() || !directory.isDirectory()) {
+            System.err.println("Error: Directory '" + testDataDirectory + "' does not exist or is not a directory");
+            return;
+        }
+
+        // Get all scenario files and station files
+        List<File> scenarioFiles = new ArrayList<>();
+        List<File> stationFiles = new ArrayList<>();
+
+        File[] csvFiles = directory.listFiles((dir, name) -> name.toLowerCase().endsWith(".csv"));
+        if (csvFiles == null || csvFiles.length == 0) {
+            System.err.println("No CSV files found in directory: " + testDataDirectory);
+            return;
+        }
+
+        // Separate scenario files from station files
+        for (File file : csvFiles) {
+            String fileName = file.getName().toLowerCase();
+            if (fileName.contains("scenario") && !fileName.contains("station")) {
+                scenarioFiles.add(file);
+            } else if (fileName.contains("station")) {
+                stationFiles.add(file);
+            }
+        }
+
+        // Sort files by size/name for consistent ordering
+        scenarioFiles.sort((f1, f2) -> {
+            // Extract numbers from filename for natural sorting
+            int num1 = extractNumberFromFilename(f1.getName());
+            int num2 = extractNumberFromFilename(f2.getName());
+            return Integer.compare(num1, num2);
+        });
+
+        stationFiles.sort((f1, f2) -> {
+            int num1 = extractNumberFromFilename(f1.getName());
+            int num2 = extractNumberFromFilename(f2.getName());
+            return Integer.compare(num1, num2);
+        });
+
+        System.out.println("Found " + scenarioFiles.size() + " scenario files and " + stationFiles.size() + " station files\n");
+
+        // Test US13 (Connectivity Check) performance
+        System.out.println("=== TESTING US13 (Train Connectivity) PERFORMANCE ===");
+        testUS13Performance(scenarioFiles, stationFiles);
+
+        System.out.println("\n" + "=".repeat(63) + "\n");
+
+        // Test US14 (Eulerian Route) performance
+        System.out.println("=== TESTING US14 (Eulerian Route) PERFORMANCE ===");
+        testUS14Performance(scenarioFiles);
+    }
+
+    private static int extractNumberFromFilename(String filename) {
+        // Extract the first number found in the filename
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\d+");
+        java.util.regex.Matcher matcher = pattern.matcher(filename);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return 0; // Default if no number found
+    }
+
+    private static void testUS13Performance(List<File> scenarioFiles, List<File> stationFiles) throws IOException {
+        List<PerformanceResult> us13Results = new ArrayList<>();
+
+        for (File scenarioFile : scenarioFiles) {
+            // Find matching station file
+            File matchingStationFile = findMatchingStationFile(scenarioFile, stationFiles);
+
+            if (matchingStationFile == null) {
+                System.out.println("Warning: No matching station file found for " + scenarioFile.getName());
+                continue;
+            }
+
+            if (!scenarioFile.exists() || !matchingStationFile.exists()) {
+                System.out.println("Warning: Files not found - " + scenarioFile.getName() + " or " + matchingStationFile.getName());
+                continue;
+            }
+
+            // Load data to get size information
+            List<String[]> edges = loadEdges(scenarioFile);
+            List<String> stations = loadStations(matchingStationFile);
+
+            // Test multiple scenarios for US13
+            String[] trainTypes = {"1", "2", "3"}; // Steam, Diesel, Electric
+            String[] trainTypeNames = {"Steam", "Diesel", "Electric"};
+
+            for (int t = 0; t < trainTypes.length; t++) {
+                // Test connectivity between random station pairs
+                List<Long> executionTimes = new ArrayList<>();
+                int testCases = Math.min(10, Math.max(1, stations.size() / 2)); // Ensure at least 1 test case
+
+                for (int test = 0; test < testCases; test++) {
+                    // Select random source and destination from same scenario
+                    String source = stations.get(test * 2 % stations.size());
+                    String destination = stations.get((test * 2 + 1) % stations.size());
+
+                    long startTime = System.nanoTime();
+
+                    // Execute US13 core logic
+                    Map<String, List<String>> graph = buildGraph(edges, trainTypes[t]);
+                    boolean connected = isConnected(graph, source, destination);
+
+                    long endTime = System.nanoTime();
+                    long executionTime = endTime - startTime;
+                    executionTimes.add(executionTime);
+                }
+
+                // Calculate statistics
+                double avgTime = executionTimes.stream().mapToLong(Long::longValue).average().orElse(0.0);
+
+                us13Results.add(new PerformanceResult(
+                        "US13_" + trainTypeNames[t] + "_" + stations.size(),
+                        stations.size(),
+                        edges.size(),
+                        avgTime
+                ));
+            }
+        }
+
+        // Print US13 performance summary
+        printPerformanceSummary("US13", us13Results);
+    }
+
+    private static File findMatchingStationFile(File scenarioFile, List<File> stationFiles) {
+        String scenarioName = scenarioFile.getName();
+
+        // Extract identifying part of scenario filename (e.g., "50", "100", etc.)
+        int scenarioNumber = extractNumberFromFilename(scenarioName);
+
+        // Find station file with matching number
+        for (File stationFile : stationFiles) {
+            int stationNumber = extractNumberFromFilename(stationFile.getName());
+            if (stationNumber == scenarioNumber) {
+                return stationFile;
+            }
+        }
+
+        // If no exact match, try to find by similar naming pattern
+        String scenarioBaseName = scenarioName.toLowerCase()
+                .replace("scenario_", "")
+                .replace("_lines.csv", "")
+                .replace(".csv", "");
+
+        for (File stationFile : stationFiles) {
+            String stationName = stationFile.getName().toLowerCase();
+            if (stationName.contains(scenarioBaseName)) {
+                return stationFile;
+            }
+        }
+
+        return null; // No matching file found
+    }
+
+    private static void testUS14Performance(List<File> scenarioFiles) throws IOException {
+        List<PerformanceResult> us14Results = new ArrayList<>();
+
+        for (File scenarioFile : scenarioFiles) {
+            if (!scenarioFile.exists()) {
+                System.out.println("Warning: File not found - " + scenarioFile.getName());
+                continue;
+            }
+
+            List<String[]> allEdges = loadEdges(scenarioFile);
+
+            // Test both maintenance types
+            boolean[] maintenanceTypes = {false, true}; // All lines, Only electrified
+            String[] typeNames = {"All Lines", "Electrified Only"};
+
+            for (int m = 0; m < maintenanceTypes.length; m++) {
+                boolean onlyElec = maintenanceTypes[m];
+
+                long startTime = System.nanoTime();
+
+                // Execute US14 core logic
+                List<String[]> edges = new ArrayList<>();
+                for (String[] e : allEdges) {
+                    boolean elec = e.length > 2 && e[2].equals("1");
+                    if (!onlyElec || elec) edges.add(e);
+                }
+
+                if (edges.isEmpty()) {
+                    System.out.println("  " + typeNames[m] + ": No applicable lines");
+                    continue;
+                }
+
+                // Build graph structure
+                List<String> vertices = new ArrayList<>();
+                for (String[] e : edges) {
+                    if (!vertices.contains(e[0])) vertices.add(e[0]);
+                    if (!vertices.contains(e[1])) vertices.add(e[1]);
+                }
+
+                List<List<Integer>> adj = new ArrayList<>();
+                for (int i = 0; i < vertices.size(); i++) adj.add(new ArrayList<>());
+                for (int i = 0; i < edges.size(); i++) {
+                    String[] e = edges.get(i);
+                    int u = vertices.indexOf(e[0]);
+                    int v = vertices.indexOf(e[1]);
+                    adj.get(u).add(i);
+                    adj.get(v).add(i);
+                }
+
+                // Check Eulerian properties
+                List<Integer> nonZero = new ArrayList<>();
+                for (int i = 0; i < vertices.size(); i++) if (!adj.get(i).isEmpty()) nonZero.add(i);
+
+                // Connectivity check
+                List<Boolean> visited = new ArrayList<>();
+                for (int i = 0; i < vertices.size(); i++) visited.add(false);
+
+                if (!nonZero.isEmpty()) {
+                    dfs(nonZero.get(0), adj, edges, vertices, visited);
+                }
+
+                // Count odd degree vertices
+                List<Integer> odd = new ArrayList<>();
+                for (int i : nonZero) if (adj.get(i).size() % 2 != 0) odd.add(i);
+
+                long endTime = System.nanoTime();
+                long executionTime = endTime - startTime;
+
+                us14Results.add(new PerformanceResult(
+                        "US14_" + typeNames[m].replace(" ", "_") + "_" + vertices.size(),
+                        vertices.size(),
+                        edges.size(),
+                        executionTime
+                ));
+            }
+        }
+
+        // Print US14 performance summary
+        printPerformanceSummary("US14", us14Results);
+    }
+
+    private static void printPerformanceSummary(String usName, List<PerformanceResult> results) {
+        System.out.println("=== " + usName + " PERFORMANCE SUMMARY ===");
+        System.out.printf("%-25s %10s %10s %15s%n",
+                "Test Case", "Vertices", "Edges", "Avg Time (ms)");
+        System.out.println("-".repeat(63));
+
+        for (PerformanceResult result : results) {
+            System.out.printf("%-25s %10d %10d %15.3f%n",
+                    result.testName, result.vertexCount, result.edgeCount,
+                    result.avgTime / 1_000_000.0);
+        }
+    }
+
+    // Helper class to store performance results
+    private static class PerformanceResult {
+        String testName;
+        int vertexCount;
+        int edgeCount;
+        double avgTime;
+
+        PerformanceResult(String testName, int vertexCount, int edgeCount,
+                          double avgTime) {
+            this.testName = testName;
+            this.vertexCount = vertexCount;
+            this.edgeCount = edgeCount;
+            this.avgTime = avgTime;
         }
     }
 
