@@ -2,6 +2,8 @@ package repository;
 
 import domain.Map;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,10 +18,15 @@ import java.util.Optional;
 
 public class MapRepository {
     private final List<Map> maps;
+    private final List<Map> savedMaps;
+
     /**
      * Constructs a new MapRepository with an empty list of maps.
      */
-    public MapRepository() { maps = new ArrayList<>(); }
+    public MapRepository() {
+        maps = new ArrayList<>();
+        savedMaps = new ArrayList<>();
+    }
 
     /**
      * Adds a map to the repository if it is not already present.
@@ -70,6 +77,52 @@ public class MapRepository {
     public List<Map> getMaps() {
         //This is a defensive copy, so that the repository cannot be modified from the outside.
         return List.copyOf(maps);
+    }
+
+    public boolean saveMap(String mapName, int width, int height, int scale) {
+        savedMaps.add(new Map(mapName, width, height, scale));
+        return true;
+    }
+
+    public boolean saveMaps(){
+
+        File mapsFile = new File("maps.map");
+        try (FileOutputStream fos = new FileOutputStream(mapsFile)){
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(savedMaps);
+        }catch(IOException e){
+            System.err.println("Error saving Maps");
+        }
+
+        return true;
+    }
+
+    public List<Map> getSavedMaps() {
+        List<Map> savedMaps = new ArrayList<>();
+        File mapsFile = new File("maps.map");
+        if (mapsFile.exists()) {
+
+            try (FileInputStream fis = new FileInputStream(mapsFile)) {
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+                Object obj = ois.readObject();
+                if (obj instanceof List<?>) {
+                    List<?> loadedMaps = (List<?>) obj;
+                    savedMaps.clear();
+
+                    for (Object loadedMap : loadedMaps) {
+                        if (loadedMap instanceof Map) {
+                            savedMaps.add((Map) loadedMap);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Error loading Maps");
+            } catch (ClassNotFoundException e) {
+                System.err.println("Error loading Maps");
+            }
+        }
+        return savedMaps;
     }
 
 }
