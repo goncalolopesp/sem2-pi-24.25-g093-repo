@@ -38,6 +38,20 @@ public class CreateMapUI implements Runnable{
         System.out.println("\n\n--- Create Map ------------------------");
         requestData();
         submitData();
+        System.out.println("Do you want to save the map as a file? (y/n)");
+        Scanner sc = new Scanner(System.in);
+        String answer = sc.nextLine().trim();
+        if (answer.equalsIgnoreCase("y")) {
+            saveMap();
+        }
+    }
+
+    public void saveMap() {
+        if (getMapController().saveMap(mapName, width, height, scale)) {
+            if (getMapController().saveMaps()){
+                System.out.println("Map saved successfully!");
+            }
+        }
     }
 
     /**

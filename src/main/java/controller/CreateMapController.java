@@ -4,6 +4,11 @@ import domain.Map;
 import repository.MapRepository;
 import repository.Repositories;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -78,5 +83,13 @@ public class CreateMapController {
      */
     public List<Map> getMaps() {
         return getMapRepository().getMaps();
+    }
+
+    public boolean saveMap(String mapName, int width, int height, int scale) {
+        return mapRepository.saveMap(mapName, width, height, scale);
+    }
+
+    public boolean saveMaps(){
+        return mapRepository.saveMaps();
     }
 }
