@@ -427,17 +427,28 @@ public class SimulationController {
      */
     public Map getMap() {
         List<Map> maps = mapRepo.getMaps();
-        if (maps.isEmpty()) {
+        List<Map> savedMaps = mapRepo.getSavedMaps();
+        List<Map> allMaps = new ArrayList<>();
+        if (maps.isEmpty() && savedMaps.isEmpty()) {
             System.out.println("No maps available.");
             return null;
         }
-        int idx = Utils.showAndSelectIndex(maps, "Select a map:");
+
+        for (Map m : maps) {
+            allMaps.add(m);
+        }
+        for (Map m : savedMaps) {
+            allMaps.add(m);
+        }
+
+        int idx = Utils.showAndSelectIndex(allMaps, "Select a map:");
+
 
         if (idx == -1) {
             return null;
         }
 
-        return maps.get(idx);
+        return allMaps.get(idx);
     }
 
     /**
