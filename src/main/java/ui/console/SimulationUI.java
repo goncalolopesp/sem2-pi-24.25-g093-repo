@@ -74,6 +74,7 @@ public class SimulationUI implements Runnable {
             System.out.println("\n=== DEBUGGING SIMULATION LOADING ===");
             List<Simulation> allSims = ctrl.getSimulations();
             System.out.println("Total simulations in repository: " + allSims.size());
+            System.out.println();
 
             for (int i = 0; i < allSims.size(); i++) {
                 Simulation s = allSims.get(i);
@@ -82,12 +83,14 @@ public class SimulationUI implements Runnable {
                 System.out.println("  Scenario: '" + s.getSelectedScenario().getScenarioName() + "'");
                 System.out.println("  User: '" + (s.getUser() != null ? s.getUser().getEmail() : "null") + "'");
                 System.out.println("  Year: " + s.getCurrentYear());
+                System.out.println();
             }
 
-            System.out.println("Looking for:");
-            System.out.println("  Map: '" + selectedMap.getMapName() + "'");
-            System.out.println("  Scenario: '" + selectedScenario.getScenarioName() + "'");
-            System.out.println("  User: '" + currentUser.getEmail() + "'");
+            System.out.println("=== SEARCHING FOR SIMULATION ===");
+            System.out.println("Looking for map: '" + selectedMap.getMapName() + "'");
+            System.out.println("Looking for scenario: '" + selectedScenario.getScenarioName() + "'");
+            System.out.println("Looking for user: '" + (currentUser != null ? currentUser.getEmail() : "null") + "'");
+            System.out.println();
 
             // Try to find existing simulation
             Optional<Simulation> existingSimulation = ctrl.findBy(selectedMap, selectedScenario);
@@ -210,6 +213,7 @@ public class SimulationUI implements Runnable {
                         sim.getCurrentYear(),
                         sim.getUserBudget()
                 );
+                sim = null;
                 System.out.println("Game stopped.");
                 if (gameOver.get()) {
                     ctrl.resetGame(selectedMap, selectedScenario, sim.getUserBudget());

@@ -91,38 +91,23 @@ public class SimulationRepository implements Serializable {
     }
 
     /**
-     * Searches for a simulation in the repository that matches the specified map, scenario, and user.
-     * If a matching simulation is found, it is returned wrapped in an Optional.
-     * If no match is found, an empty Optional is returned.
+     * Finds a simulation that matches the given map, scenario, and user.
+     * Searches through the repository's simulations to locate a simulation that
+     * has the specified map, scenario, and user attributes.
      *
-     * @param map the map to match in the simulation
-     * @param scenario the scenario to match in the simulation
-     * @param user the user associated with the simulation to match (can be null)
-     * @return an Optional containing the matching simulation if found, or an empty Optional if no match is found
+     * @param map the map to search for in the simulation
+     * @param scenario the scenario to search for in the simulation
+     * @param user the user associated with the simulation to search for
+     * @return an {@code Optional} containing the simulation if found, or an empty {@code Optional} if no match is found
      */
     public Optional<Simulation> findBy(Map map, Scenario scenario, User user) {
-        System.out.println("=== SEARCHING FOR SIMULATION ===");
-        System.out.println("Looking for map: '" + map.getMapName() + "'");
-        System.out.println("Looking for scenario: '" + scenario.getScenarioName() + "'");
-        System.out.println("Looking for user: '" + (user != null ? user.getEmail() : "null") + "'");
-
         for (Simulation s : simulations) {
-            System.out.println("Checking simulation:");
-            System.out.println("  Has map: '" + s.getSelectedMap().getMapName() + "'");
-            System.out.println("  Has scenario: '" + s.getSelectedScenario().getScenarioName() + "'");
-            System.out.println("  Has user: '" + (s.getUser() != null ? s.getUser().getEmail() : "null") + "'");
-            System.out.println("  Map equals: " + s.getSelectedMap().equals(map));
-            System.out.println("  Scenario equals: " + s.getSelectedScenario().equals(scenario));
-            System.out.println("  User equals: " + Objects.equals(s.getUser(), user));
-
             if (s.getSelectedMap().equals(map) &&
                     s.getSelectedScenario().equals(scenario) &&
                     Objects.equals(s.getUser(), user)) {
-                System.out.println("  MATCH FOUND!");
                 return Optional.of(s);
             }
         }
-        System.out.println("  NO MATCH FOUND");
         return Optional.empty();
     }
 }
