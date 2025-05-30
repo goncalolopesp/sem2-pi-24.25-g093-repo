@@ -1,12 +1,6 @@
 import controller.*;
-import domain.City;
-import domain.Industry;
-import domain.IndustryType;
-import domain.Scenario;
-import repository.IndustryRepository;
-import repository.LocomotiveRepository;
-import repository.Repositories;
-import repository.ScenarioRepository;
+import domain.*;
+import repository.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -24,10 +18,12 @@ public class Bootstrap {
     private void addUsers() {
         //TODO: add Authentication users here: should be created for each user in the organization
         //get authentication repository
+
+        AuthRepository authRepository = Repositories.getInstance().getAuthRepository();
         AuthController authController = new AuthController();
 
-        authController.createNewUserWithoutVerification("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR);
-        authController.createNewUserWithoutVerification("Player 1", "Player@this.app", "pwd", authController.ROLE_PLAYER);
+        authRepository.createNewUser(new User("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR));
+        authRepository.createNewUser(new User("Player 1", "player@this.app", "pwd", authController.ROLE_PLAYER));
     }
 
     private void addMaps() {

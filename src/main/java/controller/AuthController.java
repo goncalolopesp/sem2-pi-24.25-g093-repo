@@ -45,11 +45,6 @@ public class AuthController {
         }
     }
 
-    public boolean createNewUserWithoutVerification(String name, String email, String pwd, String roleId){
-        User user = new User(name, email, pwd, roleId);
-        return authRepo.createNewUser(user);
-    }
-
     /**
      * Authenticates a user with email and password
      * @param email The user's email address
