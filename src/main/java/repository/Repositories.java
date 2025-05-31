@@ -23,6 +23,9 @@ public class Repositories {
     private final CarriageRepository carriageRepository;
     private final BudgetRepository budgetRepository;
     private SimulationRepository simulationRepository;
+    private RailwayLineRepository railwayLineRepository;
+    private RouteRepository routeRepository;
+
     /**
      * Private constructor to prevent external instantiation.
      * Initializes all repositories.
@@ -40,6 +43,8 @@ public class Repositories {
         carriageRepository = new CarriageRepository();
         budgetRepository = new BudgetRepository();
         simulationRepository = new SimulationRepository();
+        railwayLineRepository = new RailwayLineRepository();
+        routeRepository = new RouteRepository();
 
         SimulationFile simFile = new SimulationFile();
         simFile.load(this.simulationRepository, this.stationRepository, this.buildingRepository);
@@ -163,4 +168,17 @@ public class Repositories {
         this.simulationRepository = repo;
     }
 
+    /**
+     * Gets the repository for RailwayLine entities.
+     *
+     * @return the RailwayLineRepository
+     */
+    public RailwayLineRepository getRailwayLineRepository() { return railwayLineRepository; }
+
+    /**
+     * Gets the repository for Route entities.
+     *
+     * @return the RouteRepository
+     */
+    public RouteRepository getRouteRepository() { return routeRepository; }
 }
