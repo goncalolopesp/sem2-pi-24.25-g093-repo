@@ -17,10 +17,14 @@ public class EditorUI implements Runnable {
     public void run() {
         map = requestMap();
 
+        if (map == null) {
+            return;
+        }
+
         List<MenuItem> options = new ArrayList<MenuItem>();
         options.add(new MenuItem("Create City", new CreateCityUI(map)));
         options.add(new MenuItem("Create Scenario", new CreateScenarioUI(map)));
-        int option = 0;
+        int option;
         do {
             option = Utils.showAndSelectIndex(options, "\n\n--- ADMIN MENU --------------------------");
 
@@ -33,12 +37,14 @@ public class EditorUI implements Runnable {
     private Map requestMap() {
         MapRepository mapRepository = Repositories.getInstance().getMapRepository();
         List<Map> maps = mapRepository.getMaps();
+        int mapIndex;
 
-        int mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");;
+        mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");
 
-        while(mapIndex < 0){
-            mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");
+        if (mapIndex == -1) {
+            return null;
         }
+
         return maps.get(mapIndex);
     }
 }
