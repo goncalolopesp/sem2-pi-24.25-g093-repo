@@ -29,6 +29,9 @@
 
         <!-- Surefire Version Configuration -->
         <maven-surefire-plugin>3.5.2</maven-surefire-plugin>
+
+        <javafx.version>11.0.2</javafx.version>
+        <javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
     </properties>
 
     <dependencies>
