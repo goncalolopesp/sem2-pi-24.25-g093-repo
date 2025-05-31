@@ -38,8 +38,9 @@ public class Bootstrap {
 
     private void addIndustries() {
         IndustryRepository industryRepository = Repositories.getInstance().getIndustryRepository();
-        industryRepository.addIndustry(new Industry("exampleMap", IndustryType.AUTOMOBILE, 13, 24));
+        industryRepository.addIndustry(new Industry("exampleMap", IndustryType.IRON_MINE, 13, 24));
         industryRepository.addIndustry(new Industry("exampleMap", IndustryType.COAL_MINE, 29, 17));
+        industryRepository.addIndustry(new Industry("exampleMap", IndustryType.STEEL_MILL, 15, 15));
     }
 
     private void addCities() {

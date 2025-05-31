@@ -58,7 +58,7 @@ public class AssignTrainController {
             Station to = route.get(i + 1).getStation();
 
             if (!railwayLineRepo.connectionExists(from, to)) {
-                railwayLineRepo.save(new RailwayLine(from, to));
+                railwayLineRepo.save(new RailwayLine(from, to, RailwayLineType.SINGLE));
             }
         }
     }
