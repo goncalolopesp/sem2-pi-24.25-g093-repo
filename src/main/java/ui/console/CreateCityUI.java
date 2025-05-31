@@ -11,6 +11,7 @@ import domain.Map;
 import repository.MapRepository;
 import repository.Repositories;
 
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -183,8 +184,16 @@ public class CreateCityUI implements Runnable {
                     System.out.println("Error: '" + input + "' is not a valid number. Please enter a decimal.");
                 }
             }
-            ctrl.assignBlocksAuto(city, n, s);
+
+            List<HouseBlock> generatedBlocks = ctrl.assignBlocksAuto(city, n, s);
             System.out.println("Blocks assigned automatically.");
+
+            // Print coordinates of all generated blocks
+            System.out.println("Generated block coordinates:");
+            for (int i = 0; i < generatedBlocks.size(); i++) {
+                HouseBlock block = generatedBlocks.get(i);
+                System.out.println("Block " + (i + 1) + ": (" + block.getX() + ", " + block.getY() + ")");
+            }
         }
 
         System.out.println("City created with success.");
