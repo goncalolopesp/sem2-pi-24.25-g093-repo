@@ -10,9 +10,7 @@ import domain.City;
 import domain.CurrentUser;
 import domain.Map;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -34,7 +32,6 @@ public class SimulationController {
     private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
     private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
-    private final List<City> cities = cityRepo.getCities();
 
     // ... [keeping all existing methods unchanged until here] ...
 
@@ -305,43 +302,144 @@ public class SimulationController {
 
     public void addCargoToStation(Map selectedMap, Scenario selectedScenario) {
         String mapName = selectedMap.getMapName();
+        List<Station> stations = stationrepo.getStations();
+
+        // Track stations that have reached max capacity to print warning only once
+        Set<String> maxCapacityStations = new HashSet<>();
+
+        addCityCargo(stations, mapName, selectedScenario, maxCapacityStations);
+        addIndustryCargo(stations, mapName, selectedScenario, maxCapacityStations);
+    }
+
+    public void addCityCargo(List<Station> stations, String mapName, Scenario selectedScenario, Set<String> maxCapacityStations) {
+        List<City> cities = cityRepo.getCities();
 
         for (City city : cities) {
             int totalGeneratedCargo = city.getTotalGeneratedCargo();
 
-            stationrepo.getStations().stream()
+            stations.stream()
                     .filter(s -> s.getMapName().equals(mapName))
                     .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getName().contains(city.getName()))
                     .forEach(station -> {
-                        if (station.getCapacityOwned() < station.getCapacity()) {
-                            station.setMaxCapacityNotified(false);
+                        int currentCapacity = station.getCapacityOwned();
+                        int maxCapacity = station.getCapacity();
+
+                        if (currentCapacity < maxCapacity) {
                             boolean isSchoolProgram = selectedScenario.getHistoricalRestrictions()
                                     .stream()
                                     .anyMatch(r -> r.equalsIgnoreCase("school program"));
 
-                            int toAdd = isSchoolProgram
+                            int cargoToAdd = isSchoolProgram
                                     ? totalGeneratedCargo * 2
                                     : totalGeneratedCargo;
-                            station.setCapacityOwned(station.getCapacityOwned() + toAdd);
 
-                            System.out.printf(
-                                    "\nStored %d cargo for station %s. Type your option: ",
-                                    toAdd,
-                                    station.getName()
-                            );
-                        } else {
-                            if (!station.isMaxCapacityNotified()) {
-                                station.setCapacityOwned(station.getCapacity());
-                                System.out.printf(
-                                        "\nMax capacity reached for station %s. Type your option: ",
-                                        station.getName()
-                                );
-                                station.setMaxCapacityNotified(true);
-                            }
+                            addCargoToStation(station, cargoToAdd, maxCapacityStations);
                         }
                     });
+        }
+    }
+
+    public void addIndustryCargo(List<Station> stations, String mapName, Scenario selectedScenario, Set<String> maxCapacityStations) {
+        List<Industry> industries = industryRepo.getIndustries();
+
+        for (Industry ind : industries) {
+            int w = ind.getArea();
+            int h = ind.getArea();
+            int originX = ind.getLocation().getX() - (w - 1) / 2;
+            int originY = ind.getLocation().getY() - (h - 1) / 2;
+
+            // Pre-filter stations to avoid repeated filtering in inner loops
+            List<Station> relevantStations = stations.stream()
+                    .filter(s -> s.getMapName().equals(mapName))
+                    .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
+                    .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Track which stations have already received cargo from this industry
+            Set<String> stationsProcessedForThisIndustry = new HashSet<>();
+
+            for (int dx = 0; dx < w; dx++) {
+                for (int dy = 0; dy < h; dy++) {
+                    int cx = originX + dx;
+                    int cy = originY + dy;
+
+                    for (Station s : relevantStations) {
+                        // Only add cargo once per station per industry
+                        if (hasOverlap(cx, cy, s) && !stationsProcessedForThisIndustry.contains(s.getName())) {
+                            int cargoAmount = getCargoPerIndustry(ind.getType());
+
+                            if (cargoAmount > 0) {
+                                addCargoToStation(s, cargoAmount, maxCapacityStations);
+                                stationsProcessedForThisIndustry.add(s.getName());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean hasOverlap(int cx, int cy, Station s) {
+        int sw, sh, sox, soy;
+
+        if (s.getType() == Station.Type.STATION) {
+            sw = sh = 4;
+            int sbX = s.getX();
+            int sbY = s.getY();
+            int sdx = (s.getOrientation() == Station.Orientation.NE || s.getOrientation() == Station.Orientation.SE) ? 1 : 0;
+            int sdy = (s.getOrientation() == Station.Orientation.SW || s.getOrientation() == Station.Orientation.SE) ? 1 : 0;
+            sox = sbX + sdx - 1;
+            soy = sbY + sdy - 1;
+        } else {
+            sw = (s.getType() == Station.Type.DEPOT ? 3 : 5);
+            sh = sw;
+            sox = s.getX() - sw / 2;
+            soy = s.getY() - sh / 2;
+        }
+
+        return cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh;
+    }
+
+    private int getCargoPerIndustry(IndustryType type) {
+        switch (type) {
+            case IRON_MINE:
+                return 6;
+            case COAL_MINE:
+                return 4;
+            default:
+                return 0;
+        }
+    }
+
+    private void addCargoToStation(Station station, int cargoToAdd, Set<String> maxCapacityStations) {
+        int currentCapacity = station.getCapacityOwned();
+        int maxCapacity = station.getCapacity();
+
+        if (currentCapacity < maxCapacity) {
+            // Ensure we don't exceed capacity
+            int actualCargoAdded = Math.min(cargoToAdd, maxCapacity - currentCapacity);
+            station.setCapacityOwned(currentCapacity + actualCargoAdded);
+
+            System.out.printf(
+                    "\nStored %d cargo for station %s (Total: %d/%d). Type your option: ",
+                    actualCargoAdded,
+                    station.getName(),
+                    station.getCapacityOwned(),
+                    maxCapacity
+            );
+
+            // Check if capacity is now at maximum and print warning only once
+            if (station.getCapacityOwned() >= maxCapacity && !maxCapacityStations.contains(station.getName())) {
+                System.out.printf(
+                        "\nStation %s has reached maximum capacity (%d/%d)!",
+                        station.getName(),
+                        station.getCapacityOwned(),
+                        maxCapacity
+                );
+                maxCapacityStations.add(station.getName());
+            }
         }
     }
 

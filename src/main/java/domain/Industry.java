@@ -6,6 +6,7 @@ public class Industry {
     private Location location;
     private final int generatedIron;
     private final int generatedCoal;
+    private final int area;
 
     /**
      * Constructs an Industry instance with the specified map name, industry type,
@@ -22,6 +23,7 @@ public class Industry {
         this.location = new Location(positionX, positionY);
         this.generatedIron = 6;
         this.generatedCoal = 4;
+        this.area = 9;
     }
 
     /**
@@ -65,6 +67,10 @@ public class Industry {
      */
     public void setLocation(Location location) {
         this.location = location;
+    }
+
+    public int getArea() {
+        return area;
     }
 
     /**
