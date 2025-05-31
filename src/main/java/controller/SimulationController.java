@@ -265,7 +265,12 @@ public class SimulationController {
                 sim.setCurrentYear(nextYear);
 
                 if (timePeriod.get().get(0) < timePeriod.get().get(1)) {
-                    System.out.print("\nYou have reached year " + nextYear + ". ");
+                    System.out.println("\nYou have reached year " + nextYear + ". ");
+                    Repositories.getInstance().getLocomotiveRepository().getLocomotives().forEach(l -> {
+                        if (l.getStartYearOfOperation() == nextYear) {
+                            System.out.println("Locomotive " + l.getModelName() + " has become available.");
+                        }
+                    });
                     removeOutdatedLocomotives(nextYear);
                     payLocomotiveMaintenance(budget);
                     System.out.print("Type your option: ");
