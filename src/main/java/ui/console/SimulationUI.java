@@ -38,7 +38,7 @@ public class SimulationUI implements Runnable {
      *
      * A navigational game menu is presented to the user, allowing actions such as building
      * or upgrading stations, managing locomotives, assigning trains, and pausing or resuming
-     * the game. The menu dynamically adjusts based on the simulation’s running state.
+     * the game. The menu dynamically adjusts based on the simulation's running state.
      *
      * Upon exit or pause, the method ensures the simulation state is saved, stops periodic
      * tasks, and provides the option to reset the game if required.
@@ -115,7 +115,6 @@ public class SimulationUI implements Runnable {
             currentUser.setLocomotives(sim.getUserBudget().getUser().getLocomotives());
         }
 
-        // Get Current Year and Final Year of the simulation
         int startYear = sim.getCurrentYear();
         int endYear   = selectedScenario.getTimeRestrictions()[1];
         AtomicReference<AtomicIntegerArray> timePeriod =
@@ -127,22 +126,26 @@ public class SimulationUI implements Runnable {
             System.out.println("Resuming game on year " + startYear + ", will finish on year " + endYear);
         }
 
-        // Start the game by setting up periodic tasks and displaying the menu
-
         AtomicBoolean running = new AtomicBoolean(true);
         AtomicBoolean gameOver = new AtomicBoolean(false);
         AtomicInteger option = new AtomicInteger();
 
         List<MenuItem> options = new ArrayList<>();
 
+        // Create all schedulers
         ScheduledExecutorService timeScheduler = Executors.newSingleThreadScheduledExecutor();
         ScheduledExecutorService generationScheduler = Executors.newSingleThreadScheduledExecutor();
+        ScheduledExecutorService routeScheduler = Executors.newSingleThreadScheduledExecutor();
 
+        // Create all tasks
         Runnable timeTask = ctrl.passTime(selectedScenario, timePeriod, running, options, timeScheduler, gameOver, sim.getUserBudget(), sim);
-        Runnable generationTask = ctrl.generateCargo(selectedMap,selectedScenario, timePeriod, running, generationScheduler);
+        Runnable generationTask = ctrl.generateCargo(selectedMap, selectedScenario, timePeriod, running, generationScheduler);
+        Runnable routeTask = ctrl.executeRoutes(selectedMap, selectedScenario, sim.getUserBudget(), running);
 
+        // Schedule all tasks
         timeScheduler.scheduleAtFixedRate(timeTask, 20, 20, TimeUnit.SECONDS);
         generationScheduler.scheduleAtFixedRate(generationTask, 10, 10, TimeUnit.SECONDS);
+        routeScheduler.scheduleAtFixedRate(routeTask, 5, 5, TimeUnit.SECONDS); // Execute routes every 5 seconds
 
         do {
             if (running.get()) {
@@ -173,14 +176,14 @@ public class SimulationUI implements Runnable {
                 }));
             }
 
-            // Show whatever menu we built and get the user’s choice
+            // Show whatever menu we built and get the user's choice
             option.set( Utils.showAndSelectIndex(options, "\n\n--- GAME MENU --------------------------") );
 
-            // Execute it (or handle “Cancel” = -1)
+            // Execute it (or handle "Cancel" = -1)
             if (option.get() >= 0 && option.get() < options.size()) {
                 String label = options.get(option.get()).toString();
 
-                // for any “real” option (not Pause/Resume) we pause the game…
+                // for any "real" option (not Pause/Resume) we pause the game…
                 if (!label.equals("Pause Game") && !label.equals("Resume Game")) {
                     boolean wasRunning = running.get();
                     if (wasRunning) {
@@ -203,10 +206,14 @@ public class SimulationUI implements Runnable {
                 }
             }
             else if (option.get() == -1) {
-                // This branch will also catch the “0 – Cancel” keypress
+                // This branch will also catch the "0 – Cancel" keypress
                 running.set(false);
+
+                // Shutdown all schedulers
                 timeScheduler.shutdownNow();
                 generationScheduler.shutdownNow();
+                routeScheduler.shutdownNow();
+
                 ctrl.updateSimulation(
                         sim.getSelectedMap(),
                         sim.getSelectedScenario(),

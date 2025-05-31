@@ -62,7 +62,7 @@ public class AssignTrainUI implements Runnable {
         System.out.print("Enter the number of Mail carriages: ");
         int mailCarriageCount = getValidPositiveInt();
 
-        int moneyEarned = assignTrainController.createTrainAndAssignToRoute(
+        assignTrainController.createTrainAndAssignToRoute(
                 chosenLoco, route, peopleCarriageCount, mailCarriageCount,
                 selectedScenario, budget, playerEmail);
     }
