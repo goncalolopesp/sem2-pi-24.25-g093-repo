@@ -6,6 +6,8 @@ import repository.CityRepository;
 import repository.MapRepository;
 import repository.Repositories;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -151,9 +153,12 @@ public class CreateCityController {
      * @param city  the City to which blocks will be added
      * @param count the number of blocks to generate
      * @param sigma the standard deviation for Gaussian distribution
+     * @return List of generated HouseBlocks with their coordinates
      */
-    public void assignBlocksAuto(City city, int count, double sigma) {
+    public List<HouseBlock> assignBlocksAuto(City city, int count, double sigma) {
         java.util.Random rnd = new java.util.Random();
+        List<HouseBlock> generatedBlocks = new ArrayList<>();
+
         for (int i = 0; i < count; i++) {
             HouseBlock hb;
             BlockError err;
@@ -163,12 +168,15 @@ public class CreateCityController {
                 hb = new HouseBlock(x, y);
                 err = validateBlock(city.getMapName(), hb);
             } while (err != BlockError.OK);
+
             city.addBlockManual(hb);
+            generatedBlocks.add(hb);
         }
+
+        return generatedBlocks;
     }
 
     public CityRepository getCityRepo() {
         return cityRepo;
     }
 }
-
