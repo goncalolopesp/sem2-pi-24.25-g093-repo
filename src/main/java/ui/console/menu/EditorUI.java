@@ -34,7 +34,11 @@ public class EditorUI implements Runnable {
         MapRepository mapRepository = Repositories.getInstance().getMapRepository();
         List<Map> maps = mapRepository.getMaps();
 
-        int mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");
+        int mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");;
+
+        while(mapIndex < 0){
+            mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");
+        }
         return maps.get(mapIndex);
     }
 }

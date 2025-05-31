@@ -28,7 +28,12 @@ public class Bootstrap {
 
     private void addMaps() {
         CreateMapController createMapController = new CreateMapController();
+        MapRepository mapRepository = Repositories.getInstance().getMapRepository();
         createMapController.createMap("exampleMap", 50, 50, 5);
+        List<Map> maps = mapRepository.getSavedMaps();
+        for (Map map : maps) {
+            mapRepository.add(map);
+        }
     }
 
     private void addIndustries() {
