@@ -14,8 +14,11 @@ public class Scenario implements Serializable {
     private final String scenarioName;
     private final String selectedMap;
     private final int[] timeRestrictions;
+    private final int portBehavior;
     private final List<String> technologicalRestrictions;
     private final List<String> historicalRestrictions;
+    private final double productionRate;
+    private final double profitMultiplier;
 
     /**
      * Constructs a new Scenario instance.
@@ -26,12 +29,15 @@ public class Scenario implements Serializable {
      * @param technologicalRestrictions the technological restrictions associated with the scenario
      * @param historicalRestrictions the historical restrictions associated with the scenario
      */
-    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions) {
+    public Scenario(String scenarioName, String selectedMap, int[] timeRestrictions, int portBehavior, List<String> technologicalRestrictions, List<String> historicalRestrictions, double productionRate, double profitMultiplier) {
         this.scenarioName = scenarioName;
         this.selectedMap = selectedMap;
         this.timeRestrictions = timeRestrictions;
+        this.portBehavior = portBehavior;
         this.technologicalRestrictions = technologicalRestrictions;
         this.historicalRestrictions = historicalRestrictions;
+        this.productionRate = productionRate;
+        this.profitMultiplier = profitMultiplier;
     }
 
     /**
@@ -76,10 +82,22 @@ public class Scenario implements Serializable {
     }
 
     /**
-     * Returns the string representation of the scenario, which is its name.
+     * Returns the production rate for this scenario.
      *
-     * @return the scenario name
+     * @return the production rate
      */
+    public double getProductionRate() {
+        return productionRate;
+    }
+
+    /**
+     * Returns the profit multiplier for this scenario.
+     *
+     * @return the profit multiplier
+     */
+    public double getProfitMultiplier() {
+        return profitMultiplier;
+    }
 
     @Override
     public String toString() {
