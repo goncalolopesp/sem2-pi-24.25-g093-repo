@@ -5,10 +5,9 @@ import domain.*;
 import domain.Carriage.Type;
 import repository.Repositories;
 import repository.StationRepository;
+import domain.Map;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class AssignTrainUI implements Runnable {
@@ -31,13 +30,7 @@ public class AssignTrainUI implements Runnable {
         var currentUser = CurrentUser.getInstance().getUser();
         String playerEmail = currentUser.getEmail();
 
-        StationRepository stationRepo = Repositories.getInstance().getStationRepository();
-        List<Station> stationsOnMap = stationRepo.getStations().stream()
-                .filter(s -> s.getMapName().equals(selectedMap.getMapName()))
-                .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
-                .filter(s -> s.getOwnerPlayer().equals(playerEmail))
-                .collect(Collectors.toList());
-
+        List<Station> stationsOnMap = getPlayerStationsOnMap(playerEmail);
         if (stationsOnMap.size() < 2) {
             System.out.println("Error: You need at least 2 stations on this map to assign a train.");
             return;
@@ -49,22 +42,51 @@ public class AssignTrainUI implements Runnable {
             return;
         }
 
+        Locomotive chosenLoco = selectLocomotive(userLocos);
+        List<PointOfRoute> route = createRoute(stationsOnMap);
+        java.util.Map<Type, Integer> carriageCounts = getCarriageCounts();
+
+        assignTrainController.createTrainAndAssignToRoute(
+                chosenLoco, route, carriageCounts, selectedScenario, budget, playerEmail);
+    }
+
+    private List<Station> getPlayerStationsOnMap(String playerEmail) {
+        StationRepository stationRepo = Repositories.getInstance().getStationRepository();
+        return stationRepo.getStations().stream()
+                .filter(s -> s.getMapName().equals(selectedMap.getMapName()))
+                .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
+                .filter(s -> s.getOwnerPlayer().equals(playerEmail))
+                .collect(Collectors.toList());
+    }
+
+    private Locomotive selectLocomotive(List<Locomotive> userLocos) {
         System.out.println("Select a locomotive to assign:");
         for (int i = 0; i < userLocos.size(); i++) {
             System.out.printf("[%d] %s (Top Speed: %d)%n", i, userLocos.get(i).getModelName(), userLocos.get(i).getTopSpeed());
         }
-        Locomotive chosenLoco = userLocos.get(getValidIndex("Enter locomotive number: ", userLocos.size()));
+        int index = getValidIndex("Enter locomotive number: ", userLocos.size());
+        return userLocos.get(index);
+    }
 
-        List<PointOfRoute> route = createRoute(stationsOnMap);
+    private java.util.Map<Type, Integer> getCarriageCounts() {
+        java.util.Map<Type, Integer> counts = new HashMap<>();
 
         System.out.print("Enter the number of People carriages: ");
-        int peopleCarriageCount = getValidPositiveInt();
-        System.out.print("Enter the number of Mail carriages: ");
-        int mailCarriageCount = getValidPositiveInt();
+        counts.put(Type.PEOPLE, getValidPositiveInt());
 
-        assignTrainController.createTrainAndAssignToRoute(
-                chosenLoco, route, peopleCarriageCount, mailCarriageCount,
-                selectedScenario, budget, playerEmail);
+        System.out.print("Enter the number of Mail carriages: ");
+        counts.put(Type.MAIL, getValidPositiveInt());
+
+        System.out.print("Enter the number of Coal carriages: ");
+        counts.put(Type.COAL, getValidPositiveInt());
+
+        System.out.print("Enter the number of Iron carriages: ");
+        counts.put(Type.IRON, getValidPositiveInt());
+
+        System.out.print("Enter the number of Steel carriages: ");
+        counts.put(Type.STEEL, getValidPositiveInt());
+
+        return counts;
     }
 
     private List<PointOfRoute> createRoute(List<Station> stationsOnMap) {
@@ -73,50 +95,87 @@ public class AssignTrainUI implements Runnable {
 
         System.out.println("Creating route - select stations and cargo types for each point:");
 
-        while (availableStations.size() > 0) {
-            System.out.println("\nAvailable stations:");
-            for (int i = 0; i < availableStations.size(); i++) {
-                Station s = availableStations.get(i);
-                System.out.printf("[%d] %s at (x=%d, y=%d)%n", i, s.getName(), s.getX(), s.getY());
-            }
+        while (!availableStations.isEmpty()) {
+            displayAvailableStations(availableStations);
 
             if (route.size() >= 2) {
                 System.out.println("[-1] Finish route");
             }
 
-            String promptMessage = route.size() >= 2 ?
-                    "Select station (-1 to finish): " :
-                    "Select station: ";
+            int stationIndex = getStationSelection(availableStations, route.size() >= 2);
+            if (stationIndex == -1) break;
 
-            int stationIndex;
-            if (route.size() >= 2) {
-                stationIndex = getValidIndex(promptMessage, availableStations.size(), true);
-            } else {
-                stationIndex = getValidIndex(promptMessage, availableStations.size(), false);
-            }
-
-            if (stationIndex == -1) {
-                break;
-            }
-
-            Station selectedStation = availableStations.get(stationIndex);
-            availableStations.remove(stationIndex);
-
-            CargoTypes.printCargoOptions();
-            int totalCargoOptions = CargoTypes.values().length + 1; // +1 for "Both" option
-            int cargoChoice = getValidMenuOption("Enter cargo choice (1–" + totalCargoOptions + "): ", totalCargoOptions);
-
-            List<CargoTypes> selectedCargoTypes = CargoTypes.fromMenuOption(cargoChoice);
-            List<Type> cargoTypes = new ArrayList<>();
-
-            if (selectedCargoTypes.contains(CargoTypes.PEOPLE)) cargoTypes.add(Type.PEOPLE);
-            if (selectedCargoTypes.contains(CargoTypes.MAIL)) cargoTypes.add(Type.MAIL);
-
+            Station selectedStation = availableStations.remove(stationIndex);
+            List<Type> cargoTypes = selectCargoTypes();
             route.add(new PointOfRoute(selectedStation, cargoTypes));
 
             if (route.size() >= 2 && availableStations.isEmpty()) break;
         }
 
+        ensureMinimumRouteSize(route, availableStations);
+        return route;
+    }
+
+    private void displayAvailableStations(List<Station> stations) {
+        System.out.println("\nAvailable stations:");
+        for (int i = 0; i < stations.size(); i++) {
+            Station s = stations.get(i);
+            System.out.printf("[%d] %s at (x=%d, y=%d)%n", i, s.getName(), s.getX(), s.getY());
+        }
+    }
+
+    private int getStationSelection(List<Station> availableStations, boolean canFinish) {
+        String prompt = canFinish ? "Select station (-1 to finish): " : "Select station: ";
+
+        while (true) {
+            System.out.print(prompt);
+            try {
+                int index = Integer.parseInt(scanner.nextLine());
+                if ((canFinish && index == -1) || (index >= 0 && index < availableStations.size())) {
+                    return index;
+                }
+            } catch (NumberFormatException ignored) {}
+            System.out.println("Invalid selection. Try again.");
+        }
+    }
+
+    private List<Type> selectCargoTypes() {
+        while (true) {
+            try {
+                CargoTypes.printPickupCargoOptions();
+                System.out.print("Enter cargo choices: ");
+                String input = scanner.nextLine();
+
+                List<CargoTypes> selectedCargoTypes = CargoTypes.fromPickupMenuOptions(input);
+                return convertToCarriageTypes(selectedCargoTypes);
+            } catch (IllegalArgumentException e) {
+                System.out.println("Invalid cargo selection. Try again.");
+            }
+        }
+    }
+
+    private List<Type> convertToCarriageTypes(List<CargoTypes> cargoTypes) {
+        List<Type> result = new ArrayList<>();
+        for (CargoTypes cargoType : cargoTypes) {
+            switch (cargoType) {
+                case PEOPLE:
+                    result.add(Type.PEOPLE);
+                    break;
+                case MAIL:
+                    result.add(Type.MAIL);
+                    break;
+                case COAL:
+                    result.add(Type.COAL);
+                    break;
+                case IRON:
+                    result.add(Type.IRON);
+                    break;
+            }
+        }
+        return result;
+    }
+
+    private void ensureMinimumRouteSize(List<PointOfRoute> route, List<Station> availableStations) {
         if (route.size() < 2) {
             System.out.println("Route must have at least 2 points. Adding remaining stations with default cargo types.");
             while (route.size() < 2 && !availableStations.isEmpty()) {
@@ -125,31 +184,14 @@ public class AssignTrainUI implements Runnable {
                 route.add(new PointOfRoute(s, defaultCargo));
             }
         }
-
-        return route;
     }
 
     private int getValidIndex(String prompt, int maxSize) {
-        return getValidIndex(prompt, maxSize, false);
-    }
-
-    private int getValidIndex(String prompt, int maxSize, boolean allowNegativeOne) {
         while (true) {
             System.out.print(prompt);
             try {
                 int index = Integer.parseInt(scanner.nextLine());
-                if ((allowNegativeOne && index == -1) || (index >= 0 && index < maxSize)) return index;
-            } catch (NumberFormatException ignored) {}
-            System.out.println("Invalid selection. Try again.");
-        }
-    }
-
-    private int getValidMenuOption(String prompt, int maxOption) {
-        while (true) {
-            System.out.print(prompt);
-            try {
-                int option = Integer.parseInt(scanner.nextLine());
-                if (option >= 1 && option <= maxOption) return option;
+                if (index >= 0 && index < maxSize) return index;
             } catch (NumberFormatException ignored) {}
             System.out.println("Invalid selection. Try again.");
         }
@@ -159,9 +201,9 @@ public class AssignTrainUI implements Runnable {
         while (true) {
             try {
                 int value = Integer.parseInt(scanner.nextLine());
-                if (value > 0) return value;
+                if (value >= 0) return value; // Allow 0 carriages
             } catch (NumberFormatException ignored) {}
-            System.out.println("Invalid number. Must be > 0.");
+            System.out.println("Invalid number. Must be >= 0.");
         }
     }
 }

@@ -9,6 +9,7 @@ import repository.RouteRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class AssignTrainController {
 
@@ -16,39 +17,40 @@ public class AssignTrainController {
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
 
     public void createTrainAndAssignToRoute(Locomotive locomotive, List<PointOfRoute> route,
-                                            int peopleCarriageCount, int mailCarriageCount,
+                                            Map<Carriage.Type, Integer> carriageCounts,
                                             Scenario scenario, Budget budget, String playerEmail) {
 
-        List<Carriage> carriages = getCarriages(peopleCarriageCount, mailCarriageCount);
+        List<Carriage> carriages = createCarriages(carriageCounts);
         Train train = new Train(locomotive, carriages, playerEmail);
         TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
         trainRepo.save(train);
 
         createRailwayLines(route);
+
         Route routeEntity = new Route(route, playerEmail,
                 route.get(0).getStation().getMapName(),
                 route.get(0).getStation().getScenarioName());
-                routeEntity.setTrain(train);
-                routeRepo.save(routeEntity);
+        routeEntity.setTrain(train);
+        routeRepo.save(routeEntity);
 
         System.out.println("Train assigned to route successfully!");
     }
 
-    private static List<Carriage> getCarriages(int peopleCarriageCount, int mailCarriageCount) {
+    private List<Carriage> createCarriages(Map<Carriage.Type, Integer> carriageCounts) {
         List<Carriage> carriages = new ArrayList<>();
         CarriageRepository carriageRepo = Repositories.getInstance().getCarriageRepository();
 
-        for (int i = 0; i < peopleCarriageCount; i++) {
-            Carriage c = new Carriage(Carriage.Type.PEOPLE);
-            carriageRepo.save(c);
-            carriages.add(c);
+        for (Map.Entry<Carriage.Type, Integer> entry : carriageCounts.entrySet()) {
+            Carriage.Type type = entry.getKey();
+            int count = entry.getValue();
+
+            for (int i = 0; i < count; i++) {
+                Carriage carriage = new Carriage(type);
+                carriageRepo.save(carriage);
+                carriages.add(carriage);
+            }
         }
 
-        for (int i = 0; i < mailCarriageCount; i++) {
-            Carriage c = new Carriage(Carriage.Type.MAIL);
-            carriageRepo.save(c);
-            carriages.add(c);
-        }
         return carriages;
     }
 

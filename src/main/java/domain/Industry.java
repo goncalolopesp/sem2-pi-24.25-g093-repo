@@ -2,7 +2,7 @@ package domain;
 
 public class Industry {
     private final String mapName;
-    private IndustryType type;
+    IndustryType type;
     private Location location;
     private final int generatedIron;
     private final int generatedCoal;

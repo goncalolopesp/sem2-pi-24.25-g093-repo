@@ -1,6 +1,7 @@
 package domain;
 
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Enumeration representing the different types of cargo that can be transported
@@ -19,28 +20,44 @@ public enum CargoTypes {
     }
 
     /**
-     * Prints all available cargo types with their menu options
+     * Prints available cargo types for pickup (excludes Steel)
      */
-    public static void printCargoOptions() {
-        System.out.println("Select cargo type to collect:");
-        CargoTypes[] all = values();
-        for (int i = 0; i < all.length; i++) {
-            System.out.printf("[%d] %s%n", i + 1, all[i].displayName);
+    public static void printPickupCargoOptions() {
+        System.out.println("Select cargo types to collect (enter numbers separated by spaces, for example, '1 2 3'):");
+        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON}; // Steel excluded from pickup
+        for (int i = 0; i < pickupTypes.length; i++) {
+            System.out.printf("[%d] %s%n", i + 1, pickupTypes[i].displayName);
         }
-        System.out.printf("[%d] Both%n", all.length + 1);
     }
 
     /**
-     * Returns the CargoTypes corresponding to a menu choice.
-     * If choice == values().length+1, returns both.
+     * Returns CargoTypes list from space-separated menu choices for pickup
      */
-    public static List<CargoTypes> fromMenuOption(int choice) {
-        CargoTypes[] all = values();
-        if (choice >= 1 && choice <= all.length) {
-            return List.of(all[choice - 1]);
-        } else if (choice == all.length + 1) {
-            return List.of(all);
+    public static List<CargoTypes> fromPickupMenuOptions(String input) {
+        List<CargoTypes> selected = new ArrayList<>();
+        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON};
+
+        String[] choices = input.trim().split("\\s+");
+        for (String choice : choices) {
+            try {
+                int index = Integer.parseInt(choice) - 1;
+                if (index >= 0 && index < pickupTypes.length) {
+                    CargoTypes cargoType = pickupTypes[index];
+                    if (!selected.contains(cargoType)) {
+                        selected.add(cargoType);
+                    }
+                }
+            } catch (NumberFormatException ignored) {}
         }
-        throw new IllegalArgumentException("Invalid cargo choice: " + choice);
+
+        if (selected.isEmpty()) {
+            throw new IllegalArgumentException("No valid cargo choices provided");
+        }
+
+        return selected;
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 }
