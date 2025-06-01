@@ -3,6 +3,8 @@ package ui.console;
 import controller.SimulationController;
 import domain.*;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
+import repository.MapRepository;
+import repository.Repositories;
 import ui.console.menu.MenuItem;
 
 import java.util.ArrayList;
@@ -22,6 +24,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SimulationUI implements Runnable {
 
     private final SimulationController ctrl = new SimulationController();
+    private final MapRepository mapRepo = Repositories.getInstance().getMapRepository();
+
     private Simulation sim;
 
     /**
@@ -56,13 +60,22 @@ public class SimulationUI implements Runnable {
             return;
         }
 
-        Map selectedMap = ctrl.getMap();
-        if (selectedMap == null) {
-            System.out.println("No map selected");
+        Scenario selectedScenario = ctrl.getScenario();
+        if (selectedScenario == null) {
+            System.out.println("No scenario selected.");
             return;
         }
 
-        Scenario selectedScenario = ctrl.getScenario(selectedMap);
+        String mapName = selectedScenario.getSelectedMap();
+        Map selectedMap = mapRepo.getMaps().stream()
+                .filter(map -> map.getMapName().equals(mapName))
+                .findFirst()
+                .orElse(null);
+
+        if (selectedMap == null) {
+            System.out.println("Map not found for scenario: " + mapName);
+            return;
+        }
 
         if (selectedScenario == null) {
             System.out.println("No scenario selected");

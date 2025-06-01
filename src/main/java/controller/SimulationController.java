@@ -638,29 +638,23 @@ public class SimulationController {
         return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
     }
 
-    public Map getMap() {
-        List<Map> maps = mapRepo.getMaps();
-        if (maps.isEmpty()) {
-            System.out.println("No maps available.");
+    public Scenario getScenario() {
+        List<Scenario> allScenarios = scenarioRepo.getScenarios();
+
+        if (allScenarios.isEmpty()) {
+            System.out.println("No scenarios available.");
             return null;
         }
-        int idx = Utils.showAndSelectIndex(maps, "Select a map:");
-        return idx == -1 ? null : maps.get(idx);
-    }
 
-    public Scenario getScenario(Map selectedMap) {
-        List<Scenario> scenarios = scenarioRepo.getScenarios().stream()
-                .filter(s -> s.getSelectedMap().equals(selectedMap.getMapName()))
+        List<String> displayList = allScenarios.stream()
+                .map(s -> s.getScenarioName() + " - " + s.getSelectedMap())
                 .collect(Collectors.toList());
 
-        if (scenarios.isEmpty()) {
-            System.out.println("No scenarios available for map '" + selectedMap.getMapName() + "'.");
-            return null;
-        }
+        int idx = Utils.showAndSelectIndex(displayList, "Select the scenario you want to play in:");
 
-        int idx = Utils.showAndSelectIndex(scenarios, "Select a scenario:");
-        return idx == -1 ? null : scenarios.get(idx);
+        return idx == -1 ? null : allScenarios.get(idx);
     }
+
 
     public Budget checkOrCreateBudget(Map selectedMap, Scenario selectedScenario) {
         Budget budget = null;
