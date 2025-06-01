@@ -66,8 +66,11 @@ public class Bootstrap {
             CreateScenarioController createScenarioController = new CreateScenarioController();
             createScenarioController.createScenario("exampleScenario", "exampleMap",
                     new int[]{1870, 1880},
+                    1,
                     Collections.singletonList("steam"),
-                    Collections.singletonList("none"));
+                    Collections.singletonList("none"),
+                    1.0,
+                    1.0);
         }
     }
 

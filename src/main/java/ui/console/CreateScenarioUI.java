@@ -15,8 +15,11 @@ public class CreateScenarioUI implements Runnable {
     private String scenarioName;
     private Map selectedMap;
     private int[] timeRestrictions;
+    private int portBehavior;
     private List<String> technologicalRestrictions;
     private List<String> historicalRestrictions;
+    private double productionRate;
+    private double profitMultiplier;
 
     /**
      * Constructs a new CreateScenarioUI, initializing its controller.
@@ -34,7 +37,7 @@ public class CreateScenarioUI implements Runnable {
      */
     @Override
     public void run() {
-        System.out.println("\n\n--- Create Scenario ------------------------");
+        System.out.println("\n\n--- CREATE SCENARIO ------------------------");
         requestData();
         submitData();
     }
@@ -44,7 +47,7 @@ public class CreateScenarioUI implements Runnable {
      * Prints a success or failure message based on the result.
      */
     private void submitData() {
-        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap.getMapName(), timeRestrictions, technologicalRestrictions, historicalRestrictions));
+        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap.getMapName(), timeRestrictions, portBehavior, technologicalRestrictions, historicalRestrictions, productionRate, profitMultiplier));
 
         if (scenario.isPresent()) {
             System.out.println("\nScenario successfully created!");
@@ -59,8 +62,11 @@ public class CreateScenarioUI implements Runnable {
     private void requestData() {
         scenarioName = requestScenarioName(selectedMap.getMapName());
         timeRestrictions = requestTimeRestrictions();
+        portBehavior = requestPortBehavior();
         technologicalRestrictions = requestTechnologicalRestrictions();
         historicalRestrictions = requestHistoricalRestrictions();
+        productionRate = requestProductionRate();
+        profitMultiplier = requestProfitMultiplier();
     }
 
     /**
@@ -70,13 +76,16 @@ public class CreateScenarioUI implements Runnable {
      */
     private String requestScenarioName(String selectedMap) {
         Scanner sc = new Scanner(System.in);
-        System.out.print("Enter Scenario Name: ");
         String scenarioName;
+
+        System.out.println("\n--- SCENARIO NAME --------------------------");
+        System.out.println("Note: Scenario Name must be unique and contain only alphanumeric characters and spaces.");
+        System.out.print("Enter Scenario Name: ");
 
         do {
             scenarioName = sc.nextLine();
             if (!ctrl.checkNameUniqueness(scenarioName, selectedMap)){
-                System.out.print("\nName not unique. Try again: ");
+                System.out.print("Error: Name not unique. Try again: ");
             }
         } while (!ctrl.checkNameUniqueness(scenarioName, selectedMap));
 
@@ -105,7 +114,7 @@ public class CreateScenarioUI implements Runnable {
                 System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
             }
             if (timePeriod[0] < 1804 || timePeriod[0] >= 2025) {
-                System.out.print("Starting Year must be equal or higher than 1804 and lower than 2025. Try again: ");
+                System.out.print("Error: Starting Year must be equal or higher than 1804 and lower than 2025. Try again: ");
             }
         } while (timePeriod[0] < 1804 || timePeriod[0] >= 2025);
 
@@ -121,11 +130,39 @@ public class CreateScenarioUI implements Runnable {
                 System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number. ");
             }
             if (timePeriod[1] > 2025 || timePeriod[1] <= timePeriod[0]) {
-                System.out.print("Final Year must be higher than the Starting Year and equal or lower than 2025. Try again: ");
+                System.out.print("Error: Final Year must be higher than the Starting Year and equal or lower than 2025. Try again: ");
             }
         } while (timePeriod[1] > 2025 || timePeriod[1] <= timePeriod[0]);
 
         return timePeriod;
+    }
+
+    private int requestPortBehavior() {
+        Scanner sc = new Scanner(System.in);
+        int portBehavior = 0;
+
+        System.out.println("\n--- PORT BEHAVIOR --------------------------");
+        System.out.println("Note: Chosen behavior must be included in the following list:");
+        System.out.println("1 - Port1");
+        System.out.println("2 - Port2");
+        System.out.println("3 - Port3");
+        System.out.print("Enter Port Behavior: ");
+
+        do {
+            String input = sc.nextLine().trim();
+
+            try {
+                portBehavior = Integer.parseInt(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number: ");
+            }
+
+            if (portBehavior < 1 || portBehavior > 3) {
+                System.out.print("Error: Chosen behavior must be included in the list. Try again: ");
+            }
+        } while (portBehavior < 1 || portBehavior > 3);
+
+        return portBehavior;
     }
 
     /**
@@ -162,7 +199,7 @@ public class CreateScenarioUI implements Runnable {
             }
 
             if (availableTypes.isEmpty()) {
-                System.out.print("Invalid input. Please enter only steam, diesel, and/or electric: ");
+                System.out.print("Error: Please enter only steam, diesel, and/or electric: ");
             }
         } while (availableTypes.isEmpty());
 
@@ -181,7 +218,7 @@ public class CreateScenarioUI implements Runnable {
         boolean valid;
 
         System.out.println("\n--- HISTORICAL EVENTS --------------------------");
-        System.out.println("Note: Historical Events must be either 'none', 'vaccination program', and/or 'school program'.");
+        System.out.println("Note: Historical Events must be either 'none', 'vaccination campaign', and/or 'school program'.");
         System.out.print("Enter Historical Events: ");
 
         do {
@@ -203,10 +240,60 @@ public class CreateScenarioUI implements Runnable {
             }
 
             if (historicalEvents.isEmpty()) {
-                System.out.print("Invalid input. Please enter only vaccination campaign and/or school program: ");
+                System.out.print("Error: Please enter only vaccination campaign and/or school program: ");
             }
         } while (historicalEvents.isEmpty());
 
         return historicalEvents;
+    }
+
+    private double requestProductionRate() {
+        Scanner sc = new Scanner(System.in);
+        double productionRate = 1.0;
+
+        System.out.println("\n--- PRODUCTION RATE --------------------------");
+        System.out.println("Note: Production Rate must be between 0.5 and 2.0.");
+        System.out.print("Enter Production Rate: ");
+
+        do {
+            String input = sc.nextLine().trim();
+
+            try {
+                productionRate = Double.parseDouble(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number: ");
+            }
+
+            if (productionRate < 0.5 || productionRate > 2.0) {
+                System.out.print("Error: Production Rate must be between 0.5 and 2.0. Try again: ");
+            }
+        } while (productionRate < 0.5 || productionRate > 2.0);
+
+        return productionRate;
+    }
+
+    private double requestProfitMultiplier() {
+        Scanner sc = new Scanner(System.in);
+        double profitMultiplier = 1.0;
+
+        System.out.println("\n--- PROFIT MULTIPLIER --------------------------");
+        System.out.println("Note: Profit Multiplier must be between 0.5 and 2.0.");
+        System.out.print("Enter Profit Multiplier: ");
+
+        do {
+            String input = sc.nextLine().trim();
+
+            try {
+                profitMultiplier = Double.parseDouble(input);
+            } catch (NumberFormatException e) {
+                System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number: ");
+            }
+
+            if (profitMultiplier < 0.5 || profitMultiplier > 2.0) {
+                System.out.print("Error: Profit Multiplier must be between 0.5 and 2.0. Try again: ");
+            }
+        } while (profitMultiplier < 0.5 || profitMultiplier > 2.0);
+
+        return profitMultiplier;
     }
 }
