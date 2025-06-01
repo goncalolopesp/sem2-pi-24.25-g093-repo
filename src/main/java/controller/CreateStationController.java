@@ -2,6 +2,7 @@ package controller;
 
 import domain.*;
 import domain.Station.Orientation;
+import repository.IndustryRepository;
 import repository.Repositories;
 import repository.StationRepository;
 
@@ -13,9 +14,10 @@ public class CreateStationController {
     public enum Error { OK, INVALID_TYPE, INSUFFICIENT_FUNDS, OVERBUILD, INVALID_COORDINATES }
 
     /**
-     * Constructs a Repository for Station objects.
+     * Constructs a Repository for Station and Industry objects.
      */
     private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
+    private final IndustryRepository indRepo = Repositories.getInstance().getIndustryRepository();
 
     private static final int COST_DEPOT = 50, CAP_DEPOT = 100;
     private static final int COST_STATION = 100, CAP_STATION = 200;
@@ -95,7 +97,8 @@ public class CreateStationController {
                 boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
                 boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
                         .anyMatch(b -> b.getX() == cx && b.getY() == cy);
-                if (onCity || onBlock) return Error.OVERBUILD;
+                boolean onIndustry = indRepo.getIndustries().stream().filter(i->i.getMapName().equals(map.getMapName())).filter(i->i.getLocation().getX() == cx).filter(i->i.getLocation().getY() == cy).findFirst().isPresent();
+                if (onCity || onBlock || onIndustry) return Error.OVERBUILD;
                 String owner = user.getEmail();
                 for (Station s : stationRepo.getStations()) {
                     if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner) || !s.getScenarioName().equals(scenario.getScenarioName())) continue;

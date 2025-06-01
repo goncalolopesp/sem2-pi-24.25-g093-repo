@@ -76,10 +76,30 @@ public class BuildStationUI implements Runnable {
         boolean placed = false;
         Scanner sc = new Scanner(System.in);
         while (!placed) {
-            System.out.print("Enter X coordinate: ");
-            int x = sc.nextInt();
-            System.out.print("Enter Y coordinate: ");
-            int y = sc.nextInt();
+            int x = 0;
+            int y = 0;
+            boolean validX = false;
+            boolean validY = false;
+            while (!validX) {
+                System.out.print("Enter X coordinate: ");
+                String inputX = sc.nextLine().trim();
+                try {
+                    x = Integer.parseInt(inputX);
+                    validX = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid coordinate.");
+                }
+            }
+            while (!validY) {
+                System.out.print("Enter Y coordinate: ");
+                String inputY = sc.nextLine().trim();
+                try {
+                    y = Integer.parseInt(inputY);
+                    validY = true;
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid coordinate.");
+                }
+            }
 
             Orientation orientation = null;
             if (typeName.equals("STATION")) {
