@@ -29,7 +29,7 @@ public class UpgradeStationTypeController {
     public boolean upgradeType(Station station, Type targetType, Orientation orientation,Budget budget,int cost) {
         Station copy = new Station(
                 station.getType(), station.getName(), station.getMapName(),station.getScenarioName(), station.getOwnerPlayer(),
-                station.getPrice(), station.getCapacity(), station.getCapacityOwned(),station.getX(), station.getY(), station.getOrientation()
+                station.getPrice(), station.getCapacity(), station.getX(), station.getY(), station.getOrientation()
         );
 
         stationRepo.removeStation(station);

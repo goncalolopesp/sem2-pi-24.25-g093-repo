@@ -18,28 +18,32 @@ public class Station implements Serializable {
     private final String ownerPlayer;
     private final int price;
     private final int capacity;
+    private int peopleStored;
+    private int mailStored;
+    private int coalStored;
+    private int ironStored;
+    private int steelStored;
     private int capacityOwned;
     private transient boolean maxCapacityNotified = false;
     private final int x, y;
     private final Orientation orientation;
 
     /**
-     * Constructs a new Station.
+     * Constructs a new Station with the specified attributes.
      *
-     * @param type         station type
-     * @param name         generated station name
-     * @param mapName      name of the map where station is placed
-     * @param scenarioName name of the scenario where the station is placed
-     * @param ownerPlayer  email of the player who owns this station
-     * @param price        cost to build the station
-     * @param capacity     maximum cargo capacity
-     * @param capacityOwned the current amount of cargo owned by the station
-     * @param x            x-coordinate on the map
-     * @param y            y-coordinate on the map
-     * @param orientation  orientation of the center (null for DEPOT and TERMINAL)
+     * @param type         the type of the station (DEPOT, STATION, TERMINAL)
+     * @param name         the name of the station
+     * @param mapName      the name of the map where the station is located
+     * @param scenarioName the scenario associated with the station
+     * @param ownerPlayer  the name of the owner of the station
+     * @param price        the price of the station
+     * @param capacity     the maximum cargo capacity of the station
+     * @param x            the x-coordinate of the station's location
+     * @param y            the y-coordinate of the station's location
+     * @param orientation  the orientation of the station (NE, SE, NW, SW) if the type is STATION
      */
     public Station(Type type, String name, String mapName,String scenarioName, String ownerPlayer,
-                   int price, int capacity, int capacityOwned, int x, int y, Orientation orientation) {
+                   int price, int capacity, int x, int y, Orientation orientation) {
         this.type        = type;
         this.name        = name;
         this.mapName     = mapName;
@@ -47,7 +51,12 @@ public class Station implements Serializable {
         this.ownerPlayer = ownerPlayer;
         this.price       = price;
         this.capacity    = capacity;
-        this.capacityOwned = capacityOwned;
+        this.peopleStored = 0;
+        this.mailStored = 0;
+        this.coalStored  = 0;
+        this.ironStored  = 0;
+        this.steelStored = 0;
+        this.capacityOwned = 0;
         this.x           = x;
         this.y           = y;
         this.orientation = orientation;
@@ -98,18 +107,102 @@ public class Station implements Serializable {
     public int getCapacity()        { return capacity; }
 
     /**
-     * Returns the cargo owned by the station
+     * Returns the number of people currently stored at the station.
      *
-     * @return the cargo owned by the station
+     * @return the number of people stored
      */
-    public int getCapacityOwned()        { return capacityOwned; }
+    public int getPeopleStored() {
+        return peopleStored;
+    }
 
     /**
-     * Sets the cargo owned by the station
+     * Updates the number of people currently stored at the station.
      *
-     * @param capacityOwned  the cargo that the station owns
+     * @param peopleStored the new number of people to store at the station
      */
-    public void setCapacityOwned(int capacityOwned)        { this.capacityOwned = capacityOwned; }
+    public void setPeopleStored(int peopleStored) {
+        this.peopleStored = peopleStored;
+    }
+
+    /**
+     * Returns the amount of mail currently stored at the station.
+     *
+     * @return the amount of mail stored
+     */
+    public int getMailStored() {
+        return mailStored;
+    }
+
+    /**
+     * Updates the amount of mail currently stored at the station.
+     *
+     * @param mailStored the new amount of mail to store at the station
+     */
+    public void setMailStored(int mailStored) {
+        this.mailStored = mailStored;
+    }
+
+    /**
+     * Returns the amount of coal currently stored at the station.
+     *
+     * @return the amount of coal stored
+     */
+    public int getCoalStored() {
+        return coalStored;
+    }
+
+    /**
+     * Sets the amount of coal currently stored at the station.
+     *
+     * @param coalStored the amount of coal to set, representing the current coal storage
+     */
+    public void setCoalStored(int coalStored) {
+        this.coalStored = coalStored;
+    }
+
+    /**
+     * Returns the amount of iron currently stored at the station.
+     *
+     * @return the amount of iron stored
+     */
+    public int getIronStored() {
+        return ironStored;
+    }
+
+    /**
+     * Sets the amount of iron currently stored at the station.
+     *
+     * @param ironStored the amount of iron to set, representing the current iron storage
+     */
+    public void setIronStored(int ironStored) {
+        this.ironStored = ironStored;
+    }
+
+    /**
+     * Returns the amount of steel currently stored at the station.
+     *
+     * @return the amount of steel stored
+     */
+    public int getSteelStored() {
+        return steelStored;
+    }
+
+    /**
+     * Sets the amount of steel currently stored at the station.
+     *
+     * @param steelStored the amount of steel to set, representing the current steel storage
+     */
+    public void setSteelStored(int steelStored) {
+        this.steelStored = steelStored;
+    }
+
+    public int getCapacityOwned() {
+        return capacityOwned;
+    }
+
+    public void setCapacityOwned(int capacityOwned) {
+        this.capacityOwned = capacityOwned;
+    }
 
     /**
      * Returns the x-coordinate of a station.

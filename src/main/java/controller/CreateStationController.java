@@ -127,7 +127,7 @@ public class CreateStationController {
                 .orElse("Unknown") + "-" + type.name();
 
 
-        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(),user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(),user.getEmail(), cost, capacity, origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
         budget.subtractBudget(cost);
@@ -237,7 +237,7 @@ public class CreateStationController {
                 .min(Comparator.comparingInt(c -> Math.abs(c.getCenterX() - nameRefX) + Math.abs(c.getCenterY() - nameRefY)))
                 .map(City::getName)
                 .orElse("Unknown") + "-" + type.name();
-        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(), user.getEmail(), cost, capacity,0,origX, origY, orientation);
+        Station st = new Station(type, name, map.getMapName(), scenario.getScenarioName(), user.getEmail(), cost, capacity, origX, origY, orientation);
         stationRepo.addStation(st);
         map.getStations().add(st);
         budget.subtractBudget(cost);

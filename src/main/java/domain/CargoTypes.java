@@ -7,7 +7,10 @@ import java.util.List;
  */
 public enum CargoTypes {
     PEOPLE("People"),
-    MAIL("Mail");
+    MAIL("Mail"),
+    COAL("Coal"),
+    IRON("Iron"),
+    STEEL("Steel");
 
     private final String displayName;
 

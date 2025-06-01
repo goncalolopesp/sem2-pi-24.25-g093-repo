@@ -335,7 +335,9 @@ public class SimulationController {
                                     ? totalGeneratedCargo * 2
                                     : totalGeneratedCargo;
 
-                            addCargoToStation(station, cargoToAdd, maxCapacityStations);
+                            int actualAddedCargo = addCargoToStation(station, cargoToAdd, maxCapacityStations);
+                            station.setPeopleStored((int) (station.getPeopleStored() + (actualAddedCargo * 0.7)));
+                            station.setMailStored((int) (station.getMailStored() + (actualAddedCargo * 0.3)));
                         }
                     });
         }
@@ -355,7 +357,7 @@ public class SimulationController {
                     .filter(s -> s.getMapName().equals(mapName))
                     .filter(s -> s.getOwnerPlayer().equals(currentUser.getEmail()))
                     .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             // Track which stations have already received cargo from this industry
             Set<String> stationsProcessedForThisIndustry = new HashSet<>();
@@ -371,7 +373,15 @@ public class SimulationController {
                             int cargoAmount = getCargoPerIndustry(ind.getType());
 
                             if (cargoAmount > 0) {
-                                addCargoToStation(s, cargoAmount, maxCapacityStations);
+                                int actualAddedCargo = addCargoToStation(s, cargoAmount, maxCapacityStations);
+                                switch (ind.getType()) {
+                                    case IRON_MINE:
+                                        s.setIronStored(s.getIronStored() + actualAddedCargo);
+                                        break;
+                                    case COAL_MINE:
+                                        s.setCoalStored(s.getCoalStored() + actualAddedCargo);
+                                        break;
+                                }
                                 stationsProcessedForThisIndustry.add(s.getName());
                             }
                         }
@@ -413,13 +423,14 @@ public class SimulationController {
         }
     }
 
-    private void addCargoToStation(Station station, int cargoToAdd, Set<String> maxCapacityStations) {
+    private int addCargoToStation(Station station, int cargoToAdd, Set<String> maxCapacityStations) {
         int currentCapacity = station.getCapacityOwned();
         int maxCapacity = station.getCapacity();
+        int actualCargoAdded = 0;
 
         if (currentCapacity < maxCapacity) {
             // Ensure we don't exceed capacity
-            int actualCargoAdded = Math.min(cargoToAdd, maxCapacity - currentCapacity);
+            actualCargoAdded = Math.min(cargoToAdd, maxCapacity - currentCapacity);
             station.setCapacityOwned(currentCapacity + actualCargoAdded);
 
             System.out.printf(
@@ -441,6 +452,7 @@ public class SimulationController {
                 maxCapacityStations.add(station.getName());
             }
         }
+        return actualCargoAdded;
     }
 
     public void payLocomotiveMaintenance(Budget budget){
