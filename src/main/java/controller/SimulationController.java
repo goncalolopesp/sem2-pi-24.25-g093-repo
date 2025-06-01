@@ -370,7 +370,7 @@ public class SimulationController {
                     for (Station s : relevantStations) {
                         // Only add cargo once per station per industry
                         if (hasOverlap(cx, cy, s) && !stationsProcessedForThisIndustry.contains(s.getName())) {
-                            int cargoAmount = getCargoPerIndustry(ind.getType());
+                            int cargoAmount = getCargoPerIndustry(ind);
 
                             if (cargoAmount > 0) {
                                 int actualAddedCargo = addCargoToStation(s, cargoAmount, maxCapacityStations);
@@ -412,12 +412,12 @@ public class SimulationController {
         return cx >= sox && cx < sox + sw && cy >= soy && cy < soy + sh;
     }
 
-    private int getCargoPerIndustry(IndustryType type) {
-        switch (type) {
+    private int getCargoPerIndustry(Industry ind) {
+        switch (ind.getType()) {
             case IRON_MINE:
-                return 6;
+                return ind.getGeneratedIron();
             case COAL_MINE:
-                return 4;
+                return ind.getGeneratedCoal();
             default:
                 return 0;
         }
