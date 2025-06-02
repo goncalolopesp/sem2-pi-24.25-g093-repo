@@ -1,8 +1,10 @@
 package repository;
 
+import domain.Map;
 import domain.User;
 import domain.CurrentUser;
 
+import java.io.*;
 import java.util.*;
 
 /**
@@ -236,4 +238,43 @@ public class AuthRepository {
     public String getCurrentUserEmail() {
         return session.getUser().getEmail();
     }
+
+    public void saveUserToFile(){
+        File authFile = new File("users.usr");
+        try (FileOutputStream fos = new FileOutputStream(authFile)){
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(users);
+        }catch(IOException e){
+            System.err.println("Error saving Users");
+        }
+    }
+
+    public Set<User> getUsersFromFile(){
+        Set<User> savedUsers = new HashSet<>();
+        File usersFile = new File("users.usr");
+        if (usersFile.exists()) {
+
+            try (FileInputStream fis = new FileInputStream(usersFile)) {
+                ObjectInputStream ois = new ObjectInputStream(fis);
+
+                Object obj = ois.readObject();
+                if (obj instanceof Set<?>) {
+                    Set<?> loadedUsers = (Set<?>) obj;
+                    savedUsers.clear();
+
+                    for (Object loadedUser : loadedUsers) {
+                        if (loadedUser instanceof User) {
+                            savedUsers.add((User) loadedUser);
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                System.err.println("Error loading Users");
+            } catch (ClassNotFoundException e) {
+                System.err.println("Error loading Users");
+            }
+        }
+        return savedUsers;
+    }
+
 }

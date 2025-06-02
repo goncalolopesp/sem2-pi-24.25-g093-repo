@@ -4,6 +4,7 @@ import repository.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class Bootstrap {
     public void run() {
@@ -20,10 +21,12 @@ public class Bootstrap {
         //get authentication repository
 
         AuthRepository authRepository = Repositories.getInstance().getAuthRepository();
-        AuthController authController = new AuthController();
 
-        authRepository.createNewUser(new User("Main Editor", "editor@this.app", "admin", authController.ROLE_EDITOR));
-        authRepository.createNewUser(new User("Player 1", "player@this.app", "pwd", authController.ROLE_PLAYER));
+        Set<User> users = authRepository.getUsersFromFile();
+
+        for (User user : users) {
+            authRepository.createNewUser(user);
+        }
     }
 
     private void addMaps() {

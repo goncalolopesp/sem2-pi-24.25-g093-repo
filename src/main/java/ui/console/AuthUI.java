@@ -17,7 +17,6 @@ public class AuthUI implements Runnable {
 
     public void createUser(){
         System.out.println("\n\n--- REGISTRATION UI ---------------------------");
-
         boolean success;
         do {
 
@@ -32,6 +31,7 @@ public class AuthUI implements Runnable {
             }
 
         } while (!success);
+        ctrl.saveUserToFile();
         System.out.println("User created successfully");
     }
 
