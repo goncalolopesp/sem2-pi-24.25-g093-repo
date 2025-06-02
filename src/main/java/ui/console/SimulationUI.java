@@ -83,7 +83,6 @@ public class SimulationUI implements Runnable {
         }
 
         if (sim == null) {
-            // DEBUG: Let's see what's in the repository
             System.out.println("\n=== DEBUGGING SIMULATION LOADING ===");
             List<Simulation> allSims = ctrl.getSimulations();
             System.out.println("Total simulations in repository: " + allSims.size());
@@ -173,7 +172,7 @@ public class SimulationUI implements Runnable {
                     options.add(new MenuItem("Buy a locomotive", new BuyLocomotiveUI(selectedScenario, selectedMap, sim.getUserBudget())));
                     options.add(new MenuItem("List my locomotives", new ListLocomotiveUI()));
                     options.add(new MenuItem("List my stations", new ListStationsUI()));
-                    options.add(new MenuItem("Associate a locomotive to a route", new AssignTrainUI(selectedMap,selectedScenario, sim.getUserBudget())));
+                    options.add(new MenuItem("Associate a train to a route", new AssignTrainUI(selectedMap,selectedScenario, sim.getUserBudget())));
                     options.add(new MenuItem("Pause Game", () -> {
                         running.set(false);
                         options.clear();

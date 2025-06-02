@@ -155,7 +155,7 @@ public class Bootstrap {
     }
 
     private void addTrains(){
-        String mail = "Player@this.app";
+        String mail = "player@this.app";
         Locomotive teste = new Locomotive("1-3 Bobo", 85, "Electric", 33, 6, 1895, 1935, 54);
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
@@ -174,8 +174,8 @@ public class Bootstrap {
         carriages2.add(new Carriage(Carriage.Type.MAIL));
         carriages2.add(new Carriage(Carriage.Type.COAL));
         carriages2.add(new Carriage(Carriage.Type.IRON));
-        carriages.add(new Carriage(Carriage.Type.STEEL));
-        carriages.add(new Carriage(Carriage.Type.STEEL));
+        carriages2.add(new Carriage(Carriage.Type.STEEL));
+        carriages2.add(new Carriage(Carriage.Type.STEEL));
 
         Train train2 = new Train(teste,carriages2,mail);
 

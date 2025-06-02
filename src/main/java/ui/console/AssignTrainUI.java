@@ -30,25 +30,60 @@ public class AssignTrainUI implements Runnable {
         var currentUser = CurrentUser.getInstance().getUser();
         String playerEmail = currentUser.getEmail();
 
+        System.out.println(playerEmail);
         List<Station> stationsOnMap = getPlayerStationsOnMap(playerEmail);
         if (stationsOnMap.size() < 2) {
             System.out.println("Error: You need at least 2 stations on this map to assign a train.");
             return;
         }
 
-        List<Locomotive> userLocos = currentUser.getLocomotives();
-        if (userLocos.isEmpty()) {
-            System.out.println("Error: You need at least 1 locomotive to assign a train.");
+        List<Train> userTrains = getPlayerTrains(playerEmail);
+        if (userTrains.isEmpty()) {
+            System.out.println("Error: You need at least 1 train to assign.");
             return;
         }
 
-        Locomotive chosenLoco = selectLocomotive(userLocos);
+        Train chosenTrain = selectTrain(userTrains);
         List<PointOfRoute> route = createRoute(stationsOnMap);
-        java.util.Map<Type, Integer> carriageCounts = getCarriageCounts();
 
-        assignTrainController.createTrainAndAssignToRoute(
-                chosenLoco, route, carriageCounts, selectedScenario, budget, playerEmail);
+        assignTrainController.assignExistingTrainToRoute(
+                chosenTrain, route, selectedScenario, budget);
     }
+
+    private List<Train> getPlayerTrains(String playerEmail) {
+        return Repositories.getInstance().getTrainRepository().getTrains().stream()
+                .filter(train -> train.getUserEmail().equals(playerEmail))
+                .collect(Collectors.toList());
+    }
+
+    private Train selectTrain(List<Train> userTrains) {
+        System.out.println("Select a train to assign:");
+        for (int i = 0; i < userTrains.size(); i++) {
+            Train train = userTrains.get(i);
+            System.out.printf("[%d] Locomotive: %s, Total Carriages: %d%n",
+                    i, train.getLocomotive().getModelName(), train.getCarriages().size());
+            int people = 0, mail = 0, coal = 0, iron = 0, steel = 0;
+            for (Carriage c : train.getCarriages()) {
+                switch (c.getType()) {
+                    case PEOPLE: people++; break;
+                    case MAIL: mail++; break;
+                    case COAL: coal++; break;
+                    case IRON: iron++; break;
+                    case STEEL: steel++; break;
+                }
+            }
+            if (people > 0) System.out.println("     - PEOPLE: " + people);
+            if (mail > 0) System.out.println("     - MAIL: " + mail);
+            if (coal > 0) System.out.println("     - COAL: " + coal);
+            if (iron > 0) System.out.println("     - IRON: " + iron);
+            if (steel > 0) System.out.println("     - STEEL: " + steel);
+        }
+
+        int index = getValidIndex("Enter train number: ", userTrains.size());
+        return userTrains.get(index);
+    }
+
+
 
     private List<Station> getPlayerStationsOnMap(String playerEmail) {
         StationRepository stationRepo = Repositories.getInstance().getStationRepository();

@@ -16,25 +16,22 @@ public class AssignTrainController {
     private final RailwayLineRepository railwayLineRepo = Repositories.getInstance().getRailwayLineRepository();
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
 
-    public void createTrainAndAssignToRoute(Locomotive locomotive, List<PointOfRoute> route,
-                                            Map<Carriage.Type, Integer> carriageCounts,
-                                            Scenario scenario, Budget budget, String playerEmail) {
-
-        List<Carriage> carriages = createCarriages(carriageCounts);
-        Train train = new Train(locomotive, carriages, playerEmail);
-        TrainRepository trainRepo = Repositories.getInstance().getTrainRepository();
-        trainRepo.save(train);
-
+    public void assignExistingTrainToRoute(Train train, List<PointOfRoute> route,
+                                           Scenario scenario, Budget budget) {
         createRailwayLines(route);
 
-        Route routeEntity = new Route(route, playerEmail,
+        Route routeEntity = new Route(
+                route,
+                train.getUserEmail(),
                 route.get(0).getStation().getMapName(),
-                route.get(0).getStation().getScenarioName());
+                route.get(0).getStation().getScenarioName()
+        );
         routeEntity.setTrain(train);
         routeRepo.save(routeEntity);
 
-        System.out.println("Train assigned to route successfully!");
+        System.out.println("Existing train assigned to route successfully!");
     }
+
 
     private List<Carriage> createCarriages(Map<Carriage.Type, Integer> carriageCounts) {
         List<Carriage> carriages = new ArrayList<>();
