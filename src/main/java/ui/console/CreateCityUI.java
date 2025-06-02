@@ -8,6 +8,9 @@ import controller.CreateCityController.BlockError;
 import domain.City;
 import domain.HouseBlock;
 import domain.Map;
+import dto.CityDTO;
+import dto.DTOMapperCity;
+import dto.HouseBlockDTO;
 import repository.MapRepository;
 import repository.Repositories;
 
@@ -100,7 +103,8 @@ public class CreateCityUI implements Runnable {
         } while (ce != CenterError.OK);
 
         City city = ctrl.createCity(cityName, mapName, cx, cy);
-        System.out.println("City created: " + city.getName() + " on map " + city.getMapName());
+        CityDTO cityDTO = DTOMapperCity.toCityDTO(city);
+        System.out.println("City created: " + cityDTO.name + " on map " + cityDTO.mapName);
 
         char mode;
         do {
@@ -186,14 +190,14 @@ public class CreateCityUI implements Runnable {
             }
 
             List<HouseBlock> generatedBlocks = ctrl.assignBlocksAuto(city, n, s);
+            List<HouseBlockDTO> blockDTOs = DTOMapperCity.toBlockDTOList(generatedBlocks);
             System.out.println("Blocks assigned automatically.");
-
-            // Print coordinates of all generated blocks
             System.out.println("Generated block coordinates:");
-            for (int i = 0; i < generatedBlocks.size(); i++) {
-                HouseBlock block = generatedBlocks.get(i);
-                System.out.println("Block " + (i + 1) + ": (" + block.getX() + ", " + block.getY() + ")");
+            for (int i = 0; i < blockDTOs.size(); i++) {
+                HouseBlockDTO dto = blockDTOs.get(i);
+                System.out.println("Block " + (i + 1) + ": (" + dto.x + ", " + dto.y + ")");
             }
+
         }
 
         System.out.println("City created with success.");
