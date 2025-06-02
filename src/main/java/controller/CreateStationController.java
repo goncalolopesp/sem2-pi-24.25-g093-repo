@@ -2,6 +2,7 @@ package controller;
 
 import domain.*;
 import domain.Station.Orientation;
+import dto.StationDTO;
 import repository.IndustryRepository;
 import repository.Repositories;
 import repository.StationRepository;
@@ -258,4 +259,11 @@ public class CreateStationController {
     public StationRepository getStationRepository() {
         return stationRepo;
     }
+
+    public StationDTO getLastCreatedStationDTO() {
+        List<Station> stations = stationRepo.getStations();
+        if (stations.isEmpty()) return null;
+        return StationDTO.fromEntity(stations.get(stations.size() - 1));
+    }
+
 }
