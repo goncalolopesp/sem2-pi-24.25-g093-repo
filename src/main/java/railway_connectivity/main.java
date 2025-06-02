@@ -10,6 +10,9 @@ import guru.nidi.graphviz.model.MutableGraph;
 import guru.nidi.graphviz.model.MutableNode;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class main {
@@ -331,6 +334,284 @@ public class main {
         }
     }
 
+    //=============================================================
+
+    private static void generateGraphs(List<PerformanceResult> us13Results, List<PerformanceResult> us14Results) {
+        try {
+            // Create output directory for graphs
+            Path outputDir = Paths.get("performance_graphs");
+            if (!Files.exists(outputDir)) {
+                Files.createDirectories(outputDir);
+            }
+
+            // Generate graphs for US13 and US14
+            generateUS13Graphs(us13Results, outputDir);
+            generateUS14Graphs(us14Results, outputDir);
+
+            System.out.println("\nGraphs generated in: " + outputDir.toAbsolutePath());
+
+        } catch (IOException e) {
+            System.err.println("Error generating graphs: " + e.getMessage());
+        }
+    }
+
+    private static void generateUS13Graphs(List<PerformanceResult> results, Path outputDir) throws IOException {
+        // Group results by train type
+        Map<String, List<PerformanceResult>> groupedResults = new HashMap<>();
+        for (PerformanceResult result : results) {
+            String trainType = extractTrainType(result.testName);
+            groupedResults.computeIfAbsent(trainType, k -> new ArrayList<>()).add(result);
+        }
+
+        // Generate data files and plots for each train type
+        for (Map.Entry<String, List<PerformanceResult>> entry : groupedResults.entrySet()) {
+            String trainType = entry.getKey();
+            List<PerformanceResult> trainResults = entry.getValue();
+
+            // Sort by vertex count for proper line plotting
+            trainResults.sort((a, b) -> Integer.compare(a.vertexCount, b.vertexCount));
+
+            // Generate data file
+            String dataFileName = "us13_" + trainType.toLowerCase() + "_data.txt";
+            Path dataFile = outputDir.resolve(dataFileName);
+
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(dataFile))) {
+                writer.println("# Vertices Edges Time_ms");
+                for (PerformanceResult result : trainResults) {
+                    writer.printf("%d %d %.3f%n",
+                            result.vertexCount,
+                            result.edgeCount,
+                            result.avgTime / 1_000_000.0);
+                }
+            }
+
+            // Generate Gnuplot script
+            String scriptFileName = "us13_" + trainType.toLowerCase() + "_plot.gp";
+            Path scriptFile = outputDir.resolve(scriptFileName);
+            String outputFileName = "us13_" + trainType.toLowerCase() + "_performance.png";
+
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(scriptFile))) {
+                writer.println("set terminal png size 800,600");
+                writer.println("set output '" + outputFileName + "'");
+                writer.println("set title 'US13 Performance - " + trainType + " Trains'");
+                writer.println("set xlabel 'Number of Vertices'");
+                writer.println("set ylabel 'Execution Time (ms)'");
+                writer.println("set grid");
+                writer.println("set key outside");
+
+                // Plot both time vs vertices and time vs edges
+                writer.println("plot '" + dataFileName + "' using 1:3 with linespoints title 'Time vs Vertices', \\");
+                writer.println("     '" + dataFileName + "' using 2:3 with linespoints title 'Time vs Edges'");
+            }
+
+            // Execute Gnuplot
+            executeGnuplot(scriptFile, outputDir);
+        }
+
+        // Generate combined comparison graph
+        generateUS13ComparisonGraph(groupedResults, outputDir);
+    }
+
+    private static void generateUS14Graphs(List<PerformanceResult> results, Path outputDir) throws IOException {
+        // Group results by maintenance type
+        Map<String, List<PerformanceResult>> groupedResults = new HashMap<>();
+        for (PerformanceResult result : results) {
+            String maintenanceType = extractMaintenanceType(result.testName);
+            groupedResults.computeIfAbsent(maintenanceType, k -> new ArrayList<>()).add(result);
+        }
+
+        // Generate data files and plots for each maintenance type
+        for (Map.Entry<String, List<PerformanceResult>> entry : groupedResults.entrySet()) {
+            String maintenanceType = entry.getKey();
+            List<PerformanceResult> maintenanceResults = entry.getValue();
+
+            // Sort by vertex count
+            maintenanceResults.sort((a, b) -> Integer.compare(a.vertexCount, b.vertexCount));
+
+            // Generate data file
+            String dataFileName = "us14_" + maintenanceType.toLowerCase().replace("_", "") + "_data.txt";
+            Path dataFile = outputDir.resolve(dataFileName);
+
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(dataFile))) {
+                writer.println("# Vertices Edges Time_ms");
+                for (PerformanceResult result : maintenanceResults) {
+                    writer.printf("%d %d %.3f%n",
+                            result.vertexCount,
+                            result.edgeCount,
+                            result.avgTime / 1_000_000.0);
+                }
+            }
+
+            // Generate Gnuplot script
+            String scriptFileName = "us14_" + maintenanceType.toLowerCase().replace("_", "") + "_plot.gp";
+            Path scriptFile = outputDir.resolve(scriptFileName);
+            String outputFileName = "us14_" + maintenanceType.toLowerCase().replace("_", "") + "_performance.png";
+
+            try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(scriptFile))) {
+                writer.println("set terminal png size 800,600");
+                writer.println("set output '" + outputFileName + "'");
+                writer.println("set title 'US14 Performance - " + maintenanceType.replace("_", " ") + "'");
+                writer.println("set xlabel 'Number of Vertices'");
+                writer.println("set ylabel 'Execution Time (ms)'");
+                writer.println("set grid");
+                writer.println("set key outside");
+
+                writer.println("plot '" + dataFileName + "' using 1:3 with linespoints title 'Time vs Vertices', \\");
+                writer.println("     '" + dataFileName + "' using 2:3 with linespoints title 'Time vs Edges'");
+            }
+
+            // Execute Gnuplot
+            executeGnuplot(scriptFile, outputDir);
+        }
+
+        // Generate combined comparison graph
+        generateUS14ComparisonGraph(groupedResults, outputDir);
+    }
+
+    private static void generateUS13ComparisonGraph(Map<String, List<PerformanceResult>> groupedResults, Path outputDir) throws IOException {
+        // Create combined data file
+        Path dataFile = outputDir.resolve("us13_comparison_data.txt");
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(dataFile))) {
+            writer.println("# Vertices Steam_ms Diesel_ms Electric_ms");
+
+            // Get all vertex counts
+            Set<Integer> allVertexCounts = new TreeSet<>();
+            for (List<PerformanceResult> results : groupedResults.values()) {
+                for (PerformanceResult result : results) {
+                    allVertexCounts.add(result.vertexCount);
+                }
+            }
+
+            // Write data for each vertex count
+            for (Integer vertexCount : allVertexCounts) {
+                writer.print(vertexCount);
+
+                for (String trainType : Arrays.asList("Steam", "Diesel", "Electric")) {
+                    List<PerformanceResult> results = groupedResults.get(trainType);
+                    double avgTime = 0.0;
+                    if (results != null) {
+                        OptionalDouble time = results.stream()
+                                .filter(r -> r.vertexCount == vertexCount)
+                                .mapToDouble(r -> r.avgTime / 1_000_000.0)
+                                .average();
+                        avgTime = time.orElse(0.0);
+                    }
+                    writer.printf(" %.3f", avgTime);
+                }
+                writer.println();
+            }
+        }
+
+        // Generate comparison plot script
+        Path scriptFile = outputDir.resolve("us13_comparison_plot.gp");
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(scriptFile))) {
+            writer.println("set terminal png size 1000,600");
+            writer.println("set output 'us13_comparison_performance.png'");
+            writer.println("set title 'US13 Performance Comparison - All Train Types'");
+            writer.println("set xlabel 'Number of Vertices'");
+            writer.println("set ylabel 'Execution Time (ms)'");
+            writer.println("set grid");
+            writer.println("set key outside");
+
+            writer.println("plot 'us13_comparison_data.txt' using 1:2 with linespoints title 'Steam', \\");
+            writer.println("     'us13_comparison_data.txt' using 1:3 with linespoints title 'Diesel', \\");
+            writer.println("     'us13_comparison_data.txt' using 1:4 with linespoints title 'Electric'");
+        }
+
+        executeGnuplot(scriptFile, outputDir);
+    }
+
+    private static void generateUS14ComparisonGraph(Map<String, List<PerformanceResult>> groupedResults, Path outputDir) throws IOException {
+        // Similar implementation for US14 comparison
+        Path dataFile = outputDir.resolve("us14_comparison_data.txt");
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(dataFile))) {
+            writer.println("# Vertices All_Lines_ms Electrified_Only_ms");
+
+            Set<Integer> allVertexCounts = new TreeSet<>();
+            for (List<PerformanceResult> results : groupedResults.values()) {
+                for (PerformanceResult result : results) {
+                    allVertexCounts.add(result.vertexCount);
+                }
+            }
+
+            for (Integer vertexCount : allVertexCounts) {
+                writer.print(vertexCount);
+
+                for (String maintenanceType : Arrays.asList("All_Lines", "Electrified_Only")) {
+                    List<PerformanceResult> results = groupedResults.get(maintenanceType);
+                    double avgTime = 0.0;
+                    if (results != null) {
+                        OptionalDouble time = results.stream()
+                                .filter(r -> r.vertexCount == vertexCount)
+                                .mapToDouble(r -> r.avgTime / 1_000_000.0)
+                                .average();
+                        avgTime = time.orElse(0.0);
+                    }
+                    writer.printf(" %.3f", avgTime);
+                }
+                writer.println();
+            }
+        }
+
+        Path scriptFile = outputDir.resolve("us14_comparison_plot.gp");
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(scriptFile))) {
+            writer.println("set terminal png size 1000,600");
+            writer.println("set output 'us14_comparison_performance.png'");
+            writer.println("set title 'US14 Performance Comparison - Maintenance Types'");
+            writer.println("set xlabel 'Number of Vertices'");
+            writer.println("set ylabel 'Execution Time (ms)'");
+            writer.println("set grid");
+            writer.println("set key outside");
+
+            writer.println("plot 'us14_comparison_data.txt' using 1:2 with linespoints title 'All Lines', \\");
+            writer.println("     'us14_comparison_data.txt' using 1:3 with linespoints title 'Electrified Only'");
+        }
+
+        executeGnuplot(scriptFile, outputDir);
+    }
+
+    private static void executeGnuplot(Path scriptFile, Path outputDir) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("gnuplot", scriptFile.getFileName().toString());
+            pb.directory(outputDir.toFile());
+            pb.redirectErrorStream(true);
+
+            Process process = pb.start();
+
+            // Read output/errors
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println("Gnuplot: " + line);
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("Generated graph: " + scriptFile.getFileName().toString().replace("_plot.gp", "_performance.png"));
+            } else {
+                System.err.println("Gnuplot execution failed with exit code: " + exitCode);
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error executing Gnuplot: " + e.getMessage());
+            System.err.println("Make sure Gnuplot is installed and available in PATH");
+        }
+    }
+
+    private static String extractTrainType(String testName) {
+        if (testName.contains("Steam")) return "Steam";
+        if (testName.contains("Diesel")) return "Diesel";
+        if (testName.contains("Electric")) return "Electric";
+        return "Unknown";
+    }
+
+    private static String extractMaintenanceType(String testName) {
+        if (testName.contains("All_Lines")) return "All_Lines";
+        if (testName.contains("Electrified_Only")) return "Electrified_Only";
+        return "Unknown";
+    }
+
     private static void implementUS29() throws IOException {
         System.out.println("=== US29 - Performance Testing for Variable-Sized Inputs ===");
         System.out.println("Testing asymptotic behavior of US13 and US14 procedures\n");
@@ -382,15 +663,22 @@ public class main {
 
         System.out.println("Found " + scenarioFiles.size() + " scenario files and " + stationFiles.size() + " station files\n");
 
-        // Test US13 (Connectivity Check) performance
+        // Collect results instead of just printing
+        List<PerformanceResult> us13Results = new ArrayList<>();
+        List<PerformanceResult> us14Results = new ArrayList<>();
+
+        // Test US13 (Connectivity Check) performance - modify to return results
         System.out.println("=== TESTING US13 (Train Connectivity) PERFORMANCE ===");
-        testUS13Performance(scenarioFiles, stationFiles);
+        us13Results = testUS13Performance(scenarioFiles, stationFiles);
 
         System.out.println("\n" + "=".repeat(63) + "\n");
 
-        // Test US14 (Eulerian Route) performance
+        // Test US14 (Eulerian Route) performance - modify to return results
         System.out.println("=== TESTING US14 (Eulerian Route) PERFORMANCE ===");
-        testUS14Performance(scenarioFiles);
+        us14Results = testUS14Performance(scenarioFiles);
+
+        // Generate graphs
+        generateGraphs(us13Results, us14Results);
     }
 
     private static int extractNumberFromFilename(String filename) {
@@ -403,7 +691,7 @@ public class main {
         return 0; // Default if no number found
     }
 
-    private static void testUS13Performance(List<File> scenarioFiles, List<File> stationFiles) throws IOException {
+    private static List<PerformanceResult> testUS13Performance(List<File> scenarioFiles, List<File> stationFiles) throws IOException {
         List<PerformanceResult> us13Results = new ArrayList<>();
 
         for (File scenarioFile : scenarioFiles) {
@@ -461,8 +749,8 @@ public class main {
             }
         }
 
-        // Print US13 performance summary
         printPerformanceSummary("US13", us13Results);
+        return us13Results;
     }
 
     private static File findMatchingStationFile(File scenarioFile, List<File> stationFiles) {
@@ -495,7 +783,7 @@ public class main {
         return null; // No matching file found
     }
 
-    private static void testUS14Performance(List<File> scenarioFiles) throws IOException {
+    private static List<PerformanceResult> testUS14Performance(List<File> scenarioFiles) throws IOException {
         List<PerformanceResult> us14Results = new ArrayList<>();
 
         for (File scenarioFile : scenarioFiles) {
@@ -574,6 +862,7 @@ public class main {
 
         // Print US14 performance summary
         printPerformanceSummary("US14", us14Results);
+        return us14Results;
     }
 
     private static void printPerformanceSummary(String usName, List<PerformanceResult> results) {
