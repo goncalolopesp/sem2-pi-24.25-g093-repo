@@ -45,6 +45,10 @@ public class AuthController {
         }
     }
 
+    public void saveUserToFile(){
+        authRepo.saveUserToFile();
+    }
+
     /**
      * Authenticates a user with email and password
      * @param email The user's email address
