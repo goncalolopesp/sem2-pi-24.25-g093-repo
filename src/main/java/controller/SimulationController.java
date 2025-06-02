@@ -73,7 +73,7 @@ public class SimulationController {
             deliverToSteelMills(route, carriages, result);
         }
 
-        int totalEarnings = calculateEarnings(result, scenario);
+        int totalEarnings = (int) (calculateEarnings(result, scenario) * scenario.getProfitMultiplier());
         if (result.getTotalCargo() > 0) {
             displayRouteComplete(result, totalEarnings);
             budget.addBudget(totalEarnings);
@@ -463,9 +463,8 @@ public class SimulationController {
         cityRepo.getCities().forEach(city -> {
             List<Station> cityStations = findStationsForCity(stations, city);
             if (!cityStations.isEmpty()) {
-                boolean isSchoolProgram = hasHistoricalRestriction(selectedScenario, "school program");
-                int cargoMultiplier = isSchoolProgram ? 2 : 1;
-                int totalCargo = city.getTotalGeneratedCargo() * cargoMultiplier;
+                double cargoMultiplier = selectedScenario.getProductionRate();
+                int totalCargo = (int) (city.getTotalGeneratedCargo() * cargoMultiplier);
 
                 cityStations.forEach(station -> addCityCargoToStation(station, totalCargo, maxCapacityStations));
             }
@@ -493,7 +492,7 @@ public class SimulationController {
                     .collect(Collectors.toList());
 
             if (!overlappingStations.isEmpty()) {
-                int cargoPerIndustry = getCargoPerIndustry(industry);
+                int cargoPerIndustry = (int) (getCargoPerIndustry(industry) * selectedScenario.getProductionRate());
                 if (cargoPerIndustry > 0) {
                     Station targetStation = overlappingStations.get(0);
 
