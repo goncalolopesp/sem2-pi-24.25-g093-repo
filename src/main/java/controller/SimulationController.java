@@ -486,7 +486,11 @@ public class SimulationController {
     }
 
     public void addIndustryCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations) {
-        for (Industry industry : industryRepo.getIndustries()) {
+        List<Industry> mapIndustries = industryRepo.getIndustries().stream()
+                .filter(industry -> industry.getMapName().equals(stations.get(0).getMapName()))
+                .collect(Collectors.toList());
+
+        for (Industry industry : mapIndustries) {
             List<Station> overlappingStations = stations.stream()
                     .filter(station -> hasStationIndustryOverlap(station, industry))
                     .collect(Collectors.toList());
@@ -504,14 +508,15 @@ public class SimulationController {
     }
 
     private boolean hasStationIndustryOverlap(Station station, Industry industry) {
-        int industrySize = industry.getArea();
-        int industryRadius = (int) Math.sqrt(industrySize) / 2; // Approximate radius
+        double industryRadius = industry.getArea();
         int industryX = industry.getLocation().getX();
         int industryY = industry.getLocation().getY();
         StationBounds bounds = getStationBounds(station);
 
-        return !(bounds.maxX < industryX - industryRadius || bounds.minX > industryX + industryRadius ||
-                bounds.maxY < industryY - industryRadius || bounds.minY > industryY + industryRadius);
+        return !(bounds.maxX < industryX - industryRadius ||
+                bounds.minX > industryX + industryRadius ||
+                bounds.maxY < industryY - industryRadius ||
+                bounds.minY > industryY + industryRadius);
     }
 
     private StationBounds getStationBounds(Station station) {
@@ -530,8 +535,8 @@ public class SimulationController {
                 break;
             case STATION:
                 w = h = 4;
-                minX = station.getX() - 1;
-                minY = station.getY() - 1;
+                minX = station.getX() - 2; // Fixed: center the 4x4 area
+                minY = station.getY() - 2; // Fixed: center the 4x4 area
                 break;
             default:
                 return new StationBounds(station.getX(), station.getY(), station.getX(), station.getY());
@@ -559,6 +564,13 @@ public class SimulationController {
             case COAL_MINE:
                 station.setCoalStored(station.getCoalStored() + actualAddedCargo);
                 break;
+            case STEEL_MILL:
+                if (actualAddedCargo > 0) {
+                    station.setSteelStored(station.getSteelStored() + actualAddedCargo);
+                    station.setIronStored(station.getIronStored() - 1);
+                    station.setCoalStored(station.getCoalStored() - 1);
+                }
+                break;
         }
     }
 
@@ -566,6 +578,9 @@ public class SimulationController {
         switch (ind.getType()) {
             case IRON_MINE: return ind.getGeneratedIron();
             case COAL_MINE: return ind.getGeneratedCoal();
+            case STEEL_MILL:
+                if (ind.getStoredCoal() > 0 && ind.getStoredIron() > 0) return 1;
+                return 0;
             default: return 0;
         }
     }

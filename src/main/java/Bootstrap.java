@@ -170,11 +170,11 @@ public class Bootstrap {
         carriages2.add(new Carriage(Carriage.Type.MAIL));
         carriages2.add(new Carriage(Carriage.Type.COAL));
         carriages2.add(new Carriage(Carriage.Type.IRON));
+        carriages2.add(new Carriage(Carriage.Type.STEEL));
         carriages2.add(new Carriage(Carriage.Type.PEOPLE));
         carriages2.add(new Carriage(Carriage.Type.MAIL));
         carriages2.add(new Carriage(Carriage.Type.COAL));
         carriages2.add(new Carriage(Carriage.Type.IRON));
-        carriages2.add(new Carriage(Carriage.Type.STEEL));
         carriages2.add(new Carriage(Carriage.Type.STEEL));
 
         Train train2 = new Train(teste,carriages2,mail);
