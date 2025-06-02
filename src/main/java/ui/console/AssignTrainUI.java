@@ -107,13 +107,36 @@ public class AssignTrainUI implements Runnable {
 
             Station selectedStation = availableStations.remove(stationIndex);
             List<Type> cargoTypes = selectCargoTypes();
-            route.add(new PointOfRoute(selectedStation, cargoTypes));
+            CargoMode cargoMode = selectCargoMode();
+            route.add(new PointOfRoute(selectedStation, cargoTypes, cargoMode));
 
             if (route.size() >= 2 && availableStations.isEmpty()) break;
         }
 
         ensureMinimumRouteSize(route, availableStations);
         return route;
+    }
+
+    private CargoMode selectCargoMode() {
+        System.out.println("Select cargo mode:");
+        System.out.println("[0] FULL - Wait until all selected carriages are full");
+        System.out.println("[1] HALF - Wait until half of selected carriages are full");
+        System.out.println("[2] AVAILABLE - Take all available cargo and move on");
+
+        while (true) {
+            System.out.print("Enter mode (0-2): ");
+            try {
+                int choice = Integer.parseInt(scanner.nextLine());
+                switch (choice) {
+                    case 0: return CargoMode.FULL;
+                    case 1: return CargoMode.HALF;
+                    case 2: return CargoMode.AVAILABLE;
+                    default: System.out.println("Invalid choice. Please enter 0, 1, or 2.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+            }
+        }
     }
 
     private void displayAvailableStations(List<Station> stations) {
@@ -181,7 +204,7 @@ public class AssignTrainUI implements Runnable {
             while (route.size() < 2 && !availableStations.isEmpty()) {
                 Station s = availableStations.remove(0);
                 List<Type> defaultCargo = List.of(Type.PEOPLE, Type.MAIL);
-                route.add(new PointOfRoute(s, defaultCargo));
+                route.add(new PointOfRoute(s, defaultCargo, CargoMode.AVAILABLE));
             }
         }
     }

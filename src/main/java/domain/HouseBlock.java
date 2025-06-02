@@ -24,7 +24,7 @@ public class HouseBlock {
     public HouseBlock(int x, int y) {
         this.x = x;
         this.y = y;
-        this.generatedPeople = 2;
+        this.generatedPeople = 7;
         this.generatedMail = 3;
         this.generatedCargo = generatedPeople + generatedMail;
     }

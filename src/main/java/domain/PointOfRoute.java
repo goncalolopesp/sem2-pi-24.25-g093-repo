@@ -9,9 +9,17 @@ public class PointOfRoute {
     private Station station;
     private List<Carriage.Type> cargoTypes;
 
-    public PointOfRoute(Station station, List<Carriage.Type> cargoTypes) {
+    // Add this field to PointOfRoute class
+    private CargoMode cargoMode;
+
+    public PointOfRoute(Station station, List<Carriage.Type> cargoTypes, CargoMode cargoMode) {
         this.station = station;
         this.cargoTypes = cargoTypes;
+        this.cargoMode = cargoMode;
+    }
+
+    public CargoMode getCargoMode() {
+        return cargoMode;
     }
 
     public Station getStation() {
