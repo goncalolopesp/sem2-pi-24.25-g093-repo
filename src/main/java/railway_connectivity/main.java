@@ -96,41 +96,99 @@ public class main {
         System.out.print("Enter destination station: ");
         String destination = sc.nextLine().trim();
 
-        if (source.split("_")[0].equals(destination.split("_")[0])) {
-            List<String> vertices = new ArrayList<>();
-            for (String[] e : edges) {
-                if (!vertices.contains(e[0])) vertices.add(e[0]);
-                if (!vertices.contains(e[1])) vertices.add(e[1]);
-            }
+        // Build adjacency list based on train type
+        Map<String, List<String>> graph = buildGraph(edges, trainType);
 
-            // Build adjacency list
-            Map<String, List<String>> graph = buildGraph(edges, trainType);
+        // Check connectivity
+        boolean canTravel = isConnected(graph, source, destination);
 
-            // Check connectivity
-            boolean canTravel = isConnected(graph, source, destination);
-            if (canTravel) {
-                System.out.println("The train can travel between " + source + " and " + destination + ".");
-            } else {
-                System.out.println("The train cannot travel between " + source + " and " + destination + ".");
-            }
+        if (canTravel) {
+            System.out.println("The train can travel between " + source + " and " + destination + ".");
 
-            // Build adjacency list
+            // Find the path to get only the relevant stations and edges
+            Set<String> pathVertices = new HashSet<>();
+            List<String[]> pathEdges = new ArrayList<>();
+            findPath(graph, source, destination, new HashSet<>(), pathVertices, pathEdges, edges, trainType);
+
+            // Create graph visualization with only the relevant part
             Map<String, MutableNode> nodeMap = new HashMap<>();
-            for (String v : vertices) nodeMap.put(v, mutNode(v).add(Color.BLACK));
-            // build graph
-            MutableGraph g = mutGraph("MapaDeEstacoes").setDirected(false)
+            for (String v : pathVertices) {
+                nodeMap.put(v, mutNode(v).add(Color.BLACK));
+            }
+
+            // Build partial graph
+            MutableGraph g = mutGraph("PartialStationMap").setDirected(false)
                     .add(nodeMap.values().toArray(new MutableNode[0]));
-            for (String[] e : edges) {
+
+            for (String[] e : pathEdges) {
                 String a = e[0], b = e[1];
                 Color c = e[2].equals("1") ? Color.YELLOW : Color.RED;
-                g.add(nodeMap.get(a).addLink(to(nodeMap.get(b)).with(c)));
+                if (nodeMap.containsKey(a) && nodeMap.containsKey(b)) {
+                    g.add(nodeMap.get(a).addLink(to(nodeMap.get(b)).with(c)));
+                }
             }
 
-            Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("station-map.svg"));
-            System.out.println("Graph saved as station-map.svg");
+            Graphviz.fromGraph(g).engine(DOT).render(Format.SVG).toFile(new File("partial-station-map.svg"));
+            System.out.println("Partial graph saved as partial-station-map.svg");
+
         } else {
-            System.out.println("The train cannot travel between " + source + " and " + destination + ": the type of the stations are different.");
+            System.out.println("The train cannot travel between " + source + " and " + destination + ".");
         }
+    }
+
+    // Modified isConnected method to work with path finding
+    private static boolean isConnected(Map<String, List<String>> graph, String source, String destination) {
+        Set<String> visited = new HashSet<>();
+        return dfs(graph, source, destination, visited);
+    }
+
+    private static boolean dfs(Map<String, List<String>> graph, String current, String destination, Set<String> visited) {
+        if (current.equals(destination)) return true;
+        visited.add(current);
+
+        for (String neighbor : graph.getOrDefault(current, new ArrayList<>())) {
+            if (!visited.contains(neighbor)) {
+                if (dfs(graph, neighbor, destination, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Helper method to find the actual path and collect relevant vertices/edges
+    private static boolean findPath(Map<String, List<String>> graph, String current, String destination,
+                                    Set<String> visited, Set<String> pathVertices, List<String[]> pathEdges,
+                                    List<String[]> allEdges, String trainType) {
+        if (current.equals(destination)) {
+            pathVertices.add(current);
+            return true;
+        }
+
+        visited.add(current);
+        pathVertices.add(current);
+
+        for (String neighbor : graph.getOrDefault(current, new ArrayList<>())) {
+            if (!visited.contains(neighbor)) {
+                if (findPath(graph, neighbor, destination, visited, pathVertices, pathEdges, allEdges, trainType)) {
+                    // Add the edge to pathEdges
+                    for (String[] edge : allEdges) {
+                        if ((edge[0].equals(current) && edge[1].equals(neighbor)) ||
+                                (edge[0].equals(neighbor) && edge[1].equals(current))) {
+                            // Check if this edge is valid for the train type
+                            if (!(trainType.equals("3") && edge[2].equals("0"))) {
+                                pathEdges.add(edge);
+                            }
+                            break;
+                        }
+                    }
+                    return true;
+                }
+            }
+        }
+
+        pathVertices.remove(current);
+        return false;
     }
 
     private static Map<String, List<String>> buildGraph(List<String[]> edges, String trainType) {
@@ -149,25 +207,6 @@ public class main {
             graph.get(to).add(from);
         }
         return graph;
-    }
-
-    private static boolean isConnected(Map<String, List<String>> graph, String source, String destination) {
-        Set<String> visited = new HashSet<>();
-        return dfs(graph, source, destination, visited);
-    }
-
-    private static boolean dfs(Map<String, List<String>> graph, String current, String destination, Set<String> visited) {
-        if (current.equals(destination)) return true;
-        visited.add(current);
-
-        for (String neighbor : graph.getOrDefault(current, new ArrayList<>())) {
-            if (!visited.contains(neighbor)) {
-                if (dfs(graph, neighbor, destination, visited)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     private static void implementUS14(File linesF) throws IOException {
