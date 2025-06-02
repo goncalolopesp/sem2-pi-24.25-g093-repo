@@ -6,7 +6,8 @@ import domain.Carriage.Type;
 import repository.Repositories;
 import repository.StationRepository;
 import domain.Map;
-
+import dto.TrainDTO;
+import dto.DTOMapperTrain;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,30 +59,30 @@ public class AssignTrainUI implements Runnable {
 
     private Train selectTrain(List<Train> userTrains) {
         System.out.println("Select a train to assign:");
+
         for (int i = 0; i < userTrains.size(); i++) {
             Train train = userTrains.get(i);
+            TrainDTO dto = DTOMapperTrain.toDTO(train);
+
             System.out.printf("[%d] Locomotive: %s, Total Carriages: %d%n",
-                    i, train.getLocomotive().getModelName(), train.getCarriages().size());
-            int people = 0, mail = 0, coal = 0, iron = 0, steel = 0;
-            for (Carriage c : train.getCarriages()) {
-                switch (c.getType()) {
-                    case PEOPLE: people++; break;
-                    case MAIL: mail++; break;
-                    case COAL: coal++; break;
-                    case IRON: iron++; break;
-                    case STEEL: steel++; break;
+                    i, dto.getLocomotiveModel(), dto.getTotalCarriages());
+
+            List<String> types = dto.getCarriageTypes();
+            List<Integer> counts = dto.getCarriageCounts();
+
+            for (int j = 0; j < types.size(); j++) {
+                int count = counts.get(j);
+                if (count > 0) {
+                    System.out.println("     - " + types.get(j) + ": " + count);
                 }
             }
-            if (people > 0) System.out.println("     - PEOPLE: " + people);
-            if (mail > 0) System.out.println("     - MAIL: " + mail);
-            if (coal > 0) System.out.println("     - COAL: " + coal);
-            if (iron > 0) System.out.println("     - IRON: " + iron);
-            if (steel > 0) System.out.println("     - STEEL: " + steel);
         }
 
         int index = getValidIndex("Enter train number: ", userTrains.size());
         return userTrains.get(index);
     }
+
+
 
 
 
@@ -92,36 +93,6 @@ public class AssignTrainUI implements Runnable {
                 .filter(s -> s.getScenarioName().equals(selectedScenario.getScenarioName()))
                 .filter(s -> s.getOwnerPlayer().equals(playerEmail))
                 .collect(Collectors.toList());
-    }
-
-    private Locomotive selectLocomotive(List<Locomotive> userLocos) {
-        System.out.println("Select a locomotive to assign:");
-        for (int i = 0; i < userLocos.size(); i++) {
-            System.out.printf("[%d] %s (Top Speed: %d)%n", i, userLocos.get(i).getModelName(), userLocos.get(i).getTopSpeed());
-        }
-        int index = getValidIndex("Enter locomotive number: ", userLocos.size());
-        return userLocos.get(index);
-    }
-
-    private java.util.Map<Type, Integer> getCarriageCounts() {
-        java.util.Map<Type, Integer> counts = new HashMap<>();
-
-        System.out.print("Enter the number of People carriages: ");
-        counts.put(Type.PEOPLE, getValidPositiveInt());
-
-        System.out.print("Enter the number of Mail carriages: ");
-        counts.put(Type.MAIL, getValidPositiveInt());
-
-        System.out.print("Enter the number of Coal carriages: ");
-        counts.put(Type.COAL, getValidPositiveInt());
-
-        System.out.print("Enter the number of Iron carriages: ");
-        counts.put(Type.IRON, getValidPositiveInt());
-
-        System.out.print("Enter the number of Steel carriages: ");
-        counts.put(Type.STEEL, getValidPositiveInt());
-
-        return counts;
     }
 
     private List<PointOfRoute> createRoute(List<Station> stationsOnMap) {
@@ -252,16 +223,6 @@ public class AssignTrainUI implements Runnable {
                 if (index >= 0 && index < maxSize) return index;
             } catch (NumberFormatException ignored) {}
             System.out.println("Invalid selection. Try again.");
-        }
-    }
-
-    private int getValidPositiveInt() {
-        while (true) {
-            try {
-                int value = Integer.parseInt(scanner.nextLine());
-                if (value >= 0) return value; // Allow 0 carriages
-            } catch (NumberFormatException ignored) {}
-            System.out.println("Invalid number. Must be >= 0.");
         }
     }
 }
