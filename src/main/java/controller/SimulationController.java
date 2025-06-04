@@ -13,6 +13,7 @@ import domain.Map;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -23,6 +24,13 @@ public class SimulationController {
     private static final int MAIL_VALUE = 3;
     private static final int COAL_VALUE = 4;
     private static final int IRON_VALUE = 6;
+    private static final int KMS_FUEL = 200;
+    private static final int AMOUNT_PER_LINE = 5;
+
+    private static int yearlyEarnings = 0;
+    private static int yearlyMaintenanceCost = 0;
+    private static int yearlyFuelCost = 0;
+    private static int yearlyTrackMaintenanceCost = 0;
 
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
@@ -33,12 +41,13 @@ public class SimulationController {
     private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
     private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
+    private final RailwayLineRepository railwayRepo = Repositories.getInstance().getRailwayLineRepository();
 
     public Runnable executeRoutes(Map selectedMap, Scenario selectedScenario, Budget budget, AtomicBoolean running) {
         return () -> {
             if (running.get() && currentUser != null) {
                 List<Route> userRoutes = getUserRoutes(selectedMap, selectedScenario);
-                userRoutes.forEach(route -> executeRoute(route, selectedScenario, budget));
+                userRoutes.forEach(route -> executeRoute(route, selectedScenario, budget,selectedMap));
             }
         };
     }
@@ -51,7 +60,7 @@ public class SimulationController {
                 .collect(Collectors.toList());
     }
 
-    private void executeRoute(Route route, Scenario scenario, Budget budget) {
+    private void executeRoute(Route route, Scenario scenario, Budget budget, Map selectedMap) {
         Train train = route.getTrain();
         if (train == null) return;
 
@@ -59,6 +68,9 @@ public class SimulationController {
         resetCarriageCapacity(carriages);
 
         CargoCollectionResult result = new CargoCollectionResult();
+
+        int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
+        yearlyFuelCost += routeFuelCost;
 
         for (PointOfRoute point : route.getPoints()) {
             if (isTrainFull(carriages)) break;
@@ -76,8 +88,46 @@ public class SimulationController {
         int totalEarnings = (int) (calculateEarnings(result, scenario) * scenario.getProfitMultiplier());
         if (result.getTotalCargo() > 0) {
             displayRouteComplete(result, totalEarnings);
-            budget.addBudget(totalEarnings);
+            budget.addBudget(totalEarnings - (routeFuelCost / KMS_FUEL));
+            yearlyEarnings += totalEarnings;
         }
+    }
+
+    private int calculateRouteFuelCost(Route route, Map selectedMap) {
+        if (route.getPoints().size() < 2) return 0;
+
+        Train train = route.getTrain();
+        if (train == null || train.getLocomotive() == null) return 0;
+
+        Locomotive locomotive = train.getLocomotive();
+        double totalDistance = 0.0;
+
+        for (int i = 0; i < route.getPoints().size() - 1; i++) {
+            Station currentStation = route.getPoints().get(i).getStation();
+            Station nextStation = route.getPoints().get(i + 1).getStation();
+
+            RailwayLine railwayLine = findRailwayLineBetweenStations(currentStation, nextStation, currentUser.getEmail());
+            if (railwayLine != null) {
+                totalDistance += railwayLine.getDistance();
+            }
+        }
+
+        double mapScale = selectedMap.getScale();
+        int fuelCost = (int) (locomotive.getFuelCost() * totalDistance * mapScale);
+
+        return fuelCost;
+    }
+
+    private RailwayLine findRailwayLineBetweenStations(Station station1, Station station2, String owner) {
+        return Repositories.getInstance().getRailwayLineRepository()
+                .getRailwayLines()
+                .stream()
+                .filter(line -> line.getOwnerMail().equals(owner))
+                .filter(line ->
+                        (line.getFromStation().equals(station1) && line.getToStation().equals(station2))
+                )
+                .findFirst()
+                .orElse(null);
     }
 
     private void resetCarriageCapacity(List<Carriage> carriages) {
@@ -234,13 +284,14 @@ public class SimulationController {
     }
 
     private static class CargoCollectionResult {
+
         int people = 0;
         int mail = 0;
         int coal = 0;
         int iron = 0;
 
         int getTotalCargo() {
-            return people + mail + coal + iron;
+            return people + mail ;
         }
 
         boolean hasIronAndCoal() {
@@ -393,19 +444,54 @@ public class SimulationController {
             sim.setCurrentYear(nextYear);
 
             if (nextYear < timePeriod.get().get(1)) {
-                handleYearProgression(nextYear, budget);
+                Map map = mapRepo.getMaps().stream().filter(m-> m.getMapName().equals(selectedScenario.getSelectedMap())).findFirst().orElse(null);
+                handleYearProgression(nextYear, budget, selectedScenario, map);
             } else {
                 handleGameEnd(selectedScenario, timePeriod, scheduler, running, options, gameOver, sim);
             }
         };
     }
 
-    private void handleYearProgression(int year, Budget budget) {
-        System.out.println("\nYou have reached year " + year + ". ");
-        announceNewLocomotives(year);
-        removeOutdatedLocomotives(year);
-        payLocomotiveMaintenance(budget);
-        System.out.print("Type your option: ");
+    private void handleYearProgression(int year, Budget budget, Scenario selectedScenario, Map map) {
+        int yearSummary = year -1;
+        System.out.println("\n=== YEAR " + yearSummary + " SUMMARY ===");
+            payLocomotiveMaintenance(budget);
+            payTrackMaintenance(selectedScenario,map,budget);
+            displayYearlyStatistics();
+
+            announceNewLocomotives(year);
+            removeOutdatedLocomotives(year);
+            resetYearlyCounters();
+            System.out.println("\n===========================");
+            System.out.println("The year is now " + year);
+
+            System.out.print("Type your option: ");
+    }
+
+    private void payTrackMaintenance(Scenario selectedScenario, Map map,Budget budget) {
+        long ownedTracksAmount = railwayRepo.countByScenarioMapAndOwner(selectedScenario, map, currentUser.getEmail());
+        int moneySpent = Math.toIntExact(AMOUNT_PER_LINE * ownedTracksAmount);
+        yearlyTrackMaintenanceCost = moneySpent;
+        budget.subtractBudget(moneySpent);
+
+
+    }
+
+    private void displayYearlyStatistics() {
+        System.out.println("\n--- Financial Summary ---");
+        System.out.printf("Total Earnings from Routes: $%d%n", yearlyEarnings);
+        System.out.printf("Locomotive Maintenance Costs: $%d%n", yearlyMaintenanceCost);
+        System.out.printf("Track Maintenance Costs: $%d%n", yearlyTrackMaintenanceCost);
+        System.out.printf("Fuel Costs: $%d%n", yearlyFuelCost / KMS_FUEL);
+        System.out.println("\n------------------------");
+    }
+
+    private void resetYearlyCounters() {
+        yearlyEarnings = 0;
+        yearlyMaintenanceCost = 0;
+        yearlyFuelCost = 0;
+        yearlyTrackMaintenanceCost = 0;
+
     }
 
     private void announceNewLocomotives(int year) {
@@ -508,7 +594,7 @@ public class SimulationController {
     }
 
     private boolean hasStationIndustryOverlap(Station station, Industry industry) {
-        double industryRadius = industry.getArea();
+        double industryRadius = (double) industry.getArea() /2;
         int industryX = industry.getLocation().getX();
         int industryY = industry.getLocation().getY();
         StationBounds bounds = getStationBounds(station);
@@ -606,15 +692,19 @@ public class SimulationController {
         return actualCargoAdded;
     }
 
-    // Locomotive management methods
     public void payLocomotiveMaintenance(Budget budget) {
-        List<Locomotive> affordableLocomotives = currentUser.getLocomotives().stream()
-                .filter(loc -> canAffordMaintenance(loc, budget))
-                .peek(loc -> payMaintenanceAndFuel(loc, budget))
-                .collect(Collectors.toList());
+        List<Locomotive> allLocomotives = currentUser.getLocomotives();
+        List<Locomotive> maintainedLocomotives = new ArrayList<>();
 
-        currentUser.setLocomotives(affordableLocomotives);
+        for (Locomotive loc : allLocomotives) {
+            if (canAffordMaintenance(loc, budget)) {
+                payMaintenanceAndFuel(loc, budget);
+                yearlyMaintenanceCost += loc.getMaintenanceCost();
+                maintainedLocomotives.add(loc);
+            }
+        }
     }
+
 
     private boolean canAffordMaintenance(Locomotive locomotive, Budget budget) {
         return locomotive.getMaintenanceCost() <= budget.getBudget();
@@ -625,7 +715,7 @@ public class SimulationController {
         locomotive.setAvailability(locomotive.getFuelCost() <= budget.getBudget());
 
         if (locomotive.getAvailability()) {
-            budget.subtractBudget(locomotive.getFuelCost());
+            budget.subtractBudget(yearlyFuelCost / KMS_FUEL);
         }
     }
 

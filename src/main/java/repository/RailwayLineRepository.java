@@ -1,6 +1,8 @@
 package repository;
 
+import domain.Map;
 import domain.RailwayLine;
+import domain.Scenario;
 import domain.Station;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,4 +24,9 @@ public class RailwayLineRepository {
                         (rl.getFromStation().equals(to) && rl.getToStation().equals(from))
         );
     }
+
+    public long countByScenarioMapAndOwner(Scenario scenario, Map map, String ownerMail) {
+        return railwayLines.stream().filter(r -> r.getScenario().equals(scenario) && r.getMap().equals(map) && r.getOwnerMail().equals(ownerMail)).count();
+    }
+
 }

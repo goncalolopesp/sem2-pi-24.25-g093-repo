@@ -1,5 +1,8 @@
 package domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents a railway line connecting two stations
  */
@@ -8,12 +11,22 @@ public class RailwayLine {
     private Station fromStation;
     private Station toStation;
     private RailwayLineType type;
+    private int distance;
+    private String ownerMail;
+    private Scenario scenario;
+    private Map map;
+    private static final List<RailwayLine> allRailwayLines = new ArrayList<>();
 
-    public RailwayLine(Station fromStation, Station toStation, RailwayLineType type) {
+    public RailwayLine(Station fromStation, Station toStation, RailwayLineType type, int distance,String ownerMail, Scenario scenario,Map map) {
         this.fromStation = fromStation;
         this.toStation = toStation;
         this.id = generateId(fromStation, toStation);
         this.type = type;
+        this.distance = distance;
+        this.ownerMail = ownerMail;
+        this.scenario =  scenario;
+        this.map =  map;
+        allRailwayLines.add(this);
     }
 
     private String generateId(Station from, Station to) {
@@ -24,7 +37,8 @@ public class RailwayLine {
     public Station getFromStation() { return fromStation; }
     public Station getToStation() { return toStation; }
     public RailwayLineType getType() { return type; }
-
-    public void setFromStation(Station fromStation) { this.fromStation = fromStation; }
-    public void setToStation(Station toStation) { this.toStation = toStation; }
+    public int getDistance() { return distance; }
+    public String getOwnerMail() { return ownerMail; }
+    public Scenario getScenario() { return scenario; }
+    public Map getMap() { return map; }
 }

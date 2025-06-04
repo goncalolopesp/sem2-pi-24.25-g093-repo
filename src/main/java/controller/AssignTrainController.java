@@ -1,24 +1,21 @@
 package controller;
 
 import domain.*;
-import repository.Repositories;
-import repository.TrainRepository;
-import repository.CarriageRepository;
-import repository.RailwayLineRepository;
-import repository.RouteRepository;
+import repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class AssignTrainController {
 
     private final RailwayLineRepository railwayLineRepo = Repositories.getInstance().getRailwayLineRepository();
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
+    private final User currentUser = CurrentUser.getInstance().getUser();
+    private final MapRepository mapRepo = Repositories.getInstance().getMapRepository();
 
     public void assignExistingTrainToRoute(Train train, List<PointOfRoute> route,
                                            Scenario scenario, Budget budget) {
-        createRailwayLines(route);
+        createRailwayLines(route,scenario);
 
         Route routeEntity = new Route(
                 route,
@@ -32,33 +29,23 @@ public class AssignTrainController {
         System.out.println("Existing train assigned to route successfully!");
     }
 
-
-    private List<Carriage> createCarriages(Map<Carriage.Type, Integer> carriageCounts) {
-        List<Carriage> carriages = new ArrayList<>();
-        CarriageRepository carriageRepo = Repositories.getInstance().getCarriageRepository();
-
-        for (Map.Entry<Carriage.Type, Integer> entry : carriageCounts.entrySet()) {
-            Carriage.Type type = entry.getKey();
-            int count = entry.getValue();
-
-            for (int i = 0; i < count; i++) {
-                Carriage carriage = new Carriage(type);
-                carriageRepo.save(carriage);
-                carriages.add(carriage);
-            }
-        }
-
-        return carriages;
-    }
-
-    private void createRailwayLines(List<PointOfRoute> route) {
+    private void createRailwayLines(List<PointOfRoute> route, Scenario scenario) {
         for (int i = 0; i < route.size() - 1; i++) {
             Station from = route.get(i).getStation();
-            Station to = route.get(i + 1).getStation();
+            Station to   = route.get(i + 1).getStation();
 
             if (!railwayLineRepo.connectionExists(from, to)) {
-                railwayLineRepo.save(new RailwayLine(from, to, RailwayLineType.SINGLE));
+                double x1 = from.getX();
+                double y1 = from.getY();
+                double x2 = to.getX();
+                double y2 = to.getY();
+
+                int distance = (int) Math.round(Math.hypot(x2 - x1, y2 - y1));
+
+                Map map = mapRepo.getMaps().stream().filter(m-> m.getMapName().equals(scenario.getSelectedMap())).findFirst().orElse(null);
+                railwayLineRepo.save(new RailwayLine(from, to, RailwayLineType.SINGLE, distance,currentUser.getEmail(),scenario,map));
             }
         }
     }
+
 }
