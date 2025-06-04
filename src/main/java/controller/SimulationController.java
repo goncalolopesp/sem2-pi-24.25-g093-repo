@@ -24,6 +24,7 @@ public class SimulationController {
     private static final int MAIL_VALUE = 3;
     private static final int COAL_VALUE = 4;
     private static final int IRON_VALUE = 6;
+    private static final int STEEL_VALUE = 10;
     private static final int KMS_FUEL = 200;
     private static final int AMOUNT_PER_LINE = 5;
 
@@ -207,6 +208,7 @@ public class SimulationController {
             case MAIL: return station.getMailStored();
             case COAL: return station.getCoalStored();
             case IRON: return station.getIronStored();
+            case STEEL: return station.getSteelStored();
             default: return 0;
         }
     }
@@ -225,6 +227,9 @@ public class SimulationController {
             case IRON:
                 station.setIronStored(Math.max(0, station.getIronStored() - collectedAmount));
                 break;
+            case STEEL:
+                station.setSteelStored(Math.max(0, station.getSteelStored() - collectedAmount));
+                break;
         }
     }
 
@@ -239,6 +244,7 @@ public class SimulationController {
             case MAIL: result.mail += amount; break;
             case COAL: result.coal += amount; break;
             case IRON: result.iron += amount; break;
+            case STEEL: result.steel += amount; break;
         }
     }
 
@@ -248,7 +254,7 @@ public class SimulationController {
                 (result.people * PEOPLE_VALUE * 2) : (result.people * PEOPLE_VALUE);
 
         return peopleEarnings + (result.mail * MAIL_VALUE) +
-                (result.coal * COAL_VALUE) + (result.iron * IRON_VALUE);
+                (result.coal * COAL_VALUE) + (result.iron * IRON_VALUE) + (result.steel * STEEL_VALUE);  // Add steel earnings
     }
 
     private boolean hasHistoricalRestriction(Scenario scenario, String restriction) {
@@ -257,8 +263,8 @@ public class SimulationController {
     }
 
     private void displayRouteComplete(CargoCollectionResult result, int totalEarnings) {
-        System.out.printf("\n[Route Complete] Total Cargo: %d (People: %d, Mail: %d) - Earned: %d. Type your option: ",
-                result.getTotalCargo(), result.people, result.mail, totalEarnings);
+        System.out.printf("\n[Route Complete] Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
+                result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
     }
 
     private boolean isTrainFull(List<Carriage> carriages) {
@@ -284,14 +290,14 @@ public class SimulationController {
     }
 
     private static class CargoCollectionResult {
-
         int people = 0;
         int mail = 0;
         int coal = 0;
         int iron = 0;
+        int steel = 0;
 
         int getTotalCargo() {
-            return people + mail ;
+            return people + mail + steel;
         }
 
         boolean hasIronAndCoal() {

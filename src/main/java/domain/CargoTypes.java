@@ -24,7 +24,7 @@ public enum CargoTypes {
      */
     public static void printPickupCargoOptions() {
         System.out.println("Select cargo types to collect (enter numbers separated by spaces, for example, '1 2 3'):");
-        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON}; // Steel excluded from pickup
+        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON, STEEL}; // Steel excluded from pickup
         for (int i = 0; i < pickupTypes.length; i++) {
             System.out.printf("[%d] %s%n", i + 1, pickupTypes[i].displayName);
         }
@@ -35,7 +35,7 @@ public enum CargoTypes {
      */
     public static List<CargoTypes> fromPickupMenuOptions(String input) {
         List<CargoTypes> selected = new ArrayList<>();
-        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON};
+        CargoTypes[] pickupTypes = {PEOPLE, MAIL, COAL, IRON, STEEL};
 
         String[] choices = input.trim().split("\\s+");
         for (String choice : choices) {

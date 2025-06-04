@@ -199,6 +199,9 @@ public class AssignTrainUI implements Runnable {
                 case IRON:
                     result.add(Type.IRON);
                     break;
+                case STEEL:
+                    result.add(Type.STEEL);
+                    break;
             }
         }
         return result;
