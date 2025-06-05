@@ -176,6 +176,10 @@ public class CreateCityController {
         return generatedBlocks;
     }
 
+    /**
+     * Gets the CityRepository used by this controller.
+     * @return the CityRepository instance
+     */
     public CityRepository getCityRepo() {
         return cityRepo;
     }

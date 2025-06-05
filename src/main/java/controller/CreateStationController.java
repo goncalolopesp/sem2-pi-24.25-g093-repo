@@ -256,10 +256,18 @@ public class CreateStationController {
         return stationRepo.getStations();
     }
 
+    /**
+     * Returns a StationRepository used by this controller.
+     * @return the StationRepository instance
+     */
     public StationRepository getStationRepository() {
         return stationRepo;
     }
 
+    /**
+     * Returns the last created station as a DTO.
+     * @return the last created station as a DTO
+     */
     public StationDTO getLastCreatedStationDTO() {
         List<Station> stations = stationRepo.getStations();
         if (stations.isEmpty()) return null;

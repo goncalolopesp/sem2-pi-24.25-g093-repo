@@ -20,7 +20,11 @@ public enum CargoTypes {
     }
 
     /**
-     * Prints available cargo types for pickup (excludes Steel)
+     * Displays the available cargo types for pickup, allowing users to select them by entering corresponding numbers.
+     * The cargo types are displayed with their indexes in the format: [index] CargoTypeName.
+     *
+     * The options shown include people, mail, coal, and iron, but exclude steel.
+     * Each cargo type is represented by its display name.
      */
     public static void printPickupCargoOptions() {
         System.out.println("Select cargo types to collect (enter numbers separated by spaces, for example, '1 2 3'):");
@@ -31,7 +35,14 @@ public enum CargoTypes {
     }
 
     /**
-     * Returns CargoTypes list from space-separated menu choices for pickup
+     * Parses a space-separated string of numeric selections and maps them to corresponding cargo types.
+     * The numeric input values correspond to predefined cargo type indices, starting from 1.
+     * Invalid or out-of-range selections are ignored, and duplicate selections are filtered out.
+     * An exception is thrown if no valid cargo types are selected.
+     *
+     * @param input a space-separated string representing numeric selections of cargo types
+     * @return a list of CargoTypes corresponding to the valid selections from the input
+     * @throws IllegalArgumentException if no valid cargo selections are provided
      */
     public static List<CargoTypes> fromPickupMenuOptions(String input) {
         List<CargoTypes> selected = new ArrayList<>();
@@ -55,9 +66,5 @@ public enum CargoTypes {
         }
 
         return selected;
-    }
-
-    public String getDisplayName() {
-        return displayName;
     }
 }

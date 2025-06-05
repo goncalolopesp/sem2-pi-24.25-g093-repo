@@ -18,10 +18,19 @@ public class Carriage {
 
         private final int defaultCapacity;
 
+        /**
+         * Constructs a Type instance with the specified default capacity.
+         *
+         * @param defaultCapacity the default capacity associated with*/
         Type(int defaultCapacity) {
             this.defaultCapacity = defaultCapacity;
         }
 
+        /**
+         * Returns the default capacity associated with this type of carriage.
+         *
+         * @return the default capacity as an integer
+         */
         public int getDefaultCapacity() {
             return defaultCapacity;
         }
@@ -136,6 +145,13 @@ public class Carriage {
         return true;
     }
 
+    /**
+     * Returns a string representation of the Carriage object.
+     * The representation includes the type of the carriage, its current capacity utilization,
+     * and its maximum capacity.
+     *
+     * @return a string describing the carriage in the format "Carriage[type=Type, capacity=owned/max]"
+     */
     @Override
     public String toString() {
         return String.format("Carriage[type=%s, capacity=%d/%d]",

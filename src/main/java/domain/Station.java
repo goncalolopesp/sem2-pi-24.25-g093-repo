@@ -223,13 +223,6 @@ public class Station implements Serializable {
      */
     public Orientation getOrientation() { return orientation; }
 
-    public boolean isMaxCapacityNotified() {
-        return maxCapacityNotified;
-    }
-    public void setMaxCapacityNotified(boolean b) {
-        this.maxCapacityNotified = b;
-    }
-
     /**
      * Returns a String formatted print.
      *
