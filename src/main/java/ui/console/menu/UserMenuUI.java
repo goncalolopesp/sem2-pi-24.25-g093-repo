@@ -1,23 +1,30 @@
 package ui.console.menu;
 
-import pt.ipp.isep.dei.ui.console.utils.Utils;
-import ui.console.*;
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
 
-public class UserMenuUI {
+public class UserMenuUI extends Application {
 
-    public void run() {
-        List<MenuItem> options = new ArrayList<>();
-        options.add(new MenuItem("Play Game", new SimulationUI()));
-        int option;
-        do {
-            option = Utils.showAndSelectIndex(options, "\n\n--- PLAYER MENU --------------------------");
+    public void launchApp() {
+        launch();
+    }
 
-            if ((option >= 0) && (option < options.size())) {
-                options.get(option).run();
-            }
-        } while (option != -1);
+    @Override
+    public void start(Stage stage) throws Exception {
+        URL fxmlURL = getClass().getResource("/javafx/playSimulation.fxml");
+
+        FXMLLoader loader = new FXMLLoader(fxmlURL);
+        Parent root = loader.load();
+
+        stage = new Stage();
+        stage.setTitle("PLAY SIMULATION");
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.show();
     }
 }

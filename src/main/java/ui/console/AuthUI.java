@@ -1,6 +1,8 @@
 package ui.console;
 
 import controller.AuthController;
+import javafx.application.Application;
+import javafx.stage.Stage;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import ui.console.menu.MainMenuUI;
 import ui.console.menu.UserMenuUI;
@@ -38,7 +40,11 @@ public class AuthUI implements Runnable {
     public void run() {
         switch(op){
             case 1:
-                run1();
+                try {
+                    run1();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             case 2:
                 createUser();
@@ -46,7 +52,7 @@ public class AuthUI implements Runnable {
         }
     }
 
-    public void run1(){
+    public void run1() throws Exception {
         boolean success = doLogin();
         if (success) {
             if (ctrl.getRole(ctrl.getCurrentUserEmail()).equals(AuthController.ROLE_EDITOR)) {
@@ -54,7 +60,7 @@ public class AuthUI implements Runnable {
                 admUI.run();
             }else{
                 UserMenuUI menu = new UserMenuUI();
-                menu.run();
+                menu.launchApp();
             }
         }
         this.logout();
