@@ -66,6 +66,13 @@ public class Scenario implements Serializable {
     }
 
     /**
+     * Returns the port behavior for this scenario.
+     *
+     * @return the port behavior
+     */
+    public int getPortBehavior() { return portBehavior; }
+
+    /**
      * Returns the technological restrictions for this scenario.
      *
      * @return the technological restrictions

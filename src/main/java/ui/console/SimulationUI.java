@@ -55,12 +55,14 @@ public class SimulationUI implements Runnable {
         System.out.println();
 
         User currentUser = CurrentUser.getInstance().getUser();
+
         if (currentUser == null) {
             System.out.println("No user logged in");
             return;
         }
 
         Scenario selectedScenario = ctrl.getScenario();
+
         if (selectedScenario == null) {
             System.out.println("No scenario selected.");
             return;
@@ -74,11 +76,6 @@ public class SimulationUI implements Runnable {
 
         if (selectedMap == null) {
             System.out.println("Map not found for scenario: " + mapName);
-            return;
-        }
-
-        if (selectedScenario == null) {
-            System.out.println("No scenario selected");
             return;
         }
 
@@ -101,7 +98,7 @@ public class SimulationUI implements Runnable {
             System.out.println("=== SEARCHING FOR SIMULATION ===");
             System.out.println("Looking for map: '" + selectedMap.getMapName() + "'");
             System.out.println("Looking for scenario: '" + selectedScenario.getScenarioName() + "'");
-            System.out.println("Looking for user: '" + (currentUser != null ? currentUser.getEmail() : "null") + "'");
+            System.out.println("Looking for user: '" + currentUser.getEmail() + "'");
             System.out.println();
 
             // Try to find existing simulation

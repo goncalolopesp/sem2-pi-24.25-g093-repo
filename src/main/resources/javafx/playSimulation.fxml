@@ -7,14 +7,14 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="654.0" prefWidth="803.0" style="-fx-background-color: bisque;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PlaySimulationController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="655.0" prefWidth="805.0" style="-fx-background-color: #1E1E2F;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PlaySimulationController">
    <children>
-      <Text fill="#755f07" layoutX="172.0" layoutY="166.0" strokeType="OUTSIDE" strokeWidth="0.0" text="TRAIN SIMULATION" textAlignment="CENTER">
+      <Text fill="WHITE" layoutX="172.0" layoutY="165.0" strokeType="OUTSIDE" strokeWidth="0.0" text="TRAIN SIMULATION" textAlignment="CENTER">
          <font>
             <Font name="Arial Bold" size="48.0" />
          </font>
       </Text>
-      <Button fx:id="playBUTTON" alignment="CENTER" layoutX="325.0" layoutY="279.0" mnemonicParsing="false" prefHeight="74.0" prefWidth="152.0" style="-fx-background-color: #755f07;" text="PLAY GAME" textAlignment="CENTER" textFill="BISQUE" onAction="#handlePlayGame">
+      <Button fx:id="playBUTTON" alignment="CENTER" layoutX="325.0" layoutY="279.0" mnemonicParsing="false" onAction="#handlePlayGame" prefHeight="74.0" prefWidth="152.0" text="PLAY GAME" textAlignment="CENTER">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
@@ -24,7 +24,7 @@
             <Image url="@../images/train.png" />
          </image>
       </ImageView>
-      <Button fx:id="exitBUTTON" alignment="CENTER" layoutX="326.0" layoutY="409.0" mnemonicParsing="false" prefHeight="74.0" prefWidth="152.0" style="-fx-background-color: #755f07;" text="EXIT GAME" textAlignment="CENTER" textFill="BISQUE" onAction="#handleExit">
+      <Button fx:id="exitBUTTON" alignment="CENTER" layoutX="326.0" layoutY="409.0" mnemonicParsing="false" onAction="#handleExit" prefHeight="74.0" prefWidth="152.0" text="EXIT GAME" textAlignment="CENTER">
          <font>
             <Font name="Arial" size="12.0" />
          </font>
