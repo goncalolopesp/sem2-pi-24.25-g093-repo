@@ -30,8 +30,6 @@ public class AssignTrainUI implements Runnable {
     public void run() {
         var currentUser = CurrentUser.getInstance().getUser();
         String playerEmail = currentUser.getEmail();
-
-        System.out.println(playerEmail);
         List<Station> stationsOnMap = getPlayerStationsOnMap(playerEmail);
         if (stationsOnMap.size() < 2) {
             System.out.println("Error: You need at least 2 stations on this map to assign a train.");

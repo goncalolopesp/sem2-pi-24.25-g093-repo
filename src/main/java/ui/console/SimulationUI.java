@@ -232,7 +232,6 @@ public class SimulationUI implements Runnable {
                         sim.getCurrentYear(),
                         sim.getUserBudget()
                 );
-                sim = null;
                 System.out.println("Game stopped.");
                 if (gameOver.get()) {
                     ctrl.resetGame(selectedMap, selectedScenario, sim.getUserBudget());
@@ -240,6 +239,7 @@ public class SimulationUI implements Runnable {
                 if (new SimulationFile().save()) {
                     System.out.println("Game saved.");
                 }
+                sim = null;
             }
         } while (option.get() != -1);
     }

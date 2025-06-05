@@ -32,6 +32,7 @@ public class SimulationController {
     private static int yearlyMaintenanceCost = 0;
     private static int yearlyFuelCost = 0;
     private static int yearlyTrackMaintenanceCost = 0;
+    private static int yearlyTotalCost = 0;
 
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
@@ -451,18 +452,36 @@ public class SimulationController {
 
             if (nextYear < timePeriod.get().get(1)) {
                 Map map = mapRepo.getMaps().stream().filter(m-> m.getMapName().equals(selectedScenario.getSelectedMap())).findFirst().orElse(null);
-                handleYearProgression(nextYear, budget, selectedScenario, map);
+                handleYearProgression(nextYear, budget, selectedScenario, map,
+                        timePeriod, scheduler, running, options, gameOver, sim);
+
             } else {
+                System.out.println("\n Final year was reached");
                 handleGameEnd(selectedScenario, timePeriod, scheduler, running, options, gameOver, sim);
             }
         };
     }
 
-    private void handleYearProgression(int year, Budget budget, Scenario selectedScenario, Map map) {
-        int yearSummary = year -1;
-        System.out.println("\n=== YEAR " + yearSummary + " SUMMARY ===");
+    private void handleYearProgression(int year, Budget budget, Scenario selectedScenario, Map map,
+                                       AtomicReference<AtomicIntegerArray> timePeriod,
+                                       ScheduledExecutorService scheduler, AtomicBoolean running,
+                                       List<MenuItem> options, AtomicBoolean gameOver, Simulation sim) {
+        int yearSummary = year - 1;
+        int locomotiveMaintenanceCost = calculateLocomotiveMaintenanceCost();
+        long ownedTracksAmount = railwayRepo.countByScenarioMapAndOwner(selectedScenario, map, currentUser.getEmail());
+        int trackMaintenanceCost = Math.toIntExact(AMOUNT_PER_LINE * ownedTracksAmount);
+        yearlyTotalCost = yearlyFuelCost + trackMaintenanceCost + locomotiveMaintenanceCost;
+
+        Budget money = budgetRepo.getUserBudgetFromScenarioInMap(selectedScenario, map, currentUser).orElse(null);
+        int currentBudget = money != null ? money.getBudget() : budget.getBudget();
+
+        if (currentBudget >= yearlyTotalCost) {
+            System.out.println("\n=== YEAR " + yearSummary + " SUMMARY ===");
             payLocomotiveMaintenance(budget);
-            payTrackMaintenance(selectedScenario,map,budget);
+            payTrackMaintenance(selectedScenario, map, budget);
+            yearlyMaintenanceCost = locomotiveMaintenanceCost;
+            yearlyTrackMaintenanceCost = trackMaintenanceCost;
+
             displayYearlyStatistics();
 
             announceNewLocomotives(year);
@@ -472,7 +491,18 @@ public class SimulationController {
             System.out.println("The year is now " + year);
 
             System.out.print("Type your option: ");
+        } else {
+            System.out.println("\n=== INSUFFICIENT BUDGET ===");
+            System.out.printf("Required budget: $%d%n", yearlyTotalCost);
+            System.out.printf("Available budget: $%d%n", currentBudget);
+            System.out.println("Not enough budget to pay your yearly expenses");
+            handleGameEnd(selectedScenario, timePeriod, scheduler, running, options, gameOver, sim);
+        }
+
+        yearlyTotalCost = 0;
     }
+
+
 
     private void payTrackMaintenance(Scenario selectedScenario, Map map,Budget budget) {
         long ownedTracksAmount = railwayRepo.countByScenarioMapAndOwner(selectedScenario, map, currentUser.getEmail());
@@ -518,7 +548,18 @@ public class SimulationController {
 
         options.clear();
         gameOver.set(true);
-        System.out.print("\nGame Over. Final Year was reached. Please insert 0 to return to menu: ");
+        System.out.print("\nGame Over. Please insert 0 to return to menu: ");
+    }
+
+    private int calculateLocomotiveMaintenanceCost() {
+        List<Locomotive> allLocomotives = currentUser.getLocomotives();
+        int totalMaintenanceCost = 0;
+
+        for (Locomotive locomotive : allLocomotives) {
+            totalMaintenanceCost += locomotive.getMaintenanceCost();
+        }
+
+        return totalMaintenanceCost;
     }
 
     public Runnable generateCargo(Map selectedMap, Scenario selectedScenario,
@@ -703,18 +744,11 @@ public class SimulationController {
         List<Locomotive> maintainedLocomotives = new ArrayList<>();
 
         for (Locomotive loc : allLocomotives) {
-            if (canAffordMaintenance(loc, budget)) {
-                payMaintenanceAndFuel(loc, budget);
-                yearlyMaintenanceCost += loc.getMaintenanceCost();
-                maintainedLocomotives.add(loc);
-            }
+            payMaintenanceAndFuel(loc, budget);
+            maintainedLocomotives.add(loc);
         }
     }
 
-
-    private boolean canAffordMaintenance(Locomotive locomotive, Budget budget) {
-        return locomotive.getMaintenanceCost() <= budget.getBudget();
-    }
 
     private void payMaintenanceAndFuel(Locomotive locomotive, Budget budget) {
         budget.subtractBudget(locomotive.getMaintenanceCost());
