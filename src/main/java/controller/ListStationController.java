@@ -2,6 +2,7 @@ package controller;
 
 import domain.Building;
 import domain.CurrentUser;
+import domain.Scenario;
 import domain.Station;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,6 +18,7 @@ import repository.StationRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Controller for retrieving station and building information
@@ -42,12 +44,41 @@ public class ListStationController {
     /** Repository for building data */
     BuildingRepository br = repositories.getBuildingRepository();
 
+    /** Current scenario passed from PlayerMenuController */
+    private Scenario currentScenario;
+
+    /**
+     * Method to receive the scenario from PlayerMenuController
+     */
+    public void setScenario(Scenario scenario) {
+        this.currentScenario = scenario;
+
+        // Initialize the station list after receiving the scenario
+        loadStations();
+    }
+
+    /**
+     * Load stations into the ComboBox - called after scenario is set
+     */
+    private void loadStations() {
+        // Clear existing items first
+        StationList.getItems().clear();
+
+        for (Station station : getStations()){
+            if (station.getOwnerPlayer().equalsIgnoreCase(CurrentUser.getInstance().getUser().getEmail())){
+                StationList.getItems().add(station);
+            }
+        }
+    }
+
     /**
      * Retrieves all stations in the system
      * @return List of all stations
      */
     public List<Station> getStations(){
-        return sr.getStations();
+        return sr.getStations().stream()
+                .filter(s -> s.getScenarioName().equals(currentScenario.getScenarioName()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -74,28 +105,34 @@ public class ListStationController {
         String text = "Station: " + selectedStation.getName() + "\n" + "Center:" + selectedStation.getX() + "," + selectedStation.getY() + "\n" + "Type:" + selectedStation.getType();
 
         List<Building> buildings = getBuildingByStation(selectedStation);
-        if (buildings.size() > 0){
+        if (!buildings.isEmpty()){
             text += "========= BUILDINGS =========";
             for (Building building : buildings) {
                 text += "\n" + "Buildings: " + building.getBuildingType();
             }
         }
+
         StationDescription.setText(text);
     }
 
     @FXML
     public void initialize(){
-        for (Station station : getStations()){
-            if (station.getOwnerPlayer().equalsIgnoreCase(CurrentUser.getInstance().getUser().getEmail())){
-                StationList.getItems().add(station);
-            }
-        }
+        // Don't load stations here since currentScenario will be null
+        // The loadStations() method will be called from setScenario()
+        System.out.println("ListStationController initialize() called - waiting for scenario...");
     }
 
     @FXML
     public void GoBackToPlayerMenu() throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
         Parent root = loader.load();
+
+        // Pass the scenario back to PlayerMenuController when going back
+        PlayerMenuController controller = loader.getController();
+        if (currentScenario != null) {
+            controller.setScenario(currentScenario);
+        }
+
         Scene currentScene = ListStations.getScene();
         currentScene.setRoot(root);
     }

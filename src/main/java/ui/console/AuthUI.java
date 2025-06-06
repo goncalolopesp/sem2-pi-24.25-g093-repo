@@ -61,7 +61,7 @@ public class AuthUI implements Runnable {
                 admUI.run();
             }else{
                 //UserMenuUI menu = new UserMenuUI();
-                PlayerMenu menu = new PlayerMenu();
+                UserMenuUI menu = new UserMenuUI();
                 menu.launchApp();
             }
         }

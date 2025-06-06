@@ -55,7 +55,7 @@
             <Font name="Arial Bold" size="18.0" />
          </font>
       </Text>
-      <Button fx:id="playBUTTON" layoutX="57.0" layoutY="424.0" mnemonicParsing="false" prefHeight="74.0" prefWidth="152.0" text="PLAY GAME" visible="false">
+      <Button fx:id="playBUTTON" layoutX="57.0" layoutY="424.0" mnemonicParsing="false" prefHeight="74.0" prefWidth="152.0" text="PLAY GAME" visible="false" onAction="#handlePlayGame">
          <font>
             <Font name="Arial Bold" size="12.0" />
          </font>

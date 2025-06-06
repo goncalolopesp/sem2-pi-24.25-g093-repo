@@ -20,7 +20,6 @@ public class PlaySimulationController {
 
     @FXML
     private void handlePlayGame() throws IOException {
-        // Execute the SimulationUI
         URL fxmlURL = getClass().getResource("/javafx/selectScenario.fxml");
         System.out.println("FXML URL: " + fxmlURL);
 

@@ -2,13 +2,21 @@ package controller;
 
 import domain.Scenario;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.stage.Stage;
 import repository.Repositories;
 import repository.ScenarioRepository;
+import ui.gui.PlayerMenu;
+import controller.PlayerMenuController;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 public class SelectScenarioController {
@@ -55,7 +63,6 @@ public class SelectScenarioController {
 
         scenarioCOMBOBOX.getItems().addAll(scenarios);
         scenarioCOMBOBOX.setOnAction(event -> { displayScenarioInfo(); playBUTTON.setVisible(true); });
-
     }
 
     @FXML
@@ -78,5 +85,33 @@ public class SelectScenarioController {
         histLABEL.setText("HISTORICAL RESTRICTIONS: " + historicalRestrictions.get(0));
         prodLABEL.setText("PRODUCTION RATE: " + productionRate);
         profLABEL.setText("PROFIT MULTIPLIER: " + profitMultiplier);
+    }
+
+    @FXML
+    private void handlePlayGame() throws IOException {
+        Scenario selectedScenario = scenarioCOMBOBOX.getValue();
+
+        if (selectedScenario == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setContentText("Please select a scenario first!");
+            alert.showAndWait();
+            return;
+        }
+
+        // Option 1: Using FXMLLoader directly (Alternative approach)
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
+        Parent root = loader.load();
+        PlayerMenuController controller = loader.getController();
+        controller.setScenario(selectedScenario);
+
+        Stage currentStage = (Stage) playBUTTON.getScene().getWindow();
+        Scene scene = new Scene(root);
+        currentStage.setScene(scene);
+        currentStage.setTitle("Player Menu");
+
+        // Option 2: Using PlayerMenu class (if you prefer the Application approach)
+        // PlayerMenu playerMenu = new PlayerMenu(selectedScenario);
+        // playerMenu.startWithScenario(selectedScenario, currentStage);
     }
 }
