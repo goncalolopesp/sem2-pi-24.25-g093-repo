@@ -17,6 +17,7 @@ public class Bootstrap {
         loadScenarios();
         createLocomotives();
         addTrains();
+        addStation();
     }
 
     private void addUsers() {
@@ -31,6 +32,12 @@ public class Bootstrap {
         for (User user : users) {
             authRepository.createNewUser(user);
         }
+    }
+
+    private void addStation(){
+        Station st = new Station(Station.Type.STATION, "exampleCity-STATION", "exampleMap", "exampleScenario", "player@this.app", 100, 200, 20, 20, Station.Orientation.NE);
+        StationRepository stationRepository = Repositories.getInstance().getStationRepository();
+        stationRepository.addStation(st);
     }
 
     private void addMaps() {
