@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import ui.console.menu.MainMenuUI;
 import ui.console.menu.UserMenuUI;
+import ui.gui.PlayerMenu;
 
 
 public class AuthUI implements Runnable {
@@ -59,7 +60,8 @@ public class AuthUI implements Runnable {
                 MainMenuUI admUI = new MainMenuUI();
                 admUI.run();
             }else{
-                UserMenuUI menu = new UserMenuUI();
+                //UserMenuUI menu = new UserMenuUI();
+                PlayerMenu menu = new PlayerMenu();
                 menu.launchApp();
             }
         }
