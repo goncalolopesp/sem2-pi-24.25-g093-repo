@@ -27,7 +27,7 @@ class CreateStationControllerTest {
         stationRepo = Repositories.getInstance().getStationRepository();
         stationRepo.removeStationsByMapScenarioAndOwner("", "", "");
 
-        map = new Map("Map1", 100, 100);
+        map = new Map("Map1", 100, 100,1);
          scenario = new Scenario("TestScenario", "Map1", new int[]{}, List.of(), List.of());
         controller = new CreateStationController();
         user = new User("Player 1", "player@this.app", "pwd", "ROLE_PLAYER");

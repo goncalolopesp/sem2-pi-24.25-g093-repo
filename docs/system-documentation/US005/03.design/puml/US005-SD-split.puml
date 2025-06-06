@@ -87,17 +87,24 @@ loop until station placed or abort
   Player -> BuildStationUI : enter X, Y coordinates
   activate BuildStationUI
 
-  BuildStationUI -> CreateStationController : createStation(map, location, type, center)
+  BuildStationUI -> CreateStationController : buildStation(map, scenario, x, y, orientation, budget)
   activate CreateStationController
   ref over CreateStationController
     Creates station instance and saves to repository
   end ref
 
-  CreateStationController --> BuildStationUI : result
+  CreateStationController --> BuildStationUI : Error.OK
   deactivate CreateStationController
 
   alt result == OK
-    BuildStationUI --> Player : display "Station created successfully"
+    BuildStationUI -> CreateStationController : getLastCreatedStationDTO()
+    activate CreateStationController
+    ref over CreateStationController
+        Retrieves last created station as DTO
+    end ref
+    CreateStationController --> BuildStationUI : stationDTO
+    deactivate CreateStationController
+    BuildStationUI --> Player : display "Station created successfully" + stationDTO info
   else result == INVALID_COORDINATES
     BuildStationUI --> Player : display "Coordinates out of map bounds. Please try again."
   else result == OVERBUILD

@@ -34,7 +34,7 @@ class UpgradeStationTypeControllerTest {
             stationRepo.removeStation(s);
         }
 
-        map = new Map("TestMap", 50, 50);
+        map = new Map("TestMap", 50, 50,1);
         int[] timeRange = {1928, 1938};
         scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));;
         budget = new Budget(1000, map, scenario, null);

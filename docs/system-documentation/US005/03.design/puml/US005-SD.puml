@@ -91,7 +91,7 @@ loop until station placed or abort
   BuildStationUI --> Player : request coordinates
   Player -> BuildStationUI : enter X, Y coordinates
 
-  BuildStationUI --> CreateStationController : createStation(map, location, type, center)
+  BuildStationUI --> CreateStationController : buildStation(map, scenario, x, y, orientation, budget)
   deactivate BuildStationUI
   CreateStationController -> StationRepository : createStation(map, location, type, center)
   activate StationRepository
@@ -99,16 +99,29 @@ loop until station placed or abort
 
   StationRepository -> Station: create()
 
-  StationRepository --> StationRepository : saveStation()
-  StationRepository --> CreateStationController : stationData
+  StationRepository --> StationRepository : addStation(station)
+  StationRepository --> CreateStationController : Error.OK
   deactivate StationRepository
 
   activate BuildStationUI
-  CreateStationController --> BuildStationUI : result
+  CreateStationController --> BuildStationUI : Error.OK
   deactivate CreateStationController
 
   alt result == OK
-    BuildStationUI --> Player : display "Station created successfully"
+    BuildStationUI -> CreateStationController : getLastCreatedStationDTO()
+    activate CreateStationController
+    CreateStationController -> StationRepository : getStations()
+    activate StationRepository
+    StationRepository --> CreateStationController : stations
+    deactivate StationRepository
+    create ":StationDTO" as StationDTO
+    CreateStationController -> StationDTO : fromEntity(lastStation)
+    activate StationDTO
+    StationDTO --> CreateStationController : stationDTO
+    deactivate StationDTO
+    CreateStationController --> BuildStationUI : stationDTO
+    deactivate CreateStationController
+    BuildStationUI --> Player : display "Station created successfully" + stationDTO info
   else result == INVALID_COORDINATES
     BuildStationUI --> Player : display "Coordinates out of map bounds. Please try again."
   else result == OVERBUILD

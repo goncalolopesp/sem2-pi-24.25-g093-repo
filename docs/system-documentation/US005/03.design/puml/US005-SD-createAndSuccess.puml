@@ -30,15 +30,31 @@ activate StationRepository
 
 create ":station\n:Station" as Station
 StationRepository -> Station : create()
-StationRepository -> StationRepository : saveStation()
-StationRepository --> CreateStationController : stationData
+StationRepository -> StationRepository : addStation(station)
+StationRepository --> CreateStationController : Error.OK
 deactivate StationRepository
 
-CreateStationController --> BuildStationUI : result
+CreateStationController --> BuildStationUI : Error.OK
 deactivate CreateStationController
+
+BuildStationUI -> CreateStationController : getLastCreatedStationDTO()
+activate CreateStationController
+CreateStationController -> StationRepository : getStations()
+activate StationRepository
+StationRepository --> CreateStationController : stations
+deactivate StationRepository
+
+create ":StationDTO" as StationDTO
+CreateStationController -> StationDTO : fromEntity(lastStation)
+activate StationDTO
+StationDTO --> CreateStationController : stationDTO
+deactivate StationDTO
+CreateStationController --> BuildStationUI : stationDTO
+deactivate CreateStationController
+
 destroy CreateStationController
 
-BuildStationUI --> Player : display "Station created successfully"
+BuildStationUI --> Player : display "Station created successfully" + stationDTO info
 deactivate BuildStationUI
 deactivate Player
 @enduml

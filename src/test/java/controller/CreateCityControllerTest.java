@@ -19,7 +19,7 @@ class CreateCityControllerTest {
         repos.getMapRepository();
         repos.getCityRepository();
 
-        repos.getMapRepository().add(new Map("TestMap", 100, 100));
+        repos.getMapRepository().add(new Map("TestMap", 100, 100,1));
         repos.getCityRepository().add(new City("ExistingCity", "TestMap", 2, 2));
 
         controller = new CreateCityController();
@@ -143,7 +143,7 @@ class CreateCityControllerTest {
     @Test
     void testValidateCity(){
         var repos = Repositories.getInstance();
-        repos.getMapRepository().add(new Map("TestMap2", 100, 100));
+        repos.getMapRepository().add(new Map("TestMap2", 100, 100,1));
         String city2 = "City2";
         boolean test = controller.validateCity(city2, "TestMap2",5,5);
         assertEquals(true, test);
