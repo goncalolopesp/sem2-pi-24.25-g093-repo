@@ -27,7 +27,7 @@ public class SimulationUI {
     private Simulation sim;
     private PlayerMenuController controller;
     private final Scenario selectedScenario;
-    private final Map selectedMap; // Cache the selected map
+    private final Map selectedMap;
 
     // Game state variables
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -45,7 +45,6 @@ public class SimulationUI {
         }
         this.selectedScenario = selectedScenario;
 
-        // Initialize and cache the selected map based on the scenario
         this.selectedMap = mapRepo.getMaps().stream()
                 .filter(map -> map.getMapName().equals(selectedScenario.getSelectedMap()))
                 .findFirst()
@@ -57,31 +56,24 @@ public class SimulationUI {
     }
 
     public void start(Stage stage) throws Exception {
-
-        // Initialize the simulation
         if (!initializeSimulation()) {
             System.err.println("Failed to initialize simulation");
             return;
         }
 
-        // Load FXML
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
         Parent root = loader.load();
         controller = loader.getController();
 
-        // Pass simulation data to controller - ORDER MATTERS!
-        // Set SimulationUI first so it's available when setSimulation is called
         controller.setSimulationUI(this);
         controller.setSimulation(sim);
 
-        // Create scene and show stage
         Scene scene = new Scene(root, 1065, 777);
         stage.setTitle("Railway Simulation");
         stage.setScene(scene);
         stage.centerOnScreen();
         stage.setResizable(false);
 
-        // Handle window close event
         stage.setOnCloseRequest(event -> {
             event.consume();
             stopSimulation();
@@ -89,8 +81,6 @@ public class SimulationUI {
         });
 
         stage.show();
-
-        // Start simulation threads
         startSimulationThreads();
     }
 
@@ -108,7 +98,6 @@ public class SimulationUI {
         System.out.println("Using map: " + selectedMap.getMapName());
 
         if (sim == null) {
-            // Try to find existing simulation using the constructor's selectedScenario
             Optional<Simulation> existingSimulation = ctrl.findBy(selectedMap, selectedScenario);
 
             if (existingSimulation.isPresent()) {
@@ -144,35 +133,61 @@ public class SimulationUI {
     }
 
     private void startSimulationThreads() {
-        // Create all schedulers
-        timeScheduler = Executors.newSingleThreadScheduledExecutor();
-        generationScheduler = Executors.newSingleThreadScheduledExecutor();
-        routeScheduler = Executors.newSingleThreadScheduledExecutor();
+        // Clean up existing schedulers first
+        if (timeScheduler != null && !timeScheduler.isShutdown()) {
+            timeScheduler.shutdownNow();
+        }
+        if (generationScheduler != null && !generationScheduler.isShutdown()) {
+            generationScheduler.shutdownNow();
+        }
+        if (routeScheduler != null && !routeScheduler.isShutdown()) {
+            routeScheduler.shutdownNow();
+        }
 
-        // Use the selectedMap cached from constructor
+        // Create new schedulers
+        timeScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "TimeScheduler");
+            t.setDaemon(true);
+            return t;
+        });
+        generationScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "GenerationScheduler");
+            t.setDaemon(true);
+            return t;
+        });
+        routeScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "RouteScheduler");
+            t.setDaemon(true);
+            return t;
+        });
+
         System.out.println("Starting simulation threads for map: " + selectedMap.getMapName() +
                 " and scenario: " + selectedScenario.getScenarioName());
 
-        // Create JavaFX-compatible tasks that update UI on JavaFX Application Thread
+        // Time Task - Fixed to handle return value properly
         Runnable timeTask = () -> {
             if (running.get() && !gameOver.get()) {
                 try {
-                    // Call the passTime method using the constructor's selectedScenario
+
+                    // Call passTime and execute the returned runnable
                     Runnable timeRunner = ctrl.passTime(
                             selectedScenario,
                             timePeriod,
                             running,
-                            null,
+                            null, // options parameter - you might need to pass actual options
                             timeScheduler,
                             gameOver,
                             sim.getUserBudget(),
                             sim
                     );
 
-                    // Execute the returned Runnable
-                    timeRunner.run();
+                    if (timeRunner != null) {
+                        timeRunner.run();
+                    }
 
-                    // Update UI on JavaFX Application Thread
+                    requestUIUpdate();
+
+                    // Always update UI for time-based changes
                     Platform.runLater(() -> {
                         if (controller != null) {
                             controller.updateUI();
@@ -185,10 +200,13 @@ public class SimulationUI {
             }
         };
 
+        // Generation Task - Fixed to call the method correctly
         Runnable generationTask = () -> {
-            if (running.get()) {
+            if (running.get() && !gameOver.get()) {
                 try {
                     ctrl.generateCargo(selectedMap, selectedScenario, timePeriod, running, generationScheduler);
+                    // Request UI update as cargo generation might affect the display
+                    requestUIUpdate();
                 } catch (Exception e) {
                     System.err.println("Error in generation task: " + e.getMessage());
                     e.printStackTrace();
@@ -197,16 +215,49 @@ public class SimulationUI {
         };
 
         Runnable routeTask = () -> {
-            if (running.get()) {
-                // Use the selectedMap and selectedScenario from constructor
-                ctrl.executeRoutes(selectedMap, selectedScenario, sim.getUserBudget(), running);
+            if (running.get() && !gameOver.get()) {
+                try {
+                    long previousBudget = sim.getUserBudget().getBudget();
+
+                    // Call executeRoutes and execute the returned runnable
+                    Runnable routeRunner = ctrl.executeRoutes(selectedMap, selectedScenario, sim.getUserBudget(), running);
+
+                    if (routeRunner != null) {
+                        routeRunner.run();
+                    }
+
+                    // Check if budget changed due to route execution and trigger UI update
+                    long currentBudget = sim.getUserBudget().getBudget();
+                    if (previousBudget != currentBudget) {
+                        requestUIUpdate();
+                    }
+                } catch (Exception e) {
+                    System.err.println("Error in route task: " + e.getMessage());
+                    e.printStackTrace();
+                }
             }
         };
 
-        // Schedule all tasks
-        timeScheduler.scheduleAtFixedRate(timeTask, 20, 20, TimeUnit.SECONDS);
-        generationScheduler.scheduleAtFixedRate(generationTask, 10, 10, TimeUnit.SECONDS);
-        routeScheduler.scheduleAtFixedRate(routeTask, 5, 5, TimeUnit.SECONDS);
+        // Schedule tasks with proper error handling
+        try {
+            timeScheduler.scheduleAtFixedRate(timeTask, 5, 20, TimeUnit.SECONDS); // Start after 5 seconds
+
+            generationScheduler.scheduleAtFixedRate(generationTask, 10, 10, TimeUnit.SECONDS);
+
+            routeScheduler.scheduleAtFixedRate(routeTask, 15, 5, TimeUnit.SECONDS); // Start after 15 seconds
+        } catch (Exception e) {
+            System.err.println("Error starting simulation threads: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Request a UI update - safe to call from any thread
+     */
+    public void requestUIUpdate() {
+        if (controller != null) {
+            controller.requestUIUpdate();
+        }
     }
 
     public void pauseGame() {
@@ -220,34 +271,60 @@ public class SimulationUI {
     }
 
     public void stopSimulation() {
+        System.out.println("Stopping simulation...");
         running.set(false);
 
-        // Shutdown all schedulers
-        if (timeScheduler != null) timeScheduler.shutdownNow();
-        if (generationScheduler != null) generationScheduler.shutdownNow();
-        if (routeScheduler != null) routeScheduler.shutdownNow();
+        // Shutdown schedulers with proper timeout
+        shutdownScheduler(timeScheduler, "Time");
+        shutdownScheduler(generationScheduler, "Generation");
+        shutdownScheduler(routeScheduler, "Route");
 
-        // Save simulation state using the constructor's selectedMap and selectedScenario
         if (sim != null) {
-            ctrl.updateSimulation(
-                    selectedMap,
-                    selectedScenario,
-                    sim.getCurrentYear(),
-                    sim.getUserBudget()
-            );
-            System.out.println("Game stopped.");
+            try {
+                ctrl.updateSimulation(
+                        selectedMap,
+                        selectedScenario,
+                        sim.getCurrentYear(),
+                        sim.getUserBudget()
+                );
+                System.out.println("Simulation state saved.");
 
-            if (gameOver.get()) {
-                ctrl.resetGame(selectedMap, selectedScenario, sim.getUserBudget());
-            }
+                if (gameOver.get()) {
+                    ctrl.resetGame(selectedMap, selectedScenario, sim.getUserBudget());
+                    System.out.println("Game reset completed.");
+                }
 
-            if (new SimulationFile().save()) {
-                System.out.println("Game saved.");
+                if (new SimulationFile().save()) {
+                    System.out.println("Game saved to file.");
+                }
+            } catch (Exception e) {
+                System.err.println("Error saving simulation: " + e.getMessage());
+                e.printStackTrace();
             }
         }
+
         sim = null;
+        System.out.println("Simulation stopped.");
     }
 
+    private void shutdownScheduler(ScheduledExecutorService scheduler, String name) {
+        if (scheduler != null && !scheduler.isShutdown()) {
+            System.out.println("Shutting down " + name + " scheduler...");
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    System.out.println("Force shutting down " + name + " scheduler...");
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                System.err.println("Interrupted while shutting down " + name + " scheduler");
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    // Getters remain the same
     public Simulation getSimulation() {
         return sim;
     }
@@ -256,16 +333,10 @@ public class SimulationUI {
         return ctrl;
     }
 
-    /**
-     * Get the selected scenario that was provided in the constructor
-     */
     public Scenario getSelectedScenario() {
         return selectedScenario;
     }
 
-    /**
-     * Get the selected map that corresponds to the selected scenario
-     */
     public Map getSelectedMap() {
         return selectedMap;
     }

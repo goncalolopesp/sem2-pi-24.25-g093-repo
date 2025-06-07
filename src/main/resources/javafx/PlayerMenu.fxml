@@ -7,7 +7,7 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane fx:id="PlayerMenu" prefHeight="777.0" prefWidth="1065.0" style="-fx-background-color: #1E1E2F;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PlayerMenuController">
+<AnchorPane fx:id="PlayerMenu" prefHeight="850.0" prefWidth="1065.0" style="-fx-background-color: #1E1E2F;" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.PlayerMenuController">
    <children>
       <Button fx:id="upgradeStationTypeBtn" contentDisplay="CENTER" layoutX="920.0" layoutY="191.0" mnemonicParsing="false" onAction="#handleUpgradeStationType" prefHeight="80.0" prefWidth="95.0" text="UPGRADE STATION TYPE" textAlignment="CENTER" wrapText="true" />
       <Button fx:id="buildStationBtn" layoutX="800.0" layoutY="191.0" mnemonicParsing="false" onAction="#handleBuildStation" prefHeight="80.0" prefWidth="95.0" text="BUILD A STATION" textAlignment="CENTER" wrapText="true" />
@@ -23,30 +23,33 @@
       <Button fx:id="resumeBtn" layoutX="920.0" layoutY="491.0" mnemonicParsing="false" onAction="#handleResume" prefHeight="80.0" prefWidth="95.0" text="RESUME" textAlignment="CENTER" visible="false" wrapText="true" />
       <Button fx:id="backBtn" layoutX="997.0" layoutY="738.0" mnemonicParsing="false" onAction="#doLogout" style="-fx-background-color: red;" text="BACK" textAlignment="CENTER" textFill="WHITE" />
 
-      <!-- Map Display Area -->
-      <ScrollPane layoutX="50.0" layoutY="150.0" prefHeight="400.0" prefWidth="700.0"
-                  style="-fx-background: #2A2A3A; -fx-border-color: #444; -fx-border-width: 2;">
+      <!-- Map Display Area - Moved up to center vertically -->
+      <ScrollPane layoutX="50.0" layoutY="75.0" prefHeight="500.0" prefWidth="700.0"
+                  style="-fx-background: #2A2A3A; -fx-border-color: #444; -fx-border-width: 2;"
+                  fitToWidth="true" fitToHeight="true">
          <content>
-            <GridPane fx:id="mapGridPane" style="-fx-background-color: #2A2A3A; -fx-padding: 10;" />
+            <GridPane fx:id="mapGridPane"
+                      style="-fx-background-color: #2A2A3A;"
+                      alignment="CENTER" />
          </content>
       </ScrollPane>
 
       <!-- Year Display -->
-      <Text fx:id="yearText" fill="WHITE" layoutX="350.0" layoutY="120.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Year: Loading..." textAlignment="CENTER">
+      <Text fx:id="yearText" fill="WHITE" layoutX="125.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Year: Loading..." textAlignment="LEFT">
          <font>
             <Font name="Arial Bold" size="18.0" />
          </font>
       </Text>
 
       <!-- Budget Display -->
-      <Text fx:id="budgetText" fill="WHITE" layoutX="320.0" layoutY="580.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Budget: Loading..." textAlignment="CENTER">
+      <Text fx:id="budgetText" fill="WHITE" layoutX="600.0" layoutY="45.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Budget: Loading..." textAlignment="RIGHT">
          <font>
             <Font name="Arial Bold" size="18.0" />
          </font>
       </Text>
 
       <!-- Map Legend -->
-      <AnchorPane layoutX="50.0" layoutY="580.0" prefHeight="120.0" prefWidth="700.0"
+      <AnchorPane layoutX="50.0" layoutY="595.0" prefHeight="150.0" prefWidth="700.0"
                   style="-fx-background-color: #2A2A3A; -fx-border-color: #444; -fx-border-width: 1;">
          <children>
             <Text fill="WHITE" layoutX="10.0" layoutY="20.0" text="Map Legend:" textAlignment="LEFT">

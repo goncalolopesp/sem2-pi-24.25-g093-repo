@@ -1,6 +1,7 @@
 package controller;
 
 import domain.*;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -19,6 +20,9 @@ import ui.gui.PlayMenuGUI;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerMenuController implements Initializable {
 
@@ -27,7 +31,6 @@ public class PlayerMenuController implements Initializable {
     @FXML private Button upgradeStationBuildingBtn;
     @FXML private Button buyLocomotiveBtn;
     @FXML private Button listLocomotivesBtn;
-    @FXML private Button listStationsBtn;
     @FXML private Button assignTrainBtn;
     @FXML private Button pauseBtn;
     @FXML private Button resumeBtn;
@@ -39,31 +42,99 @@ public class PlayerMenuController implements Initializable {
     private SimulationUI simulationUI;
     private Simulation simulation;
     private boolean gameRunning = true;
-    private boolean wasRunningBeforeNavigation = true; // Track state before navigation
+    private boolean wasRunningBeforeNavigation = true;
+
+    // Add scheduler for periodic UI updates
+    private ScheduledExecutorService uiUpdateScheduler;
+    private volatile boolean shouldUpdateUI = false;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Initialize UI state
         resumeBtn.setVisible(false);
         updateButtonStates();
+
+        // Start UI update scheduler
+        startUIUpdateScheduler();
+
+        // Force initial UI update
+        Platform.runLater(() -> {
+            updateUI();
+            // Set flag to ensure continuous updates
+            shouldUpdateUI = true;
+        });
+    }
+
+    /**
+     * Start a scheduler that periodically checks if UI needs updating
+     */
+    private void startUIUpdateScheduler() {
+        // Shutdown existing scheduler if it exists
+        if (uiUpdateScheduler != null && !uiUpdateScheduler.isShutdown()) {
+            uiUpdateScheduler.shutdownNow();
+        }
+
+        uiUpdateScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "UIUpdateScheduler");
+            t.setDaemon(true); // Make it a daemon thread
+            return t;
+        });
+
+        uiUpdateScheduler.scheduleAtFixedRate(() -> {
+            if (shouldUpdateUI && simulation != null && simulationUI != null) {
+                Platform.runLater(() -> {
+                    updateUI();
+                    // Keep updating as long as we have valid references
+                    shouldUpdateUI = true;
+                });
+            }
+        }, 100, 500, TimeUnit.MILLISECONDS); // Start after 100ms, then every 500ms
+
+        System.out.println("UI Update Scheduler started");
+    }
+
+    /**
+     * Request UI update - can be called from any thread
+     */
+    public void requestUIUpdate() {
+        shouldUpdateUI = true;
+    }
+
+    /**
+     * Force immediate UI update - must be called from JavaFX Application Thread
+     */
+    public void forceUIUpdate() {
+        if (Platform.isFxApplicationThread()) {
+            updateUI();
+            shouldUpdateUI = true; // Ensure continuous updates
+        } else {
+            Platform.runLater(() -> {
+                updateUI();
+                shouldUpdateUI = true;
+            });
+        }
     }
 
     public void setSimulation(Simulation simulation) {
         this.simulation = simulation;
         System.out.println("Simulation set in PlayerMenuController");
-        // Only update UI if we also have simulationUI
-        if (simulationUI != null) {
+
+        // Always try to update UI when simulation is set
+        Platform.runLater(() -> {
             updateUI();
-        }
+            shouldUpdateUI = true;
+        });
     }
 
     public void setSimulationUI(SimulationUI simulationUI) {
         this.simulationUI = simulationUI;
         System.out.println("SimulationUI set in PlayerMenuController");
-        // Update UI now that we have both simulation and simulationUI
-        updateUI();
 
-        // Resume game when returning to player menu (if it was running before)
+        // Always update UI when simulationUI is set
+        Platform.runLater(() -> {
+            updateUI();
+            shouldUpdateUI = true;
+        });
+
         if (wasRunningBeforeNavigation && simulationUI != null) {
             simulationUI.resumeGame();
             gameRunning = true;
@@ -74,33 +145,33 @@ public class PlayerMenuController implements Initializable {
 
     public void updateUI() {
         if (simulation != null) {
-            // Update year
             yearText.setText("Year: " + simulation.getCurrentYear());
-
-            // Update budget
             budgetText.setText("Budget: $" + simulation.getUserBudget().getBudget());
-
-            // Update map display
             displayMapInGrid();
         }
     }
 
     private void displayMapInGrid() {
-        if (simulation == null || mapGridPane == null) return;
+        if (simulation == null || mapGridPane == null || simulationUI == null) {
+            System.out.println("Cannot display map - missing references: " +
+                    "simulation=" + (simulation != null) +
+                    ", mapGridPane=" + (mapGridPane != null) +
+                    ", simulationUI=" + (simulationUI != null));
+            return;
+        }
 
-        // Clear existing map
         mapGridPane.getChildren().clear();
 
         Map selectedMap = simulationUI.getSelectedMap();
         Scenario selectedScenario = simulationUI.getSelectedScenario();
 
-        if (selectedMap == null || selectedScenario == null) return;
+        if (selectedMap == null || selectedScenario == null) {
+            System.out.println("Cannot display map - missing map or scenario");
+            return;
+        }
 
-        // Create map grid using the existing logic from SimulationController
         String[][] grid = createMapGrid(selectedMap);
         populateMapGrid(grid, selectedMap, selectedScenario);
-
-        // Display the grid in JavaFX
         displayGridInUI(grid, selectedMap.getHeight(), selectedMap.getWidth());
     }
 
@@ -108,34 +179,24 @@ public class PlayerMenuController implements Initializable {
         String[][] grid = new String[map.getHeight() + 1][map.getWidth() + 1];
         for (int y = 1; y <= map.getHeight(); y++) {
             for (int x = 1; x <= map.getWidth(); x++) {
-                grid[y][x] = "⬛"; // Default empty space
+                grid[y][x] = "⬛";
             }
         }
         return grid;
     }
 
     private void populateMapGrid(String[][] grid, Map map, Scenario scenario) {
-        // Use the existing logic from SimulationController
-        SimulationController controller = simulationUI.getController();
-
-        // Add industries
         addIndustriesToGrid(grid, map);
-
-        // Add cities
         addCitiesToGrid(grid, map);
-
-        // Add stations
         addStationsToGrid(grid, map, scenario);
     }
 
     private void addIndustriesToGrid(String[][] grid, Map map) {
-        // Get industries for this map and add them to grid
         simulationUI.getController().getIndustriesForMap(map).forEach(industry ->
                 grid[industry.getLocation().getY()][industry.getLocation().getX()] = "🏭");
     }
 
     private void addCitiesToGrid(String[][] grid, Map map) {
-        // Get cities for this map and add them to grid
         simulationUI.getController().getCitiesForMap(map).forEach(city -> {
             grid[city.getCenterY()][city.getCenterX()] = "🌆";
             city.getBlocks().forEach(hb -> grid[hb.getY()][hb.getX()] = "🏠");
@@ -146,7 +207,6 @@ public class PlayerMenuController implements Initializable {
         User currentUser = CurrentUser.getInstance().getUser();
         if (currentUser == null) return;
 
-        // Get user stations and add them to grid
         simulationUI.getController().getUserStations(map, scenario).forEach(station ->
                 addStationToGrid(grid, station, map.getWidth(), map.getHeight()));
     }
@@ -215,43 +275,72 @@ public class PlayerMenuController implements Initializable {
     }
 
     private void displayGridInUI(String[][] grid, int height, int width) {
-        // Calculate cell size based on available space
-        double maxWidth = 500.0; // Available width for map
-        double maxHeight = 300.0; // Available height for map
+        double maxWidth = 500.0;
+        double maxHeight = 400.0; // Increased from 300.0 to 400.0
 
         double cellWidth = Math.min(maxWidth / width, 15.0);
         double cellHeight = Math.min(maxHeight / height, 15.0);
+
+        // Clear existing content
+        mapGridPane.getChildren().clear();
+
+        // Set the GridPane alignment and padding
+        mapGridPane.setAlignment(javafx.geometry.Pos.CENTER);
+
+        // Set minimum size for the GridPane to ensure it fills the ScrollPane
+        double totalWidth = cellWidth * width;
+        double totalHeight = cellHeight * height;
+
+        // Make sure the GridPane is at least as large as the ScrollPane content area
+        mapGridPane.setMinWidth(Math.max(totalWidth, 680)); // ScrollPane is 700px wide minus some padding
+        mapGridPane.setMinHeight(Math.max(totalHeight, 480)); // ScrollPane is now 500px high minus some padding
+
+        // Center the GridPane content
+        mapGridPane.setPadding(new javafx.geometry.Insets(10, 10, 10, 10));
 
         for (int y = 1; y <= height; y++) {
             for (int x = 1; x <= width; x++) {
                 Rectangle cell = new Rectangle(cellWidth, cellHeight);
 
-                // Set color based on cell content
                 Color cellColor = getCellColor(grid[y][x]);
                 cell.setFill(cellColor);
                 cell.setStroke(Color.GRAY);
                 cell.setStrokeWidth(0.5);
 
-                // Add tooltip with cell information
-                String cellInfo = getCellInfo(grid[y][x], x, y);
-                if (!cellInfo.isEmpty()) {
-                    // You can add Tooltip here if needed
-                    // Tooltip.install(cell, new Tooltip(cellInfo));
-                }
-
+                // Add the cell to the grid at its relative position
                 mapGridPane.add(cell, x - 1, y - 1);
             }
+        }
+
+        // Alternative approach: Set column and row constraints to center content
+        mapGridPane.getColumnConstraints().clear();
+        mapGridPane.getRowConstraints().clear();
+
+        // Create column constraints
+        for (int i = 0; i < width; i++) {
+            javafx.scene.layout.ColumnConstraints colConstraints = new javafx.scene.layout.ColumnConstraints();
+            colConstraints.setHalignment(javafx.geometry.HPos.CENTER);
+            colConstraints.setPrefWidth(cellWidth);
+            mapGridPane.getColumnConstraints().add(colConstraints);
+        }
+
+        // Create row constraints
+        for (int i = 0; i < height; i++) {
+            javafx.scene.layout.RowConstraints rowConstraints = new javafx.scene.layout.RowConstraints();
+            rowConstraints.setValignment(javafx.geometry.VPos.CENTER);
+            rowConstraints.setPrefHeight(cellHeight);
+            mapGridPane.getRowConstraints().add(rowConstraints);
         }
     }
 
     private Color getCellColor(String cellContent) {
         switch (cellContent) {
-            case "⬛": return Color.DARKGRAY; // Empty space
-            case "🏭": return Color.ORANGE; // Industry
-            case "🌆": return Color.LIGHTBLUE; // City center
-            case "🏠": return Color.LIGHTGREEN; // City blocks
-            case "🚉": return Color.YELLOW; // Station
-            case "🅿️": return Color.LIGHTYELLOW; // Station area
+            case "⬛": return Color.DARKGRAY;
+            case "🏭": return Color.ORANGE;
+            case "🌆": return Color.LIGHTBLUE;
+            case "🏠": return Color.LIGHTGREEN;
+            case "🚉": return Color.YELLOW;
+            case "🅿️": return Color.LIGHTYELLOW;
             default: return Color.DARKGRAY;
         }
     }
@@ -267,7 +356,6 @@ public class PlayerMenuController implements Initializable {
         }
     }
 
-
     @FXML
     private void handleBuildStation() {
         if (simulationUI == null) {
@@ -281,6 +369,8 @@ public class PlayerMenuController implements Initializable {
                     simulationUI.getSelectedScenario(),
                     simulation.getUserBudget()
             ).run();
+            // Request UI update after building station
+            requestUIUpdate();
         });
     }
 
@@ -297,6 +387,7 @@ public class PlayerMenuController implements Initializable {
                     simulationUI.getSelectedScenario(),
                     simulation.getUserBudget()
             ).run();
+            requestUIUpdate();
         });
     }
 
@@ -314,6 +405,7 @@ public class PlayerMenuController implements Initializable {
                     simulationUI.getTimePeriod(),
                     simulation.getUserBudget()
             ).run();
+            requestUIUpdate();
         });
     }
 
@@ -330,13 +422,12 @@ public class PlayerMenuController implements Initializable {
                     simulationUI.getSelectedMap(),
                     simulation.getUserBudget()
             ).run();
+            requestUIUpdate();
         });
     }
 
     @FXML
     private void ListLocomotives() {
-        // ListLocomotiveUI is likely a console operation that returns immediately
-        // so we use pauseForAction instead of navigateAwayFromMenu
         pauseForAction(() -> {
             new ListLocomotiveUI().run();
         });
@@ -361,7 +452,6 @@ public class PlayerMenuController implements Initializable {
             }
 
             ListStationController controller = loader.getController();
-            // Set the scenario and also pass a reference to this PlayerMenuController
             controller.setScenario(simulationUI.getSelectedScenario());
             controller.setPlayerMenuController(this);
 
@@ -389,7 +479,7 @@ public class PlayerMenuController implements Initializable {
         if (simulationUI != null) {
             simulationUI.pauseGame();
             gameRunning = false;
-            wasRunningBeforeNavigation = false; // User manually paused
+            wasRunningBeforeNavigation = false;
             updateButtonStates();
         }
     }
@@ -399,7 +489,7 @@ public class PlayerMenuController implements Initializable {
         if (simulationUI != null) {
             simulationUI.resumeGame();
             gameRunning = true;
-            wasRunningBeforeNavigation = true; // User manually resumed
+            wasRunningBeforeNavigation = true;
             updateButtonStates();
         }
     }
@@ -410,7 +500,11 @@ public class PlayerMenuController implements Initializable {
             simulationUI.stopSimulation();
         }
 
-        // Close current window
+        // Shutdown UI update scheduler
+        if (uiUpdateScheduler != null) {
+            uiUpdateScheduler.shutdownNow();
+        }
+
         Stage stage = (Stage) backBtn.getScene().getWindow();
         new PlayMenuGUI().start(stage);
     }
@@ -419,7 +513,6 @@ public class PlayerMenuController implements Initializable {
         pauseBtn.setVisible(gameRunning);
         resumeBtn.setVisible(!gameRunning);
 
-        // Disable other buttons when game is paused (optional)
         boolean buttonsEnabled = gameRunning;
         buildStationBtn.setDisable(!buttonsEnabled);
         upgradeStationTypeBtn.setDisable(!buttonsEnabled);
@@ -428,36 +521,38 @@ public class PlayerMenuController implements Initializable {
         assignTrainBtn.setDisable(!buttonsEnabled);
     }
 
-    /**
-     * Method to return to this PlayerMenu from other screens
-     * This preserves the simulation state and UI references
-     */
     public void returnToPlayerMenu(Scene scene) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
             Parent root = loader.load();
             PlayerMenuController newController = loader.getController();
 
-            // Transfer all the state to the new controller
-            newController.setSimulationUI(this.simulationUI);
+            // Transfer all state to the new controller
             newController.setSimulation(this.simulation);
+            newController.setSimulationUI(this.simulationUI);
             newController.gameRunning = this.gameRunning;
             newController.wasRunningBeforeNavigation = this.wasRunningBeforeNavigation;
             newController.updateButtonStates();
 
+            // Force immediate UI update when returning
+            newController.forceUIUpdate();
+
             scene.setRoot(root);
+
+            // Shutdown the old controller's scheduler
+            if (uiUpdateScheduler != null) {
+                uiUpdateScheduler.shutdownNow();
+                System.out.println("Old UI Update Scheduler shutdown");
+            }
+
+            System.out.println("Successfully returned to PlayerMenu with state transfer");
         } catch (IOException e) {
             System.err.println("Failed to return to PlayerMenu: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * Enhanced method that pauses the game when navigating away from the menu
-     * and remembers the previous state for when the player returns
-     */
     private void navigateAwayFromMenu(Runnable action) {
-        // Remember if the game was running before navigation
         wasRunningBeforeNavigation = gameRunning;
 
         if (gameRunning && (simulationUI != null)) {
@@ -467,14 +562,12 @@ public class PlayerMenuController implements Initializable {
             System.out.println("[Game paused - navigating away from menu]");
         }
 
-        // Execute the navigation action
         try {
             action.run();
         } catch (Exception e) {
             System.err.println("Error executing navigation action: " + e.getMessage());
             e.printStackTrace();
 
-            // If navigation failed, restore the previous game state
             if (wasRunningBeforeNavigation && (simulationUI != null)) {
                 simulationUI.resumeGame();
                 gameRunning = true;
@@ -487,10 +580,6 @@ public class PlayerMenuController implements Initializable {
         updateButtonStates();
     }
 
-    /**
-     * Utility method to pause the game, execute an action, then resume if it was running
-     * Use this for quick console-based actions that don't involve UI navigation
-     */
     private void pauseForAction(Runnable action) {
         boolean wasRunning = gameRunning;
         if (wasRunning && simulationUI != null) {
@@ -500,7 +589,6 @@ public class PlayerMenuController implements Initializable {
             System.out.println("[Game paused for quick action]");
         }
 
-        // Execute the action
         try {
             action.run();
         } catch (Exception e) {
@@ -508,7 +596,6 @@ public class PlayerMenuController implements Initializable {
             e.printStackTrace();
         }
 
-        // Resume if it was running before
         if (wasRunning && simulationUI != null) {
             simulationUI.resumeGame();
             gameRunning = true;

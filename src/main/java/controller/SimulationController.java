@@ -434,7 +434,6 @@ public class SimulationController {
         sim.setCurrentYear(resetYear);
         timePeriod.set(new AtomicIntegerArray(scenario.getTimeRestrictions()));
 
-        options.clear();
         gameOver.set(true);
         System.out.print("\nGame Over. Please insert 0 to return to menu: ");
     }
