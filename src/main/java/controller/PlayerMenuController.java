@@ -15,6 +15,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import ui.console.SimulationUI;
 import ui.console.*;
+import ui.gui.BuildStationGUI;
 import ui.gui.PlayMenuGUI;
 
 import java.io.IOException;
@@ -364,13 +365,12 @@ public class PlayerMenuController implements Initializable {
         }
 
         navigateAwayFromMenu(() -> {
-            new BuildStationUI(
-                    simulationUI.getSelectedMap(),
-                    simulationUI.getSelectedScenario(),
-                    simulation.getUserBudget()
-            ).run();
-            // Request UI update after building station
-            requestUIUpdate();
+            Stage currentStage = (Stage) buildStationBtn.getScene().getWindow();
+            Map map = simulationUI.getSelectedMap();
+            Scenario scenario = simulationUI.getSelectedScenario();
+            Budget budget = simulation.getUserBudget();
+
+            BuildStationGUI.launch(currentStage, map, scenario, budget);
         });
     }
 

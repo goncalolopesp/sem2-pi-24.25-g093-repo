@@ -52,4 +52,13 @@ public class PointOfRoute {
         return cargoTypes;
     }
 
+    /**
+     * Retrieves the cargo mode for this point in the route.
+     *
+     * @return the cargo mode of type {@code CargoMode}, representing the mode of cargo handling or utilization
+     */
+    public CargoMode getCargoMode() {
+        return cargoMode;
+    }
+
 }
