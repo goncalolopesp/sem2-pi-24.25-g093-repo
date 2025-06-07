@@ -36,7 +36,12 @@ class UpgradeStationTypeControllerTest {
 
         map = new Map("TestMap", 50, 50,1);
         int[] timeRange = {1928, 1938};
-        scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));;
+        scenario = new Scenario("TestScenario", "TestMap",  new int[]{1870, 1880},
+                1,
+                Collections.singletonList("steam"),
+                Collections.singletonList("none"),
+                1.0,
+                1.0);;;
         budget = new Budget(1000, map, scenario, null);
         user = new User("Player", "player@example.com", "pwd", AuthController.ROLE_PLAYER);
         budget.setUser(user);
@@ -48,7 +53,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testSuccessfulUpgrade() {
         Station original = new Station(Type.DEPOT, "Depot-1", "TestMap", "TestScenario",
-                user.getEmail(), 50, 100, 0, 30, 30, null);
+                user.getEmail(), 50, 100, 0, 30, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, null, budget, 150);
@@ -65,9 +70,9 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradeFailsDueToPositionOccupied() {
         Station original = new Station(Type.DEPOT, "Depot-1", "TestMap", "TestScenario",
-                user.getEmail(), 50, 100, 0, 10, 10, null);
+                user.getEmail(), 50, 100, 0, 10, Orientation.NE);
         Station blocking = new Station(Type.STATION, "Blocking", "TestMap", "TestScenario",
-                user.getEmail(), 50, 100, 0, 11, 10, null);
+                user.getEmail(), 50, 100, 0, 11, Orientation.NE);
         stationRepo.addStation(original);
         stationRepo.addStation(blocking);
         map.getStations().add(original);
@@ -84,7 +89,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradeWithDifferentOrientation() {
         Station original = new Station(Type.STATION, "Station-1", "TestMap", "TestScenario",
-                user.getEmail(), 100, 200, 0, 20, 20, Orientation.NE);
+                user.getEmail(), 100, 200, 0, 20, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.STATION, Orientation.SE, budget, 50);
@@ -99,7 +104,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradeToSameType() {
         Station original = new Station(Type.TERMINAL, "Terminal-1", "TestMap", "TestScenario",
-                user.getEmail(), 200, 300, 150, 30, 30, Orientation.NE);
+                user.getEmail(), 200, 300, 150, 30, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, Orientation.SW, budget, 100);
@@ -115,7 +120,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradePreservesCapacity() {
         Station original = new Station(Type.STATION, "Station-2", "TestMap", "TestScenario",
-                user.getEmail(), 100, 500, 250, 25, 25, Orientation.NE);
+                user.getEmail(), 100, 500, 250, 25, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, Orientation.NW, budget, 200);

@@ -9,6 +9,7 @@ import repository.StationRepository;
 import static domain.Station.Orientation.NE;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,7 +29,12 @@ class CreateStationControllerTest {
         stationRepo.removeStationsByMapScenarioAndOwner("", "", "");
 
         map = new Map("Map1", 100, 100,1);
-         scenario = new Scenario("TestScenario", "Map1", new int[]{}, List.of(), List.of());
+         scenario = new Scenario("TestScenario", "Map1",  new int[]{1870, 1880},
+                 1,
+                 Collections.singletonList("steam"),
+                 Collections.singletonList("none"),
+                 1.0,
+                 1.0);;
         controller = new CreateStationController();
         user = new User("Player 1", "player@this.app", "pwd", "ROLE_PLAYER");
         budget = new Budget (1000, map,scenario, user);
@@ -43,7 +49,7 @@ class CreateStationControllerTest {
     @Test
     void testOverbuild() {
         CurrentUser.getInstance().setUser(user);
-        Station existing = new Station(Station.Type.DEPOT, "Ex", "Map1", "S", "player@this.app", 50, 100, 0, 4, 4, null);
+        Station existing = new Station(Station.Type.DEPOT, "Ex", "Map1", "S", "player@this.app", 50, 100, 0, 4, Station.Orientation.NE);
         stationRepo.addStation(existing);
 
         var err = controller.buildStation("DEPOT", map, scenario, 4, 4, null,budget);

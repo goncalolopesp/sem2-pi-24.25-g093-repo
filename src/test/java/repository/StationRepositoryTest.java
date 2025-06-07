@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class StationRepositoryTest {
     private StationRepository repo;
-    Station station1 = new Station(Station.Type.STATION,"Station1", "Map1", "Test","Player1", 1, 1, 1, 5,5, Station.Orientation.NE);
+    Station station1 = new Station(Station.Type.STATION,"Station1", "Map1", "Test","Player1", 1, 1, 1, 5, Station.Orientation.NE);
     @BeforeEach
     void setup(){
         repo = new StationRepository();
@@ -37,10 +37,10 @@ class StationRepositoryTest {
 
     @Test
     void removeStationsByMapAndOwner() {
-        Station station1 = new Station(Station.Type.STATION, "Station1", "Map1", "Test" ,"player1@email.com", 1, 1, 1, 5, 5, Station.Orientation.NE);
-        Station station2 = new Station(Station.Type.STATION, "Station2", "Map1", "Test" ,"player1@email.com", 2, 2, 2, 6, 6, Station.Orientation.NW);
-        Station station3 = new Station(Station.Type.STATION, "Station3", "Map2", "Test2" ,"player1@email.com", 3, 3, 3, 7, 7, Station.Orientation.SE);
-        Station station4 = new Station(Station.Type.STATION, "Station4", "Map1","Test6" ,"player2@email.com", 4, 4, 4, 8, 8, Station.Orientation.SW);
+        Station station1 = new Station(Station.Type.STATION, "Station1", "Map1", "Test" ,"player1@email.com", 1, 1, 1, 5, Station.Orientation.NE);
+        Station station2 = new Station(Station.Type.STATION, "Station2", "Map1", "Test" ,"player1@email.com", 2, 2, 2, 6, Station.Orientation.NW);
+        Station station3 = new Station(Station.Type.STATION, "Station3", "Map2", "Test2" ,"player1@email.com", 3, 3, 3, 7, Station.Orientation.SE);
+        Station station4 = new Station(Station.Type.STATION, "Station4", "Map1","Test6" ,"player2@email.com", 4, 4, 4, 8,  Station.Orientation.SW);
         repo.addStation(station1);
         repo.addStation(station2);
         repo.addStation(station3);
