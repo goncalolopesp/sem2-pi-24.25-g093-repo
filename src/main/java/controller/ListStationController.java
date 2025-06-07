@@ -47,24 +47,45 @@ public class ListStationController {
     /** Current scenario passed from PlayerMenuController */
     private Scenario currentScenario;
 
+    /** Reference to the PlayerMenuController for proper navigation */
+    private PlayerMenuController playerMenuController;
+
     /**
      * Method to receive the scenario from PlayerMenuController
      */
     public void setScenario(Scenario scenario) {
         this.currentScenario = scenario;
+        System.out.println("Scenario set in ListStationController: " +
+                (scenario != null ? scenario.getScenarioName() : "null"));
 
         // Initialize the station list after receiving the scenario
         loadStations();
     }
 
     /**
+     * Set reference to the PlayerMenuController for proper navigation
+     */
+    public void setPlayerMenuController(PlayerMenuController playerMenuController) {
+        this.playerMenuController = playerMenuController;
+        System.out.println("PlayerMenuController reference set in ListStationController");
+    }
+
+    /**
      * Load stations into the ComboBox - called after scenario is set
      */
     private void loadStations() {
+        if (currentScenario == null) {
+            System.err.println("Cannot load stations: currentScenario is null");
+            return;
+        }
+
         // Clear existing items first
         StationList.getItems().clear();
 
-        for (Station station : getStations()){
+        List<Station> userStations = getStations();
+        System.out.println("Loading " + userStations.size() + " stations for user");
+
+        for (Station station : userStations){
             if (station.getOwnerPlayer().equalsIgnoreCase(CurrentUser.getInstance().getUser().getEmail())){
                 StationList.getItems().add(station);
             }
@@ -76,6 +97,11 @@ public class ListStationController {
      * @return List of all stations
      */
     public List<Station> getStations(){
+        if (currentScenario == null) {
+            System.err.println("Cannot get stations: currentScenario is null");
+            return new ArrayList<>();
+        }
+
         return sr.getStations().stream()
                 .filter(s -> s.getScenarioName().equals(currentScenario.getScenarioName()))
                 .collect(Collectors.toList());
@@ -100,13 +126,21 @@ public class ListStationController {
 
     @FXML
     public void ShowStationDescription(){
-
         Station selectedStation = StationList.getSelectionModel().getSelectedItem();
-        String text = "Station: " + selectedStation.getName() + "\n" + "Center:" + selectedStation.getX() + "," + selectedStation.getY() + "\n" + "Type:" + selectedStation.getType();
+
+        if (selectedStation == null) {
+            StationDescription.setText("Please select a station from the list.");
+            return;
+        }
+
+        String text = "Station: " + selectedStation.getName() + "\n" +
+                "Center:" + selectedStation.getX() + "," + selectedStation.getY() + "\n" +
+                "Type:" + selectedStation.getType() + "\n" +
+                "Cargo: " + selectedStation.getCapacityOwned() + "/" + selectedStation.getCapacity();
 
         List<Building> buildings = getBuildingByStation(selectedStation);
         if (!buildings.isEmpty()){
-            text += "========= BUILDINGS =========";
+            text += "\n========= BUILDINGS =========";
             for (Building building : buildings) {
                 text += "\n" + "Buildings: " + building.getBuildingType();
             }
@@ -124,16 +158,18 @@ public class ListStationController {
 
     @FXML
     public void GoBackToPlayerMenu() throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
-        Parent root = loader.load();
+        if (playerMenuController != null) {
+            // Use the reference to properly navigate back
+            Scene currentScene = ListStations.getScene();
+            playerMenuController.returnToPlayerMenu(currentScene);
+        } else {
+            System.err.println("PlayerMenuController reference is null - cannot navigate back properly");
 
-        // Pass the scenario back to PlayerMenuController when going back
-        PlayerMenuController controller = loader.getController();
-        if (currentScenario != null) {
-            controller.setScenario(currentScenario);
+            // Fallback to the old method (but this will lose simulation state)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
+            Parent root = loader.load();
+            Scene currentScene = ListStations.getScene();
+            currentScene.setRoot(root);
         }
-
-        Scene currentScene = ListStations.getScene();
-        currentScene.setRoot(root);
     }
 }

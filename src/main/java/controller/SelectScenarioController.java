@@ -2,9 +2,6 @@ package controller;
 
 import domain.Scenario;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -12,7 +9,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import repository.Repositories;
 import repository.ScenarioRepository;
-import ui.gui.PlayerMenu;
+import ui.console.SimulationUI;
 
 import java.io.IOException;
 import java.util.List;
@@ -86,7 +83,7 @@ public class SelectScenarioController {
     }
 
     @FXML
-    private void handlePlayGame() throws IOException {
+    private void handlePlayGame() throws Exception {
         Scenario selectedScenario = scenarioCOMBOBOX.getValue();
 
         if (selectedScenario == null) {
@@ -99,7 +96,7 @@ public class SelectScenarioController {
 
         Stage currentStage = (Stage) playBUTTON.getScene().getWindow();
 
-        PlayerMenu playerMenu = new PlayerMenu(selectedScenario);
-        playerMenu.start(currentStage);
+        SimulationUI simulationUI = new SimulationUI(selectedScenario);
+        simulationUI.start(currentStage);
     }
 }

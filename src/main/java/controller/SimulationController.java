@@ -306,138 +306,26 @@ public class SimulationController {
         }
     }
 
-    // Map display methods (simplified)
-    public void displayMapData(Map map, Scenario scenario) {
-        String[][] grid = createMapGrid(map);
-        populateMapGrid(grid, map, scenario);
-        printMapGrid(grid, map.getHeight(), map.getWidth());
-    }
-
-    private String[][] createMapGrid(Map map) {
-        String[][] grid = new String[map.getHeight() + 1][map.getWidth() + 1];
-        for (int y = 1; y <= map.getHeight(); y++) {
-            for (int x = 1; x <= map.getWidth(); x++) {
-                grid[y][x] = "⬛";
-            }
-        }
-        return grid;
-    }
-
-    private void populateMapGrid(String[][] grid, Map map, Scenario scenario) {
-        addIndustriesToMap(grid, map);
-        addCitiesToMap(grid, map);
-        addStationsToMap(grid, map, scenario, map.getWidth(), map.getHeight());
-    }
-
-    private void printMapGrid(String[][] grid, int height, int width) {
-        for (int y = 1; y <= height; y++) {
-            for (int x = 1; x <= width; x++) {
-                System.out.print(grid[y][x]);
-            }
-            System.out.println();
-        }
-    }
-
-    private void addIndustriesToMap(String[][] grid, Map map) {
-        getIndustriesForMap(map).forEach(industry ->
-                grid[industry.getLocation().getY()][industry.getLocation().getX()] = "🏭");
-    }
-
-    private List<Industry> getIndustriesForMap(Map map) {
+    public List<Industry> getIndustriesForMap(Map map) {
         return industryRepo.getIndustries().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
     }
 
-    private void addCitiesToMap(String[][] grid, Map map) {
-        getCitiesForMap(map).forEach(city -> {
-            grid[city.getCenterY()][city.getCenterX()] = "🌆";
-            city.getBlocks().forEach(hb -> grid[hb.getY()][hb.getX()] = "🏠");
-        });
-    }
-
-    private List<City> getCitiesForMap(Map map) {
+    public List<City> getCitiesForMap(Map map) {
         return cityRepo.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
     }
 
-    private void addStationsToMap(String[][] grid, Map map, Scenario scenario, int width, int height) {
-        if (currentUser == null) return;
+    public List<Station> getUserStations(Map map, Scenario scenario) {
+        if (currentUser == null) return new ArrayList<>();
 
-        getUserStations(map, scenario).forEach(station ->
-                addStationToGrid(grid, station, width, height));
-    }
-
-    private List<Station> getUserStations(Map map, Scenario scenario) {
         return stationrepo.getStations().stream()
                 .filter(st -> st.getMapName().equals(map.getMapName()) &&
                         st.getOwnerPlayer().equals(currentUser.getEmail()) &&
                         st.getScenarioName().equals(scenario.getScenarioName()))
                 .collect(Collectors.toList());
-    }
-
-    private void addStationToGrid(String[][] grid, Station station, int width, int height) {
-        switch (station.getType()) {
-            case DEPOT:
-                paintStationArea(grid, station, 3, 3, width, height);
-                break;
-            case TERMINAL:
-                paintStationArea(grid, station, 5, 5, width, height);
-                break;
-            case STATION:
-                paintOrientedStation(grid, station, width, height);
-                break;
-            default:
-                if (isValidPosition(station.getX(), station.getY(), width, height)) {
-                    grid[station.getY()][station.getX()] = "🚉";
-                }
-        }
-    }
-
-    private void paintStationArea(String[][] grid, Station station, int w, int h, int maxW, int maxH) {
-        int ox = station.getX() - (w / 2);
-        int oy = station.getY() - (h / 2);
-        paintArea(grid, maxW, maxH, station.getX(), station.getY(), ox, oy, w, h);
-    }
-
-    private void paintOrientedStation(String[][] grid, Station station, int width, int height) {
-        int w = 4, h = 4;
-        int ox = station.getX() - 1;
-        int oy = station.getY() - 1;
-
-        int sdx = 1, sdy = 1;
-        switch (station.getOrientation()) {
-            case NE: sdx = 2; break;
-            case SW: sdy = 2; break;
-            case SE: sdx = 2; sdy = 2; break;
-        }
-
-        for (int dy = 0; dy < h; dy++) {
-            for (int dx = 0; dx < w; dx++) {
-                int gx = ox + dx;
-                int gy = oy + dy;
-                if (isValidPosition(gx, gy, width, height)) {
-                    grid[gy][gx] = (dx == sdx && dy == sdy) ? "🚉" : "🅿️";
-                }
-            }
-        }
-    }
-
-    private boolean isValidPosition(int x, int y, int maxW, int maxH) {
-        return x >= 1 && x <= maxW && y >= 1 && y <= maxH;
-    }
-
-    private void paintArea(String[][] grid, int maxW, int maxH, int cx, int cy, int ox, int oy, int w, int h) {
-        for (int dy = 0; dy < h; dy++) {
-            for (int dx = 0; dx < w; dx++) {
-                int x = ox + dx;
-                int y = oy + dy;
-                if (isValidPosition(x, y, maxW, maxH)) {
-                    grid[y][x] = (x == cx && y == cy) ? "🚉" : "🅿️";
-                }
-            }
-        }
     }
 
     // Time management methods
@@ -562,17 +450,15 @@ public class SimulationController {
         return totalMaintenanceCost;
     }
 
-    public Runnable generateCargo(Map selectedMap, Scenario selectedScenario,
-                                  AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running,
-                                  ScheduledExecutorService generationScheduler) {
-        return () -> {
-            if (running.get() && timePeriod.get().get(0) <= timePeriod.get().get(1)) {
-                addCargoToStation(selectedMap, selectedScenario);
-            }
-            if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
-                generationScheduler.shutdownNow();
-            }
-        };
+    public void generateCargo(Map selectedMap, Scenario selectedScenario,
+                              AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running,
+                              ScheduledExecutorService generationScheduler) {
+        if (running.get() && timePeriod.get().get(0) <= timePeriod.get().get(1)) {
+            addCargoToStation(selectedMap, selectedScenario);
+        }
+        if (timePeriod.get().get(0) > timePeriod.get().get(1)) {
+            generationScheduler.shutdownNow();
+        }
     }
 
     public void addCargoToStation(Map selectedMap, Scenario selectedScenario) {
@@ -581,7 +467,7 @@ public class SimulationController {
         Set<Station> maxCapacityStations = new HashSet<>();
 
         addCityCargo(stations, selectedScenario, maxCapacityStations);
-        addIndustryCargo(stations, selectedScenario, maxCapacityStations);
+        addIndustryCargo(stations, selectedScenario, maxCapacityStations, mapName);
     }
 
     private List<Station> getUserStationsForMap(String mapName, Scenario scenario) {
@@ -618,9 +504,15 @@ public class SimulationController {
         }
     }
 
-    public void addIndustryCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations) {
+    public void addIndustryCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations, String mapName) {
+        // Check if stations list is empty to prevent IndexOutOfBoundsException
+        if (stations.isEmpty()) {
+            System.out.println("No stations available for cargo generation");
+            return;
+        }
+
         List<Industry> mapIndustries = industryRepo.getIndustries().stream()
-                .filter(industry -> industry.getMapName().equals(stations.get(0).getMapName()))
+                .filter(industry -> industry.getMapName().equals(mapName))
                 .collect(Collectors.toList());
 
         for (Industry industry : mapIndustries) {
