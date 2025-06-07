@@ -8,8 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import repository.AuthRepository;
-import repository.Repositories;
+import ui.gui.PlayMenuGUI;
 
 import java.io.IOException;
 
@@ -46,10 +45,8 @@ public class PlayerMenuController {
     }
 
     @FXML
-    public void doLogout(ActionEvent event) {
+    public void doLogout(ActionEvent event) throws Exception {
         Stage stage = (Stage) PlayerMenu.getScene().getWindow();
-        stage.close();
-        AuthRepository ar = Repositories.getInstance().getAuthRepository();
-        ar.doLogout();
+        new PlayMenuGUI().start(stage);
     }
 }

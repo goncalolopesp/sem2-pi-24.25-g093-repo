@@ -1,4 +1,4 @@
-package ui.console.menu;
+package ui.gui;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -8,7 +8,7 @@ import javafx.stage.Stage;
 
 import java.net.URL;
 
-public class UserMenuUI extends Application {
+public class PlayMenuGUI extends Application {
 
     public void launchApp() {
         launch();
@@ -21,9 +21,10 @@ public class UserMenuUI extends Application {
         FXMLLoader loader = new FXMLLoader(fxmlURL);
         Parent root = loader.load();
 
-        stage = new Stage();
+        Scene scene = new Scene(root);
         stage.setTitle("PLAY SIMULATION");
-        stage.setScene(new Scene(root));
+        stage.setScene(scene);
+        stage.centerOnScreen();
         stage.setResizable(false);
         stage.show();
     }

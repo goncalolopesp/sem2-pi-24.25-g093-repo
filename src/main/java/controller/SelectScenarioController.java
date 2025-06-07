@@ -13,10 +13,8 @@ import javafx.stage.Stage;
 import repository.Repositories;
 import repository.ScenarioRepository;
 import ui.gui.PlayerMenu;
-import controller.PlayerMenuController;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 
 public class SelectScenarioController {
@@ -99,19 +97,9 @@ public class SelectScenarioController {
             return;
         }
 
-        // Option 1: Using FXMLLoader directly (Alternative approach)
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/PlayerMenu.fxml"));
-        Parent root = loader.load();
-        PlayerMenuController controller = loader.getController();
-        controller.setScenario(selectedScenario);
-
         Stage currentStage = (Stage) playBUTTON.getScene().getWindow();
-        Scene scene = new Scene(root);
-        currentStage.setScene(scene);
-        currentStage.setTitle("Player Menu");
 
-        // Option 2: Using PlayerMenu class (if you prefer the Application approach)
-        // PlayerMenu playerMenu = new PlayerMenu(selectedScenario);
-        // playerMenu.startWithScenario(selectedScenario, currentStage);
+        PlayerMenu playerMenu = new PlayerMenu(selectedScenario);
+        playerMenu.start(currentStage);
     }
 }

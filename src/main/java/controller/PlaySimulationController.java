@@ -1,14 +1,11 @@
 package controller;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
+import ui.gui.SelectScenarioGUI;
 
 import java.io.IOException;
-import java.net.URL;
 
 public class PlaySimulationController {
 
@@ -20,20 +17,10 @@ public class PlaySimulationController {
 
     @FXML
     private void handlePlayGame() throws IOException {
-        URL fxmlURL = getClass().getResource("/javafx/selectScenario.fxml");
-        System.out.println("FXML URL: " + fxmlURL);
-
-        FXMLLoader loader = new FXMLLoader(fxmlURL);
-        Parent root = loader.load();
-
-        Stage stage = new Stage();
-        stage.setTitle("SELECT SCENARIO");
-        stage.setScene(new Scene(root));
-        stage.setResizable(false);
-        stage.show();
-
         Stage currentStage = (Stage) playBUTTON.getScene().getWindow();
-        currentStage.close();
+
+        SelectScenarioGUI selectScenarioGUI = new SelectScenarioGUI();
+        selectScenarioGUI.start(currentStage);
     }
 
     @FXML
