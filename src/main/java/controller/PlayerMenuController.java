@@ -17,6 +17,7 @@ import ui.console.SimulationUI;
 import ui.console.*;
 import ui.gui.BuildStationGUI;
 import ui.gui.PlayMenuGUI;
+import ui.gui.UpgradeStationGUI;
 import ui.gui.UpgradeStationTypeGUI;
 
 import java.io.IOException;
@@ -403,12 +404,17 @@ public class PlayerMenuController implements Initializable {
         }
 
         navigateAwayFromMenu(() -> {
-            new UpgradeStationUI(
+            Stage currentStage = (Stage) upgradeStationBuildingBtn.getScene().getWindow();
+
+            UpgradeStationGUI launcher = new UpgradeStationGUI(
                     simulationUI.getSelectedMap(),
                     simulationUI.getSelectedScenario(),
                     simulationUI.getTimePeriod(),
-                    simulation.getUserBudget()
-            ).run();
+                    simulationUI.getSimulation().getUserBudget()
+            );
+
+            launcher.show(currentStage);
+
             requestUIUpdate();
         });
     }

@@ -28,7 +28,6 @@ public class SimulationFile {
 
     public boolean load(File file, SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo) {
         if (!file.exists()) {
-            System.out.println("No save file found - starting fresh");
             return true;
         }
 
@@ -36,7 +35,6 @@ public class SimulationFile {
             SimulationRepository loadedRepo = (SimulationRepository) in.readObject();
             StationRepository loadedRepo2 = (StationRepository) in.readObject();
             BuildingRepository loadedRepo3 = (BuildingRepository) in.readObject();
-            System.out.println("File loaded successfully");
 
             // Instead of setting on singleton, copy data to the target repo
             // You'll need to add a method to copy simulations
@@ -73,7 +71,6 @@ public class SimulationFile {
             } finally {
                 out.close();
             }
-            System.out.println("File saved successfully");
             return true;
         } catch (IOException e) {
             System.out.println("Error saving file: " + e.getMessage());
