@@ -197,4 +197,9 @@ public class Locomotive implements Serializable {
      * @param available The new availability status
      */
     public void setAvailability(boolean available) { this.available = available; }
+
+    @Override
+    public String toString() {
+        return modelName;
+    }
 }

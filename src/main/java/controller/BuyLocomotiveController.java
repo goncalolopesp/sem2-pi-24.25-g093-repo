@@ -3,11 +3,24 @@ package controller;
 import domain.Budget;
 import domain.CurrentUser;
 import domain.Locomotive;
+import domain.Map;
 import domain.Scenario;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import repository.BudgetRepository;
 import repository.LocomotiveRepository;
 import repository.Repositories;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -23,6 +36,29 @@ public class BuyLocomotiveController {
 
     /** Repository for budget management */
     private final BudgetRepository budgetRepository;
+
+    private PlayerMenuController playerMenuController;
+
+    private Scenario currentScenario;
+
+    private Budget playerBudget;
+
+    private Stage currentStage;
+
+    @FXML
+    private ComboBox<Locomotive> locomotiveList_cmb;
+
+    @FXML
+    private TextArea locomotiveDetails_TxtA;
+
+    @FXML
+    private AnchorPane BuyLocomotive;
+
+    @FXML
+    public Label budgetLabel;
+
+    @FXML
+    public TextArea infoLocomotive;
 
     /**
      * Constructor initializes repositories from the singleton repositories instance
@@ -69,14 +105,6 @@ public class BuyLocomotiveController {
     }
 
     /**
-     * Gets all locomotives owned by the current player
-     * @return List of locomotives owned by the player
-     */
-    public List<Locomotive> getPlayerLocomotives() {
-        return session.getUser().getLocomotives();
-    }
-
-    /**
      * Checks if a locomotive can be purchased in the given scenario
      * @param modelName The model name of the locomotive to check
      * @param scenario The scenario to check against
@@ -95,19 +123,11 @@ public class BuyLocomotiveController {
      * Purchases a locomotive for the current player if available and affordable
      * @param modelName The model name of the locomotive to buy
      * @param scenario The current game scenario
-     * @param map The current game map
      * @return true if purchase was successful, false otherwise
      */
-    public boolean buyLocomotive(String modelName, Scenario scenario, domain.Map map) {
+    public boolean buyLocomotive(String modelName, Scenario scenario) {
         if (canBuyLocomotive(modelName, scenario)) {
-            Optional<Budget> budgetOpt = budgetRepository.getUserBudgetFromScenarioInMap(scenario, map, session.getUser());
-
-            if (budgetOpt.isPresent()) {
-                return locomotiveRepository.buyLocomotive(modelName, budgetOpt.get());
-            } else {
-                System.out.println("Error: No budget found for current user/scenario/map combination");
-                return false;
-            }
+            return locomotiveRepository.buyLocomotive(modelName, playerBudget);
         }
         return false;
     }
@@ -118,4 +138,104 @@ public class BuyLocomotiveController {
         }
         return false;
     }
+
+    @FXML
+    public void buySelectedLocomotive(ActionEvent event) {
+        Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
+        if (canBuyLocomotive(selectedLocomotive.getModelName(), currentScenario)) {
+            buyLocomotive(selectedLocomotive.getModelName(), currentScenario);
+            if (currentStage != null) {
+                currentStage.close();
+            }
+        }else{
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Not Enough Budget");
+            alert.show();
+        }
+    }
+
+    @FXML
+    public void returnToMenu(ActionEvent event) throws IOException {
+        if (currentStage != null) {
+            currentStage.close();
+        }
+    }
+
+    public void addLocomotivesToComboBox(){
+        // Add null check as safety measure
+        if (currentScenario == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Scenario is null");
+            alert.show();
+            return;
+        }
+
+        // Clear existing items first
+        locomotiveList_cmb.getItems().clear();
+
+        for (Locomotive locomotive : getLocomotives(currentScenario)){
+            locomotiveList_cmb.getItems().add(locomotive);
+        }
+    }
+
+    public void addOwnedLocomotivesToComboBox(){
+        // Add null check as safety measure
+        if (currentScenario == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Scenario is null");
+            alert.show();
+            return;
+        }
+
+        // Clear existing items first
+        locomotiveList_cmb.getItems().clear();
+
+        for (Locomotive locomotive : session.getUser().getLocomotives()){
+            if (locomotiveRepository.getLocomotives().contains(locomotive)){
+                locomotiveList_cmb.getItems().add(locomotive);
+            }
+        }
+    }
+
+    @FXML
+    public void listLocomotiveDetails(ActionEvent event) {
+        Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
+        String txt = "Name: " + selectedLocomotive.getModelName() + "\n" +
+                    "topSpeed: " + selectedLocomotive.getTopSpeed() + "\n" +
+                    "Type: " + selectedLocomotive.getType() + "\n" +
+                    "Maintenance Cost: " + selectedLocomotive.getMaintenanceCost() + "\n" +
+                    "Fuel Cost: " + selectedLocomotive.getFuelCost() + "\n" +
+                    "Price: " + selectedLocomotive.getPrice() + "\n";
+        locomotiveDetails_TxtA.setText(txt);
+    }
+
+    public void initData(Scenario scenario, Budget budget, Stage stage, int app) {
+        this.currentScenario = scenario;
+        this.playerBudget = budget;
+        this.currentStage = stage;
+
+        if (app == 1) {
+            updateBudgetLabel();
+            // Now that we have the scenario, we can safely load the locomotives
+            addLocomotivesToComboBox();
+        }else{
+            addOwnedLocomotivesToComboBox();
+        }
+    }
+
+    private void updateBudgetLabel() {
+        if (playerBudget != null) {
+            budgetLabel.setText("Current Budget: $" + playerBudget.getBudget());
+        }
+    }
+
+    @FXML
+    public void LocomotiveList_IndexChanged(){
+        Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
+        String txt = "Name: " + selectedLocomotive.getModelName() + "\n" +
+                "topSpeed: " + selectedLocomotive.getTopSpeed() + "\n" +
+                "Type: " + selectedLocomotive.getType() + "\n" +
+                "Maintenance Cost: " + selectedLocomotive.getMaintenanceCost() + "\n" +
+                "Fuel Cost: " + selectedLocomotive.getFuelCost() + "\n" +
+                "Price: " + selectedLocomotive.getPrice() + "\n";
+        infoLocomotive.setText(txt);
+    }
+
 }
