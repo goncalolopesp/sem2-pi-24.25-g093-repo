@@ -23,8 +23,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
- * JavaFX Controller for the Upgrade Station UI.
- * Replaces the console-based UpgradeStationUI with a graphical interface.
+ * The UpgradeStationFXController class is responsible for managing the user interface and
+ * functionalities related to upgrading user-owned stations in the application. This includes
+ * displaying stations, managing available upgrades, handling budget updates, and processing
+ * user interactions to apply upgrades.
+ *
+ * The controller works in conjunction with JavaFX UI components, synchronizing data and
+ * operations to ensure a smooth user experience. It also interacts with data models such as
+ * the map, scenario, budget, and time period to provide accurate and contextual upgrade options.
+ *
+ * Responsibilities:
+ * - Displaying a list of user-owned stations and their details.
+ * - Calculating and displaying available building upgrades.
+ * - Checking budget availability and updating the budget post-upgrade.
+ * - Managing user interactions with the upgrade process.
+ * - Handling errors and providing feedback messages to the user.
  */
 public class UpgradeStationFXController implements Initializable {
 
@@ -65,6 +78,15 @@ public class UpgradeStationFXController implements Initializable {
     // Data storage
     private List<Station> ownedStations;
 
+    /**
+     * Constructs an instance of UpgradeStationFXController to manage and display
+     * upgrade-related functionalities for user-owned stations in the application.
+     *
+     * @param selectedMap the map where the stations are located
+     * @param selectedScenario the scenario currently in use
+     * @param timePeriod an atomic reference tracking time period data
+     * @param budget the budget available for upgrades
+     */
     public UpgradeStationFXController(Map selectedMap, Scenario selectedScenario,
                                       AtomicReference<AtomicIntegerArray> timePeriod, Budget budget) {
         this.selectedMap = selectedMap;
@@ -75,6 +97,13 @@ public class UpgradeStationFXController implements Initializable {
         initializeBuildingData();
     }
 
+    /**
+     * Initializes the controller by setting up the UI components, loading user-owned stations,
+     * and updating the budget display.
+     *
+     * @param location The location used to resolve relative paths for the root object, or null if it is not specified.
+     * @param resources The resources used to localize the root object, or null if no resources are specified.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupUI();
@@ -83,7 +112,15 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Initialize building cost and capacity data
+     * Initializes building-related data, including costs, capacities, and display-to-internal
+     * mappings for various building types utilized in the application. This setup is used to
+     * manage and display information about upgrades and available buildings.
+     *
+     * The method performs the following key functions:
+     * 1. Populates the buildingCosts map with the cost of each building type.
+     * 2. Assigns capacities to each building type and populates the buildingCapacities map.
+     * 3. Maps user-friendly display names to internal identifiers for building types
+     *    and populates the displayToInternal map.
      */
     private void initializeBuildingData() {
         // Building costs
@@ -124,7 +161,14 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Setup UI components
+     * Configures the user interface components for the UpgradeStationFXController.
+     *
+     * This method performs the following actions:
+     * 1. Configures the station list view to allow single selection only.
+     * 2. Initially hides the UI elements related to station upgrade options,
+     *    including the selected station box and upgrade options box.
+     * 3. Disables the upgrade button.
+     * 4. Clears any initial messages displayed in the message label.
      */
     private void setupUI() {
         // Configure ListView
@@ -140,7 +184,20 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Load user's stations from repository
+     * Loads and filters the stations owned by the current user for the selected map and scenario,
+     * and updates the station list view with user-owned stations.
+     *
+     * The method performs the following steps:
+     * 1. Retrieves the station repository from the singleton instance of Repositories.
+     * 2. Filters the stations based on the following criteria:
+     *    - Owned by the current user (matching the user's email address).
+     *    - Belonging to the currently selected scenario.
+     *    - Located on the currently selected map.
+     * 3. Collects the filtered stations into the `ownedStations` list.
+     * 4. If no stations are found, sets an appropriate message in the message label
+     *    and exits the method.
+     * 5. Creates a formatted display name for each station in the filtered list
+     *    and populates the station list view with these names.
      */
     private void loadStations() {
         StationRepository repo = Repositories.getInstance().getStationRepository();
@@ -166,7 +223,17 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Update budget display
+     * Updates the budget display in the user interface with the current budget value.
+     *
+     * This method ensures that the budget label is updated on the JavaFX Application Thread
+     * by using the Platform.runLater method. The updated text is formatted as
+     * "Current Budget: $\<budget_amount\>" with a comma as the thousand separator.
+     *
+     * Responsibilities:
+     * - Accesses the budget object to retrieve the current budget value.
+     * - Uses the budget value to format the text for the budgetLabel UI component.
+     * - Ensures that updates to the UI are performed on the JavaFX Application Thread
+     *   to avoid thread conflicts.
      */
     private void updateBudgetDisplay() {
         Platform.runLater(() -> {
@@ -175,7 +242,11 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Handle station selection from ListView
+     * Handles the event triggered when a station is selected from the station list view.
+     * Updates the selected station information, displays details of the selected station,
+     * and loads available upgrade options for it.
+     *
+     * @param event the MouseEvent triggered by the user's interaction with the station list view.
      */
     @FXML
     private void onStationSelected(MouseEvent event) {
@@ -188,7 +259,19 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Show selected station information
+     * Displays detailed information about the currently selected station
+     * in the user interface. If a station is selected, its name, location,
+     * and type are formatted into a string and shown in the UI component
+     * designated for station details. Additionally, the visibility of the
+     * selected station box is updated to make the details visible.
+     *
+     * Functionality includes:
+     * - Retrieving the name, coordinates, and type of the selected station.
+     * - Formatting the station details into a readable string.
+     * - Updating the corresponding label to display the formatted details.
+     * - Ensuring the selected station details box is visible.
+     *
+     * If no station is selected, the method performs no action.
      */
     private void showSelectedStation() {
         if (selectedStation != null) {
@@ -205,8 +288,10 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Load available upgrade options for selected station
-     */
+     * Loads and configures the available upgrade options for the currently selected station.
+     *
+     * This method filters the possible upgrade options based on several conditions and
+     * populates the UI components for upgrade*/
     private void loadUpgradeOptions() {
         if (selectedStation == null) return;
 
@@ -244,7 +329,16 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Handle upgrade option selection
+     * Handles the event triggered when the selected upgrade option changes in the UI.
+     *
+     * This method performs the following actions:
+     * 1. Retrieves the user-selected upgrade option from the `upgradeOptionComboBox`.
+     * 2. Maps the selected display-friendly upgrade option to its internal identifier
+     *    using the `displayToInternal` map and sets the `selectedBuildingType`.
+     * 3. Updates the cost and capacity labels in the UI by calling `updateCostAndCapacity()`.
+     * 4. Enables the upgrade button if an upgrade option is selected; otherwise, disables it.
+     *
+     * If no valid upgrade option is selected, ensures that the upgrade button is disabled.
      */
     @FXML
     private void onUpgradeOptionChanged() {
@@ -259,7 +353,23 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Update cost and capacity labels
+     * Updates the UI components with the cost and capacity of the selected building type
+     * and modifies the state of the upgrade button based on the user's budget.
+     *
+     * Functionality:
+     * - Retrieves the cost and capacity of the `selectedBuildingType` from the `buildingCosts`
+     *   and `buildingCapacities` maps, respectively.
+     * - Updates the `costLabel` and `capacityLabel` in the UI to display the cost
+     *   and capacity values.
+     * - Compares the user's current budget with the cost of the selected building type
+     *   to determine whether the upgrade is affordable:
+     *   - If the budget is insufficient, changes the style of `costLabel` to indicate
+     *     an error and displays a message in the `messageLabel`.
+     *   - If the budget is sufficient, reverts `costLabel` to a valid state, removes
+     *     any error messages, and enables the `upgradeButton`.
+     *
+     * Behavior is conditional on the presence of a valid `selectedBuildingType`.
+     * If no type is selected, the method takes no action.
      */
     private void updateCostAndCapacity() {
         if (selectedBuildingType != null) {
@@ -283,7 +393,31 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Handle upgrade station button click
+     * Handles the process of upgrading a station by validating user selections,
+     * checking the budget, and applying the upgrade if all conditions are met.
+     *
+     * This method performs the following steps:
+     * 1. Validates the selected station and building type to ensure they are not null.
+     * 2. Checks whether the current budget is sufficient for the upgrade cost.
+     * 3. Retrieves the list of existing buildings for the selected station.
+     * 4. Invokes the upgrade operation on the selected station and building type.
+     * 5. Updates the budget, applies mutual exclusivity rules for buildings, and refreshes
+     *    the user interface components if the upgrade succeeds.
+     * 6. Displays appropriate messages to the user based on the success or failure of the upgrade operation.
+     *
+     * Preconditions:
+     * - The `selectedStation` and `selectedBuildingType` must have valid values.
+     * - The `budget` and `buildingCosts` must be properly initialized and synchronized with the UI.
+     *
+     * Postconditions:
+     * - Budget is decremented by the upgrade cost if the upgrade is successful.
+     * - The display of the budget, upgrade options, and related UI components is refreshed.
+     * - Selection for upgrade options is reset after the operation completes.
+     *
+     * Error Handling:
+     * - If no station or building type is selected, an error message is displayed.
+     * - If insufficient funds are available for the upgrade, an error message is displayed.
+     * - If the upgrade operation fails, an appropriate error message is shown, and no state changes are applied.
      */
     @FXML
     private void handleUpgradeStation() {
@@ -328,7 +462,9 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Handle cancel button click
+     * Handles the action for the cancel button.
+     * This method is triggered when the cancel button is clicked.
+     * It retrieves the current stage from the button's scene and closes it.
      */
     @FXML
     private void handleCancel() {
@@ -337,7 +473,10 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Show message to user
+     * Displays a message on the message label with a specific style based on the message type.
+     *
+     * @param message   the text to display in the message label
+     * @param isError   specifies whether the message is an error message (true) or not (false)
      */
     private void showMessage(String message, boolean isError) {
         messageLabel.setText(message);
@@ -349,56 +488,35 @@ public class UpgradeStationFXController implements Initializable {
     }
 
     /**
-     * Check mutual exclusivity for display purposes
+     * Checks for mutual exclusivity between a new building type and a list of existing buildings.
+     * Ensures no duplicate building types exist and handles conflicts for specific building categories.
+     *
+     * @param existingBuildings a list of existing buildings to check against
+     * @param newType           the type of the new building to verify
      */
-    private boolean checkMutualExclusivityForDisplay(String newType) {
-        List<Building> existingBuildings = ctrl.getBuildings();
-        String newLower = newType.toLowerCase().trim();
-
-        for (Building building : existingBuildings) {
-            if (!building.getStation().equals(selectedStation)) {
-                continue;
-            }
-
-            String existing = building.getBuildingType().toLowerCase().trim();
-
-            if (existing.equals(newLower)) {
-                return false;
-            }
-
-            if ((existing.contains("hotel") && newLower.contains("hotel")) ||
-                    (existing.contains("cafe") && newLower.contains("cafe"))) {
-                return false; // Would conflict
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Check mutual exclusivity and handle removal (same as console version)
-     */
-    private boolean checkMutualExclusivity(List<Building> existingBuildings, String newType) {
+    private void checkMutualExclusivity(List<Building> existingBuildings, String newType) {
         String newLower = newType.toLowerCase().trim();
 
         for (Building building : existingBuildings) {
             String existing = building.getBuildingType().toLowerCase().trim();
 
             if (existing.equals(newLower)) {
-                return false;
+                return;
             }
 
             if ((existing.contains("hotel") && newLower.contains("hotel")) ||
                     (existing.contains("cafe") && newLower.contains("cafe"))) {
 
                 ctrl.getBuildingRepository().remove(building.getStation(), building.getBuildingType());
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     /**
-     * Get the controller (for external access)
+     * Retrieves the UpgradeStationController instance.
+     *
+     * @return the instance of UpgradeStationController
      */
     public UpgradeStationController getUpgradeStationController() {
         return ctrl;

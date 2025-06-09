@@ -13,14 +13,25 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Launcher class for the Upgrade Station JavaFX window.
- * This replaces the console-based UpgradeStationUI.
+ * This class provides a graphical user interface for the upgrade station functionality,
+ * replacing the console-based implementation.
  */
+
 public class UpgradeStationGUI {
 
     private final Map selectedMap;
     private final Scenario selectedScenario;
     private final AtomicReference<AtomicIntegerArray> timePeriod;
     private final Budget budget;
+
+    /**
+     * Constructs a new UpgradeStationGUI instance.
+     *
+     * @param selectedMap The map currently selected in the application
+     * @param selectedScenario The scenario currently selected in the application
+     * @param timePeriod The atomic reference to the time period array
+     * @param budget The budget object containing financial constraints
+     */
 
     public UpgradeStationGUI(Map selectedMap, Scenario selectedScenario,
                                   AtomicReference<AtomicIntegerArray> timePeriod, Budget budget) {
@@ -31,15 +42,23 @@ public class UpgradeStationGUI {
     }
 
     /**
-     * Show the upgrade station window as a modal dialog
+     * Shows the upgrade station window as a non-modal dialog.
+     * This method displays the window centered on the screen.
      */
+
     public void show() {
         show(null);
     }
 
     /**
-     * Show the upgrade station window as a modal dialog with specified parent
+     * Shows the upgrade station window as a modal dialog.
+     * If a parent stage is provided, the window will be displayed centered relative to the parent window.
+     * If the JavaFX interface fails to load, it falls back to the console-based interface.
+     *
+     * @param parentStage The parent stage to which this window should be modal.
+     *                    If null, the window will be non-modal and centered on screen.
      */
+
     public void show(Stage parentStage) {
         try {
             // Create the controller with required dependencies
