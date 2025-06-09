@@ -220,7 +220,7 @@ public class SimulationUI {
                     long previousBudget = sim.getUserBudget().getBudget();
 
                     // Call executeRoutes and execute the returned runnable
-                    Runnable routeRunner = ctrl.executeRoutes(selectedMap, selectedScenario, sim.getUserBudget(), running);
+                    Runnable routeRunner = ctrl.executeRoutes(selectedMap, selectedScenario, sim.getUserBudget(), running, sim.getCurrentYear());
 
                     if (routeRunner != null) {
                         routeRunner.run();

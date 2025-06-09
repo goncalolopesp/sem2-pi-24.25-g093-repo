@@ -13,7 +13,6 @@ import domain.Map;
 import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -25,7 +24,7 @@ public class SimulationController {
     private static final int COAL_VALUE = 4;
     private static final int IRON_VALUE = 6;
     private static final int STEEL_VALUE = 10;
-    private static final int KMS_FUEL = 200;
+    private static final int KMS_FUEL = 100;
     private static final int AMOUNT_PER_LINE = 5;
 
     private static int yearlyEarnings = 0;
@@ -33,6 +32,8 @@ public class SimulationController {
     private static int yearlyFuelCost = 0;
     private static int yearlyTrackMaintenanceCost = 0;
     private static int yearlyTotalCost = 0;
+
+    private final java.util.Map<String, TrainJourney> activeJourneys = new HashMap<>();
 
     private final User currentUser = CurrentUser.getInstance().getUser();
     private final SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
@@ -45,24 +46,350 @@ public class SimulationController {
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
     private final RailwayLineRepository railwayRepo = Repositories.getInstance().getRailwayLineRepository();
 
-    public Runnable executeRoutes(Map selectedMap, Scenario selectedScenario, Budget budget, AtomicBoolean running) {
-        return () -> {
-            if (running.get() && currentUser != null) {
-                List<Route> userRoutes = getUserRoutes(selectedMap, selectedScenario);
-                userRoutes.forEach(route -> executeRoute(route, selectedScenario, budget,selectedMap));
+    private static class TrainJourney {
+        private final Route route;
+        private final int departureYear;
+        private final int estimatedArrivalYear;
+        private boolean completed;
+
+        public TrainJourney(Route route, int currentSimulationYear) {
+            this.route = route;
+            this.departureYear = currentSimulationYear;
+            this.completed = false;
+            this.estimatedArrivalYear = calculateEstimatedArrivalYear(currentSimulationYear);
+        }
+
+        private int calculateEstimatedArrivalYear(int currentYear) {
+            if (route.getPoints().size() < 2 || route.getTrain() == null || route.getTrain().getLocomotive() == null) {
+                return currentYear;
             }
+
+            double totalDistance = 0.0;
+            Locomotive locomotive = route.getTrain().getLocomotive();
+
+            // Calculate total route distance
+            for (int i = 0; i < route.getPoints().size() - 1; i++) {
+                Station currentStation = route.getPoints().get(i).getStation();
+                Station nextStation = route.getPoints().get(i + 1).getStation();
+
+                RailwayLine railwayLine = findRailwayLineBetweenStations(currentStation, nextStation, currentStation.getOwnerPlayer());
+                if (railwayLine != null) {
+                    totalDistance += railwayLine.getDistance();
+                }
+            }
+
+            // Calculate travel time considering locomotive speed and carriage degradation
+            double baseSpeed = locomotive.getTopSpeed();
+            double speedDegradation = calculateSpeedDegradation();
+            double effectiveSpeed = baseSpeed * (1 - speedDegradation);
+
+            // Convert distance to time - assuming very long distances take multiple years
+            // You can adjust this formula based on your game's time scale
+            double travelTimeYears = totalDistance / Math.max(effectiveSpeed * 100, 50); // Arbitrary scale factor
+
+            // Minimum 1 year travel time, round up to nearest year
+            int yearsToTravel = Math.max(1, (int) Math.ceil(travelTimeYears));
+
+            return currentYear + yearsToTravel;
+        }
+
+        private double calculateSpeedDegradation() {
+            if (route.getTrain() == null || route.getTrain().getCarriages() == null) {
+                return 0.0;
+            }
+
+            List<Carriage> carriages = route.getTrain().getCarriages();
+            if (carriages.isEmpty()) {
+                return 0.0;
+            }
+
+            // Each carriage degrades 5% of locomotive's speed up to maximum of 30%
+            double totalDegradation = carriages.size() * 0.05; // 5% per carriage
+            return Math.min(totalDegradation, 0.30); // Maximum 30% degradation
+        }
+
+        private RailwayLine findRailwayLineBetweenStations(Station station1, Station station2, String owner) {
+            return Repositories.getInstance().getRailwayLineRepository()
+                    .getRailwayLines()
+                    .stream()
+                    .filter(line -> line.getOwnerMail().equals(owner))
+                    .filter(line ->
+                            (line.getFromStation().equals(station1) && line.getToStation().equals(station2)) ||
+                                    (line.getFromStation().equals(station2) && line.getToStation().equals(station1))
+                    )
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        // Getters
+        public Route getRoute() { return route; }
+        public int getDepartureYear() { return departureYear; }
+        public int getEstimatedArrivalYear() { return estimatedArrivalYear; }
+        public boolean isCompleted() { return completed; }
+        public void setCompleted(boolean completed) { this.completed = completed; }
+    }
+
+    public class DemandManager {
+        // Demand constants
+        private static final int MIN_DEMAND = 1;
+        private static final int MAX_DEMAND = 9;
+        private static final int DEFAULT_DEMAND = 4;
+
+        // Thresholds for demand adjustment
+        private static final int LOW_DELIVERY_THRESHOLD = 10;  // If less than this delivered, demand increases
+        private static final int HIGH_DELIVERY_THRESHOLD = 50; // If more than this delivered, demand decreases
+
+        // Current demand values
+        private int peopleDemand = DEFAULT_DEMAND;
+        private int mailDemand = DEFAULT_DEMAND;
+        private int coalDemand = DEFAULT_DEMAND;
+        private int ironDemand = DEFAULT_DEMAND;
+        private int steelDemand = DEFAULT_DEMAND;
+
+        // Track deliveries for demand calculation
+        private int yearlyPeopleDelivered = 0;
+        private int yearlyMailDelivered = 0;
+        private int yearlyCoalDelivered = 0;
+        private int yearlyIronDelivered = 0;
+        private int yearlySteelDelivered = 0;
+
+        // Getters for demand values
+        public int getPeopleDemand() { return peopleDemand; }
+        public int getMailDemand() { return mailDemand; }
+        public int getCoalDemand() { return coalDemand; }
+        public int getIronDemand() { return ironDemand; }
+        public int getSteelDemand() { return steelDemand; }
+
+        // Track deliveries throughout the year
+        public void recordDelivery(Carriage.Type cargoType, int amount) {
+            switch (cargoType) {
+                case PEOPLE:
+                    yearlyPeopleDelivered += amount;
+                    break;
+                case MAIL:
+                    yearlyMailDelivered += amount;
+                    break;
+                case COAL:
+                    yearlyCoalDelivered += amount;
+                    break;
+                case IRON:
+                    yearlyIronDelivered += amount;
+                    break;
+                case STEEL:
+                    yearlySteelDelivered += amount;
+                    break;
+            }
+        }
+
+        // Update demand based on yearly deliveries
+        public void updateYearlyDemand(Scenario scenario) {
+            // Update each cargo type's demand based on deliveries
+            peopleDemand = calculateNewDemand(peopleDemand, yearlyPeopleDelivered);
+            mailDemand = calculateNewDemand(mailDemand, yearlyMailDelivered);
+            coalDemand = calculateNewDemand(coalDemand, yearlyCoalDelivered);
+            ironDemand = calculateNewDemand(ironDemand, yearlyIronDelivered);
+            steelDemand = calculateNewDemand(steelDemand, yearlySteelDelivered);
+
+            // Apply scenario-specific modifications
+            applyScenarioModifications(scenario);
+
+            // Reset yearly counters
+            resetYearlyDeliveries();
+
+            // Display updated demand
+            displayDemandUpdate();
+        }
+
+        private int calculateNewDemand(int currentDemand, int yearlyDelivered) {
+            int newDemand = currentDemand;
+
+            if (yearlyDelivered < LOW_DELIVERY_THRESHOLD) {
+                // Low deliveries increase demand
+                newDemand += 1;
+            } else if (yearlyDelivered > HIGH_DELIVERY_THRESHOLD) {
+                // High deliveries decrease demand
+                newDemand -= 1;
+            }
+            // If deliveries are between thresholds, demand stays the same
+
+            // Apply some randomness (±1)
+            Random random = new Random();
+            newDemand += random.nextInt(3) - 1; // -1, 0, or +1
+
+            // Ensure demand stays within bounds
+            return Math.max(MIN_DEMAND, Math.min(MAX_DEMAND, newDemand));
+        }
+
+        private void applyScenarioModifications(Scenario scenario) {
+            // Apply scenario-specific demand modifications
+            if (hasHistoricalRestriction(scenario, "industrial revolution")) {
+                coalDemand = Math.min(MAX_DEMAND, coalDemand + 2);
+                ironDemand = Math.min(MAX_DEMAND, ironDemand + 2);
+                steelDemand = Math.min(MAX_DEMAND, steelDemand + 3);
+            }
+
+            if (hasHistoricalRestriction(scenario, "vaccination campaign")) {
+                peopleDemand = Math.min(MAX_DEMAND, peopleDemand + 1);
+            }
+
+            // Add more scenario-specific modifications as needed
+            if (hasHistoricalRestriction(scenario, "economic depression")) {
+                // During economic depression, all demands might decrease
+                peopleDemand = Math.max(MIN_DEMAND, peopleDemand - 1);
+                mailDemand = Math.max(MIN_DEMAND, mailDemand - 1);
+            }
+
+            if (hasHistoricalRestriction(scenario, "war time")) {
+                // During war, steel and iron demand increases, people movement decreases
+                steelDemand = Math.min(MAX_DEMAND, steelDemand + 2);
+                ironDemand = Math.min(MAX_DEMAND, ironDemand + 1);
+                peopleDemand = Math.max(MIN_DEMAND, peopleDemand - 1);
+            }
+        }
+
+        private boolean hasHistoricalRestriction(Scenario scenario, String restriction) {
+            return scenario.getHistoricalRestrictions().stream()
+                    .anyMatch(r -> r.equalsIgnoreCase(restriction));
+        }
+
+        private void resetYearlyDeliveries() {
+            yearlyPeopleDelivered = 0;
+            yearlyMailDelivered = 0;
+            yearlyCoalDelivered = 0;
+            yearlyIronDelivered = 0;
+            yearlySteelDelivered = 0;
+        }
+
+        private void displayDemandUpdate() {
+            System.out.println("\n[Yearly Demand Update] Demand levels updated for the new year.");
+            System.out.printf("People: %d, Mail: %d, Coal: %d, Iron: %d, Steel: %d%n",
+                    peopleDemand, mailDemand, coalDemand, ironDemand, steelDemand);
+        }
+
+        // Method to get demand as float for calculations (maintains backward compatibility)
+        public float getDemandAsFloat(Carriage.Type cargoType) {
+            switch (cargoType) {
+                case PEOPLE: return (float) peopleDemand;
+                case MAIL: return (float) mailDemand;
+                case COAL: return (float) coalDemand;
+                case IRON: return (float) ironDemand;
+                case STEEL: return (float) steelDemand;
+                default: return DEFAULT_DEMAND;
+            }
+        }
+
+        // Reset demands to default (useful for new games)
+        public void resetToDefault() {
+            peopleDemand = DEFAULT_DEMAND;
+            mailDemand = DEFAULT_DEMAND;
+            coalDemand = DEFAULT_DEMAND;
+            ironDemand = DEFAULT_DEMAND;
+            steelDemand = DEFAULT_DEMAND;
+            resetYearlyDeliveries();
+        }
+    }
+
+    // In your SimulationController class, add this field:
+    private final DemandManager demandManager = new DemandManager();
+
+    // Modified executeRoutes method to pass current simulation year
+    public Runnable executeRoutes(Map selectedMap, Scenario selectedScenario, Budget budget,
+                                  AtomicBoolean running, int currentSimulationYear) {
+        return () -> {
+            if (!running.get() || currentUser == null) {
+                return;
+            }
+
+            List<Route> userRoutes = getUserRoutes(selectedMap, selectedScenario);
+
+            if (userRoutes.isEmpty()) {
+                return;
+            }
+
+            // Start new journeys for routes that aren't already active
+            for (Route route : userRoutes) {
+                if (!isRouteValid(route)) {
+                    continue;
+                }
+
+                String routeId = generateRouteId(route);
+                if (!activeJourneys.containsKey(routeId)) {
+                    startTrainJourney(route, currentSimulationYear);
+                }
+            }
+
+            // Check for arriving trains
+            checkArrivingTrains(selectedScenario, budget, selectedMap, currentSimulationYear);
         };
     }
 
-    private List<Route> getUserRoutes(Map map, Scenario scenario) {
-        return routeRepo.getRoutes().stream()
-                .filter(r -> r.getPlayerEmail().equals(currentUser.getEmail())
-                        && r.getMapName().equals(map.getMapName())
-                        && r.getScenarioName().equals(scenario.getScenarioName()))
-                .collect(Collectors.toList());
+    private boolean isRouteValid(Route route) {
+        if (route == null) {
+            System.out.println("Route is null");
+            return false;
+        }
+
+        if (route.getTrain() == null) {
+            System.out.println("Route has no train assigned");
+            return false;
+        }
+
+        if (route.getPoints() == null || route.getPoints().size() < 2) {
+            System.out.println("Route must have at least 2 points");
+            return false;
+        }
+
+        // Check if all stations in route are connected by railway lines
+        for (int i = 0; i < route.getPoints().size() - 1; i++) {
+            Station current = route.getPoints().get(i).getStation();
+            Station next = route.getPoints().get(i + 1).getStation();
+
+            RailwayLine connection = findRailwayLineBetweenStations(current, next, currentUser.getEmail());
+            if (connection == null) {
+                System.out.printf("No railway connection between %s and %s%n",
+                        current.getName(), next.getName());
+                return false;
+            }
+        }
+
+        return true;
     }
 
-    private void executeRoute(Route route, Scenario scenario, Budget budget, Map selectedMap) {
+    // Modified startTrainJourney method
+    private void startTrainJourney(Route route, int currentSimulationYear) {
+        TrainJourney journey = new TrainJourney(route, currentSimulationYear);
+        String routeId = generateRouteId(route);
+
+        activeJourneys.put(routeId, journey);
+
+        System.out.printf("\n[Train Departure] Train departed from %s in year %d. Estimated arrival: year %d. Type your option: ",
+                route.getPoints().get(0).getStation().getName(),
+                journey.getDepartureYear(),
+                journey.getEstimatedArrivalYear());
+    }
+
+    // Modified checkArrivingTrains method
+    private void checkArrivingTrains(Scenario scenario, Budget budget, Map selectedMap, int currentSimulationYear) {
+        List<String> completedJourneys = new ArrayList<>();
+
+        for (java.util.Map.Entry<String, TrainJourney> entry : activeJourneys.entrySet()) {
+            TrainJourney journey = entry.getValue();
+
+            if (!journey.isCompleted() && currentSimulationYear >= journey.getEstimatedArrivalYear()) {
+                // Train has arrived - execute the route
+                executeArrivingRoute(journey.getRoute(), scenario, budget, selectedMap, journey, currentSimulationYear);
+                journey.setCompleted(true);
+                completedJourneys.add(entry.getKey());
+            }
+        }
+
+        // Remove completed journeys
+        for (String completedId : completedJourneys) {
+            activeJourneys.remove(completedId);
+        }
+    }
+
+    private void executeArrivingRoute(Route route, Scenario scenario, Budget budget, Map selectedMap, TrainJourney journey, int currentYear) {
         Train train = route.getTrain();
         if (train == null) return;
 
@@ -73,6 +400,7 @@ public class SimulationController {
 
         int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
         yearlyFuelCost += routeFuelCost;
+
 
         for (PointOfRoute point : route.getPoints()) {
             if (isTrainFull(carriages)) break;
@@ -87,12 +415,84 @@ public class SimulationController {
             deliverToSteelMills(route, carriages, result);
         }
 
-        int totalEarnings = (int) (calculateEarnings(result, scenario) * scenario.getProfitMultiplier());
+        // Record deliveries for demand calculation
+        if (result.people > 0) demandManager.recordDelivery(Carriage.Type.PEOPLE, result.people);
+        if (result.mail > 0) demandManager.recordDelivery(Carriage.Type.MAIL, result.mail);
+        if (result.coal > 0) demandManager.recordDelivery(Carriage.Type.COAL, result.coal);
+        if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
+        if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
+
+        // Calculate earnings based on demand and distance
+        int totalEarnings = calculateArrivalEarnings(result, scenario, route, selectedMap);
         if (result.getTotalCargo() > 0) {
-            displayRouteComplete(result, totalEarnings);
+            displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
             budget.addBudget(totalEarnings - (routeFuelCost / KMS_FUEL));
             yearlyEarnings += totalEarnings;
         }
+    }
+
+    // Modified display method to show years
+    private void displayRouteCompleteWithYear(CargoCollectionResult result, int totalEarnings, TrainJourney journey, int currentYear) {
+        System.out.printf("\n[Train Arrival] Train arrived in year %d (departed year %d). Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
+                currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
+    }
+
+    private int calculateArrivalEarnings(CargoCollectionResult result, Scenario scenario, Route route, Map selectedMap) {
+        boolean isVaccinationCampaign = hasHistoricalRestriction(scenario, "vaccination campaign");
+        final float DEFAULT_DEMAND = 4f;
+
+        // Calculate distance between departure and arrival stations
+        double routeDistance = calculateRouteDistance(route, selectedMap);
+        double distanceMultiplier = Math.max(0.5, Math.min(2.0, routeDistance / 100.0));
+
+        int peopleEarnings = (int)(
+                result.people
+                        * PEOPLE_VALUE
+                        * (isVaccinationCampaign ? 2 : 1)
+                        * demandManager.getPeopleDemand() / DEFAULT_DEMAND
+                        * distanceMultiplier
+        );
+
+        int mailEarnings  = (int)(result.mail  * MAIL_VALUE  * (demandManager.getMailDemand() / DEFAULT_DEMAND) * distanceMultiplier);
+        int coalEarnings  = (int)(result.coal  * COAL_VALUE  * (demandManager.getCoalDemand() / DEFAULT_DEMAND) * distanceMultiplier);
+        int ironEarnings  = (int)(result.iron  * IRON_VALUE  * (demandManager.getIronDemand() / DEFAULT_DEMAND) * distanceMultiplier);
+        int steelEarnings = (int)(result.steel * STEEL_VALUE * (demandManager.getSteelDemand() / DEFAULT_DEMAND) * distanceMultiplier);
+
+        return peopleEarnings + mailEarnings + coalEarnings + ironEarnings + steelEarnings;
+    }
+
+    private double calculateRouteDistance(Route route, Map selectedMap) {
+        if (route.getPoints().size() < 2) return 0.0;
+
+        double totalDistance = 0.0;
+        for (int i = 0; i < route.getPoints().size() - 1; i++) {
+            Station currentStation = route.getPoints().get(i).getStation();
+            Station nextStation = route.getPoints().get(i + 1).getStation();
+
+            RailwayLine railwayLine = findRailwayLineBetweenStations(currentStation, nextStation, currentUser.getEmail());
+            if (railwayLine != null) {
+                totalDistance += railwayLine.getDistance();
+            }
+        }
+        return totalDistance * selectedMap.getScale();
+    }
+
+    private String generateRouteId(Route route) {
+        return route.getMapName() + "_" + route.getScenarioName() + "_" + route.getPlayerEmail() + "_" +
+                route.getPoints().hashCode() + "_" + (route.getTrain() != null ? route.getTrain().hashCode() : 0);
+    }
+
+    private void displayRouteComplete(CargoCollectionResult result, int totalEarnings, TrainJourney journey) {
+        System.out.printf("\n[Train Arrival] Train arrived at %s. Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
+                new Date().toString(), result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
+    }
+
+    private List<Route> getUserRoutes(Map map, Scenario scenario) {
+        return routeRepo.getRoutes().stream()
+                .filter(r -> r.getPlayerEmail().equals(currentUser.getEmail())
+                        && r.getMapName().equals(map.getMapName())
+                        && r.getScenarioName().equals(scenario.getScenarioName()))
+                .collect(Collectors.toList());
     }
 
     private int calculateRouteFuelCost(Route route, Map selectedMap) {
@@ -115,7 +515,7 @@ public class SimulationController {
         }
 
         double mapScale = selectedMap.getScale();
-        int fuelCost = (int) (locomotive.getFuelCost() * totalDistance * mapScale);
+        int fuelCost = (int) (locomotive.getFuelCost() * totalDistance * mapScale)/ KMS_FUEL;
 
         return fuelCost;
     }
@@ -192,15 +592,65 @@ public class SimulationController {
 
     private void collectCargoFromStation(Station station, List<Carriage.Type> requestedTypes,
                                          List<Carriage> carriages, CargoCollectionResult result) {
+
         for (Carriage.Type cargoType : requestedTypes) {
             int availableCargo = getAvailableCargoAtStation(station, cargoType);
+
             if (availableCargo > 0) {
-                int collected = collectCargo(carriages, cargoType, availableCargo);
-                updateStationCargo(station, cargoType, collected);
-                updateCollectionResult(result, cargoType, collected);
+                int collected = collectCargoOptimized(carriages, cargoType, availableCargo);
+
+                if (collected > 0) {
+                    updateStationCargo(station, cargoType, collected);
+                    updateCollectionResult(result, cargoType, collected);
+                }
             }
         }
+
         updateStationCapacity(station);
+    }
+
+    private int collectCargoOptimized(List<Carriage> carriages, Carriage.Type cargoType, int availableCargo) {
+        int totalCollected = 0;
+        int remainingCargo = availableCargo;
+
+        // First pass: fill carriages of matching type
+        for (Carriage carriage : carriages) {
+            if (carriage.getType() == cargoType && remainingCargo > 0) {
+                int spaceLeft = carriage.getCapacity() - carriage.getCapacityOwned();
+                if (spaceLeft > 0) {
+                    int toCollect = Math.min(remainingCargo, spaceLeft);
+                    carriage.setCapacityOwned(carriage.getCapacityOwned() + toCollect);
+                    totalCollected += toCollect;
+                    remainingCargo -= toCollect;
+                }
+            }
+        }
+
+        // Second pass: if there's still cargo and we have multi-purpose carriages, use them
+        if (remainingCargo > 0) {
+            for (Carriage carriage : carriages) {
+                if (canCarryCargoType(carriage, cargoType) && remainingCargo > 0) {
+                    int spaceLeft = carriage.getCapacity() - carriage.getCapacityOwned();
+                    if (spaceLeft > 0) {
+                        int toCollect = Math.min(remainingCargo, spaceLeft);
+                        carriage.setCapacityOwned(carriage.getCapacityOwned() + toCollect);
+                        totalCollected += toCollect;
+                        remainingCargo -= toCollect;
+                    }
+                }
+            }
+        }
+
+        return totalCollected;
+    }
+
+    private boolean canCarryCargoType(Carriage carriage, Carriage.Type cargoType) {
+        // If it's the same type, it can definitely carry it
+        if (carriage.getType() == cargoType) {
+            return true;
+        }
+
+        return false;
     }
 
     private int getAvailableCargoAtStation(Station station, Carriage.Type cargoType) {
@@ -249,15 +699,6 @@ public class SimulationController {
         }
     }
 
-    private int calculateEarnings(CargoCollectionResult result, Scenario scenario) {
-        boolean isVaccinationCampaign = hasHistoricalRestriction(scenario, "vaccination campaign");
-        int peopleEarnings = isVaccinationCampaign ?
-                (result.people * PEOPLE_VALUE * 2) : (result.people * PEOPLE_VALUE);
-
-        return peopleEarnings + (result.mail * MAIL_VALUE) +
-                (result.coal * COAL_VALUE) + (result.iron * IRON_VALUE) + (result.steel * STEEL_VALUE);  // Add steel earnings
-    }
-
     private boolean hasHistoricalRestriction(Scenario scenario, String restriction) {
         return scenario.getHistoricalRestrictions().stream()
                 .anyMatch(r -> r.equalsIgnoreCase(restriction));
@@ -269,25 +710,25 @@ public class SimulationController {
     }
 
     private boolean isTrainFull(List<Carriage> carriages) {
-        return carriages.stream().allMatch(c -> c.getCapacityOwned() >= c.getCapacity());
-    }
+        if (carriages == null || carriages.isEmpty()) {
+            return true;
+        }
 
-    private int collectCargo(List<Carriage> carriages, Carriage.Type cargoType, int availableCargo) {
-        int totalCollected = 0;
-        int remainingCargo = availableCargo;
+        int totalCapacity = 0;
+        int totalUsed = 0;
+        boolean hasAvailableSpace = false;
 
-        for (Carriage carriage : carriages) {
-            if (carriage.getType() == cargoType && remainingCargo > 0) {
-                int spaceLeft = carriage.getCapacity() - carriage.getCapacityOwned();
-                if (spaceLeft > 0) {
-                    int toCollect = Math.min(remainingCargo, spaceLeft);
-                    carriage.setCapacityOwned(carriage.getCapacityOwned() + toCollect);
-                    totalCollected += toCollect;
-                    remainingCargo -= toCollect;
-                }
+        for (int i = 0; i < carriages.size(); i++) {
+            Carriage c = carriages.get(i);
+            totalCapacity += c.getCapacity();
+            totalUsed += c.getCapacityOwned();
+
+            if (c.getCapacityOwned() < c.getCapacity()) {
+                hasAvailableSpace = true;
             }
         }
-        return totalCollected;
+
+        return !hasAvailableSpace;
     }
 
     private static class CargoCollectionResult {
@@ -366,11 +807,15 @@ public class SimulationController {
         if (currentBudget >= yearlyTotalCost) {
             System.out.println("\n=== YEAR " + yearSummary + " SUMMARY ===");
             payLocomotiveMaintenance(budget);
+            System.out.println("\nYearly Fuel Cost: " + yearlyFuelCost);
+            budget.subtractBudget(yearlyFuelCost);
             payTrackMaintenance(selectedScenario, map, budget);
             yearlyMaintenanceCost = locomotiveMaintenanceCost;
             yearlyTrackMaintenanceCost = trackMaintenanceCost;
 
             displayYearlyStatistics();
+
+            demandManager.updateYearlyDemand(selectedScenario);
 
             announceNewLocomotives(year);
             removeOutdatedLocomotives(year);
@@ -397,8 +842,6 @@ public class SimulationController {
         int moneySpent = Math.toIntExact(AMOUNT_PER_LINE * ownedTracksAmount);
         yearlyTrackMaintenanceCost = moneySpent;
         budget.subtractBudget(moneySpent);
-
-
     }
 
     private void displayYearlyStatistics() {
@@ -526,6 +969,7 @@ public class SimulationController {
 
                     int actualAddedCargo = addCargoToStation(targetStation, cargoPerIndustry, maxCapacityStations);
                     distributeIndustryCargo(targetStation, industry, actualAddedCargo);
+                    
                 }
             }
         }
