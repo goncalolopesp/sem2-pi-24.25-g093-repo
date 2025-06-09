@@ -15,9 +15,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import ui.console.SimulationUI;
 import ui.console.*;
-import ui.gui.BuildStationGUI;
-import ui.gui.PlayMenuGUI;
-import ui.gui.UpgradeStationTypeGUI;
+import ui.gui.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -420,21 +418,22 @@ public class PlayerMenuController implements Initializable {
             return;
         }
 
-        navigateAwayFromMenu(() -> {
-            new BuyLocomotiveUI(
-                    simulationUI.getSelectedScenario(),
-                    simulationUI.getSelectedMap(),
-                    simulation.getUserBudget()
-            ).run();
-            requestUIUpdate();
-        });
+        Stage currentStage = (Stage) buyLocomotiveBtn.getScene().getWindow();
+        Map map = simulationUI.getSelectedMap();
+        Scenario scenario = simulationUI.getSelectedScenario();
+        Budget budget = simulation.getUserBudget();
+
+        BuyLocomotiveGUI.launch(currentStage, map, scenario, budget);
     }
 
     @FXML
     private void ListLocomotives() {
-        pauseForAction(() -> {
-            new ListLocomotiveUI().run();
-        });
+        Stage currentStage = (Stage) listLocomotivesBtn.getScene().getWindow();
+        Map map = simulationUI.getSelectedMap();
+        Scenario scenario = simulationUI.getSelectedScenario();
+        Budget budget = simulation.getUserBudget();
+
+        ListLocomotivesGUI.launch(currentStage, map, scenario, budget);
     }
 
     @FXML
