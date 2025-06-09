@@ -345,17 +345,6 @@ public class PlayerMenuController implements Initializable {
         }
     }
 
-    private String getCellInfo(String cellContent, int x, int y) {
-        switch (cellContent) {
-            case "🏭": return "Industry at (" + x + "," + y + ")";
-            case "🌆": return "City Center at (" + x + "," + y + ")";
-            case "🏠": return "City Block at (" + x + "," + y + ")";
-            case "🚉": return "Station at (" + x + "," + y + ")";
-            case "🅿️": return "Station Area at (" + x + "," + y + ")";
-            default: return "";
-        }
-    }
-
     @FXML
     private void handleBuildStation() {
         if (simulationUI == null) {
@@ -401,12 +390,15 @@ public class PlayerMenuController implements Initializable {
         }
 
         navigateAwayFromMenu(() -> {
-            new UpgradeStationUI(
+            Stage currentStage = (Stage) upgradeStationBuildingBtn.getScene().getWindow();
+            UpgradeStationGUI launcher = new UpgradeStationGUI(
                     simulationUI.getSelectedMap(),
                     simulationUI.getSelectedScenario(),
                     simulationUI.getTimePeriod(),
-                    simulation.getUserBudget()
-            ).run();
+                    simulationUI.getSimulation().getUserBudget()
+            );
+
+            launcher.show(currentStage);
             requestUIUpdate();
         });
     }
