@@ -212,7 +212,8 @@ public class CreateStationController {
                 boolean onCity = cities.stream().anyMatch(c -> c.getCenterX() == cx && c.getCenterY() == cy);
                 boolean onBlock = cities.stream().flatMap(c -> c.getBlocks().stream())
                         .anyMatch(b -> b.getX() == cx && b.getY() == cy);
-                if (onCity || onBlock) return Error.OVERBUILD;
+                boolean onIndustry = indRepo.getIndustries().stream().filter(i->i.getMapName().equals(map.getMapName())).filter(i->i.getLocation().getX() == cx).filter(i->i.getLocation().getY() == cy).findFirst().isPresent();
+                if (onCity || onBlock || onIndustry) return Error.OVERBUILD;
                 String owner = user.getEmail();
                 for (Station s : stationRepo.getStations()) {
                     if (!s.getMapName().equals(map.getMapName()) || !s.getOwnerPlayer().equals(owner) || !s.getScenarioName().equals(scenario.getScenarioName())) continue;

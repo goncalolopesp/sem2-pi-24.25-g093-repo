@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="650.0" prefWidth="550.0" style="-fx-background-color: #1E1E2F;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.UpgradeStationTypeUIController">
+    <children>
+        <VBox alignment="CENTER" layoutX="50.0" layoutY="30.0" prefHeight="590.0" prefWidth="450.0" spacing="20.0">
+            <children>
+                <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="UPGRADE STATION TYPE" textAlignment="CENTER">
+                    <font>
+                        <Font name="Arial Bold" size="32.0" />
+                    </font>
+                </Text>
+
+                <Label fx:id="budgetLabel" text="Current Budget: $0" textFill="WHITE">
+                    <font>
+                        <Font name="Arial" size="14.0" />
+                    </font>
+                </Label>
+
+                <VBox spacing="10.0">
+                    <children>
+                        <Label text="Select Station to Upgrade:" textFill="WHITE">
+                            <font>
+                                <Font name="Arial" size="14.0" />
+                            </font>
+                        </Label>
+                        <ListView fx:id="stationListView" onMouseClicked="#onStationSelected" prefHeight="120.0" prefWidth="400.0"
+                                  style="-fx-background-color: #2A2A3E; -fx-control-inner-background: #2A2A3E; -fx-text-fill: white;" />
+                    </children>
+                </VBox>
+
+                <VBox fx:id="selectedStationBox" spacing="10.0" visible="false">
+                    <children>
+                        <Label text="Selected Station:" textFill="#90EE90">
+                            <font>
+                                <Font name="Arial Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="selectedStationLabel" text="" textFill="WHITE" wrapText="true">
+                            <font>
+                                <Font name="Arial" size="12.0" />
+                            </font>
+                        </Label>
+                    </children>
+                </VBox>
+
+                <VBox fx:id="upgradeOptionsBox" spacing="10.0" visible="false">
+                    <children>
+                        <Label text="Upgrade Options:" textFill="WHITE">
+                            <font>
+                                <Font name="Arial" size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="upgradeOptionComboBox" onAction="#onUpgradeOptionChanged" prefWidth="300.0"
+                                  promptText="Select upgrade option" />
+                    </children>
+                </VBox>
+
+                <VBox fx:id="orientationBox" spacing="10.0" visible="false">
+                    <children>
+                        <Label text="New Orientation (for STATION upgrade):" textFill="WHITE">
+                            <font>
+                                <Font name="Arial" size="14.0" />
+                            </font>
+                        </Label>
+                        <ComboBox fx:id="orientationComboBox" onAction="#onOrientationChanged" prefWidth="200.0" promptText="Select orientation" />
+                    </children>
+                </VBox>
+
+                <HBox alignment="CENTER" spacing="30.0">
+                    <children>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <Label text="Upgrade Cost:" textFill="WHITE">
+                                    <font>
+                                        <Font name="Arial" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="costLabel" text="0$" textFill="#FFD700">
+                                    <font>
+                                        <Font name="Arial Bold" size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                        <VBox alignment="CENTER" spacing="5.0">
+                            <children>
+                                <Label text="New Capacity:" textFill="WHITE">
+                                    <font>
+                                        <Font name="Arial" size="12.0" />
+                                    </font>
+                                </Label>
+                                <Label fx:id="capacityLabel" text="0" textFill="#90EE90">
+                                    <font>
+                                        <Font name="Arial Bold" size="16.0" />
+                                    </font>
+                                </Label>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <HBox alignment="CENTER" spacing="20.0">
+                    <children>
+                        <Button fx:id="upgradeButton" onAction="#handleUpgradeStation" prefHeight="40.0" prefWidth="140.0"
+                                text="UPGRADE STATION" disable="true"
+                                style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;">
+                            <font>
+                                <Font name="Arial" size="12.0" />
+                            </font>
+                        </Button>
+                        <Button fx:id="cancelButton" onAction="#handleCancel" prefHeight="40.0" prefWidth="120.0" text="CANCEL"
+                                style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold;">
+                            <font>
+                                <Font name="Arial" size="12.0" />
+                            </font>
+                        </Button>
+                    </children>
+                </HBox>
+
+                <Label fx:id="messageLabel" text="" textFill="#FF6B6B" wrapText="true">
+                    <font>
+                        <Font name="Arial" size="12.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

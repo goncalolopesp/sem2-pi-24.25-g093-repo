@@ -17,6 +17,7 @@ import ui.console.SimulationUI;
 import ui.console.*;
 import ui.gui.BuildStationGUI;
 import ui.gui.PlayMenuGUI;
+import ui.gui.UpgradeStationTypeGUI;
 
 import java.io.IOException;
 import java.net.URL;
@@ -382,12 +383,15 @@ public class PlayerMenuController implements Initializable {
         }
 
         navigateAwayFromMenu(() -> {
-            new UpgradeStationTypeUI(
-                    simulationUI.getSelectedMap(),
-                    simulationUI.getSelectedScenario(),
-                    simulation.getUserBudget()
-            ).run();
-            requestUIUpdate();
+            Stage currentStage = (Stage) upgradeStationTypeBtn.getScene().getWindow();
+            try {
+                UpgradeStationTypeGUI gui = new UpgradeStationTypeGUI();
+                gui.show(currentStage, simulationUI.getSelectedMap(), simulationUI.getSelectedScenario(), simulation.getUserBudget());
+                requestUIUpdate();
+            } catch (IOException e) {
+                System.err.println("Failed to open Upgrade Station Type GUI: " + e.getMessage());
+                e.printStackTrace();
+            }
         });
     }
 
