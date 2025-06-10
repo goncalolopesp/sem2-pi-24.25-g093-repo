@@ -410,22 +410,26 @@ public class PlayerMenuController implements Initializable {
             return;
         }
 
-        Stage currentStage = (Stage) buyLocomotiveBtn.getScene().getWindow();
-        Map map = simulationUI.getSelectedMap();
-        Scenario scenario = simulationUI.getSelectedScenario();
-        Budget budget = simulation.getUserBudget();
+        navigateAwayFromMenu(() -> {
+            Stage currentStage = (Stage) buyLocomotiveBtn.getScene().getWindow();
+            Map map = simulationUI.getSelectedMap();
+            Scenario scenario = simulationUI.getSelectedScenario();
+            Budget budget = simulation.getUserBudget();
 
-        BuyLocomotiveGUI.launch(currentStage, map, scenario, budget);
+            BuyLocomotiveGUI.launch(currentStage, map, scenario, budget);
+        });
     }
 
     @FXML
     private void ListLocomotives() {
-        Stage currentStage = (Stage) listLocomotivesBtn.getScene().getWindow();
-        Map map = simulationUI.getSelectedMap();
-        Scenario scenario = simulationUI.getSelectedScenario();
-        Budget budget = simulation.getUserBudget();
+        navigateAwayFromMenu(() -> {
+            Stage currentStage = (Stage) listLocomotivesBtn.getScene().getWindow();
+            Map map = simulationUI.getSelectedMap();
+            Scenario scenario = simulationUI.getSelectedScenario();
+            Budget budget = simulation.getUserBudget();
 
-        ListLocomotivesGUI.launch(currentStage, map, scenario, budget);
+            ListLocomotivesGUI.launch(currentStage, map, scenario, budget);
+        });
     }
 
     @FXML
@@ -565,40 +569,13 @@ public class PlayerMenuController implements Initializable {
         } catch (Exception e) {
             System.err.println("Error executing navigation action: " + e.getMessage());
             e.printStackTrace();
-
-            if (wasRunningBeforeNavigation && (simulationUI != null)) {
-                simulationUI.resumeGame();
-                gameRunning = true;
-                updateButtonStates();
-                System.out.println("[Game resumed - navigation failed]");
-            }
         }
 
-        gameRunning = true;
-        updateButtonStates();
-    }
-
-    private void pauseForAction(Runnable action) {
-        boolean wasRunning = gameRunning;
-        if (wasRunning && simulationUI != null) {
-            simulationUI.pauseGame();
-            gameRunning = false;
-            updateButtonStates();
-            System.out.println("[Game paused for quick action]");
-        }
-
-        try {
-            action.run();
-        } catch (Exception e) {
-            System.err.println("Error executing action: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-        if (wasRunning && simulationUI != null) {
+        if (wasRunningBeforeNavigation && (simulationUI != null)) {
             simulationUI.resumeGame();
             gameRunning = true;
             updateButtonStates();
-            System.out.println("[Game resumed after quick action]");
+            System.out.println("[Game resumed - navigating back to menu]");
         }
     }
 }

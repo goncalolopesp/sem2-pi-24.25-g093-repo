@@ -352,11 +352,9 @@ public class SimulationUI {
      *
      * Side Effects:
      * - Updates the `running` field to false.
-     * - Prints "Game paused." to the console.
      */
     public void pauseGame() {
         running.set(false);
-        System.out.println("Game paused.");
     }
 
     /**
@@ -371,11 +369,9 @@ public class SimulationUI {
      *
      * Side Effects:
      * - Updates the `running` field to true.
-     * - Prints "Game resumed." to the console.
      */
     public void resumeGame() {
         running.set(true);
-        System.out.println("Game resumed.");
     }
 
     /**
