@@ -13,7 +13,7 @@ public class ScenarioTest {
 
     @BeforeEach
     void setUp() {
-        scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));
+        scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
     }
 
     @Test

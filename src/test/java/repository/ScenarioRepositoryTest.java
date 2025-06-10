@@ -11,25 +11,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ScenarioRepositoryTest {
     private ScenarioRepository repo;
-    private Scenario scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, Collections.singletonList("steam"), Collections.singletonList("none"));
+    private Scenario scenario = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
 
     @BeforeEach
     void setup() {
         repo = new ScenarioRepository();
         repo.add(scenario);
-        repo.add(new Scenario("TestScenario2", "TestMap", new int[]{1970, 1980}, List.of("steam", "diesel", "electric"), Collections.singletonList("school program")));
+        repo.add(new Scenario("TestScenario2", "TestMap", new int[]{1970, 1980}, 1, List.of("steam", "diesel", "electric"), Collections.singletonList("school program"), 1, 1));
     }
 
     @Test
     void add() {
-        repo.add(new Scenario("TestScenario3", "TestMap", new int[]{1855, 1867}, Collections.singletonList("steam"), Collections.singletonList("none")));
+        repo.add(new Scenario("TestScenario3", "TestMap", new int[]{1855, 1867}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1));
         assertEquals(3, repo.getScenarios().size());
     }
 
     @Test
     void validateScenario() {
         assertTrue(repo.getScenarios().contains(scenario));
-        assertFalse(repo.getScenarios().contains(new Scenario("TestScenario4", "TestMap", new int[]{1870, 1880}, Collections.singletonList("diesel"), Collections.singletonList("none"))));
+        assertFalse(repo.getScenarios().contains(new Scenario("TestScenario4", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("diesel"), Collections.singletonList("none"), 1, 1)));
     }
 
     @Test

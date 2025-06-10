@@ -13,7 +13,7 @@ public class MapTest {
      */
     @Test
     public void testMapCreationStoresCorrectValues() {
-        Map map = new Map("MetroMap", 10, 15);
+        Map map = new Map("MetroMap", 10, 15, 1);
 
         assertEquals("MetroMap", map.getMapName());
         assertEquals(10, map.getWidth());
@@ -25,7 +25,7 @@ public class MapTest {
      */
     @Test
     public void testStationsListIsInitialized() {
-        Map map = new Map("CityMap", 5, 5);
+        Map map = new Map("CityMap", 5, 5, 1);
 
         assertNotNull(map.getStations());
         assertTrue(map.getStations().isEmpty());
@@ -35,7 +35,7 @@ public class MapTest {
      */
     @Test
     public void testToStringReturnsMapName() {
-        Map map = new Map("WorldMap", 20, 30);
+        Map map = new Map("WorldMap", 20, 30, 1);
 
         assertEquals("WorldMap", map.toString());
     }
@@ -46,10 +46,10 @@ public class MapTest {
     @Test
     public void testDuplicateMapNameDetectionExternally() {
         Set<String> existingNames = new HashSet<>();
-        Map map1 = new Map("TestMap", 10, 10);
+        Map map1 = new Map("TestMap", 10, 10, 1);
         assertTrue(existingNames.add(map1.getMapName()));
 
-        Map map2 = new Map("TestMap", 20, 20);
+        Map map2 = new Map("TestMap", 20, 20, 1);
         boolean added = existingNames.add(map2.getMapName());
 
         assertFalse(added, "Duplicate map name should not be allowed externally");
@@ -61,7 +61,7 @@ public class MapTest {
      */
     @Test
     public void testNegativeWidthOrHeightIsAllowed() {
-        Map map = new Map("InvalidMap", -5, -10);
+        Map map = new Map("InvalidMap", -5, -10, 1);
 
         assertEquals(-5, map.getWidth());
         assertEquals(-10, map.getHeight());

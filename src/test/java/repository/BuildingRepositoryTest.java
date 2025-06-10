@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BuildingRepositoryTest {
     private BuildingRepository repo;
-    private Station station = new Station(Station.Type.STATION,"Station1", "Map1", "Test","Player1", 100, 200, 50, 5,5, Station.Orientation.NE);
+    private Station station = new Station(Station.Type.STATION,"Station1", "Map1", "Test","Player1", 100, 200, 50, 5, Station.Orientation.NE);
     private Building building = new Building(station, "telegraph");
 
     @BeforeEach
