@@ -289,10 +289,8 @@ public class SimulationController {
         }
     }
 
-    // In your SimulationController class, add this field:
     private final DemandManager demandManager = new DemandManager();
 
-    // Modified executeRoutes method to pass current simulation year
     public Runnable executeRoutes(Map selectedMap, Scenario selectedScenario, Budget budget,
                                   AtomicBoolean running, int currentSimulationYear) {
         return () -> {
@@ -306,8 +304,8 @@ public class SimulationController {
                 return;
             }
 
-            // Start new journeys for routes that aren't already active
             for (Route route : userRoutes) {
+
                 if (!isRouteValid(route)) {
                     continue;
                 }
@@ -318,7 +316,6 @@ public class SimulationController {
                 }
             }
 
-            // Check for arriving trains
             checkArrivingTrains(selectedScenario, budget, selectedMap, currentSimulationYear);
         };
     }
@@ -368,7 +365,6 @@ public class SimulationController {
                 journey.getEstimatedArrivalYear());
     }
 
-    // Modified checkArrivingTrains method
     private void checkArrivingTrains(Scenario scenario, Budget budget, Map selectedMap, int currentSimulationYear) {
         List<String> completedJourneys = new ArrayList<>();
 
@@ -376,14 +372,12 @@ public class SimulationController {
             TrainJourney journey = entry.getValue();
 
             if (!journey.isCompleted() && currentSimulationYear >= journey.getEstimatedArrivalYear()) {
-                // Train has arrived - execute the route
                 executeArrivingRoute(journey.getRoute(), scenario, budget, selectedMap, journey, currentSimulationYear);
                 journey.setCompleted(true);
                 completedJourneys.add(entry.getKey());
             }
         }
 
-        // Remove completed journeys
         for (String completedId : completedJourneys) {
             activeJourneys.remove(completedId);
         }
@@ -401,7 +395,6 @@ public class SimulationController {
         int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
         yearlyFuelCost += routeFuelCost;
 
-
         for (PointOfRoute point : route.getPoints()) {
             if (isTrainFull(carriages)) break;
 
@@ -411,30 +404,28 @@ public class SimulationController {
             collectCargoFromStation(station, point.getCargoTypes(), carriages, result);
         }
 
-        if (result.hasIronAndCoal()) {
-            deliverToSteelMills(route, carriages, result);
-        }
-
-        // Record deliveries for demand calculation
         if (result.people > 0) demandManager.recordDelivery(Carriage.Type.PEOPLE, result.people);
         if (result.mail > 0) demandManager.recordDelivery(Carriage.Type.MAIL, result.mail);
         if (result.coal > 0) demandManager.recordDelivery(Carriage.Type.COAL, result.coal);
         if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
         if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
 
-        // Calculate earnings based on demand and distance
         int totalEarnings = calculateArrivalEarnings(result, scenario, route, selectedMap);
+
         if (result.getTotalCargo() > 0) {
             displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
             budget.addBudget(totalEarnings - (routeFuelCost / KMS_FUEL));
             yearlyEarnings += totalEarnings;
         }
+
+        if (result.hasIronAndCoal()) {
+            deliverToSteelMills(route, carriages, result);
+        }
     }
 
-    // Modified display method to show years
     private void displayRouteCompleteWithYear(CargoCollectionResult result, int totalEarnings, TrainJourney journey, int currentYear) {
-        System.out.printf("\n[Train Arrival] Train arrived in year %d (departed year %d). Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
-                currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
+        System.out.printf("\n[Train Arrival] Train arrived in year %d (departed year %d). Total Cargo: %d (People: %d, Mail: %d, Iron: %d, Coal: %d, Steel: %d) - Earned: %d. Type your option: ",
+                currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.iron, result.coal, result.steel, totalEarnings);
     }
 
     private int calculateArrivalEarnings(CargoCollectionResult result, Scenario scenario, Route route, Map selectedMap) {
