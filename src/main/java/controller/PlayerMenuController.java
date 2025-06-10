@@ -462,11 +462,14 @@ public class PlayerMenuController implements Initializable {
             return;
         }
 
-        navigateAwayFromMenu(() -> new AssignTrainUI(
-                simulationUI.getSelectedMap(),
-                simulationUI.getSelectedScenario(),
-                simulation.getUserBudget()
-        ).run());
+        navigateAwayFromMenu(() -> {
+            Stage currentStage = (Stage) assignTrainBtn.getScene().getWindow();
+            Map map = simulationUI.getSelectedMap();
+            Scenario scenario = simulationUI.getSelectedScenario();
+            Budget budget = simulation.getUserBudget();
+
+            AssignTrainGUI.launch(currentStage, map, scenario, budget);
+        });
     }
 
     @FXML
