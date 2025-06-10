@@ -12,6 +12,15 @@ import controller.AssignTrainGUIController;
 
 import java.io.IOException;
 
+
+/**
+ * A graphical user interface (GUI) window for assigning a train to a route.
+ *
+ * This class is responsible for launching a new GUI window
+ * allowing users to assign a train to a specific route.
+ * It uses JavaFX components such as FXMLLoader and Stage
+ * to load and display the window.
+ */
 public class AssignTrainGUI {
 
     public static void launch(Stage parentStage, Map selectedMap, Scenario selectedScenario, Budget budget) {

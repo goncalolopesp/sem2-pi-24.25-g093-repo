@@ -72,6 +72,12 @@ public class BuildStationController implements Initializable {
         }
     }
 
+    /**
+     * Initializes the BuildStationController by setting up UI components and preparing validations.
+     *
+     * @param location The location used to resolve relative paths for the root object, or null if not known.
+     * @param resources The ResourceBundle for localizing the root object, or null if not available.
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupComboBoxes();
@@ -80,7 +86,10 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Sets up the combo boxes with their respective values
+     * Configures the combo boxes for selecting station type and orientation.
+     *
+     * The method sets the available items for the stationTypeComboBox and orientationComboBox
+     * UI elements based on all possible values of the StationType and Orientation enums, respectively.
      */
     private void setupComboBoxes() {
         stationTypeComboBox.setItems(FXCollections.observableArrayList(StationType.values()));
@@ -88,7 +97,10 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Sets up validation for text fields
+     * Configures validation listeners for the xCoordinateField and yCoordinateField text fields.
+     *
+     * The listeners ensure that any input in these fields consists only of numeric characters.
+     * If a non-numeric character is entered, it is automatically removed from the input.
      */
     private void setupValidation() {
         xCoordinateField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -105,7 +117,12 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Initializes the controller with required dependencies
+     * Initializes the necessary data and updates the budget label for the BuildStationController.
+     *
+     * @param map      The Map object representing the current game map.
+     * @param scenario The Scenario object representing the game scenario.
+     * @param budget   The Budget object representing the current budget details.
+     * @param stage    The Stage object representing the current user interface stage.
      */
     public void initData(Map map, Scenario scenario, Budget budget, Stage stage) {
         this.map = map;
@@ -117,7 +134,11 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Updates the budget label
+     * Updates the text of the budget label to display the current budget amount.
+     *
+     * If the budget object is not null, this method fetches the budget value
+     * from the `Budget` instance and updates the `budgetLabel` control with
+     * a formatted string displaying the current budget.
      */
     private void updateBudgetLabel() {
         if (budget != null) {
@@ -126,7 +147,14 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Handles station type selection changes
+     * Handles changes to the selected station type in the station type combo box.
+     *
+     * This method updates the UI components and validates the budget based on the selected
+     * station type. It adjusts labels for cost and capacity, determines the visibility
+     * of the orientation box, and enables or disables the build button accordingly.
+     * If the budget is insufficient for the selected station type, an error message is displayed.
+     *
+     * @param event The event triggered by changing the selection in the station type combo box.
      */
     @FXML
     private void onStationTypeChanged(ActionEvent event) {
@@ -150,7 +178,14 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Handles the build station button click
+     * Handles the action of building a station based on the user's input in the form.
+     *
+     * The method checks the user input for validity, fetches the current user, and processes
+     * the station-building operation. It validates the selected station type, coordinates,
+     * and remaining budget. Depending on the result of the operation, feedback is displayed
+     * to the user through messages or updated UI elements.
+     *
+     * @param event The ActionEvent triggered when the user attempts to build a station.
      */
     @FXML
     private void handleBuildStation(ActionEvent event) {
@@ -214,7 +249,11 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Handles the cancel button click
+     * Handles the cancel action triggered by the user.
+     *
+     * This method closes the current user interface stage if it is available.
+     *
+     * @param event The ActionEvent triggered when the cancel button is clicked.
      */
     @FXML
     private void handleCancel(ActionEvent event) {
@@ -224,7 +263,16 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Validates the input fields
+     * Validates the user input for building a station.
+     *
+     * This method checks that all required fields have been filled out properly:
+     * - A station type is selected.
+     * - Both X and Y coordinate fields have non-empty, valid numeric values.
+     * - The coordinates are positive integers.
+     *
+     * If any validation fails, an appropriate error message is displayed to the user.
+     *
+     * @return true if the input is valid and meets all the criteria, false otherwise
      */
     private boolean validateInput() {
         if (stationTypeComboBox.getValue() == null) {
@@ -259,7 +307,14 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Clears the form fields
+     * Clears the input fields and resets the form to its initial state.
+     *
+     * This method performs the following actions:
+     * - Resets the `stationTypeComboBox` and `orientationComboBox` to null.
+     * - Clears the values in the `xCoordinateField` and `yCoordinateField` text fields.
+     * - Hides and unmanages the `orientationBox`.
+     * - Updates the labels for cost and capacity to their default values.
+     * - Enables the `buildButton`.
      */
     private void clearForm() {
         stationTypeComboBox.setValue(null);
@@ -274,14 +329,30 @@ public class BuildStationController implements Initializable {
     }
 
     /**
-     * Message types for styling
+     * Enum representing the types of messages that can be displayed to the user.
+     *
+     * The message types are used to specify the context or category of a message,
+     * such as success notifications, error alerts, or informational messages.
+     * This enum is primarily utilized in message display functionality to
+     * distinguish between different types of feedback provided to the user.
+     *
+     * The available message types are:
+     * - SUCCESS: Indicates a successful operation or outcome.
+     * - ERROR: Represents an error or problem that occurred.
      */
     private enum MessageType {
-        SUCCESS, ERROR, INFO
+        SUCCESS, ERROR
     }
 
     /**
-     * Shows a message to the user
+     * Displays a message to the user with a specific style based on the message type.
+     *
+     * The method updates the text and style of the `messageLabel` control. The style
+     * is determined by the `MessageType` parameter, allowing for a visual distinction
+     * between success and error messages.
+     *
+     * @param message The message to be displayed to the user.
+     * @param type    The type of the message, which determines the style (e.g., SUCCESS or ERROR).
      */
     private void showMessage(String message, MessageType type) {
         messageLabel.setText(message);
@@ -292,9 +363,6 @@ public class BuildStationController implements Initializable {
                 break;
             case ERROR:
                 messageLabel.setStyle("-fx-text-fill: #FF6B6B;");
-                break;
-            case INFO:
-                messageLabel.setStyle("-fx-text-fill: #87CEEB;");
                 break;
         }
     }
