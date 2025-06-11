@@ -49,21 +49,22 @@ public class CreateCityUI implements Runnable {
         String pattern = "^[A-Za-zÀ-Ÿà-ÿ ]+$";
         NameMapError nm;
         do {
-            System.out.print("Enter City Name: ");
-            cityName = sc.nextLine().trim();
-            if (!cityName.matches(pattern)) {
-                System.out.println("Invalid city name. Please enter a valid name. No special characters nor digits are allowed.");
-            }
-        } while (!cityName.matches(pattern));
-        do {
+            do {
+                System.out.print("Enter City Name: ");
+                cityName = sc.nextLine().trim();
+
+                if (!cityName.matches(pattern)) {
+                    System.out.println("Invalid city name. Please enter a valid name. No special characters nor digits are allowed.");
+                }
+            } while (!cityName.matches(pattern)); // Repeat until name matches the pattern
+
             mapName = map.getMapName().trim();
             nm = ctrl.validateNameMap(cityName, mapName);
 
-            switch (nm) {
-                case NAME_DUPLICATE:
-                    System.out.println("Error: City name '" + cityName + "' already used on map '" + mapName + "'.");
-                    break;
+            if (nm == NameMapError.NAME_DUPLICATE) {
+                System.out.println("Error: City name '" + cityName + "' already used on map '" + mapName + "'.");
             }
+
         } while (nm != NameMapError.OK);
 
         int cx = 0, cy = 0;
