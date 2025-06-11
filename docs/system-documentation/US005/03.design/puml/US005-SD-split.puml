@@ -6,113 +6,86 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildStationUI
+participant ":BuildStationController" as BuildStationController
 participant ":CreateStationController" as CreateStationController
 
 activate Player
 
-Player -> BuildStationUI : buildStationRequest()
-create CreateStationController
-activate BuildStationUI
-BuildStationUI -> CreateStationController: create()
-deactivate CreateStationController
+Player -> BuildStationController : select station type from dropdown
+activate BuildStationController
+BuildStationController -> BuildStationController : onStationTypeChanged()
+BuildStationController -> BuildStationController : update cost and capacity labels
+BuildStationController -> BuildStationController : check budget sufficiency
+alt insufficient budget
+    BuildStationController -> BuildStationController : showMessage("Insufficient funds!", ERROR)
+    BuildStationController -> BuildStationController : disable build button
+else budget sufficient
+    BuildStationController -> BuildStationController : enable build button
+    BuildStationController -> BuildStationController : show/hide orientation box
+end
+BuildStationController --> Player : UI updated with station info
+deactivate BuildStationController
 
-BuildStationUI --> Player : request map selection
-deactivate BuildStationUI
-Player -> BuildStationUI : select map
-activate BuildStationUI
-BuildStationUI --> BuildStationUI : keepMap(map)
+Player -> BuildStationController : enter X coordinate
+activate BuildStationController
+BuildStationController -> BuildStationController : validate numeric input
+BuildStationController --> Player : input validated
+deactivate BuildStationController
 
-BuildStationUI --> Player : request station location
-deactivate BuildStationUI
-Player -> BuildStationUI : select location
-activate BuildStationUI
-BuildStationUI --> BuildStationUI : keepLocation(location)
+Player -> BuildStationController : enter Y coordinate
+activate BuildStationController
+BuildStationController -> BuildStationController : validate numeric input
+BuildStationController --> Player : input validated
+deactivate BuildStationController
 
-BuildStationUI -> CreateStationController : checkOverbuild(location)
-activate CreateStationController
-ref over CreateStationController
-    Verifies no overbuild at location
-end ref
-deactivate CreateStationController
-
-BuildStationUI --> Player : request station type (Depot/Station/Terminal)
-deactivate BuildStationUI
-Player -> BuildStationUI : select type
-activate BuildStationUI
-BuildStationUI --> BuildStationUI : keepType(type)
-
-BuildStationUI -> CreateStationController : checkBudget(type)
-activate CreateStationController
-ref over CreateStationController
-    Verifies the type of building budget
-end ref
-deactivate CreateStationController
-
-BuildStationUI -> CreateStationController : getClosestCity(location)
-activate CreateStationController
-ref over CreateStationController
-    Determines the nearest city
-end ref
-deactivate CreateStationController
-
-BuildStationUI -> CreateStationController : proposeName(cityName, type)
-activate CreateStationController
-ref over CreateStationController
-    Proposes station name based on city and type
-end ref
-deactivate CreateStationController
-
-alt type == "STATION"
-  BuildStationUI --> Player : request center (geometric)
-  deactivate BuildStationUI
-  Player -> BuildStationUI : select center
-  activate BuildStationUI
-  BuildStationUI --> BuildStationUI : keepCenter(center)
-
-  loop until valid orientation
-    BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
-    deactivate BuildStationUI
-    Player -> BuildStationUI : enter orientation
-    activate BuildStationUI
-    alt invalid orientation
-      BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
-    end
-  end
+opt station type is STATION
+    Player -> BuildStationController : select orientation from dropdown
+    activate BuildStationController
+    BuildStationController --> Player : orientation selected
+    deactivate BuildStationController
 end
 
-loop until station placed or abort
-  BuildStationUI --> Player : request coordinates
-  deactivate BuildStationUI
-  Player -> BuildStationUI : enter X, Y coordinates
-  activate BuildStationUI
+Player -> BuildStationController : click BUILD STATION button
+activate BuildStationController
+BuildStationController -> BuildStationController : handleBuildStation()
+BuildStationController -> BuildStationController : validateInput()
 
-  BuildStationUI -> CreateStationController : buildStation(map, scenario, x, y, orientation, budget)
-  activate CreateStationController
-  ref over CreateStationController
+BuildStationController -> CreateStationController : buildStation(type, map, scenario, x, y, orientation, budget)
+activate CreateStationController
+
+ref over CreateStationController
+    Verifies coordinates, overbuild, and budget
+    Gets closest city
     Creates station instance and saves to repository
-  end ref
+end ref
 
-  CreateStationController --> BuildStationUI : Error.OK
-  deactivate CreateStationController
+CreateStationController --> BuildStationController : Error.OK/INVALID_COORDINATES/OVERBUILD/INSUFFICIENT_FUNDS
+deactivate CreateStationController
 
-  alt result == OK
-    BuildStationUI -> CreateStationController : getLastCreatedStationDTO()
+alt result == OK
+    BuildStationController -> CreateStationController : getLastCreatedStationDTO()
     activate CreateStationController
     ref over CreateStationController
         Retrieves last created station as DTO
     end ref
-    CreateStationController --> BuildStationUI : stationDTO
+    CreateStationController --> BuildStationController : stationDTO
     deactivate CreateStationController
-    BuildStationUI --> Player : display "Station created successfully" + stationDTO info
-  else result == INVALID_COORDINATES
-    BuildStationUI --> Player : display "Coordinates out of map bounds. Please try again."
-  else result == OVERBUILD
-    BuildStationUI --> Player : display "Cannot build on occupied cell. Please choose different coordinates."
-  end
-end
 
-destroy CreateStationController
-deactivate BuildStationUI
+    BuildStationController -> BuildStationController : showMessage("Station built successfully", SUCCESS)
+    BuildStationController -> BuildStationController : updateBudgetLabel()
+    BuildStationController -> BuildStationController : clearForm()
+    BuildStationController --> Player : display success message and updated budget
+else result == INVALID_COORDINATES
+    BuildStationController -> BuildStationController : showMessage("Coordinates out of bounds", ERROR)
+    BuildStationController --> Player : display coordinate error
+else result == OVERBUILD
+    BuildStationController -> BuildStationController : showMessage("Cannot build on occupied cell", ERROR)
+    BuildStationController --> Player : display overbuild error
+else result == INSUFFICIENT_FUNDS
+    BuildStationController -> BuildStationController : showMessage("Insufficient funds", ERROR)
+    BuildStationController -> BuildStationController : updateBudgetLabel()
+    BuildStationController --> Player : display budget error
+end
+deactivate BuildStationController
 deactivate Player
 @enduml

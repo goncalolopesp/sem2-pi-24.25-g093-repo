@@ -6,43 +6,66 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildStationUI
+participant ":PlayerMenuController" as PlayerMenuController
+participant ":BuildStationGUI" as BuildStationGUI
+participant ":BuildStationController" as BuildStationController
 
 activate Player
-Player -> BuildStationUI : buildStationRequest()
-activate BuildStationUI
-BuildStationUI --> Player : request map selection
 
-Player -> BuildStationUI : select map
-BuildStationUI --> BuildStationUI : keepMap(map)
+Player -> PlayerMenuController : handleBuildStation()
+activate PlayerMenuController
+PlayerMenuController -> BuildStationGUI : launch(parentStage, map, scenario, budget)
+activate BuildStationGUI
 
-BuildStationUI --> Player : request station location
-Player -> BuildStationUI : select location
-BuildStationUI --> BuildStationUI : keepLocation(location)
+BuildStationGUI -> BuildStationGUI : load buildStation.fxml
+create BuildStationController
+BuildStationGUI -> BuildStationController : create()
+activate BuildStationController
 
-BuildStationUI --> Player : request station type (Depot/Station/Terminal)
-Player -> BuildStationUI : select type
-BuildStationUI --> BuildStationUI : keepType(type)
+BuildStationController -> BuildStationController : initialize()
+BuildStationController -> BuildStationController : setupComboBoxes()
+BuildStationController -> BuildStationController : setupValidation()
 
-alt type == "STATION"
-  BuildStationUI --> Player : request center (geometric)
-  Player -> BuildStationUI : select center
-  BuildStationUI --> BuildStationUI : keepCenter(center)
+BuildStationGUI -> BuildStationController : initData(map, scenario, budget, stage)
+BuildStationController -> BuildStationController : updateBudgetLabel()
 
-  loop until valid orientation
-    BuildStationUI --> Player : request orientation (NE,SE,NW,SW)
-    Player -> BuildStationUI : enter orientation
-    alt invalid orientation
-      BuildStationUI --> Player : display "Orientation is invalid. It must be NE, SE, NW or SW."
-    end
-  end
+BuildStationGUI -> BuildStationGUI : showAndWait()
+BuildStationGUI --> PlayerMenuController : modal dialog displayed
+deactivate BuildStationGUI
+deactivate PlayerMenuController
+
+Player -> BuildStationController : select station type from dropdown
+BuildStationController -> BuildStationController : onStationTypeChanged()
+BuildStationController -> BuildStationController : update cost and capacity labels
+BuildStationController -> BuildStationController : check budget sufficiency
+alt insufficient budget
+    BuildStationController -> BuildStationController : showMessage("Insufficient funds!", ERROR)
+    BuildStationController -> BuildStationController : disable build button
+else budget sufficient
+    BuildStationController -> BuildStationController : enable build button
+    BuildStationController -> BuildStationController : show/hide orientation box
+end
+BuildStationController --> Player : UI updated with station info
+deactivate BuildStationController
+
+Player -> BuildStationController : enter X coordinate
+activate BuildStationController
+BuildStationController -> BuildStationController : validate numeric input
+BuildStationController --> Player : input validated
+deactivate BuildStationController
+
+Player -> BuildStationController : enter Y coordinate
+activate BuildStationController
+BuildStationController -> BuildStationController : validate numeric input
+BuildStationController --> Player : input validated
+deactivate BuildStationController
+
+opt station type is STATION
+    Player -> BuildStationController : select orientation from dropdown
+    activate BuildStationController
+    BuildStationController --> Player : orientation selected
+    deactivate BuildStationController
 end
 
-loop until station placed or abort
-  BuildStationUI --> Player : request coordinates
-  Player -> BuildStationUI : enter X, Y coordinates
-end
-
-deactivate BuildStationUI
 deactivate Player
 @enduml

@@ -6,55 +6,65 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":BuildStationUI" as BuildStationUI
+participant ":BuildStationController" as BuildStationController
 participant ":CreateStationController" as CreateStationController
 participant "repositories\n:Repositories" as Repositories
 participant "stationRepository\n:StationRepository" as StationRepository
+participant "cityRepository\n:CityRepository" as CityRepository
 
 activate Player
-Player -> BuildStationUI : buildStationRequest()
-activate BuildStationUI
-create CreateStationController
-BuildStationUI -> CreateStationController : create()
+Player -> BuildStationController : click BUILD STATION button
+activate BuildStationController
+BuildStationController -> BuildStationController : handleBuildStation()
+BuildStationController -> BuildStationController : validateInput()
+
+BuildStationController -> CreateStationController : buildStation(type, map, scenario, x, y, orientation, budget)
 activate CreateStationController
 
-BuildStationUI -> CreateStationController : getRepositories()
 CreateStationController -> Repositories : getInstance()
 activate Repositories
 Repositories --> CreateStationController : repositories
 deactivate Repositories
 
-BuildStationUI -> CreateStationController : createStation(map, location, type, center)
-CreateStationController -> StationRepository : createStation(map, location, type, center)
+CreateStationController -> StationRepository : verify coordinates and budget
 activate StationRepository
+StationRepository -> StationRepository : checkCoordinates(x, y, map)
+StationRepository -> StationRepository : checkOverbuild(x, y, map, scenario)
+StationRepository -> StationRepository : checkBudget(stationType, budget)
+StationRepository --> CreateStationController : validation result
+deactivate StationRepository
 
-create ":station\n:Station" as Station
-StationRepository -> Station : create()
+CreateStationController -> CityRepository : getClosestCity(x, y, map)
+activate CityRepository
+CityRepository --> CreateStationController : closest city
+deactivate CityRepository
+
+CreateStationController -> StationRepository : createStation(type, x, y, orientation, map, scenario, budget)
+activate StationRepository
+create ":Station" as Station
+StationRepository -> Station : create(type, x, y, orientation, closestCity)
 StationRepository -> StationRepository : addStation(station)
+StationRepository -> StationRepository : deductBudget(cost)
 StationRepository --> CreateStationController : Error.OK
 deactivate StationRepository
 
-CreateStationController --> BuildStationUI : Error.OK
+CreateStationController --> BuildStationController : Error.OK
 deactivate CreateStationController
 
-BuildStationUI -> CreateStationController : getLastCreatedStationDTO()
+BuildStationController -> CreateStationController : getLastCreatedStationDTO()
 activate CreateStationController
-CreateStationController -> StationRepository : getStations()
-activate StationRepository
-StationRepository --> CreateStationController : stations
-deactivate StationRepository
-
 create ":StationDTO" as StationDTO
-CreateStationController -> StationDTO : fromEntity(lastStation)
+CreateStationController -> StationDTO : fromEntity(lastCreatedStation)
 activate StationDTO
 StationDTO --> CreateStationController : stationDTO
 deactivate StationDTO
-CreateStationController --> BuildStationUI : stationDTO
+CreateStationController --> BuildStationController : stationDTO
 deactivate CreateStationController
 
-destroy CreateStationController
-
-BuildStationUI --> Player : display "Station created successfully" + stationDTO info
-deactivate BuildStationUI
+BuildStationController -> BuildStationController : showMessage("Station built successfully", SUCCESS)
+BuildStationController -> BuildStationController : updateBudgetLabel()
+BuildStationController -> BuildStationController : clearForm()
+BuildStationController --> Player : display success message and updated budget
+deactivate BuildStationController
 deactivate Player
 @enduml

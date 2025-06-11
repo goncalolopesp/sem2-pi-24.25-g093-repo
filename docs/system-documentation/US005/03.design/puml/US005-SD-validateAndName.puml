@@ -5,35 +5,38 @@ skinparam shadowing false
 
 autonumber
 participant ":CreateStationController" as CreateStationController
-participant "mapRepository\n:MapRepository" as MapRepository
-participant "cityRepository\n:CityRepository" as CityRepository
+participant "repositories\n:Repositories" as Repositories
 participant "stationRepository\n:StationRepository" as StationRepository
+participant "cityRepository\n:CityRepository" as CityRepository
 
 activate CreateStationController
 
-CreateStationController -> MapRepository : findMap(map)
-activate MapRepository
-MapRepository --> CreateStationController : map
-deactivate MapRepository
+CreateStationController -> Repositories : getInstance()
+activate Repositories
+Repositories --> CreateStationController : repositories
+deactivate Repositories
 
-CreateStationController -> StationRepository : verifyNoOverbuild(location)
+CreateStationController -> StationRepository : verify coordinates and budget
 activate StationRepository
-StationRepository --> CreateStationController : noConflict
+StationRepository -> StationRepository : checkCoordinates(x, y, map)
+StationRepository -> StationRepository : checkOverbuild(x, y, map, scenario)
+StationRepository -> StationRepository : checkBudget(stationType, budget)
+StationRepository --> CreateStationController : validation result
 deactivate StationRepository
 
-CreateStationController -> StationRepository : verifyBudget(type)
-activate StationRepository
-StationRepository --> CreateStationController : budgetOK
-deactivate StationRepository
-
-CreateStationController -> CityRepository : getClosestCity(location)
+CreateStationController -> CityRepository : getClosestCity(x, y, map)
 activate CityRepository
-CityRepository --> CreateStationController : cityName
+CityRepository --> CreateStationController : closest city
 deactivate CityRepository
 
-CreateStationController -> StationRepository : proposeName(cityName, type)
+CreateStationController -> StationRepository : createStation(type, x, y, orientation, map, scenario, budget)
 activate StationRepository
-StationRepository --> CreateStationController : proposedName
+create ":Station" as Station
+StationRepository -> Station : create(type, x, y, orientation, closestCity)
+StationRepository -> StationRepository : addStation(station)
+StationRepository -> StationRepository : deductBudget(cost)
+StationRepository --> CreateStationController : Error.OK
 deactivate StationRepository
 
+deactivate CreateStationController
 @enduml
