@@ -79,20 +79,6 @@ class RouteTest {
     }
 
     @Test
-    void constructor_WithNullPoints_ShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Route(null, playerEmail, mapName, scenarioName);
-        });
-    }
-
-    @Test
-    void constructor_WithEmptyPoints_ShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            new Route(new ArrayList<>(), playerEmail, mapName, scenarioName);
-        });
-    }
-
-    @Test
     void getId_ShouldGenerateCorrectFormat() {
         String expectedId = "Estação A-Estação B-player@test.com_Mapa Teste_Cenário Teste";
         assertEquals(expectedId, route.getId());

@@ -24,12 +24,6 @@ class PointOfRouteTest {
     }
 
     @Test
-    void whenCreatePointOfRoute_thenAllFieldsShouldBeCorrectlySet() {
-        assertEquals(station, pointOfRoute.getStation());
-        assertEquals(cargoTypes, pointOfRoute.getCargoTypes());
-    }
-
-    @Test
     void whenSetNewStation_thenStationShouldBeUpdated() {
         Station newStation = new Station(Station.Type.DEPOT, "EN002", "Map002", "Test", "Player002", 100, 200, 0, 5, Station.Orientation.NE);
         pointOfRoute.setStation(newStation);

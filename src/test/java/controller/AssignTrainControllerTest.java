@@ -58,7 +58,6 @@ public class AssignTrainControllerTest {
 
     @Test
     public void testAssignExistingTrainToRoute_VaccinationScenario() {
-        CurrentUser.getInstance().clear();
         AssignTrainController controller = new AssignTrainController();
         User testUser = new User("Test User", "test@example.com", "password", "player");
         CurrentUser.getInstance().setUser(testUser);
@@ -103,7 +102,6 @@ public class AssignTrainControllerTest {
 
     @Test
     public void testAssignExistingTrainToRoute_WithPeopleCarriageOnly() {
-        CurrentUser.getInstance().clear();
         AssignTrainController controller = new AssignTrainController();
         User testUser = new User("Test User", "test@example.com", "password", "player");
         CurrentUser.getInstance().setUser(testUser);

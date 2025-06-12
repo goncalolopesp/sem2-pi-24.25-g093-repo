@@ -25,7 +25,7 @@ public class BudgetTest {
         histRestrictions.add("Pre-electric era");
 
         map = new Map(mapName, 100, 100, 2);
-        scenario = new Scenario("TestScenario", mapName, timeRestrictions, techRestrictions, histRestrictions);
+        scenario = new Scenario("TestScenario", mapName, timeRestrictions,1,techRestrictions, histRestrictions, 1,1);
         user = new User("Test User", "test@example.com", "password", "PLAYER");
         budget = new Budget(initialBudgetAmount, map, scenario, user);
     }
@@ -80,8 +80,8 @@ public class BudgetTest {
         List<String> newHistRestrictions = new ArrayList<>();
         newHistRestrictions.add("Post-war era");
 
-        Scenario newScenario = new Scenario("NewScenario", "NewMap", new int[]{1950, 2050},
-                newTechRestrictions, newHistRestrictions);
+        Scenario newScenario = new Scenario("NewScenario", "NewMap", new int[]{1950, 2050},1,
+                newTechRestrictions, newHistRestrictions,1,1);
         budget.setScenario(newScenario);
         assertEquals(newScenario, budget.getScenario());
     }

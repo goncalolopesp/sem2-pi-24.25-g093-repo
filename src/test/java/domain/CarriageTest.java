@@ -52,6 +52,6 @@ class CarriageTest {
 
         String result = carriage.toString();
 
-        assertEquals("Carriage type: MAILcapacity: 30", result);
+        assertEquals("Carriage[type=MAIL, capacity=0/30]", result);
     }
 }

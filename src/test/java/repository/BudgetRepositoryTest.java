@@ -26,12 +26,12 @@ public class BudgetRepositoryTest {
 
         testUser = new User("Test User", "test@example.com", "password", "PLAYER");
 
-        testMap = new Map("TestMap", 100, 100);
+        testMap = new Map("TestMap", 100, 100,1);
 
         int[] timeRestrictions = {1900, 1950};
-        testScenario = new Scenario("Test Scenario", "TestMap", timeRestrictions,
+        testScenario = new Scenario("Test Scenario", "TestMap", timeRestrictions,1,
                 List.of("Steam", "Diesel"),
-                List.of("European"));
+                List.of("Test"),1,1);
     }
 
     @Test
@@ -70,13 +70,13 @@ public class BudgetRepositoryTest {
         assertFalse(notFoundBudget.isPresent());
 
         Scenario differentScenario = new Scenario("Different Scenario", "TestMap",
-                new int[]{1920, 1970},
+                new int[]{1920, 1970},1,
                 List.of("Electric"),
-                List.of("American"));
+                List.of("American"),1,1);
         notFoundBudget = budgetRepository.getUserBudgetFromScenarioInMap(differentScenario, testMap, testUser);
         assertFalse(notFoundBudget.isPresent());
 
-        Map differentMap = new Map("DifferentMap", 100, 100);
+        Map differentMap = new Map("DifferentMap", 100, 100,1);
         notFoundBudget = budgetRepository.getUserBudgetFromScenarioInMap(testScenario, differentMap, testUser);
         assertFalse(notFoundBudget.isPresent());
     }

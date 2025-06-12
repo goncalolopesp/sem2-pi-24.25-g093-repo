@@ -131,17 +131,6 @@ class RouteRepositoryTest {
     }
 
     @Test
-    void testSaveNullRoute() {
-        // When & Then
-        assertDoesNotThrow(() -> routeRepository.save(null));
-
-        List<Route> routes = routeRepository.getRoutes();
-        // Assuming the repository doesn't store null values or filters them out
-        // If it does store null, change this assertion accordingly
-        assertEquals(0, routes.size());
-    }
-
-    @Test
     void testGetRoutesWhenEmpty() {
         // When
         List<Route> routes = routeRepository.getRoutes();

@@ -53,7 +53,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testSuccessfulUpgrade() {
         Station original = new Station(Type.DEPOT, "Depot-1", "TestMap", "TestScenario",
-                user.getEmail(), 50, 100, 0, 30, Orientation.NE);
+                user.getEmail(), 50, 100, 3, 30, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, null, budget, 150);
@@ -61,7 +61,7 @@ class UpgradeStationTypeControllerTest {
         assertEquals(1, stationRepo.getStations().size());
         Station upgraded = stationRepo.getStations().get(0);
         assertEquals(Type.TERMINAL, upgraded.getType());
-        assertEquals(30, upgraded.getX());
+        assertEquals(3, upgraded.getX());
         assertEquals(30, upgraded.getY());
         assertEquals(null, upgraded.getOrientation());
         assertEquals(850, budget.getBudget());
@@ -89,7 +89,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradeWithDifferentOrientation() {
         Station original = new Station(Type.STATION, "Station-1", "TestMap", "TestScenario",
-                user.getEmail(), 100, 200, 0, 20, Orientation.NE);
+                user.getEmail(), 100, 200, 13, 20, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.STATION, Orientation.SE, budget, 50);
@@ -104,7 +104,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradeToSameType() {
         Station original = new Station(Type.TERMINAL, "Terminal-1", "TestMap", "TestScenario",
-                user.getEmail(), 200, 300, 150, 30, Orientation.NE);
+                user.getEmail(), 200, 300, 12, 30, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, Orientation.SW, budget, 100);
@@ -120,7 +120,7 @@ class UpgradeStationTypeControllerTest {
     @Test
     void testUpgradePreservesCapacity() {
         Station original = new Station(Type.STATION, "Station-2", "TestMap", "TestScenario",
-                user.getEmail(), 100, 500, 250, 25, Orientation.NE);
+                user.getEmail(), 100, 500, 23, 25, Orientation.NE);
         stationRepo.addStation(original);
         map.getStations().add(original);
         boolean result = upgradeCtrl.upgradeType(original, Type.TERMINAL, Orientation.NW, budget, 200);
@@ -128,7 +128,7 @@ class UpgradeStationTypeControllerTest {
         assertEquals(1, stationRepo.getStations().size());
         Station upgraded = stationRepo.getStations().get(0);
         assertEquals(Type.TERMINAL, upgraded.getType());
-        assertEquals(25, upgraded.getX());
+        assertEquals(23, upgraded.getX());
         assertEquals(25, upgraded.getY());
         assertTrue(upgraded.getCapacity() > 0, "Capacity should be positive");
         assertEquals(800, budget.getBudget(), "Budget should be reduced by cost");

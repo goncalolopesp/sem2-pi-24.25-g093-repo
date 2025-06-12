@@ -14,7 +14,7 @@ class StationTest {
 
     @BeforeEach
     void setUp() {
-        station = new Station(Station.Type.STATION,"madrid-STATION","MapTest","Test","Player@this.app",100,200,0,5, NE);
+        station = new Station(Station.Type.STATION,"madrid-STATION","MapTest","Test","Player@this.app",100,200,5,5, NE);
     }
 
     @Test
