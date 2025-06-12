@@ -1,0 +1,62 @@
+# User Story US30 - Curve Fitting for Theoretical Complexity
+
+## Description
+As a **Product Owner**, I want to obtain the best-fitting curve for the previous sample dataset and visualize it graphically.
+
+---
+
+## Acceptance Criteria
+
+### AC01: The fitted curve should align with the reference function obtained from the theoretical analysis of the procedure’s complexity.
+### AC04: The documentation must:
+1. Present a **detailed description** of the objective and the **theoretical concepts** that justify the answers.
+2. Include a **thorough analysis** and **interpretation** of the results, related back to the project theme (PI).
+
+---
+
+## Theoretical Context & Objective
+
+The goal is to validate whether the performance of a procedure matches its **expected computational complexity**. In algorithm analysis, complexity is usually expressed using Big O notation (e.g., O(n), O(n²), O(log n)). This code fits multiple theoretical curves to a set of observed data points to determine which one best describes the behavior of the procedure.
+
+This process is important in software engineering and data analysis because it checks if implementations scale as expected. For instance, if a sorting algorithm has theoretical complexity O(n log n), we should be able to observe this in empirical time measurements as input size increases.
+
+---
+
+## Input & Output
+
+### Input:
+- An Excel file (`Dataset_US30.xlsx`) containing two columns:
+  - `size`: The size of the input for which the procedure was run.
+  - `time`: The time it took to complete.
+
+### Output:
+- A **graph** showing the original data and the best-fitting curve.
+- A **console printout** with:
+  - The name of the best-fitting curve.
+  - The R² score (how well the model fits).
+  - The final equation with the calculated parameters.
+
+---
+
+## Result Analysis & Interpretation
+
+After trying several curve models (linear, quadratic, cubic, logarithmic, power), the script chooses the one with the best **R² score**, which measures how well the curve matches the data (1.0 means perfect fit).
+
+This helps us understand how closely our real-world performance matches the theoretical expectations. If a quadratic function gives the best fit, and we expected O(n²) from theory, this confirms our assumptions. If not, we may need to revisit either the implementation or the complexity analysis.
+
+This approach supports the overall PI topic by ensuring the computational model behaves as intended, making performance more predictable and systems more reliable.
+
+---
+
+## Technologies Used
+
+- **Pandas & NumPy**: Data loading and preprocessing.
+- **SciPy**: Curve fitting.
+- **Matplotlib**: Visualization.
+- **scikit-learn**: R² score calculation.
+
+---
+
+## Final Notes
+
+This task ensures empirical validation of theoretical concepts in complexity analysis. It helps developers prove that their algorithms perform according to expectations and supports high-quality, efficient system design.
