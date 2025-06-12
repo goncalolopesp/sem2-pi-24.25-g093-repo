@@ -266,28 +266,6 @@ public class SimulationController {
             System.out.printf("People: %d, Mail: %d, Coal: %d, Iron: %d, Steel: %d%n",
                     peopleDemand, mailDemand, coalDemand, ironDemand, steelDemand);
         }
-
-        // Method to get demand as float for calculations (maintains backward compatibility)
-        public float getDemandAsFloat(Carriage.Type cargoType) {
-            switch (cargoType) {
-                case PEOPLE: return (float) peopleDemand;
-                case MAIL: return (float) mailDemand;
-                case COAL: return (float) coalDemand;
-                case IRON: return (float) ironDemand;
-                case STEEL: return (float) steelDemand;
-                default: return DEFAULT_DEMAND;
-            }
-        }
-
-        // Reset demands to default (useful for new games)
-        public void resetToDefault() {
-            peopleDemand = DEFAULT_DEMAND;
-            mailDemand = DEFAULT_DEMAND;
-            coalDemand = DEFAULT_DEMAND;
-            ironDemand = DEFAULT_DEMAND;
-            steelDemand = DEFAULT_DEMAND;
-            resetYearlyDeliveries();
-        }
     }
 
     private final DemandManager demandManager = new DemandManager();
@@ -411,7 +389,7 @@ public class SimulationController {
         if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
         if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
 
-        int totalEarnings = calculateArrivalEarnings(result, scenario, route, selectedMap);
+        int totalEarnings = (int) ((calculateArrivalEarnings(result, scenario, route, selectedMap)) * scenario.getProfitMultiplier());
 
         if (result.getTotalCargo() > 0) {
             displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
