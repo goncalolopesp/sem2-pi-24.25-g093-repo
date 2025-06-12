@@ -1,6 +1,9 @@
 package ui.console.menu;
 
+import controller.CreateMapController;
+import controller.EditorController;
 import domain.Map;
+import dto.MapDTO;
 import pt.ipp.isep.dei.ui.console.utils.Utils;
 import repository.MapRepository;
 import repository.Repositories;
@@ -11,15 +14,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EditorUI implements Runnable {
-    private Map map;
+    private MapDTO mapDTO;
+    private final EditorController ctrl = new EditorController();
 
     @Override
     public void run() {
-        map = requestMap();
+        mapDTO = requestMap();
 
-        if (map == null) {
+        if (mapDTO == null) {
             return;
         }
+
+        CreateMapController mapCtrl = new CreateMapController(Repositories.getInstance().getMapRepository());
+        List<Map> mapList = mapCtrl.getMaps();
+        Map map = mapList.stream().filter(m -> m.getMapName().equals(mapDTO.getMapName())).findFirst().get();
 
         List<MenuItem> options = new ArrayList<MenuItem>();
         options.add(new MenuItem("Create City", new CreateCityUI(map)));
@@ -34,9 +42,8 @@ public class EditorUI implements Runnable {
         } while (option != -1);
     }
 
-    private Map requestMap() {
-        MapRepository mapRepository = Repositories.getInstance().getMapRepository();
-        List<Map> maps = mapRepository.getMaps();
+    private MapDTO requestMap() {
+        List<MapDTO> maps = ctrl.getMaps();
         int mapIndex;
 
         mapIndex = Utils.showAndSelectIndex(maps, "\n\n--- MAP LIST --------------------------");
