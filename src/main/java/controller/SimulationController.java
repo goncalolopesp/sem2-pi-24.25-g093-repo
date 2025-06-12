@@ -798,7 +798,6 @@ public class SimulationController {
         if (currentBudget >= yearlyTotalCost) {
             System.out.println("\n=== YEAR " + yearSummary + " SUMMARY ===");
             payLocomotiveMaintenance(budget);
-            System.out.println("\nYearly Fuel Cost: " + yearlyFuelCost);
             budget.subtractBudget(yearlyFuelCost);
             payTrackMaintenance(selectedScenario, map, budget);
             yearlyMaintenanceCost = locomotiveMaintenanceCost;
@@ -840,7 +839,7 @@ public class SimulationController {
         System.out.printf("Total Earnings from Routes: $%d%n", yearlyEarnings);
         System.out.printf("Locomotive Maintenance Costs: $%d%n", yearlyMaintenanceCost);
         System.out.printf("Track Maintenance Costs: $%d%n", yearlyTrackMaintenanceCost);
-        System.out.printf("Fuel Costs: $%d%n", yearlyFuelCost / KMS_FUEL);
+        System.out.printf("Fuel Costs: $%d%n", yearlyFuelCost);
         System.out.println("\n------------------------");
     }
 
