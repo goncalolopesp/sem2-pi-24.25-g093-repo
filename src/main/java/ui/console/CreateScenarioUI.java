@@ -143,9 +143,8 @@ public class CreateScenarioUI implements Runnable {
 
         System.out.println("\n--- PORT BEHAVIOR --------------------------");
         System.out.println("Note: Chosen behavior must be included in the following list:");
-        System.out.println("1 - Port1");
-        System.out.println("2 - Port2");
-        System.out.println("3 - Port3");
+        System.out.println("1 - Port1 (All Cargo available to import and export)");
+        System.out.println("2 - Port2 (Only PEOPLE and MAIL are allowed)");
         System.out.print("Enter Port Behavior: ");
 
         do {
@@ -157,10 +156,10 @@ public class CreateScenarioUI implements Runnable {
                 System.out.print("Error: '" + input + "' is not a valid integer. Please enter a number: ");
             }
 
-            if (portBehavior < 1 || portBehavior > 3) {
+            if (portBehavior < 1 || portBehavior > 2) {
                 System.out.print("Error: Chosen behavior must be included in the list. Try again: ");
             }
-        } while (portBehavior < 1 || portBehavior > 3);
+        } while (portBehavior < 1 || portBehavior > 2);
 
         return portBehavior;
     }

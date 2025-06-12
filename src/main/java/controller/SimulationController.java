@@ -26,6 +26,7 @@ public class SimulationController {
     private static final int STEEL_VALUE = 10;
     private static final int KMS_FUEL = 100;
     private static final int AMOUNT_PER_LINE = 5;
+    private static final int PORT_BEHAVIOUR = 1;
 
     private static int yearlyEarnings = 0;
     private static int yearlyMaintenanceCost = 0;
@@ -471,11 +472,6 @@ public class SimulationController {
     private String generateRouteId(Route route) {
         return route.getMapName() + "_" + route.getScenarioName() + "_" + route.getPlayerEmail() + "_" +
                 route.getPoints().hashCode() + "_" + (route.getTrain() != null ? route.getTrain().hashCode() : 0);
-    }
-
-    private void displayRouteComplete(CargoCollectionResult result, int totalEarnings, TrainJourney journey) {
-        System.out.printf("\n[Train Arrival] Train arrived at %s. Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
-                new Date().toString(), result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
     }
 
     private List<Route> getUserRoutes(Map map, Scenario scenario) {
@@ -937,29 +933,30 @@ public class SimulationController {
     }
 
     public void addIndustryCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations, String mapName) {
-        // Check if stations list is empty to prevent IndexOutOfBoundsException
-        if (stations.isEmpty()) {
-            System.out.println("No stations available for cargo generation");
-            return;
-        }
+        if(selectedScenario.getPortBehavior() == PORT_BEHAVIOUR) {
+            if (stations.isEmpty()) {
+                System.out.println("No stations available for cargo generation");
+                return;
+            }
 
-        List<Industry> mapIndustries = industryRepo.getIndustries().stream()
-                .filter(industry -> industry.getMapName().equals(mapName))
-                .collect(Collectors.toList());
-
-        for (Industry industry : mapIndustries) {
-            List<Station> overlappingStations = stations.stream()
-                    .filter(station -> hasStationIndustryOverlap(station, industry))
+            List<Industry> mapIndustries = industryRepo.getIndustries().stream()
+                    .filter(industry -> industry.getMapName().equals(mapName))
                     .collect(Collectors.toList());
 
-            if (!overlappingStations.isEmpty()) {
-                int cargoPerIndustry = (int) (getCargoPerIndustry(industry) * selectedScenario.getProductionRate());
-                if (cargoPerIndustry > 0) {
-                    Station targetStation = overlappingStations.get(0);
+            for (Industry industry : mapIndustries) {
+                List<Station> overlappingStations = stations.stream()
+                        .filter(station -> hasStationIndustryOverlap(station, industry))
+                        .collect(Collectors.toList());
 
-                    int actualAddedCargo = addCargoToStation(targetStation, cargoPerIndustry, maxCapacityStations);
-                    distributeIndustryCargo(targetStation, industry, actualAddedCargo);
-                    
+                if (!overlappingStations.isEmpty()) {
+                    int cargoPerIndustry = (int) (getCargoPerIndustry(industry) * selectedScenario.getProductionRate());
+                    if (cargoPerIndustry > 0) {
+                        Station targetStation = overlappingStations.get(0);
+
+                        int actualAddedCargo = addCargoToStation(targetStation, cargoPerIndustry, maxCapacityStations);
+                        distributeIndustryCargo(targetStation, industry, actualAddedCargo);
+
+                    }
                 }
             }
         }

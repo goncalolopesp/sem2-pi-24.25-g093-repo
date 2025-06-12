@@ -42,6 +42,7 @@ public class AssignTrainGUIController implements Initializable {
     private Scenario selectedScenario;
     private Budget budget;
     private AssignTrainController assignTrainController;
+    private static int PORT_BEHAVIOUR = 1;
 
     private List<Train> userTrains;
     private List<Station> availableStations;
@@ -390,7 +391,12 @@ public class AssignTrainGUIController implements Initializable {
         cargoCheckBoxContainer.getChildren().clear();
         cargoCheckBoxes.clear();
 
-        String[] cargoTypes = {"PEOPLE", "MAIL", "COAL", "IRON", "STEEL"};
+        String [] cargoTypes;
+        if (selectedScenario.getPortBehavior() != PORT_BEHAVIOUR) {
+            cargoTypes = new String[]{"PEOPLE", "MAIL"};
+        } else {
+            cargoTypes = new String[]{"PEOPLE", "MAIL", "COAL", "IRON", "STEEL"};
+        }
 
         for (String cargoType : cargoTypes) {
             CheckBox checkBox = new CheckBox(cargoType);
