@@ -20,7 +20,7 @@
       </Label>
       <ComboBox fx:id="StationList" layoutX="225.0" layoutY="128.0" onAction="#ShowStationDescription" prefWidth="150.0" />
       <TextArea fx:id="StationDescription" editable="false" layoutX="200.0" layoutY="188.0" prefHeight="200.0" prefWidth="200.0" />
-      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#GoBackToPlayerMenu" style="-fx-background-color: red;" text="Back" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#returnToMenu" style="-fx-background-color: red;" text="Back" textAlignment="CENTER" textFill="WHITE" wrapText="true">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>

@@ -421,6 +421,11 @@ public class PlayerMenuController implements Initializable {
 
     @FXML
     private void ListLocomotives() {
+        if (simulationUI == null) {
+            System.err.println("SimulationUI is not set");
+            return;
+        }
+
         navigateAwayFromMenu(() -> {
             Stage currentStage = (Stage) listLocomotivesBtn.getScene().getWindow();
             Map map = simulationUI.getSelectedMap();
@@ -439,22 +444,12 @@ public class PlayerMenuController implements Initializable {
         }
 
         navigateAwayFromMenu(() -> {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/javafx/ListStationsGUI.fxml"));
-            Parent root;
-            try {
-                root = loader.load();
-            } catch (IOException e) {
-                System.err.println("Failed to load ListStationsGUI.fxml: " + e.getMessage());
-                e.printStackTrace();
-                return;
-            }
+            Stage currentStage = (Stage) listLocomotivesBtn.getScene().getWindow();
+            Map map = simulationUI.getSelectedMap();
+            Scenario scenario = simulationUI.getSelectedScenario();
+            Budget budget = simulation.getUserBudget();
 
-            ListStationController controller = loader.getController();
-            controller.setScenario(simulationUI.getSelectedScenario());
-            controller.setPlayerMenuController(this);
-
-            Scene currentScene = listLocomotivesBtn.getScene();
-            currentScene.setRoot(root);
+            ListStationsGUI.launch(currentStage, map, scenario, budget);
         });
     }
 
