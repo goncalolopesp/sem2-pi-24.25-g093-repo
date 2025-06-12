@@ -1,6 +1,7 @@
 package domain;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Represents a Station within a map, now including orientation.
@@ -231,5 +232,17 @@ public class Station implements Serializable {
     @Override
     public String toString() {
         return name + " " + type + " (" + x + ',' + y + ')';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Station station = (Station) o;
+        return x == station.x && y == station.y && type == station.type && Objects.equals(name, station.name) && Objects.equals(ownerPlayer, station.ownerPlayer);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, name, ownerPlayer, x, y);
     }
 }

@@ -43,6 +43,7 @@ public class SimulationController {
     private final CityRepository cityRepo = Repositories.getInstance().getCityRepository();
     private final ScenarioRepository scenarioRepo = Repositories.getInstance().getScenarioRepository();
     private final StationRepository stationrepo = Repositories.getInstance().getStationRepository();
+    private final BuildingRepository buildingRepo = Repositories.getInstance().getBuildingRepository();
     private final BudgetRepository budgetRepo = Repositories.getInstance().getBudgetRepository();
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
     private final RailwayLineRepository railwayRepo = Repositories.getInstance().getRailwayLineRepository();
@@ -374,11 +375,23 @@ public class SimulationController {
         int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
         yearlyFuelCost += routeFuelCost;
 
+        AtomicReference<Double> peopleEarningMultiplier = new AtomicReference<>(1.0);
+
         for (PointOfRoute point : route.getPoints()) {
             if (isTrainFull(carriages)) break;
 
             Station station = point.getStation();
             if (station.getCapacityOwned() <= 0) continue;
+
+            if (station.getPeopleStored() > 0) {
+                buildingRepo.getBuildings().stream().filter(building -> building.getStation().equals(station)).forEach(building -> {
+                    if (building.getBuildingType().contains("cafe")) {
+                        peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.2);
+                    } if (building.getBuildingType().contains("hotel")) {
+                        peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.3);
+                    }
+                });
+            }
 
             collectCargoFromStation(station, point.getCargoTypes(), carriages, result);
         }
@@ -389,7 +402,7 @@ public class SimulationController {
         if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
         if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
 
-        int totalEarnings = (int) ((calculateArrivalEarnings(result, scenario, route, selectedMap)) * scenario.getProfitMultiplier());
+        int totalEarnings = (int) ((calculateArrivalEarnings(result, scenario, route, selectedMap, peopleEarningMultiplier)) * scenario.getProfitMultiplier());
 
         if (result.getTotalCargo() > 0) {
             displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
@@ -407,7 +420,7 @@ public class SimulationController {
                 currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.iron, result.coal, result.steel, totalEarnings);
     }
 
-    private int calculateArrivalEarnings(CargoCollectionResult result, Scenario scenario, Route route, Map selectedMap) {
+    private int calculateArrivalEarnings(CargoCollectionResult result, Scenario scenario, Route route, Map selectedMap, AtomicReference<Double> peopleEarningMultiplier) {
         boolean isVaccinationCampaign = hasHistoricalRestriction(scenario, "vaccination campaign");
         final float DEFAULT_DEMAND = 4f;
 
@@ -418,6 +431,7 @@ public class SimulationController {
         int peopleEarnings = (int)(
                 result.people
                         * PEOPLE_VALUE
+                        * peopleEarningMultiplier.get()
                         * (isVaccinationCampaign ? 2 : 1)
                         * demandManager.getPeopleDemand() / DEFAULT_DEMAND
                         * distanceMultiplier
