@@ -77,7 +77,7 @@ public class Bootstrap {
                     Collections.singletonList("steam"),
                     Collections.singletonList("none"),
                     1.0,
-                    1.0);
+                    1.0,false);
         }
     }
 

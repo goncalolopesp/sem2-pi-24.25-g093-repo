@@ -43,18 +43,65 @@ public class CreateScenarioUI implements Runnable {
     }
 
     /**
-     * Collects all data related to scenario creation.
-     * Prints a success or failure message based on the result.
+     * Submits the data required to create a new scenario.
+     *
+     * The method prompts the user to indicate whether the scenario should be saved
+     * to a file or only retained in memory. It then initiates the creation of a
+     * scenario using the specified parameters, which include the scenario name,
+     * map name, time restrictions, port behavior, technological restrictions,
+     * historical restrictions, production rate, and profit multiplier.
+     *
+     * Upon successful creation, the scenario is either saved to memory or persisted
+     * to a file based on the user's input. If the creation fails, the user is
+     * notified accordingly. Feedback messages about the operation's success or
+     * failure are displayed to the console.
      */
     private void submitData() {
-        Optional<Scenario> scenario = Optional.ofNullable(getScenarioController().createScenario(scenarioName, selectedMap.getMapName(), timeRestrictions, portBehavior, technologicalRestrictions, historicalRestrictions, productionRate, profitMultiplier));
+        boolean saveToFile = askUserToSaveToFile();
+
+        Optional<Scenario> scenario = Optional.ofNullable(
+                getScenarioController().createScenario(scenarioName, selectedMap.getMapName(), timeRestrictions,
+                        portBehavior, technologicalRestrictions, historicalRestrictions,
+                        productionRate, profitMultiplier, saveToFile)
+        );
 
         if (scenario.isPresent()) {
             System.out.println("\nScenario successfully created!");
+            if (!saveToFile) {
+                System.out.println("Note: Scenario was saved in memory but not persisted to file.");
+            }
         } else {
             System.out.println("\nScenario not created!");
         }
     }
+
+    /**
+     * Prompts the user to decide whether or not to save the scenario to a file.
+     * The user is asked to enter "yes" or "no", and the input is validated.
+     * If the input is invalid, the user is prompted again until valid input is provided.
+     *
+     * @return true if the user chooses to save the scenario to a file, false otherwise
+     */
+    private boolean askUserToSaveToFile() {
+        Scanner sc = new Scanner(System.in);
+        String input;
+
+        while (true) {
+            System.out.print("\nDo you want to save the scenario to the file? (yes/no): ");
+            input = sc.nextLine().trim().toLowerCase();
+
+            if (input.equals("yes")) {
+                return true;
+            } else if (input.equals("no")) {
+                return false;
+            } else {
+                System.out.println("Invalid input. Please type 'yes' or 'no'.");
+            }
+        }
+    }
+
+
+
 
     /**
      * Asks the user for scenario name and map selection.
@@ -187,7 +234,7 @@ public class CreateScenarioUI implements Runnable {
 
                 for (String validType : validTypes) {
                     if (s.equalsIgnoreCase(validType) && !availableTypes.contains("none")) {
-                        availableTypes.add(validType); // Store the normalized lowercase version
+                        availableTypes.add(validType);
                     } else {
                         valid = false;
                     }

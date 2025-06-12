@@ -42,20 +42,28 @@ public class CreateScenarioController {
     }
 
     /**
-     * Creates a new scenario with the given name and associated map.
+     * Creates a new Scenario with the provided attributes and adds it to the repository.
      *
-     * @param scenarioName           the unique name of the scenario
-     * @param selectedMap            the name of the map associated with this scenario
-     * @param timeRestrictions
-     * @param technologicalRestrictions
-     * @param historicalRestrictions
+     * @param scenarioName the unique name of the scenario
+     * @param selectedMap the name of the map associated with the scenario
+     * @param timeRestrictions the time restrictions associated with the scenario
+     * @param portBehavior the behavior of the ports in the scenario
+     * @param technologicalRestrictions the technological restrictions associated with the scenario
+     * @param historicalRestrictions the historical restrictions associated with the scenario
+     * @param productionRate the production rate applied within the scenario
+     * @param profitMultiplier the profit multiplier applicable in the scenario
+     * @param saveToFile a flag indicating whether to save the scenario to a file
      * @return the created Scenario instance
      */
-    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, int portBehavior, List<String> technologicalRestrictions, List<String> historicalRestrictions, double productionRate, double profitMultiplier) {
-        Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, portBehavior, technologicalRestrictions, historicalRestrictions, productionRate, profitMultiplier);
-        getScenarioRepository().add(scenario);
+    public Scenario createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, int portBehavior,
+                                   List<String> technologicalRestrictions, List<String> historicalRestrictions,
+                                   double productionRate, double profitMultiplier, boolean saveToFile) {
+        Scenario scenario = new Scenario(scenarioName, selectedMap, timeRestrictions, portBehavior,
+                technologicalRestrictions, historicalRestrictions, productionRate, profitMultiplier);
+        getScenarioRepository().add(scenario, saveToFile);
         return scenario;
     }
+
 
     /**
      * Checks if name is unique.

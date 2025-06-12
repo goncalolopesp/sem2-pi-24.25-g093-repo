@@ -25,17 +25,31 @@ public class ScenarioRepository {
     }
 
     /**
-     * Adds a new scenario to the repository if it is not already present.
-     * Automatically saves the updated scenario list to file.
+     * Adds a new scenario to the repository if it passes validation. Optionally, the changes
+     * can be saved to a file.
      *
-     * @param scenario the Scenario instance to add
+     * @param scenario the {@link Scenario} instance to be added to the repository
+     * @param saveToFile a boolean flag indicating whether to save the updated repository to a file
      */
-    public void add(Scenario scenario) {
+    public void add(Scenario scenario, boolean saveToFile) {
         if (validateScenario(scenario)) {
             scenarios.add(scenario);
-            saveScenariosToFile();
+            if (saveToFile) {
+                saveScenariosToFile();
+            }
         }
     }
+
+    /**
+     * Adds a new scenario to the repository. By default, the changes will be saved to a file.
+     *
+     * @param scenario the {@link Scenario} instance to be added to the repository
+     */
+    public void add(Scenario scenario) {
+        add(scenario, true); // default behavior remains saving to file
+    }
+
+
 
     /**
      * Validates that a scenario is not already contained in the repository.
