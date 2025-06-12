@@ -5,55 +5,54 @@ skinparam shadowing false
 
 autonumber
 
-participant ":UpgradeStationUI" as UpgradeStationUI
-participant ":UpgradeStationController" as UpgradeStationController
+participant ":UpgradeStationFXController" as Controller
+participant ":UpgradeStationController" as UpgradeController
 participant "buildingRepository\n:BuildingRepository" as BuildingRepository
 participant ":Budget" as Budget
 
-activate UpgradeStationUI
-UpgradeStationUI -> UpgradeStationController : verifyIfBuildingExists(station, buildingType)
-activate UpgradeStationController
+activate Controller
 
-UpgradeStationController -> BuildingRepository : getBuildings()
+Controller -> Controller : filter available building types by year and existing buildings
+Controller -> UpgradeController : verifyIfBuildingExists(station, buildingType)
+activate UpgradeController
+
+UpgradeController -> BuildingRepository : getBuildings()
 activate BuildingRepository
-BuildingRepository --> UpgradeStationController : buildings list
+BuildingRepository --> UpgradeController : buildings list
 deactivate BuildingRepository
+UpgradeController --> Controller : buildingExists
+deactivate UpgradeController
 
-UpgradeStationController --> UpgradeStationUI : buildingExists
+Controller -> Controller : populate upgradeOptionComboBox with valid options
 
-alt building already exists
-    UpgradeStationUI --> UpgradeStationUI : validation failed
-else building doesn't exist
-    alt telegraph selected
-        alt year < 1855 OR year > 1875
-            UpgradeStationUI --> UpgradeStationUI : availability failed
-        else year within range
-            UpgradeStationUI --> UpgradeStationUI : availability ok
-        end
-    else telephone selected
-        alt year < 1876
-            UpgradeStationUI --> UpgradeStationUI : availability failed
-        else year >= 1876
-            UpgradeStationUI --> UpgradeStationUI : availability ok
-        end
-    else other building types
-        UpgradeStationUI --> UpgradeStationUI : availability ok
+alt no upgrade options available
+    Controller --> Controller : display "No upgrade options available for this station."
+else upgrade options available
+    Controller -> Controller : updateCostAndCapacity()
+
+    alt insufficient budget
+        Controller --> Controller : display cost in red and "Insufficient funds" message
+        Controller -> Controller : disable upgradeButton
+    else sufficient budget
+        Controller --> Controller : display cost in gold and enable upgradeButton
     end
-    UpgradeStationUI -> UpgradeStationUI : checkMutualExclusivity(existingBuildings, buildingType)
 
-    alt mutually exclusive building exists
-        UpgradeStationUI --> UpgradeStationUI : exclusivity failed
-    else no conflicts
-        UpgradeStationUI -> Budget : subtractBudget(cost)
-        activate Budget
-        Budget --> UpgradeStationUI : budget updated
-        deactivate Budget
+    alt valid upgrade request
+        Controller -> Controller : checkMutualExclusivity(existingBuildings, buildingType)
 
-        UpgradeStationUI --> UpgradeStationUI : validation successful
+        alt mutually exclusive building exists
+            Controller --> Controller : validation failed
+        else no conflicts
+            Controller -> Budget : subtractBudget(cost)
+            activate Budget
+            Budget --> Controller : budget updated
+            deactivate Budget
+
+            Controller --> Controller : validation successful
+        end
     end
 end
 
-deactivate UpgradeStationController
-deactivate UpgradeStationUI
+deactivate Controller
 
 @enduml

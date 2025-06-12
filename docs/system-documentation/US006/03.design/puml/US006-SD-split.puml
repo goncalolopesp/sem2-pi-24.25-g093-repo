@@ -6,56 +6,92 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeStationUI
-participant ":UpgradeStationController" as UpgradeStationController
+participant ":UpgradeStationGUI" as GUI
+participant ":UpgradeStationFXController" as Controller
+participant ":UpgradeStationController" as UpgradeController
 
 activate Player
 
-Player -> UpgradeStationUI : requests station upgrade
-activate UpgradeStationUI
+Player -> GUI : requests station upgrade window
+activate GUI
 
-create UpgradeStationController
-UpgradeStationUI -> UpgradeStationController : create()
-activate UpgradeStationController
+create Controller
+GUI -> Controller : create(selectedMap, selectedScenario, timePeriod, budget)
+activate Controller
 
-ref over UpgradeStationUI
+ref over Controller
+    - initialize()
+    - setupUI()
+    - loadStations()
     - Get current user
-    - Filter owned stations by user and scenario
-    - Handle station selection with validation loops
+    - Filter owned stations by user, scenario and map
 end ref
 
-alt station selected successfully
-    ref over UpgradeStationUI, UpgradeStationController
-        - Display available building types with costs
-        - Validate building type selection
-        - Check year restrictions (telegraph/telephone)
-        - Check mutual exclusivity
-        - Subtract budget cost
+alt no owned stations found
+    Controller --> Player : display "You have no stations on this map."
+else stations found
+    Controller --> Player : display owned stations list
+    GUI --> Player : display upgrade station window
+
+    Player -> Controller : onStationSelected(MouseEvent)
+
+    ref over Controller
+        - showSelectedStation()
+        - loadUpgradeOptions()
+        - Filter available building types by year
+        - Populate upgrade options
     end ref
 
-    UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
+    alt no upgrade options available
+        Controller --> Player : display "No upgrade options available for this station."
+    else upgrade options available
+        Controller --> Player : show upgrade options
 
-    ref over UpgradeStationController
-        - Get repositories instance
-        - Create Building object
-        - Validate building in repository
-        - Add building if valid
-    end ref
+        Player -> Controller : onUpgradeOptionChanged()
 
-    alt building created successfully
-        UpgradeStationController --> UpgradeStationUI : building created successfully
-        UpgradeStationUI --> Player : display "Building successfully created!"
-    else building creation failed
-        UpgradeStationController --> UpgradeStationUI : null
-        UpgradeStationUI --> Player : display "Building not created!"
+        ref over Controller
+            - updateCostAndCapacity()
+            - Check budget sufficiency
+            - Enable/disable upgrade button
+        end ref
+
+        Player -> Controller : handleUpgradeStation()
+
+        Controller -> UpgradeController : upgradeStation(station, buildingType)
+        activate UpgradeController
+
+        ref over UpgradeController
+            - Get repositories instance
+            - Create Building object
+            - Validate building in repository
+            - Add building if valid
+        end ref
+
+        alt building created successfully
+            UpgradeController --> Controller : building created
+
+            ref over Controller
+                - Subtract budget cost
+                - Update budget display
+                - Check mutual exclusivity
+                - Load upgrade options
+                - Reset UI selections
+            end ref
+
+            Controller --> Player : display "Building successfully created!"
+        else building creation failed
+            UpgradeController --> Controller : null
+            Controller --> Player : display "Building creation failed. Please try again."
+        end
+
+        deactivate UpgradeController
     end
-else no station selected
-    UpgradeStationUI --> Player : display "You have no stations on this map."
 end
 
-destroy UpgradeStationController
-deactivate UpgradeStationController
-deactivate UpgradeStationUI
+
+destroy Controller
+deactivate Controller
+deactivate GUI
 deactivate Player
 
 @enduml

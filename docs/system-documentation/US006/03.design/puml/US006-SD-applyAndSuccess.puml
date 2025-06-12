@@ -6,45 +6,65 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeStationUI
-participant ":UpgradeStationController" as UpgradeStationController
+participant ":UpgradeStationFXController" as Controller
+participant ":UpgradeStationController" as UpgradeController
 participant "repositories\n:Repositories" as Repo
 participant "buildingRepository\n:BuildingRepository" as BuildingRepository
+participant ":Budget" as Budget
 
 activate Player
-activate UpgradeStationUI
+activate Controller
 
-Player -> UpgradeStationUI : buildingRequest()
-create UpgradeStationController
-UpgradeStationUI -> UpgradeStationController  : create()
-activate UpgradeStationController
-UpgradeStationController -> Repo : getInstance()
+Player -> Controller : handleUpgradeStation()
+
+Controller -> BuildingRepository : getBuildings()
+activate BuildingRepository
+BuildingRepository --> Controller : existing buildings for station
+deactivate BuildingRepository
+
+Controller -> UpgradeController : upgradeStation(station, buildingType)
+activate UpgradeController
+
+UpgradeController -> Repo : getInstance()
 activate Repo
-Repo --> UpgradeStationController : repositories
+Repo --> UpgradeController : repositories
 deactivate Repo
 
-UpgradeStationController -> UpgradeStationController : getBuildingRepository()
-
-UpgradeStationController -> BuildingRepository : create Building(station, buildingType)
+UpgradeController -> BuildingRepository : create Building(station, buildingType)
 activate BuildingRepository
-UpgradeStationController -> BuildingRepository : validateBuilding(building)
+UpgradeController -> BuildingRepository : validateBuilding(building)
 
-alt building is valid (not already present in repository)
+alt building is valid
     BuildingRepository -> BuildingRepository : add building to list
-    BuildingRepository --> UpgradeStationController : building added successfully
+    BuildingRepository --> UpgradeController : building added successfully
+    UpgradeController --> Controller : building created
 
-    UpgradeStationController --> UpgradeStationUI : building created successfully
-    UpgradeStationUI --> Player : display "Building successfully created!"
+    Controller -> Budget : subtractBudget(cost)
+    activate Budget
+    deactivate Budget
 
-else building validation failed (duplicate)
-    BuildingRepository --> UpgradeStationController : building not added
+    Controller -> Controller : updateBudgetDisplay()
+    Controller -> Controller : checkMutualExclusivity(existingBuildings, buildingType)
 
-    UpgradeStationController --> UpgradeStationUI : null
-    UpgradeStationUI --> Player : display "Building not created!"
+    alt mutually exclusive building exists
+        Controller -> UpgradeController : getBuildingRepository()
+        Controller -> BuildingRepository : remove(station, conflictingBuildingType)
+    end
+
+    Controller -> Controller : loadUpgradeOptions()
+    Controller -> Controller : reset UI selections
+    Controller --> Player : display "Building successfully created!"
+
+else building validation failed
+    BuildingRepository --> UpgradeController : building not added
+    UpgradeController --> Controller : null
+    Controller --> Player : display "Building creation failed. Please try again."
 end
 
 deactivate BuildingRepository
-deactivate UpgradeStationController
-deactivate UpgradeStationUI
+deactivate UpgradeController
+deactivate Controller
+deactivate GUI
+deactivate Player
 
 @enduml

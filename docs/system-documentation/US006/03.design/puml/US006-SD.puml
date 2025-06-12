@@ -6,8 +6,9 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeStationUI
-participant ":UpgradeStationController" as UpgradeStationController
+participant ":UpgradeStationGUI" as GUI
+participant ":UpgradeStationFXController" as Controller
+participant ":UpgradeStationController" as UpgradeController
 participant "repositories\n:Repositories" as Repo
 participant "buildingRepository\n:BuildingRepository" as BuildingRepository
 participant "stationRepository\n:StationRepository" as StationRepository
@@ -16,129 +17,130 @@ participant ":Budget" as Budget
 
 activate Player
 
-Player -> UpgradeStationUI : requests station upgrade
-activate UpgradeStationUI
+Player -> GUI : requests station upgrade window
+activate GUI
 
-create UpgradeStationController
-UpgradeStationUI -> UpgradeStationController : create()
-activate UpgradeStationController
+create Controller
+GUI -> Controller : create(selectedMap, selectedScenario, timePeriod, budget)
+activate Controller
 
-UpgradeStationUI -> UpgradeStationUI : requestData()
-UpgradeStationUI -> CurrentUser : getInstance()
+Controller -> Controller : initialize()
+Controller -> Controller : setupUI()
+Controller -> Controller : loadStations()
+
+Controller -> StationRepository : getStations()
+activate StationRepository
+StationRepository --> Controller : stations list
+deactivate StationRepository
+
+Controller -> CurrentUser : getInstance()
 activate CurrentUser
-CurrentUser --> UpgradeStationUI : currentUser
+CurrentUser --> Controller : currentUser
 deactivate CurrentUser
 
-UpgradeStationUI -> UpgradeStationUI : filter owned stations by user and scenario
+Controller -> Controller : filter owned stations by user, scenario and map
 
 alt no owned stations found
-    UpgradeStationUI --> Player : display "You have no stations on this map."
-    UpgradeStationUI -> UpgradeStationUI : return null
+    Controller -> Controller : set messageLabel("You have no stations on this map.")
+    Controller --> Player : display empty station list
 else stations found
-    UpgradeStationUI --> Player : display owned stations list
+    Controller -> Controller : populate stationListView with formatted station names
+    Controller --> Player : display owned stations list
+    Controller -> Controller : updateBudgetDisplay()
 
-    loop until valid station selected
-        UpgradeStationUI --> Player : request station name
-        Player -> UpgradeStationUI : provides station name
+    GUI -> GUI : show window
+    GUI --> Player : display upgrade station window
 
-        alt station name not found
-            UpgradeStationUI --> Player : display "Invalid name. Please try again."
-        else multiple stations with same name
-            UpgradeStationUI --> Player : request coordinates (X, Y)
-            Player -> UpgradeStationUI : provides coordinates
+    Player -> Controller : onStationSelected(MouseEvent)
+    Controller -> Controller : showSelectedStation()
+    Controller -> Controller : loadUpgradeOptions()
 
-            alt coordinates don't match any station
-                UpgradeStationUI --> Player : display "No station found at those coordinates."
-            else coordinates match
-                UpgradeStationUI -> UpgradeStationUI : set chosen station
-            end
-        else single station found
-            UpgradeStationUI -> UpgradeStationUI : set chosen station
+    Controller -> Controller : filter available building types by year and existing buildings
+    Controller -> UpgradeController : verifyIfBuildingExists(station, buildingType)
+    activate UpgradeController
+
+    UpgradeController -> BuildingRepository : getBuildings()
+    activate BuildingRepository
+    BuildingRepository --> UpgradeController : buildings list
+    deactivate BuildingRepository
+    UpgradeController --> Controller : buildingExists
+    deactivate UpgradeController
+
+    Controller -> Controller : populate upgradeOptionComboBox with valid options
+    Controller --> Player : display available building types with costs
+
+    alt no upgrade options available
+        Controller --> Player : display "No upgrade options available for this station."
+    else upgrade options available
+        Controller --> Player : show upgrade options and make visible upgradeOptionsBox
+
+        Player -> Controller : onUpgradeOptionChanged()
+        Controller -> Controller : updateCostAndCapacity()
+
+        alt insufficient budget
+            Controller --> Player : display cost in red and "Insufficient funds" message
+            Controller -> Controller : disable upgradeButton
+        else sufficient budget
+            Controller --> Player : display cost in gold and enable upgradeButton
         end
-    end
-end
 
-alt station selected successfully
-    UpgradeStationUI --> Player : display available building types with costs and restrictions
+        Player -> Controller : handleUpgradeStation()
 
-    loop until valid building type selected
-        UpgradeStationUI --> Player : request building type
-        Player -> UpgradeStationUI : provides building type
+        alt insufficient funds or invalid selection
+            Controller --> Player : display error message
+        else valid upgrade request
+            Controller -> BuildingRepository : getBuildings()
+            activate BuildingRepository
+            BuildingRepository --> Controller : existing buildings for station
+            deactivate BuildingRepository
 
-        UpgradeStationUI -> UpgradeStationController : verifyIfBuildingExists(station, buildingType)
+            Controller -> UpgradeController : upgradeStation(station, buildingType)
+            activate UpgradeController
 
-        UpgradeStationController -> BuildingRepository : getBuildings()
-        activate BuildingRepository
-        BuildingRepository --> UpgradeStationController : buildings list
-        deactivate BuildingRepository
-        UpgradeStationController --> UpgradeStationUI : buildingExists
-        deactivate UpgradeStationController
+            UpgradeController -> Repo : getInstance()
+            activate Repo
+            Repo --> UpgradeController : repositories
+            deactivate Repo
 
-        alt building already exists in station
-            UpgradeStationUI --> Player : display "Building already exists in station. Please try again."
-        else building type invalid
-            UpgradeStationUI --> Player : display "Invalid input. Please try again."
-        else building type valid
-            alt telegraph selected AND (year < 1855 OR year > 1875)
-                UpgradeStationUI --> Player : display "Telegraph can only be built in the year 1855-1875."
-            else telephone selected AND year < 1876
-                UpgradeStationUI --> Player : display "Telephone can only be built in the year 1876-Present."
-            else year restrictions satisfied
-                UpgradeStationUI -> UpgradeStationUI : checkMutualExclusivity(existingBuildings, buildingType)
+            UpgradeController -> BuildingRepository : create Building(station, buildingType)
+            activate BuildingRepository
+            UpgradeController -> BuildingRepository : validateBuilding(building)
+
+            alt building is valid
+                BuildingRepository -> BuildingRepository : add building to list
+                BuildingRepository --> UpgradeController : building added successfully
+                UpgradeController --> Controller : building created
+
+                Controller -> Budget : subtractBudget(cost)
+                activate Budget
+                deactivate Budget
+
+                Controller -> Controller : updateBudgetDisplay()
+                Controller -> Controller : checkMutualExclusivity(existingBuildings, buildingType)
 
                 alt mutually exclusive building exists
-                    UpgradeStationUI --> Player : display "Mutually exclusive building already exists in this station."
-                else no conflicts
-                    alt telegraph exists AND year outside 1855-1875
-                        UpgradeStationUI -> BuildingRepository : remove(station, "telegraph")
-                        activate BuildingRepository
-                        deactivate BuildingRepository
-                    else telephone exists AND year before 1876
-                        UpgradeStationUI -> BuildingRepository : remove(station, "telephone")
-                        activate BuildingRepository
-                        deactivate BuildingRepository
-                    end
-
-                    UpgradeStationUI -> UpgradeStationUI : set valid building type
-                    UpgradeStationUI -> Budget : subtractBudget(cost)
-                    activate Budget
-                    deactivate Budget
+                    Controller -> UpgradeController : getBuildingRepository()
+                    Controller -> BuildingRepository : remove(station, conflictingBuildingType)
                 end
+
+                Controller -> Controller : loadUpgradeOptions()
+                Controller -> Controller : reset UI selections
+                Controller --> Player : display "Building successfully created!"
+
+            else building validation failed
+                BuildingRepository --> UpgradeController : building not added
+                UpgradeController --> Controller : null
+                Controller --> Player : display "Building creation failed. Please try again."
             end
+            deactivate BuildingRepository
+            deactivate UpgradeController
         end
     end
-    UpgradeStationUI -> UpgradeStationController : upgradeStation(station, buildingType)
-    activate UpgradeStationController
-
-    UpgradeStationController -> Repo : getInstance()
-    activate Repo
-    Repo --> UpgradeStationController : repositories
-    deactivate Repo
-
-    UpgradeStationController -> UpgradeStationController : getBuildingRepository()
-    activate BuildingRepository
-    UpgradeStationController -> BuildingRepository : create Building(station, buildingType)
-    UpgradeStationController -> BuildingRepository : validateBuilding(building)
-
-    alt building is valid (not already present)
-        BuildingRepository -> BuildingRepository : add building to list
-        BuildingRepository --> UpgradeStationController : building added
-        UpgradeStationController --> UpgradeStationUI : building created successfully
-
-        UpgradeStationUI --> Player : display "Building successfully created!"
-    else building validation failed
-        BuildingRepository --> UpgradeStationController : building not added
-        UpgradeStationController --> UpgradeStationUI : null
-
-        UpgradeStationUI --> Player : display "Building not created!"
-    end
-    deactivate BuildingRepository
-    deactivate UpgradeStationController
-else no station selected
 end
 
-destroy UpgradeStationController
-deactivate UpgradeStationUI
+
+destroy Controller
+deactivate GUI
 deactivate Player
 
 @enduml

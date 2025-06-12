@@ -6,63 +6,54 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant ":UpgradeStationUI" as UpgradeStationUI
+participant ":UpgradeStationGUI" as GUI
+participant ":UpgradeStationFXController" as Controller
+participant "stationRepository\n:StationRepository" as StationRepository
 participant ":CurrentUser" as CurrentUser
 
 activate Player
 
-Player -> UpgradeStationUI : requests station upgrade
-activate UpgradeStationUI
+Player -> GUI : requests station upgrade window
+activate GUI
 
-UpgradeStationUI -> CurrentUser : getInstance()
+create Controller
+GUI -> Controller : create(selectedMap, selectedScenario, timePeriod, budget)
+activate Controller
+
+Controller -> Controller : initialize()
+Controller -> Controller : setupUI()
+Controller -> Controller : loadStations()
+
+Controller -> StationRepository : getStations()
+activate StationRepository
+StationRepository --> Controller : stations list
+deactivate StationRepository
+
+Controller -> CurrentUser : getInstance()
 activate CurrentUser
-CurrentUser --> UpgradeStationUI : currentUser
+CurrentUser --> Controller : currentUser
 deactivate CurrentUser
 
-UpgradeStationUI -> UpgradeStationUI : filter owned stations by user and scenario
+Controller -> Controller : filter owned stations by user, scenario and map
 
 alt no owned stations found
-    UpgradeStationUI --> Player : display "You have no stations on this map."
+    Controller -> Controller : set messageLabel("You have no stations on this map.")
+    Controller --> Player : display empty station list
 else stations found
-    UpgradeStationUI --> Player : display owned stations list
+    Controller -> Controller : populate stationListView with formatted station names
+    Controller --> Player : display owned stations list
+    Controller -> Controller : updateBudgetDisplay()
 
-    loop until valid station selected
-        UpgradeStationUI --> Player : request station name
-        Player -> UpgradeStationUI : provides station name
+    GUI -> GUI : show window
+    GUI --> Player : display upgrade station window
 
-        alt station name not found
-            UpgradeStationUI --> Player : display "Invalid name. Please try again."
-        else multiple stations with same name
-            UpgradeStationUI --> Player : request coordinates (X, Y)
-            Player -> UpgradeStationUI : provides coordinates
-
-            alt coordinates don't match any station
-                UpgradeStationUI --> Player : display "No station found at those coordinates."
-            else coordinates match
-                UpgradeStationUI -> UpgradeStationUI : keepStation(station)
-            end
-        else single station found
-            UpgradeStationUI -> UpgradeStationUI : keepStation(station)
-        end
-    end
-
-    alt station selected successfully
-        UpgradeStationUI --> Player : display available building types with costs and restrictions
-
-        loop until valid building type selected
-            UpgradeStationUI --> Player : request building type
-            Player -> UpgradeStationUI : provides building type
-
-            alt building type valid and passes all validations
-                UpgradeStationUI -> UpgradeStationUI : keepBuilding(buildingType)
-            else validation failed
-                UpgradeStationUI --> Player : displays error message
-            end
-        end
-    end
+    Player -> Controller : onStationSelected(MouseEvent)
+    Controller -> Controller : showSelectedStation()
+    Controller -> Controller : loadUpgradeOptions()
 end
 
-deactivate UpgradeStationUI
+deactivate Controller
+deactivate GUI
 deactivate Player
 
 @enduml
