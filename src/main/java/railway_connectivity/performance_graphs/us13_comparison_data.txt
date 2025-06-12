@@ -1,2 +1,2 @@
 # Vertices Steam_ms Diesel_ms Electric_ms
-1 0.441 0.345 0.182
+1 0.476 0.359 0.195

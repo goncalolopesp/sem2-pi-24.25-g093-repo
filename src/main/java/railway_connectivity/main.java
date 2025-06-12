@@ -679,6 +679,8 @@ public class main {
 
         // Generate graphs
         generateGraphs(us13Results, us14Results);
+
+        generateCSVFiles(us13Results, us14Results);
     }
 
     private static int extractNumberFromFilename(String filename) {
@@ -891,6 +893,53 @@ public class main {
             this.vertexCount = vertexCount;
             this.edgeCount = edgeCount;
             this.avgTime = avgTime;
+        }
+    }
+
+    private static void generateCSVFiles(List<PerformanceResult> us13Results, List<PerformanceResult> us14Results) {
+        try {
+            // Generate CSV for US13 results
+            generateUS13CSV(us13Results);
+
+            // Generate CSV for US14 results
+            generateUS14CSV(us14Results);
+
+            System.out.println("\nCSV files generated successfully!");
+            System.out.println("- US13_performance.csv");
+            System.out.println("- US14_performance.csv");
+
+        } catch (IOException e) {
+            System.err.println("Error generating CSV files: " + e.getMessage());
+        }
+    }
+
+    private static void generateUS13CSV(List<PerformanceResult> us13Results) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("US13_performance.csv"))) {
+            // Write header
+            writer.println("size,time");
+
+            // Write data rows
+            for (PerformanceResult result : us13Results) {
+                // Use vertex count as size and convert nanoseconds to seconds
+                writer.printf("%d,%.7f%n",
+                        result.vertexCount,
+                        result.avgTime / 1_000_000_000.0); // Convert nanoseconds to seconds
+            }
+        }
+    }
+
+    private static void generateUS14CSV(List<PerformanceResult> us14Results) throws IOException {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("US14_performance.csv"))) {
+            // Write header
+            writer.println("size,time");
+
+            // Write data rows
+            for (PerformanceResult result : us14Results) {
+                // Use vertex count as size and convert nanoseconds to seconds
+                writer.printf("%d,%.7f%n",
+                        result.vertexCount,
+                        result.avgTime / 1_000_000_000.0); // Convert nanoseconds to seconds
+            }
         }
     }
 
