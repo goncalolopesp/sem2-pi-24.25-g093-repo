@@ -1,5 +1,6 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -7,7 +8,7 @@ import java.util.HashMap;
  * Singleton class that manages the currently authenticated user
  * Provides a global access point for the current user session throughout the application
  */
-public class CurrentUser {
+public class CurrentUser implements Serializable {
     /** The single instance of CurrentUser (Singleton pattern) */
     private static CurrentUser session = null;
 

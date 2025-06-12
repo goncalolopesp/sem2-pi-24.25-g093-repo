@@ -1,5 +1,6 @@
 package repository;
 
+import java.io.Serializable;
 import java.util.*;
 
 import domain.Budget;
@@ -12,7 +13,7 @@ import domain.User;
  * This class handles the storage, retrieval, and purchase of locomotive objects
  * within the application.
  */
-public class LocomotiveRepository {
+public class LocomotiveRepository implements Serializable {
 
     /** Collection of all available locomotives in the system */
     Set<Locomotive> locomotives = new HashSet<>();
@@ -145,5 +146,10 @@ public class LocomotiveRepository {
      */
     public Set<Locomotive> getLocomotives() {
         return locomotives;
+    }
+
+    public void copyFrom(LocomotiveRepository other) {
+        this.locomotives.clear();
+        this.locomotives.addAll(other.getLocomotives());
     }
 }

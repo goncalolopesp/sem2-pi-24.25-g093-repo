@@ -1,9 +1,6 @@
 package domain;
 
-import repository.BuildingRepository;
-import repository.Repositories;
-import repository.SimulationRepository;
-import repository.StationRepository;
+import repository.*;
 
 import java.io.*;
 
@@ -18,15 +15,15 @@ public class SimulationFile {
      * @param buildingRepo the building repository into which the loaded building data will be copied
      * @return true if the data was successfully loaded or no save file exists; false if an error occurred during loading
      */
-    public boolean load(SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo) {
-        return load(FILE_NAME, simRepo, stationRepo, buildingRepo);
+    public boolean load(SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo, LocomotiveRepository locomotiveRepo) {
+        return load(FILE_NAME, simRepo, stationRepo, buildingRepo, locomotiveRepo);
     }
 
-    public boolean load(String fileName, SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo) {
-        return load(new File(fileName), simRepo, stationRepo, buildingRepo);
+    public boolean load(String fileName, SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo, LocomotiveRepository locomotiveRepo) {
+        return load(new File(fileName), simRepo, stationRepo, buildingRepo, locomotiveRepo);
     }
 
-    public boolean load(File file, SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo) {
+    public boolean load(File file, SimulationRepository simRepo, StationRepository stationRepo, BuildingRepository buildingRepo, LocomotiveRepository locomotiveRepo) {
         if (!file.exists()) {
             return true;
         }
@@ -35,12 +32,14 @@ public class SimulationFile {
             SimulationRepository loadedRepo = (SimulationRepository) in.readObject();
             StationRepository loadedRepo2 = (StationRepository) in.readObject();
             BuildingRepository loadedRepo3 = (BuildingRepository) in.readObject();
+            LocomotiveRepository loadedRepo4 = (LocomotiveRepository) in.readObject();
 
             // Instead of setting on singleton, copy data to the target repo
             // You'll need to add a method to copy simulations
             simRepo.copyFrom(loadedRepo);
             stationRepo.copyFrom(loadedRepo2);
             buildingRepo.copyFrom(loadedRepo3);
+            locomotiveRepo.copyFrom(loadedRepo4);
             return true;
         } catch (IOException | ClassNotFoundException ex) {
             System.out.println("Error loading file: " + ex.getMessage());
@@ -61,6 +60,7 @@ public class SimulationFile {
         SimulationRepository simulationRepo = Repositories.getInstance().getSimulationRepository();
         StationRepository stationRepo = Repositories.getInstance().getStationRepository();
         BuildingRepository buildingRepo = Repositories.getInstance().getBuildingRepository();
+        LocomotiveRepository locomotiveRepo = Repositories.getInstance().getLocomotiveRepository();
         try {
             ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(file));
 
@@ -68,6 +68,7 @@ public class SimulationFile {
                 out.writeObject(simulationRepo);
                 out.writeObject(stationRepo);
                 out.writeObject(buildingRepo);
+                out.writeObject(locomotiveRepo);
             } finally {
                 out.close();
             }
