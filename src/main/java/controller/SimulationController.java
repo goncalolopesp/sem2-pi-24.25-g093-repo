@@ -358,58 +358,6 @@ public class SimulationController {
         }
     }
 
-    private void executeArrivingRoute(Route route, Scenario scenario, Budget budget, Map selectedMap, TrainJourney journey, int currentYear) {
-        Train train = route.getTrain();
-        if (train == null) return;
-
-        List<Carriage> carriages = train.getCarriages();
-        resetCarriageCapacity(carriages);
-
-        CargoCollectionResult result = new CargoCollectionResult();
-
-        int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
-        yearlyFuelCost += routeFuelCost;
-
-        AtomicReference<Double> peopleEarningMultiplier = new AtomicReference<>(1.0);
-
-        for (PointOfRoute point : route.getPoints()) {
-            if (isTrainFull(carriages)) break;
-
-            Station station = point.getStation();
-            if (station.getCapacityOwned() <= 0) continue;
-
-            if (station.getPeopleStored() > 0) {
-                buildingRepo.getBuildings().stream().filter(building -> building.getStation().equals(station)).forEach(building -> {
-                    if (building.getBuildingType().contains("cafe")) {
-                        peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.2);
-                    } if (building.getBuildingType().contains("hotel")) {
-                        peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.3);
-                    }
-                });
-            }
-
-            collectCargoFromStation(route, station, point.getCargoTypes(), result);
-        }
-
-        if (result.people > 0) demandManager.recordDelivery(Carriage.Type.PEOPLE, result.people);
-        if (result.mail > 0) demandManager.recordDelivery(Carriage.Type.MAIL, result.mail);
-        if (result.coal > 0) demandManager.recordDelivery(Carriage.Type.COAL, result.coal);
-        if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
-        if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
-
-        int totalEarnings = (int) ((calculateArrivalEarnings(result, scenario, route, selectedMap, peopleEarningMultiplier)) * scenario.getProfitMultiplier());
-
-        if (result.getTotalCargo() > 0) {
-            displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
-            budget.addBudget(totalEarnings - (routeFuelCost / KMS_FUEL));
-            yearlyEarnings += totalEarnings;
-        }
-
-        if (result.hasIronAndCoal()) {
-            deliverToSteelMills(route, carriages, result);
-        }
-    }
-
     private void displayRouteCompleteWithYear(CargoCollectionResult result, int totalEarnings, TrainJourney journey, int currentYear) {
         System.out.printf("\n[Train Arrival] Train arrived in year %d (departed year %d). Total Cargo: %d (People: %d, Mail: %d, Iron: %d, Coal: %d, Steel: %d) - Earned: %d. Type your option: ",
                 currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.iron, result.coal, result.steel, totalEarnings);
@@ -571,7 +519,7 @@ public class SimulationController {
             int availableCargo = getAvailableCargoAtStation(station, cargoType);
 
             if (availableCargo > 0) {
-                int collected = collectCargoForType(route, availableCargo, cargoType);
+                int collected = collectCargoFromSingleStation(route, station, availableCargo, cargoType);
                 System.out.println("\n[Cargo Collection] " + collected + " " + cargoType + " cargo collected from station " + station.getName());
 
                 if (collected > 0) {
@@ -584,37 +532,186 @@ public class SimulationController {
         updateStationCapacity(station);
     }
 
-    private int collectCargoForType(Route route, int availableCargo, Carriage.Type cargoType) {
-        if (route == null || route.getPoints().isEmpty()) {
+    private int processCargoAtSingleStation(Route route, PointOfRoute stationPoint, Station station,
+                                            int maxCargoTypeCapacity, int availableCargo, Carriage.Type cargoType) {
+
+        CargoMode cargoMode = stationPoint.getCargoMode();
+
+        int requiredCargo = calculateRequiredCargoForMode(cargoMode, maxCargoTypeCapacity, route, stationPoint, availableCargo);
+
+        if (availableCargo < requiredCargo) {
             return 0;
         }
 
-        int currentCargoLoad = 0;
-        Train train = route.getTrain();
-        List<PointOfRoute> routePoints = route.getPoints();
+        return Math.min(requiredCargo, availableCargo);
+    }
 
-        // Calculate capacity for this specific cargo type only
+    private int calculateRequiredCargoForMode(CargoMode cargoMode, int maxCargoTypeCapacity, Route route, PointOfRoute stationPoint, int availableCargo) {
+        switch (cargoMode) {
+            case FULL:
+                return maxCargoTypeCapacity;
+
+            case HALF:
+                List<Carriage.Type> requestedTypes = stationPoint.getCargoTypes();
+                Train train = route.getTrain();
+
+                int totalRequestedCarriages = 0;
+                for (Carriage.Type type : requestedTypes) {
+                    totalRequestedCarriages += (int) train.getCarriages().stream()
+                            .filter(c -> c.getType() == type)
+                            .count();
+                }
+
+                if (totalRequestedCarriages <= 1) {
+                    return maxCargoTypeCapacity;
+                }
+
+                return (int) Math.ceil(maxCargoTypeCapacity * 0.5);
+
+            case AVAILABLE:
+                return availableCargo;
+
+            default:
+                throw new IllegalArgumentException("Unknown cargo mode: " + cargoMode);
+        }
+    }
+
+    // Modified train departure logic to check if cargo requirements are met
+    private boolean canTrainDepartFromStation(Route route, int stationIndex) {
+        PointOfRoute stationPoint = route.getPoints().get(stationIndex);
+        Station station = stationPoint.getStation();
+        CargoMode cargoMode = stationPoint.getCargoMode();
+        List<Carriage.Type> requestedTypes = stationPoint.getCargoTypes();
+        Train train = route.getTrain();
+
+        switch (cargoMode) {
+            case AVAILABLE:
+                // Can depart if any cargo is available for any requested type
+                return requestedTypes.stream()
+                        .anyMatch(type -> getAvailableCargoAtStation(station, type) > 0);
+
+            case HALF:
+                // Can depart if half of the requested carriage types can be filled
+                int typesThatCanBeFilled = 0;
+                int totalRequestedTypes = requestedTypes.size();
+
+                for (Carriage.Type type : requestedTypes) {
+                    int maxCapacityForType = calculateCargoTypeCapacity(train, type);
+                    int availableCargoForType = getAvailableCargoAtStation(station, type);
+
+                    if (availableCargoForType >= maxCapacityForType) {
+                        typesThatCanBeFilled++;
+                    }
+                }
+
+                // Need at least half of the carriage types to be fillable
+                return typesThatCanBeFilled >= Math.ceil(totalRequestedTypes / 2.0);
+
+            case FULL:
+                // Can depart only if ALL requested carriage types can be completely filled
+                return requestedTypes.stream()
+                        .allMatch(type -> {
+                            int maxCapacityForType = calculateCargoTypeCapacity(train, type);
+                            int availableCargoForType = getAvailableCargoAtStation(station, type);
+                            return availableCargoForType >= maxCapacityForType;
+                        });
+
+            default:
+                return false;
+        }
+    }
+
+    // Modified executeArrivingRoute to check departure conditions before collecting cargo
+    private void executeArrivingRoute(Route route, Scenario scenario, Budget budget, Map selectedMap, TrainJourney journey, int currentYear) {
+        Train train = route.getTrain();
+        if (train == null) return;
+
+        List<Carriage> carriages = train.getCarriages();
+        resetCarriageCapacity(carriages);
+
+        CargoCollectionResult result = new CargoCollectionResult();
+
+        int routeFuelCost = calculateRouteFuelCost(route, selectedMap);
+        yearlyFuelCost += routeFuelCost;
+
+        AtomicReference<Double> peopleEarningMultiplier = new AtomicReference<>(1.0);
+
+        for (int i = 0; i < route.getPoints().size(); i++) {
+            PointOfRoute point = route.getPoints().get(i);
+            Station station = point.getStation();
+
+            if (station.getCapacityOwned() <= 0) continue;
+
+            if (!canTrainDepartFromStation(route, i)) {
+                System.out.println("\n\nPeople: " + station.getPeopleStored() + " Mail: " + station.getMailStored());
+                System.out.printf("[Waiting] Train waiting at %s for sufficient cargo (%s mode). Type your option: ",
+                        station.getName(), point.getCargoMode());
+                continue;
+            }
+
+            if (isTrainFull(carriages)) break;
+
+            if (station.getPeopleStored() > 0) {
+                buildingRepo.getBuildings().stream()
+                        .filter(building -> building.getStation().equals(station))
+                        .forEach(building -> {
+                            if (building.getBuildingType().contains("cafe")) {
+                                peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.2);
+                            }
+                            if (building.getBuildingType().contains("hotel")) {
+                                peopleEarningMultiplier.set(peopleEarningMultiplier.get() + 0.3);
+                            }
+                        });
+            }
+
+            collectCargoFromStation(route, station, point.getCargoTypes(), result);
+        }
+
+        if (result.people > 0) demandManager.recordDelivery(Carriage.Type.PEOPLE, result.people);
+        if (result.mail > 0) demandManager.recordDelivery(Carriage.Type.MAIL, result.mail);
+        if (result.coal > 0) demandManager.recordDelivery(Carriage.Type.COAL, result.coal);
+        if (result.iron > 0) demandManager.recordDelivery(Carriage.Type.IRON, result.iron);
+        if (result.steel > 0) demandManager.recordDelivery(Carriage.Type.STEEL, result.steel);
+
+        int totalEarnings = (int) ((calculateArrivalEarnings(result, scenario, route, selectedMap, peopleEarningMultiplier)) * scenario.getProfitMultiplier());
+
+        if (result.getTotalCargo() > 0) {
+            displayRouteCompleteWithYear(result, totalEarnings, journey, currentYear);
+            budget.addBudget(totalEarnings - (routeFuelCost / KMS_FUEL));
+            yearlyEarnings += totalEarnings;
+        }
+
+        if (result.hasIronAndCoal()) {
+            deliverToSteelMills(route, carriages, result);
+        }
+    }
+
+    private int collectCargoFromSingleStation(Route route, Station station, int availableCargo, Carriage.Type cargoType) {
+        if (route == null) {
+            return 0;
+        }
+
+        Train train = route.getTrain();
+
         int maxCargoTypeCapacity = calculateCargoTypeCapacity(train, cargoType);
 
         if (maxCargoTypeCapacity == 0) {
-            return 0; // No carriages for this cargo type
+            return 0;
         }
 
-        for (int i = 0; i < routePoints.size() - 1; i++) {
-            PointOfRoute currentPoint = routePoints.get(i);
-            Station station = currentPoint.getStation();
-
-            currentCargoLoad = processCargoAtStation(
-                    route, i, currentPoint, station,
-                    currentCargoLoad, maxCargoTypeCapacity, availableCargo
-            );
-
-            if (currentCargoLoad >= maxCargoTypeCapacity) {
-                break;
-            }
+        PointOfRoute stationPoint = findStationInRoute(route, station);
+        if (stationPoint == null) {
+            return 0;
         }
 
-        return currentCargoLoad;
+        return processCargoAtSingleStation(route, stationPoint, station, maxCargoTypeCapacity, availableCargo, cargoType);
+    }
+
+    private PointOfRoute findStationInRoute(Route route, Station targetStation) {
+        return route.getPoints().stream()
+                .filter(point -> point.getStation().equals(targetStation))
+                .findFirst()
+                .orElse(null);
     }
 
     private int calculateCargoTypeCapacity(Train train, Carriage.Type cargoType) {
@@ -622,54 +719,6 @@ public class SimulationController {
                 .filter(carriage -> carriage.getType() == cargoType)
                 .mapToInt(Carriage::getCapacity)
                 .sum();
-    }
-
-    private int processCargoAtStation(Route route, int stationIndex, PointOfRoute currentPoint,
-                                      Station station, int currentCargoLoad,
-                                      int maxCargoTypeCapacity, int availableCargo) {
-        int cargoLoad = currentCargoLoad;
-
-        int maxIterations = 100;
-        int iterations = 0;
-
-        while (!route.isReadyToDepart(stationIndex, cargoLoad) && iterations < maxIterations) {
-            int targetCargo = calculateTargetCargo(currentPoint.getCargoMode(), maxCargoTypeCapacity);
-            int cargoToLoad = calculateCargoToLoad(station, targetCargo, cargoLoad, availableCargo);
-
-            if (cargoToLoad <= 0) {
-                break;
-            }
-
-            cargoLoad += cargoToLoad;
-            iterations++;
-        }
-
-        if (iterations >= maxIterations) {
-            System.err.println("Warning: Maximum iterations reached at station " + station.getName());
-        }
-
-        return cargoLoad;
-    }
-
-    private int calculateTargetCargo(CargoMode cargoMode, int maxCargoTypeCapacity) {
-        switch (cargoMode) {
-            case FULL:
-            case AVAILABLE:
-                return maxCargoTypeCapacity;
-            case HALF:
-                return maxCargoTypeCapacity / 2;
-            default:
-                throw new IllegalArgumentException("Unknown cargo mode: " + cargoMode);
-        }
-    }
-
-    private int calculateCargoToLoad(Station station, int targetCargo, int currentCargoLoad, int availableCargo) {
-        int cargoNeeded = targetCargo - currentCargoLoad;
-        if (cargoNeeded <= 0) {
-            return 0;
-        }
-
-        return Math.min(Math.min(station.getCapacityOwned(), availableCargo), cargoNeeded);
     }
 
     private int getAvailableCargoAtStation(Station station, Carriage.Type cargoType) {
@@ -687,9 +736,11 @@ public class SimulationController {
         switch (cargoType) {
             case PEOPLE:
                 station.setPeopleStored(Math.max(0, station.getPeopleStored() - collectedAmount));
+                System.out.println("\nPeople stored: " + station.getPeopleStored());
                 break;
             case MAIL:
                 station.setMailStored(Math.max(0, station.getMailStored() - collectedAmount));
+                System.out.println("\nMail stored: " + station.getMailStored());
                 break;
             case COAL:
                 station.setCoalStored(Math.max(0, station.getCoalStored() - collectedAmount));
@@ -704,8 +755,10 @@ public class SimulationController {
     }
 
     private void updateStationCapacity(Station station) {
-        station.setCapacityOwned(station.getPeopleStored() + station.getMailStored() +
-                station.getCoalStored() + station.getIronStored());
+        // Calculate total stored cargo across all types
+        int totalStored = station.getPeopleStored() + station.getMailStored() +
+                station.getCoalStored() + station.getIronStored() + station.getSteelStored();
+        station.setCapacityOwned(totalStored);
     }
 
     private void updateCollectionResult(CargoCollectionResult result, Carriage.Type cargoType, int amount) {
@@ -853,8 +906,6 @@ public class SimulationController {
         yearlyTotalCost = 0;
     }
 
-
-
     private void payTrackMaintenance(Scenario selectedScenario, Map map,Budget budget) {
         long ownedTracksAmount = railwayRepo.countByScenarioMapAndOwner(selectedScenario, map, currentUser.getEmail());
         int moneySpent = Math.toIntExact(AMOUNT_PER_LINE * ownedTracksAmount);
@@ -957,10 +1008,30 @@ public class SimulationController {
     }
 
     private void addCityCargoToStation(Station station, int totalCargo, Set<Station> maxCapacityStations) {
-        if (station.getCapacityOwned() < station.getCapacity()) {
-            int actualAddedCargo = addCargoToStation(station, totalCargo, maxCapacityStations);
-            station.setPeopleStored(station.getPeopleStored() + (int)(actualAddedCargo * 0.7));
-            station.setMailStored(station.getMailStored() + (int)(actualAddedCargo * 0.3));
+        int currentCapacity = station.getCapacityOwned();
+        int maxCapacity     = station.getCapacity();
+        if (currentCapacity >= maxCapacity) return;
+
+        int actualCargoAdded = Math.min(totalCargo, maxCapacity - currentCapacity);
+        if (actualCargoAdded <= 0) return;
+
+        int newTotalCapacity = currentCapacity + actualCargoAdded;
+        int targetTotalPeople = Math.round(newTotalCapacity * 0.7f);
+        int peopleToAdd = targetTotalPeople - station.getPeopleStored();
+        int mailToAdd   = actualCargoAdded - peopleToAdd;
+
+        station.setPeopleStored(station.getPeopleStored() + peopleToAdd);
+        station.setMailStored(station.getMailStored() + mailToAdd);
+        station.setCapacityOwned(newTotalCapacity);
+
+        System.out.printf("\nStored %d cargo for station %s (%d people, %d mail) (Total: %d/%d). Type your option: ",
+                actualCargoAdded, station.getName(), peopleToAdd, mailToAdd,
+                station.getCapacityOwned(), maxCapacity);
+
+        if (newTotalCapacity >= maxCapacity && !maxCapacityStations.contains(station)) {
+            System.out.printf("\nStation %s has reached maximum capacity (%d/%d)!",
+                    station.getName(), newTotalCapacity, maxCapacity);
+            maxCapacityStations.add(station);
         }
     }
 
