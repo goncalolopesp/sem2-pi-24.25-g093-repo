@@ -38,7 +38,7 @@ public class AuthController {
      */
     public boolean createNewUser(String name, String email, String pwd, String roleId){
         User user = new User(name, email, pwd, roleId);
-        if (authRepo.isPasswordUsable(pwd)){
+        if (authRepo.isPasswordUsable(pwd) && authRepo.isEmailUsable(email)){
             return authRepo.createNewUser(user);
         }else{
             return false;

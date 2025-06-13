@@ -40,11 +40,17 @@ public class AuthRepository {
         }
 
         for (int i = 0; i < password.length(); i++) {
-            if (Character.isUpperCase(password.charAt(i))) {
+            char c = password.charAt(i);
+
+            if (Character.isUpperCase(c)) {
                 numOfCapitals++;
             }
-            if (Character.isDigit(password.charAt(i))) {
+            if (Character.isDigit(c)) {
                 numOfNums++;
+            }
+            // Check for special characters - if found, return false
+            if (!Character.isLetterOrDigit(c)) {
+                return false;
             }
         }
 
@@ -275,6 +281,14 @@ public class AuthRepository {
             }
         }
         return savedUsers;
+    }
+
+
+    public boolean isEmailUsable(String email){
+        if (email.split("@").length > 2) {
+            return false;
+        }
+        return true;
     }
 
 }
