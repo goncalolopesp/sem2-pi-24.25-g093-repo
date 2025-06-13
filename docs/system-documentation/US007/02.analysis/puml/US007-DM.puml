@@ -33,9 +33,10 @@ class Cargo{
     status
 }
 
-Player *-- Station
 
-Station *-- Building
 Station o-- Cargo
+Station o-- Cost
+Station o-- Building
+Player o-- Station
 
 @enduml

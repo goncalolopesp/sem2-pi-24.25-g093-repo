@@ -5,85 +5,113 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
-participant ":StationsListUI" as StationsListUI
+actor "Player" as Player
+participant ":ListStationsUI" as ListStationsUI
 
-activate Employee
+activate Player
 
-Employee -> StationsListUI : asks to list the stations
-activate StationsListUI
+Player -> ListStationsUI : asks to list the stations
+activate ListStationsUI
 
-create ":StationsListController" as StationsListController
+create ":ListStationController" as ListStationController
 
-StationsListUI --> StationsListController : create()
-
-
+ListStationsUI --> ListStationController : create()
+activate ListStationController
 
 participant ":Repositories" as Repositories
-participant "repositories\n:Repositories" as Repo
-participant "stationRepository\n:StationRepository" as stationRepository
-participant "buildingRepository\n:BuildingRepository" as buildingRepository
+participant "repositories\n:Repositories" as repo
+participant "stationRepository\n:StationRepository" as srepo
+participant "buildingRepository\n:BuildingRepository" as brepo
+participant ":DTOMapperStation" as DTOMapper
 
-StationsListController --> Repositories : getInstance()
-activate StationsListController
+ListStationController --> Repositories : getInstance()
 activate Repositories
 
-Repositories --> StationsListController : repositories
-
+Repositories --> ListStationController : repositories
 deactivate Repositories
 
-StationsListController --> Repo : getStationRepository()
-activate Repo
+ListStationController --> repo : getStationRepository()
+activate repo
 
-Repo --> StationsListController : stationRepository
-deactivate Repo
+repo --> ListStationController : stationRepository
+deactivate repo
 
+ListStationController --> repo : getBuildingRepository()
+activate repo
 
-StationsListController --> stationRepository : asks for list of stations
-activate stationRepository
-stationRepository --> StationsListController : lists
-deactivate stationRepository
-StationsListController --> StationsListUI : lists
+repo --> ListStationController : buildingRepository
+deactivate repo
 
-deactivate StationsListController
+deactivate ListStationController
 
-StationsListUI --> Employee : lists all the stations
-StationsListUI --> Employee : asks the selected station
-deactivate StationsListUI
+ListStationsUI --> ListStationController : getStations()
+activate ListStationController
 
-Employee -> StationsListUI : selects a station
-activate StationsListUI
-StationsListUI --> StationsListUI : saveStation()
-StationsListUI --> StationsListController : asks for the station details
-activate StationsListController
-StationsListController --> Repositories : getInstance()
-activate Repositories
-Repositories --> StationsListController : repositories
-deactivate Repositories
-StationsListController --> Repo : getStationRepository()
-activate Repo
-Repo --> StationsListController : stationRepository
-deactivate Repo
-StationsListController --> stationRepository : asks for the details of a specific station
-activate stationRepository
-stationRepository --> StationsListController : returns the details of said station
-deactivate stationRepository
-StationsListController --> Repositories : getInstance()
-activate Repositories
-Repositories --> StationsListController : repositories
-deactivate Repositories
-StationsListController --> Repo : getBuildingRepository()
-activate Repo
-Repo --> StationsListController : buildingRepository
-deactivate Repo
-StationsListController --> buildingRepository : asks for the details of the building(s) associated with the requested station
-activate buildingRepository
-buildingRepository --> StationsListController : returns the details of the building(s)
-deactivate buildingRepository
-StationsListController --> StationsListUI : returns the details
-deactivate StationsListController
-StationsListUI --> Employee : shows the details
-deactivate StationsListUI
+ListStationController --> srepo : getStations()
+activate srepo
 
+srepo --> ListStationController : returns List<Station>
+deactivate srepo
+
+ListStationController --> DTOMapper : toDTOList(stations)
+activate DTOMapper
+
+DTOMapper --> ListStationController : returns List<StationDTO>
+deactivate DTOMapper
+
+ListStationController --> ListStationsUI : returns List<StationDTO>
+deactivate ListStationController
+
+alt stations list is empty
+    ListStationsUI --> Player : outputs "No stations available."
+    ListStationsUI --> ListStationsUI : return
+end
+
+ListStationsUI --> Player : displays all the stations
+ListStationsUI --> Player : asks for station selection
+deactivate ListStationsUI
+
+Player -> ListStationsUI : selects a station
+activate ListStationsUI
+
+loop while station selection is invalid
+    ListStationsUI --> ListStationsUI : validates station selection
+    ListStationsUI --> Player : outputs "Invalid selection. Try again."
+    ListStationsUI --> Player : asks for station selection
+    deactivate ListStationsUI
+
+    Player -> ListStationsUI : selects a station
+    activate ListStationsUI
+end
+
+ListStationsUI --> ListStationsUI : validates station selection
+ListStationsUI --> ListStationController : getStationDetails(stationDTO)
+activate ListStationController
+
+ListStationController --> srepo : getStationDetails(stationDTO.getName())
+activate srepo
+
+srepo --> ListStationController : returns Station
+deactivate srepo
+
+ListStationController --> brepo : getBuildingsForStation(station)
+activate brepo
+
+brepo --> ListStationController : returns List<Building>
+deactivate brepo
+
+ListStationController --> DTOMapper : toDetailDTO(station, buildings)
+activate DTOMapper
+
+DTOMapper --> ListStationController : returns StationDetailDTO
+deactivate DTOMapper
+
+ListStationController --> ListStationsUI : returns StationDetailDTO
+deactivate ListStationController
+
+ListStationsUI --> Player : displays station details, buildings, and cargo demand/supply
+deactivate ListStationsUI
+
+deactivate Player
 
 @enduml

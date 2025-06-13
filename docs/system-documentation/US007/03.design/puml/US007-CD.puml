@@ -11,24 +11,40 @@ class User {
     - password : String
     - roleId : String
     - locomotives : List<Locomotive>
+    - stations : List<Station>
     + getName() : String
     + getEmail() : String
     + getPassword() : String
     + getRoleId() : String
     + getLocomotives() : List<Locomotive>
-    + setName() : String
-    + setEmail() : String
-    + setPassword() : String
-    + setRoleId() : String
-    + setBudgetValue() : int
-    + setLocomotives() : List<Locomotive>
+    + getStations() : List<Station>
+    + setName(String name) : void
+    + setEmail(String email) : void
+    + setPassword(String password) : void
+    + setRoleId(String roleId) : void
+    + setLocomotives(List<Locomotive> locomotives) : void
+    + setStations(List<Station> stations) : void
 }
 
 class Building{
     - station : Station
     - buildingType : String
+    - cargoType : String
+    - cargoSupply : int
+    - cargoDemand : int
+    - owner : User
     + getStation() : Station
+    + setStation(Station station) : void
     + getBuildingType() : String
+    + setBuildingType(String buildingType) : void
+    + getCargoType() : String
+    + setCargoType(String cargoType) : void
+    + getCargoSupply() : int
+    + setCargoSupply(int cargoSupply) : void
+    + getCargoDemand() : int
+    + setCargoDemand(int cargoDemand) : void
+    + getOwner() : User
+    + setOwner(User owner) : void
 }
 
 class Station {
@@ -42,6 +58,7 @@ class Station {
     - x : int
     - y : int
     - orientation : Orientation
+    - buildings : List<Building>
     + Station(Type type, String name, String mapName, String ownerPlayer,
                          int price, int capacity, int capacityOwned, int x, int y, Orientation orientation)
     + getType() : Type
@@ -55,8 +72,10 @@ class Station {
     + getX() : int
     + getY() : int
     + getOrientation() : Orientation
+    + getBuildings() : List<Building>
+    + setBuildings(List<Building> buildings) : void
+    + addBuilding(Building building) : void
     + toString() : String
-
 }
 
 class CurrentUser{
@@ -64,7 +83,7 @@ class CurrentUser{
     - usr : Map<String, User>
     + getInstance() : CurrentUser
     + getUser() : User
-    + setUSer(User user) : void
+    + setUser(User user) : void
     + doLogin(User user) : boolean
     + clear() : void
     + doLogout() : boolean
@@ -87,23 +106,87 @@ class Budget{
     + setUser(User user) : void
 }
 
-'UI
-class ListStationsUI {
-  + listStations()
+'DTOs
+
+class StationDTO{
+    - name : String
+    - x : int
+    - y : int
+    + StationDTO(String name, int x, int y)
+    + fromEntity(Station station) : StationDTO
+    + getName() : String
+    + getX() : int
+    + getY() : int
 }
 
-'interface
+class BuildingDTO{
+    - buildingType : String
+    - cargoType : String
+    - cargoSupply : int
+    - cargoDemand : int
+    - stationName : String
+    + BuildingDTO(String buildingType, String cargoType, int cargoSupply, int cargoDemand, String stationName)
+    + fromEntity(Building building) : BuildingDTO
+    + getBuildingType() : String
+    + getCargoType() : String
+    + getCargoSupply() : int
+    + getCargoDemand() : int
+    + getStationName() : String
+    + toString() : String
+}
+
+class StationDetailDTO{
+    - name : String
+    - x : int
+    - y : int
+    - ownerPlayer : String
+    - capacity : int
+    - capacityOwned : int
+    - buildings : List<BuildingDTO>
+    + StationDetailDTO(String name, int x, int y, String ownerPlayer, int capacity, int capacityOwned, List<BuildingDTO> buildings)
+    + fromEntity(Station station, List<Building> buildings) : StationDetailDTO
+    + getName() : String
+    + getX() : int
+    + getY() : int
+    + getOwnerPlayer() : String
+    + getCapacity() : int
+    + getCapacityOwned() : int
+    + getBuildings() : List<BuildingDTO>
+    + toString() : String
+}
+
+class DTOMapperStation{
+    + toDTO(Station station) : StationDTO
+    + toDTOList(List<Station> stations) : List<StationDTO>
+    + toDetailDTO(Station station, List<Building> buildings) : StationDetailDTO
+    + buildingsToDTOList(List<Building> buildings) : List<BuildingDTO>
+}
+
+'UI
+class ListStationsUI {
+    - listStationController : ListStationController
+    + run() : void
+    + getStations() : List<StationDTO>
+    + displayStations(List<StationDTO> stations) : void
+    + validateStationSelection(String selection) : boolean
+    + getStationDetails(StationDTO station) : void
+    + displayStationDetails(StationDetailDTO stationDetail) : void
+}
+
+'Interface
 interface Runnable <<interface>>{
-    +run(): void
+    + run() : void
 }
 
 'Controller
 class ListStationController{
     - repositories : Repositories
-    - sr : StationRepository
-    - br : BuildingRepository
-    + getStations() : List<Station>
-    + getBuildingByStation(Station station) : List<Building>
+    - stationRepository : StationRepository
+    - buildingRepository : BuildingRepository
+    + getStations() : List<StationDTO>
+    + getStationDetails(StationDTO station) : StationDetailDTO
+    + getBuildingsForStation(Station station) : List<BuildingDTO>
+    + validateStationSelection(StationDTO station) : boolean
 }
 
 'Repository
@@ -117,40 +200,62 @@ class Repositories {
 }
 
 class BuildingRepository {
-  + BuildingRepository()
-  + add(Building building) : void
-  + validateBuilding(Building building) : boolean
-  + getBuildings() : List<Building>
+    - buildings : Set<Building>
+    + BuildingRepository()
+    + add(Building building) : boolean
+    + validateBuilding(Building building) : boolean
+    + getBuildings() : List<Building>
+    + getBuildingsForStation(Station station) : List<Building>
+    + getBuildingsByOwner(User owner) : List<Building>
 }
 
 class StationRepository {
-  + addStation(Station s) : boolean
-  + getStations() : List<Station>
-  + removeStation(Station station) : boolean
+    - stations : Set<Station>
+    + addStation(Station station) : boolean
+    + getStations() : List<Station>
+    + getStationDetails(String stationName) : Station
+    + getStationsByOwner(User owner) : List<Station>
+    + removeStation(Station station) : boolean
+    + validateStation(Station station) : boolean
 }
 
 'Connections
 User ..> ListStationsUI
 
 ListStationsUI ..|> Runnable
-ListStationsUI .> ListStationController
+ListStationsUI --> ListStationController
+ListStationsUI ..> StationDTO
+ListStationsUI ..> StationDetailDTO
 
-ListStationController ..> StationRepository : sr
-ListStationController ..> BuildingRepository : br
+ListStationController --> Repositories
+ListStationController ..> StationRepository
+ListStationController ..> BuildingRepository
+ListStationController ..> StationDTO
+ListStationController ..> StationDetailDTO
+ListStationController ..> DTOMapperStation
+
+DTOMapperStation ..> Station : converts
+DTOMapperStation ..> Building : converts
+DTOMapperStation ..> StationDTO : creates
+DTOMapperStation ..> StationDetailDTO : creates
+DTOMapperStation ..> BuildingDTO : creates
+
+StationDetailDTO --> "*" BuildingDTO
 
 Repositories -> Repositories : instance
 Repositories --> "1" StationRepository
 Repositories --> "1" BuildingRepository
 
+CurrentUser -> CurrentUser : instance
+CurrentUser --> User : stores session
+
 StationRepository "1" --> "*" Station
 BuildingRepository "1" --> "*" Building
 
-Budget ..> User : user
-CurrentUser --> User : uses
-Building --> User : bought by
-Building --> Station : owned by
-Station --> User : owned by
-
-
+Budget --> User
+Building --> User
+Building --> Station
+Station --> User
+Station "1" --> "*" Building
 
 @enduml
