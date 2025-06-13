@@ -114,35 +114,26 @@ class Train{
 }
 
 class Locomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
     typeOfFuel
     locomotiveType
 }
 
 class SteamLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
+
 }
 
 class DieselLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
+
 }
 
 class ElectricLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
+
 }
 
 class Carriage{
@@ -168,53 +159,51 @@ class Time{
 }
 
 
-Cost --|> Station
-Cost --|> Building
-Cost --|> Industry
-Depot --|> Station
-Station --|> Station
-Terminal --|> Station
-PrimarySectorIndustries --|> Industry
-TransformingIndustries --|> Industry
-MixedIndustries --|> Industry
-TimePeriod --|> Scenario
-Location --|> Map
-Location --|> City
-Location --|> Station
-Location --|> Industry
-SteamLocomotive --|> Locomotive
-DieselLocomotive --|> Locomotive
-ElectricLocomotive --|> Locomotive
-Player --|> User
-Editor --|> User
-
-Travel o-- Cost
-Travel o-- Departure
-Travel o-- Arrival
-Travel o-- Time
-Travel o-- Train
-Route o-- Station
-Editor o-- Scenario
-Station o-- Cargo
+City o-- Location
+Map o-- City
+Map o-- Station
+Scenario o-- Map
 Train o-- Carriage
+Train o-- Locomotive
+Route o-- Travel
+Route o-- Departure
+Route o-- Arrival
+Route o-- Time
+Carriage o-- Cargo
+Station o-- Cargo
+Player o-- Locomotive
+Player o-- Scenario
+Player o-- Station
+Player o-- Simulator
+City o-- HouseBlocks
+City o-- Industry
+Station o-- Building
+Locomotive o-- Cost
+Station o-- Cost
+Carriage o-- Cost
+Industry o-- Location
+Route o-- Train
+Simulator o-- TimePeriod
+Scenario o-- TimePeriod
 
-Route *-- Travel
-Train *-- Locomotive
-Editor *-- Map
-City *-- HouseBlocks
-Map *-- Industry
-Map *-- City
-Map *-- Station
-Player *-- Station
-Player *-- Train
-Station *-- Building
-Simulator *-- Station
-Scenario *-- Map
-Editor *-- City
 
-Station "1" -- "1" City
-Train "1" -- "1" Route
-Player "1" -- "1" Simulator
-Scenario "1"--"*" Locomotive
+TimePeriod -- Time
+HouseBlocks -- Cargo
+Editor -- Scenario
+Editor -- Map
+Player -- Train
+Industry -- Cargo
+
+
+
+SteamLocomotive *-- Locomotive
+ElectricLocomotive *-- Locomotive
+DieselLocomotive *-- Locomotive
+Player *-- User
+Editor *-- User
+
+
+
+
 
 @enduml
