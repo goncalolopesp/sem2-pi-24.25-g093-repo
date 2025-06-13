@@ -571,8 +571,8 @@ public class SimulationController {
             int availableCargo = getAvailableCargoAtStation(station, cargoType);
 
             if (availableCargo > 0) {
-                int collected = collectCargo(route, availableCargo, requestedTypes);
-                System.out.println("\n[Cargo Collection]" + collected + " " + cargoType + " cargo collected from station " + station.getName());
+                int collected = collectCargoForType(route, availableCargo, cargoType);
+                System.out.println("\n[Cargo Collection] " + collected + " " + cargoType + " cargo collected from station " + station.getName());
 
                 if (collected > 0) {
                     updateStationCargo(station, cargoType, collected);
@@ -584,7 +584,7 @@ public class SimulationController {
         updateStationCapacity(station);
     }
 
-    private int collectCargo(Route route, int availableCargo, List<Carriage.Type> requestedTypes) {
+    private int collectCargoForType(Route route, int availableCargo, Carriage.Type cargoType) {
         if (route == null || route.getPoints().isEmpty()) {
             return 0;
         }
@@ -593,7 +593,12 @@ public class SimulationController {
         Train train = route.getTrain();
         List<PointOfRoute> routePoints = route.getPoints();
 
-        int maxTrainCapacity = calculateTrainCapacity(train, requestedTypes);
+        // Calculate capacity for this specific cargo type only
+        int maxCargoTypeCapacity = calculateCargoTypeCapacity(train, cargoType);
+
+        if (maxCargoTypeCapacity == 0) {
+            return 0; // No carriages for this cargo type
+        }
 
         for (int i = 0; i < routePoints.size() - 1; i++) {
             PointOfRoute currentPoint = routePoints.get(i);
@@ -601,10 +606,10 @@ public class SimulationController {
 
             currentCargoLoad = processCargoAtStation(
                     route, i, currentPoint, station,
-                    currentCargoLoad, maxTrainCapacity, availableCargo
+                    currentCargoLoad, maxCargoTypeCapacity, availableCargo
             );
 
-            if (currentCargoLoad >= maxTrainCapacity) {
+            if (currentCargoLoad >= maxCargoTypeCapacity) {
                 break;
             }
         }
@@ -612,25 +617,23 @@ public class SimulationController {
         return currentCargoLoad;
     }
 
-    private int calculateTrainCapacity(Train train, List<Carriage.Type> requestedTypes) {
-        List<Carriage> carriages = train.getCarriages().stream().filter(c -> requestedTypes.contains(c.getType())).collect(Collectors.toList());
-        if (carriages.isEmpty()) {
-            return 0;
-        }
-
-        return carriages.stream().mapToInt(Carriage::getCapacity).sum();
+    private int calculateCargoTypeCapacity(Train train, Carriage.Type cargoType) {
+        return train.getCarriages().stream()
+                .filter(carriage -> carriage.getType() == cargoType)
+                .mapToInt(Carriage::getCapacity)
+                .sum();
     }
 
     private int processCargoAtStation(Route route, int stationIndex, PointOfRoute currentPoint,
                                       Station station, int currentCargoLoad,
-                                      int maxTrainCapacity, int availableCargo) {
+                                      int maxCargoTypeCapacity, int availableCargo) {
         int cargoLoad = currentCargoLoad;
 
         int maxIterations = 100;
         int iterations = 0;
 
         while (!route.isReadyToDepart(stationIndex, cargoLoad) && iterations < maxIterations) {
-            int targetCargo = calculateTargetCargo(currentPoint.getCargoMode(), maxTrainCapacity);
+            int targetCargo = calculateTargetCargo(currentPoint.getCargoMode(), maxCargoTypeCapacity);
             int cargoToLoad = calculateCargoToLoad(station, targetCargo, cargoLoad, availableCargo);
 
             if (cargoToLoad <= 0) {
@@ -638,7 +641,6 @@ public class SimulationController {
             }
 
             cargoLoad += cargoToLoad;
-
             iterations++;
         }
 
@@ -649,13 +651,13 @@ public class SimulationController {
         return cargoLoad;
     }
 
-    private int calculateTargetCargo(CargoMode cargoMode, int maxTrainCapacity) {
+    private int calculateTargetCargo(CargoMode cargoMode, int maxCargoTypeCapacity) {
         switch (cargoMode) {
             case FULL:
             case AVAILABLE:
-                return maxTrainCapacity;
+                return maxCargoTypeCapacity;
             case HALF:
-                return maxTrainCapacity / 2;
+                return maxCargoTypeCapacity / 2;
             default:
                 throw new IllegalArgumentException("Unknown cargo mode: " + cargoMode);
         }
