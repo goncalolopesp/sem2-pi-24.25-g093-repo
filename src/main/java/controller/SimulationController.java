@@ -11,6 +11,7 @@ import domain.CurrentUser;
 import domain.Map;
 
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicIntegerArray;
@@ -69,7 +70,6 @@ public class SimulationController {
             double totalDistance = 0.0;
             Locomotive locomotive = route.getTrain().getLocomotive();
 
-            // Calculate total route distance
             for (int i = 0; i < route.getPoints().size() - 1; i++) {
                 Station currentStation = route.getPoints().get(i).getStation();
                 Station nextStation = route.getPoints().get(i + 1).getStation();
@@ -80,16 +80,12 @@ public class SimulationController {
                 }
             }
 
-            // Calculate travel time considering locomotive speed and carriage degradation
             double baseSpeed = locomotive.getTopSpeed();
             double speedDegradation = calculateSpeedDegradation();
             double effectiveSpeed = baseSpeed * (1 - speedDegradation);
 
-            // Convert distance to time - assuming very long distances take multiple years
-            // You can adjust this formula based on your game's time scale
-            double travelTimeYears = totalDistance / Math.max(effectiveSpeed * 100, 50); // Arbitrary scale factor
+            double travelTimeYears = totalDistance / effectiveSpeed;
 
-            // Minimum 1 year travel time, round up to nearest year
             int yearsToTravel = Math.max(1, (int) Math.ceil(travelTimeYears));
 
             return currentYear + yearsToTravel;
@@ -105,9 +101,8 @@ public class SimulationController {
                 return 0.0;
             }
 
-            // Each carriage degrades 5% of locomotive's speed up to maximum of 30%
-            double totalDegradation = carriages.size() * 0.05; // 5% per carriage
-            return Math.min(totalDegradation, 0.30); // Maximum 30% degradation
+            double totalDegradation = carriages.size() * 0.05;
+            return Math.min(totalDegradation, 0.30);
         }
 
         private RailwayLine findRailwayLineBetweenStations(Station station1, Station station2, String owner) {
@@ -393,7 +388,7 @@ public class SimulationController {
                 });
             }
 
-            collectCargoFromStation(station, point.getCargoTypes(), carriages, result);
+            collectCargoFromStation(route, station, point.getCargoTypes(), result);
         }
 
         if (result.people > 0) demandManager.recordDelivery(Carriage.Type.PEOPLE, result.people);
@@ -569,14 +564,15 @@ public class SimulationController {
         return totalRemoved;
     }
 
-    private void collectCargoFromStation(Station station, List<Carriage.Type> requestedTypes,
-                                         List<Carriage> carriages, CargoCollectionResult result) {
+    private void collectCargoFromStation(Route route, Station station, List<Carriage.Type> requestedTypes,
+                                         CargoCollectionResult result) {
 
         for (Carriage.Type cargoType : requestedTypes) {
             int availableCargo = getAvailableCargoAtStation(station, cargoType);
 
             if (availableCargo > 0) {
-                int collected = collectCargoOptimized(carriages, cargoType, availableCargo);
+                int collected = collectCargo(route, availableCargo, requestedTypes);
+                System.out.println("\n[Cargo Collection]" + collected + " " + cargoType + " cargo collected from station " + station.getName());
 
                 if (collected > 0) {
                     updateStationCargo(station, cargoType, collected);
@@ -588,48 +584,90 @@ public class SimulationController {
         updateStationCapacity(station);
     }
 
-    private int collectCargoOptimized(List<Carriage> carriages, Carriage.Type cargoType, int availableCargo) {
-        int totalCollected = 0;
-        int remainingCargo = availableCargo;
+    private int collectCargo(Route route, int availableCargo, List<Carriage.Type> requestedTypes) {
+        if (route == null || route.getPoints().isEmpty()) {
+            return 0;
+        }
 
-        // First pass: fill carriages of matching type
-        for (Carriage carriage : carriages) {
-            if (carriage.getType() == cargoType && remainingCargo > 0) {
-                int spaceLeft = carriage.getCapacity() - carriage.getCapacityOwned();
-                if (spaceLeft > 0) {
-                    int toCollect = Math.min(remainingCargo, spaceLeft);
-                    carriage.setCapacityOwned(carriage.getCapacityOwned() + toCollect);
-                    totalCollected += toCollect;
-                    remainingCargo -= toCollect;
-                }
+        int currentCargoLoad = 0;
+        Train train = route.getTrain();
+        List<PointOfRoute> routePoints = route.getPoints();
+
+        int maxTrainCapacity = calculateTrainCapacity(train, requestedTypes);
+
+        for (int i = 0; i < routePoints.size() - 1; i++) {
+            PointOfRoute currentPoint = routePoints.get(i);
+            Station station = currentPoint.getStation();
+
+            currentCargoLoad = processCargoAtStation(
+                    route, i, currentPoint, station,
+                    currentCargoLoad, maxTrainCapacity, availableCargo
+            );
+
+            if (currentCargoLoad >= maxTrainCapacity) {
+                break;
             }
         }
 
-        // Second pass: if there's still cargo and we have multi-purpose carriages, use them
-        if (remainingCargo > 0) {
-            for (Carriage carriage : carriages) {
-                if (canCarryCargoType(carriage, cargoType) && remainingCargo > 0) {
-                    int spaceLeft = carriage.getCapacity() - carriage.getCapacityOwned();
-                    if (spaceLeft > 0) {
-                        int toCollect = Math.min(remainingCargo, spaceLeft);
-                        carriage.setCapacityOwned(carriage.getCapacityOwned() + toCollect);
-                        totalCollected += toCollect;
-                        remainingCargo -= toCollect;
-                    }
-                }
-            }
-        }
-
-        return totalCollected;
+        return currentCargoLoad;
     }
 
-    private boolean canCarryCargoType(Carriage carriage, Carriage.Type cargoType) {
-        // If it's the same type, it can definitely carry it
-        if (carriage.getType() == cargoType) {
-            return true;
+    private int calculateTrainCapacity(Train train, List<Carriage.Type> requestedTypes) {
+        List<Carriage> carriages = train.getCarriages().stream().filter(c -> requestedTypes.contains(c.getType())).collect(Collectors.toList());
+        if (carriages.isEmpty()) {
+            return 0;
         }
 
-        return false;
+        return carriages.stream().mapToInt(Carriage::getCapacity).sum();
+    }
+
+    private int processCargoAtStation(Route route, int stationIndex, PointOfRoute currentPoint,
+                                      Station station, int currentCargoLoad,
+                                      int maxTrainCapacity, int availableCargo) {
+        int cargoLoad = currentCargoLoad;
+
+        int maxIterations = 100;
+        int iterations = 0;
+
+        while (!route.isReadyToDepart(stationIndex, cargoLoad) && iterations < maxIterations) {
+            int targetCargo = calculateTargetCargo(currentPoint.getCargoMode(), maxTrainCapacity);
+            int cargoToLoad = calculateCargoToLoad(station, targetCargo, cargoLoad, availableCargo);
+
+            if (cargoToLoad <= 0) {
+                break;
+            }
+
+            cargoLoad += cargoToLoad;
+
+            iterations++;
+        }
+
+        if (iterations >= maxIterations) {
+            System.err.println("Warning: Maximum iterations reached at station " + station.getName());
+        }
+
+        return cargoLoad;
+    }
+
+    private int calculateTargetCargo(CargoMode cargoMode, int maxTrainCapacity) {
+        switch (cargoMode) {
+            case FULL:
+            case AVAILABLE:
+                return maxTrainCapacity;
+            case HALF:
+                return maxTrainCapacity / 2;
+            default:
+                throw new IllegalArgumentException("Unknown cargo mode: " + cargoMode);
+        }
+    }
+
+    private int calculateCargoToLoad(Station station, int targetCargo, int currentCargoLoad, int availableCargo) {
+        int cargoNeeded = targetCargo - currentCargoLoad;
+        if (cargoNeeded <= 0) {
+            return 0;
+        }
+
+        return Math.min(Math.min(station.getCapacityOwned(), availableCargo), cargoNeeded);
     }
 
     private int getAvailableCargoAtStation(Station station, Carriage.Type cargoType) {

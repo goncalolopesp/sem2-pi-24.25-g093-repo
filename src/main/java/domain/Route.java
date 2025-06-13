@@ -134,6 +134,13 @@ public class Route {
         this.id = generateId();
     }
 
+    public boolean isReadyToDepart(int pointIndex, int currentLoad) {
+        if (pointIndex >= 0 && pointIndex < pointsOfRoute.size()) {
+            return pointsOfRoute.get(pointIndex).isReadyToDepart(currentLoad, (train.getCarriages().size() * train.getCarriages().get(0).getCapacity()));
+        }
+        return false;
+    }
+
     /**
      * Returns a string representation of the Route object.
      * The string includes key information about the route, such as its unique identifier,

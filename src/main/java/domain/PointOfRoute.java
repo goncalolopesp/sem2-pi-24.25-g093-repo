@@ -61,4 +61,17 @@ public class PointOfRoute {
         return cargoMode;
     }
 
+    public boolean isReadyToDepart(int currentLoad, int maxLoad) {
+        switch (cargoMode) {
+            case FULL:
+                return currentLoad >= maxLoad;
+            case HALF:
+                return currentLoad >= maxLoad / 2;
+            case AVAILABLE:
+                return currentLoad > 0;
+            default:
+                return true;
+        }
+    }
+
 }
