@@ -5,34 +5,41 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
+actor "Player" as Player
 participant ":BuyLocomotiveUI" as BuyLocomotiveUI
+participant ":BuyLocomotiveController" as BuyLocomotiveController
+participant "budgetRepository\n:BudgetRepository" as brepo
+participant "locomotiveRepository\n:LocomotiveRepository" as lrepo
 
-activate Employee
-
+activate Player
 activate BuyLocomotiveUI
-
-create ":BuyLocomotiveController" as BuyLocomotiveController
-
-BuyLocomotiveUI --> BuyLocomotiveController : create
-
-participant "locomotiveRepository\n:LocomotiveRepository" as locomotiveRepository
-
 activate BuyLocomotiveController
 
-BuyLocomotiveController --> BuyLocomotiveController : getBudget()
+BuyLocomotiveUI --> BuyLocomotiveController : purchaseLocomotive(locomotiveDTO)
 
-BuyLocomotiveController --> locomotiveRepository : getPrice(locomotive)
-activate locomotiveRepository
-locomotiveRepository --> BuyLocomotiveController : price of the locomotive
-deactivate locomotiveRepository
+BuyLocomotiveController --> brepo : getBudget()
+activate brepo
+brepo --> BuyLocomotiveController : current budget
+deactivate brepo
 
-BuyLocomotiveController --> BuyLocomotiveUI : bought locomotive
+note right: budget >= locomotive price
 
+BuyLocomotiveController --> brepo : deductAmount(locomotivePrice)
+activate brepo
+brepo --> BuyLocomotiveController : updated budget
+deactivate brepo
+
+BuyLocomotiveController --> lrepo : addLocomotiveToPlayer(locomotiveDTO.getModelName())
+activate lrepo
+lrepo --> BuyLocomotiveController : purchased locomotive
+deactivate lrepo
+
+BuyLocomotiveController --> BuyLocomotiveUI : returns purchase success
 deactivate BuyLocomotiveController
 
-BuyLocomotiveUI --> Employee : Success Message
+BuyLocomotiveUI --> Player : outputs "Success: Locomotive purchased successfully!"
 
 deactivate BuyLocomotiveUI
+deactivate Player
 
 @enduml

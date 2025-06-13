@@ -5,57 +5,69 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
+actor "Player" as Player
 participant ":BuyLocomotiveUI" as BuyLocomotiveUI
 
-activate Employee
+activate Player
 
-Employee -> BuyLocomotiveUI : asks to buy a locomotive
+Player -> BuyLocomotiveUI : asks to buy a locomotive
 activate BuyLocomotiveUI
 
 create ":BuyLocomotiveController" as BuyLocomotiveController
 
-BuyLocomotiveUI --> BuyLocomotiveController : create
-
+BuyLocomotiveUI --> BuyLocomotiveController : create()
 
 ref over BuyLocomotiveController
-    Checks what locomotives are available
+    Initialize repositories and get available locomotives
 end
 
-
-BuyLocomotiveController --> BuyLocomotiveUI : lists
-
-deactivate BuyLocomotiveController
-
-BuyLocomotiveUI --> Employee : lists the available locomotives
-BuyLocomotiveUI --> Employee : asks the wished locomotive
-deactivate BuyLocomotiveUI
-
-Employee -> BuyLocomotiveUI : selects a locomotive from the list
-
-activate BuyLocomotiveUI
-
-BuyLocomotiveUI --> BuyLocomotiveUI : saveLocomotive()
-
-BuyLocomotiveUI --> BuyLocomotiveController : asks for the locomotive's price
-ref over BuyLocomotiveController
-    Checks the price of the locomotive
-end
+BuyLocomotiveUI --> BuyLocomotiveController : getAvailableLocomotives()
 activate BuyLocomotiveController
 
+BuyLocomotiveController --> BuyLocomotiveUI : returns List<LocomotiveDTO>
+deactivate BuyLocomotiveController
 
-BuyLocomotiveController --> BuyLocomotiveUI : bought locomotive
+alt available locomotives list is empty
+    BuyLocomotiveUI --> Player : outputs "No locomotives available for purchase."
+    BuyLocomotiveUI --> BuyLocomotiveUI : return
+end
 
-BuyLocomotiveUI --> Employee : boughtLocomotive
-BuyLocomotiveUI --> Employee : Success Message
+BuyLocomotiveUI --> Player : displays available locomotives
+BuyLocomotiveUI --> Player : asks for locomotive selection
+deactivate BuyLocomotiveUI
 
-alt Budget < price
-    BuyLocomotiveController --> BuyLocomotiveUI : Error Message "Not Enough Budget"
+Player -> BuyLocomotiveUI : selects a locomotive
+activate BuyLocomotiveUI
+
+loop while locomotive selection is invalid
+    BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+    BuyLocomotiveUI --> Player : outputs "Invalid selection. Try again."
+    deactivate BuyLocomotiveUI
+
+    Player -> BuyLocomotiveUI : selects a locomotive
+    activate BuyLocomotiveUI
+end
+
+BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+
+BuyLocomotiveUI --> BuyLocomotiveController : purchaseLocomotive(locomotiveDTO)
+activate BuyLocomotiveController
+
+ref over BuyLocomotiveController
+    Check budget and purchase locomotive
+end
+
+alt budget < locomotive price
+    BuyLocomotiveController --> BuyLocomotiveUI : returns "Error: Not enough budget"
     deactivate BuyLocomotiveController
-    BuyLocomotiveUI --> Employee : Error Message "Not Enough Budget"
+    BuyLocomotiveUI --> Player : outputs "Error: Not enough budget to purchase this locomotive."
+else budget >= locomotive price
+    BuyLocomotiveController --> BuyLocomotiveUI : returns purchase success
+    deactivate BuyLocomotiveController
+    BuyLocomotiveUI --> Player : outputs "Success: Locomotive purchased successfully!"
 end
 
 deactivate BuyLocomotiveUI
-
+deactivate Player
 
 @enduml

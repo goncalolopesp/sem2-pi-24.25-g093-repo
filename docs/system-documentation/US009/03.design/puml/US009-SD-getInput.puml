@@ -5,18 +5,61 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
+actor "Player" as Player
 participant ":BuyLocomotiveUI" as BuyLocomotiveUI
+participant ":Repositories" as Repositories
+participant "repositories\n:Repositories" as repo
+participant "locomotiveRepository\n:LocomotiveRepository" as lrepo
+participant "scenarioRepository\n:ScenarioRepository" as srepo
+participant ":DTOMapperLocomotive" as DTOMapper
 
-activate Employee
+activate Player
 
-Employee -> BuyLocomotiveUI : openLocomotiveForm()
+Player -> BuyLocomotiveUI : asks to buy a locomotive
 activate BuyLocomotiveUI
 
-BuyLocomotiveUI --> Employee : displayLocomotiveList(locomotiveList)
+create ":BuyLocomotiveController" as BuyLocomotiveController
+BuyLocomotiveUI --> BuyLocomotiveController : create()
+create ":BuyLocomotiveController" as BuyLocomotiveController
 
-Employee -> BuyLocomotiveUI : selectLocomotive(locomotive)
+BuyLocomotiveUI --> BuyLocomotiveController : getAvailableLocomotives()
+activate BuyLocomotiveController
 
-BuyLocomotiveUI --> BuyLocomotiveUI : saveLocomotive()
+BuyLocomotiveController --> srepo : getAvailableLocomotives()
+activate srepo
+srepo --> BuyLocomotiveController : returns available locomotives list
+deactivate srepo
+
+BuyLocomotiveController --> lrepo : getLocomotivesByType(availableTypes)
+activate lrepo
+lrepo --> BuyLocomotiveController : returns List<Locomotive>
+deactivate lrepo
+
+BuyLocomotiveController --> DTOMapper : toDTOList(locomotives)
+activate DTOMapper
+DTOMapper --> BuyLocomotiveController : returns List<LocomotiveDTO>
+deactivate DTOMapper
+
+BuyLocomotiveController --> BuyLocomotiveUI : returns List<LocomotiveDTO>
+deactivate BuyLocomotiveController
+
+BuyLocomotiveUI --> Player : displays available locomotives
+BuyLocomotiveUI --> Player : asks for locomotive selection
+
+Player -> BuyLocomotiveUI : selects a locomotive
+
+loop while locomotive selection is invalid
+    BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+    BuyLocomotiveUI --> Player : outputs "Invalid selection. Try again."
+    deactivate BuyLocomotiveUI
+
+    Player -> BuyLocomotiveUI : selects a locomotive
+    activate BuyLocomotiveUI
+end
+
+BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+
+deactivate BuyLocomotiveUI
+deactivate Player
 
 @enduml
