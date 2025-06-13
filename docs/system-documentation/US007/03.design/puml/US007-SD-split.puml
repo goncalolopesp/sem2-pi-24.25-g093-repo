@@ -5,35 +5,53 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
-participant ":StationsListUI" as StationsListUI
+actor "Player" as Player
+participant ":ListStationsUI" as ListStationsUI
 
-activate Employee
+activate Player
 
-Employee -> StationsListUI : asks to list the stations
-activate StationsListUI
+Player -> ListStationsUI : asks to list the stations
+activate ListStationsUI
 
-create ":StationsListController" as StationsListController
+create ":ListStationController" as ListStationController
+ListStationsUI --> ListStationController : create()
+activate ListStationController
 
-StationsListUI --> StationsListController : create()
-activate StationsListController
-StationsListController --> StationsListUI : lists
+ListStationController --> ListStationsUI : returns List<StationDTO>
+deactivate ListStationController
 
-deactivate StationsListController
+alt stations list is empty
+    ListStationsUI --> Player : outputs "No stations available."
+    ListStationsUI --> ListStationsUI : return
+else
+    ListStationsUI --> Player : displays all the stations
+    ListStationsUI --> Player : asks for station selection
+end
 
-StationsListUI --> Employee : lists all the stations
-StationsListUI --> Employee : asks the selected station
-deactivate StationsListUI
+deactivate ListStationsUI
 
-Employee -> StationsListUI : selects a station
-activate StationsListUI
-StationsListUI --> StationsListUI : saveStation()
-StationsListUI --> StationsListController : asks for the station details
-activate StationsListController
-StationsListController --> StationsListUI : returns the details
-deactivate StationsListController
-StationsListUI --> Employee : shows the details
-deactivate StationsListUI
+Player -> ListStationsUI : selects a station
+activate ListStationsUI
 
+loop while station selection is invalid
+    ListStationsUI --> ListStationsUI : validates station selection
+    ListStationsUI --> Player : outputs "Invalid selection. Try again."
+    ListStationsUI --> Player : asks for station selection
+    deactivate ListStationsUI
+
+    Player -> ListStationsUI : selects a station
+    activate ListStationsUI
+end
+
+ListStationsUI --> ListStationsUI : validates station selection
+ListStationsUI --> ListStationController : getStationDetails(stationDTO)
+activate ListStationController
+
+ListStationController --> ListStationsUI : returns StationDetailDTO
+deactivate ListStationController
+
+ListStationsUI --> Player : displays station details, buildings, and cargo demand/supply
+deactivate ListStationsUI
+deactivate Player
 
 @enduml

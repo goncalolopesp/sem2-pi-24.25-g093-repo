@@ -5,47 +5,54 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
-participant ":StationsListUI" as StationsListUI
+actor "Player" as Player
+participant ":ListStationsUI" as ListStationsUI
 
-activate Employee
+activate Player
 
-Employee -> StationsListUI : asks to list the stations
-activate StationsListUI
+Player -> ListStationsUI : asks to list the stations
+activate ListStationsUI
 
-create ":StationsListController" as StationsListController
-
-StationsListUI --> StationsListController : create
-
-
+create ":ListStationController" as ListStationController
+ListStationsUI --> ListStationController : create()
+activate ListStationController
 
 participant ":Repositories" as Repositories
-participant "repositories\n:Repositories" as Repo
-participant "stationRepository\n:StationRepository" as stationRepository
+participant "repositories\n:Repositories" as repo
+participant "stationRepository\n:StationRepository" as srepo
+participant ":DTOMapperStation" as DTOMapper
 
-StationsListController --> Repositories : getInstance()
-activate StationsListController
+ListStationController --> Repositories : getInstance()
 activate Repositories
-
-Repositories --> StationsListController : repositories
-
+Repositories --> ListStationController : repositories
 deactivate Repositories
 
-StationsListController --> Repo : getStationRepository()
-activate Repo
+ListStationController --> repo : getStationRepository()
+activate repo
+repo --> ListStationController : stationRepository
+deactivate repo
 
-Repo --> StationsListController : stationRepository
-deactivate Repo
+ListStationController --> srepo : getStations()
+activate srepo
+srepo --> ListStationController : returns List<Station>
+deactivate srepo
 
+ListStationController --> DTOMapper : toDTOList(stations)
+activate DTOMapper
+DTOMapper --> ListStationController : returns List<StationDTO>
+deactivate DTOMapper
 
-StationsListController --> stationRepository : asks for list of stations
-activate stationRepository
-stationRepository --> StationsListController : lists
-deactivate stationRepository
-StationsListController --> StationsListUI : lists
+ListStationController --> ListStationsUI : returns List<StationDTO>
+deactivate ListStationController
 
-deactivate StationsListController
+alt stations list is empty
+    ListStationsUI --> Player : outputs "No stations available."
+    ListStationsUI --> ListStationsUI : return
+else
+    ListStationsUI --> Player : displays all the stations
+    ListStationsUI --> Player : asks for station selection
+end
 
-StationsListUI --> Employee : lists all the stations
-deactivate StationsListUI
+deactivate ListStationsUI
+
 @enduml

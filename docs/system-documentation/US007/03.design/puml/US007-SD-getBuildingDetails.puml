@@ -5,51 +5,39 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
-participant ":StationsListUI" as StationsListUI
+actor "Player" as Player
+participant ":ListStationsUI" as ListStationsUI
+participant ":ListStationController" as ListStationController
+participant "stationRepository\n:StationRepository" as srepo
+participant "buildingRepository\n:BuildingRepository" as brepo
+participant ":DTOMapperStation" as DTOMapper
 
-activate Employee
+Player -> ListStationsUI : selects a station
+activate ListStationsUI
 
-participant ":StationsListController" as StationsListController
+ListStationsUI --> ListStationsUI : validates station selection
+ListStationsUI --> ListStationController : getStationDetails(stationDTO)
+activate ListStationController
 
-participant ":Repositories" as Repositories
-participant "repositories\n:Repositories" as Repo
-participant "stationRepository\n:StationRepository" as stationRepository
-participant "buildingRepository\n:BuildingRepository" as buildingRepository
+ListStationController --> srepo : getStationDetails(stationDTO.getName())
+activate srepo
+srepo --> ListStationController : returns Station
+deactivate srepo
 
+ListStationController --> brepo : getBuildingsForStation(station)
+activate brepo
+brepo --> ListStationController : returns List<Building>
+deactivate brepo
 
-Employee -> StationsListUI : selects a station
-activate StationsListUI
-StationsListUI --> StationsListController : asks for the station details
-activate StationsListController
-StationsListController --> Repositories : getInstance()
-activate Repositories
-Repositories --> StationsListController : repositories
-deactivate Repositories
-StationsListController --> Repo : getStationRepository()
-activate Repo
-Repo --> StationsListController : stationRepository
-deactivate Repo
-StationsListController --> stationRepository : asks for the details of a specific station
-activate stationRepository
-stationRepository --> StationsListController : returns the details of said station
-deactivate stationRepository
-StationsListController --> Repositories : getInstance()
-activate Repositories
-Repositories --> StationsListController : repositories
-deactivate Repositories
-StationsListController --> Repo : getBuildingRepository()
-activate Repo
-Repo --> StationsListController : buildingRepository
-deactivate Repo
-StationsListController --> buildingRepository : asks for the details of the building(s) associated with the requested station
-activate buildingRepository
-buildingRepository --> StationsListController : returns the details of the building(s)
-deactivate buildingRepository
-StationsListController --> StationsListUI : returns the details
-deactivate StationsListController
-StationsListUI --> Employee : shows the details
-deactivate StationsListUI
+ListStationController --> DTOMapper : toDetailDTO(station, buildings)
+activate DTOMapper
+DTOMapper --> ListStationController : returns StationDetailDTO
+deactivate DTOMapper
 
+ListStationController --> ListStationsUI : returns StationDetailDTO
+deactivate ListStationController
+
+ListStationsUI --> Player : displays station details, buildings, and cargo demand/supply
+deactivate ListStationsUI
 
 @enduml

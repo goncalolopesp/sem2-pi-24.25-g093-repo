@@ -5,22 +5,31 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
-participant ":StationsListUI" as StationsListUI
+actor "Player" as Player
+participant ":ListStationsUI" as ListStationsUI
 
-activate Employee
+activate Player
 
-Employee -> StationsListUI : openStationListing()
-activate StationsListUI
+Player -> ListStationsUI : asks to list the stations
+activate ListStationsUI
 
-StationsListUI --> Employee : listStations()
+ListStationsUI --> Player : displays all the stations
+ListStationsUI --> Player : asks for station selection
 
-Employee -> StationsListUI : selectStation(station)
+deactivate ListStationsUI
+Player -> ListStationsUI : selects a station
+activate ListStationsUI
 
-StationsListUI --> StationsListUI : saveStation()
+loop while station selection is invalid
+    ListStationsUI --> ListStationsUI : validates station selection
+    ListStationsUI --> Player : outputs "Invalid selection. Try again."
+    ListStationsUI --> Player : asks for station selection
+    deactivate ListStationsUI
 
-StationsListUI --> Employee : displayStationData()
+    Player -> ListStationsUI : selects a station
+    activate ListStationsUI
+end
 
-
+ListStationsUI --> ListStationsUI : validates station selection
 
 @enduml
