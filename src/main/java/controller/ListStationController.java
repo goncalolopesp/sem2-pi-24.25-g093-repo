@@ -4,6 +4,10 @@ import domain.Building;
 import domain.CurrentUser;
 import domain.Scenario;
 import domain.Station;
+import dto.StationDTO;
+import dto.StationDetailDTO;
+import dto.BuildingDTO;
+import dto.DTOMapperStation;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -88,7 +92,7 @@ public class ListStationController {
         // Clear existing items first
         StationList.getItems().clear();
 
-        List<Station> userStations = getStations();
+        List<Station> userStations = getStationEntities();
 
         for (Station station : userStations){
             if (station.getOwnerPlayer().equalsIgnoreCase(CurrentUser.getInstance().getUser().getEmail())){
@@ -98,16 +102,35 @@ public class ListStationController {
     }
 
     /**
-     * Retrieves a list of stations associated with the current scenario.
+     * Retrieves a list of station DTOs associated with the current scenario.
      *
      * This method filters the stations available in the system to include only those
      * that belong to the scenario currently set as active. If the current scenario
      * is not set (null), an error message is displayed, and an empty list is returned.
      *
-     * @return a list of stations associated with the active scenario, or an empty
+     * @return a list of StationDTO objects associated with the active scenario, or an empty
      * list if the current scenario is null or no matching stations are found
      */
-    public List<Station> getStations(){
+    public List<StationDTO> getStations(){
+        if (currentScenario == null) {
+            System.err.println("Cannot get stations: currentScenario is null");
+            return new ArrayList<>();
+        }
+
+        List<Station> stations = sr.getStations().stream()
+                .filter(s -> s.getScenarioName().equals(currentScenario.getScenarioName()))
+                .collect(Collectors.toList());
+
+        return DTOMapperStation.toDTOList(stations);
+    }
+
+    /**
+     * Retrieves a list of station entities associated with the current scenario.
+     * Used internally for operations that require full domain objects.
+     *
+     * @return a list of Station domain objects associated with the active scenario
+     */
+    private List<Station> getStationEntities(){
         if (currentScenario == null) {
             System.err.println("Cannot get stations: currentScenario is null");
             return new ArrayList<>();
@@ -116,6 +139,28 @@ public class ListStationController {
         return sr.getStations().stream()
                 .filter(s -> s.getScenarioName().equals(currentScenario.getScenarioName()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retrieves detailed information about a specific station including its buildings.
+     *
+     * @param stationDTO the StationDTO object representing the station
+     * @return a StationDetailDTO containing complete station and building information
+     */
+    public StationDetailDTO getStationDetails(StationDTO stationDTO) {
+        Station station = sr.getStations().stream()
+                .filter(s -> s.getName().equals(stationDTO.getName()) &&
+                        s.getX() == stationDTO.getX() &&
+                        s.getY() == stationDTO.getY())
+                .findFirst()
+                .orElse(null);
+
+        if (station == null) {
+            return null;
+        }
+
+        List<Building> buildings = getBuildingByStation(station);
+        return DTOMapperStation.toDetailDTO(station, buildings);
     }
 
     /**
@@ -138,6 +183,28 @@ public class ListStationController {
             }
         }
         return lstBuilding;
+    }
+
+    /**
+     * Retrieves building DTOs for a specific station.
+     *
+     * @param stationDTO the StationDTO representing the station
+     * @return a list of BuildingDTO objects associated with the station
+     */
+    public List<BuildingDTO> getBuildingDTOs(StationDTO stationDTO) {
+        Station station = sr.getStations().stream()
+                .filter(s -> s.getName().equals(stationDTO.getName()) &&
+                        s.getX() == stationDTO.getX() &&
+                        s.getY() == stationDTO.getY())
+                .findFirst()
+                .orElse(null);
+
+        if (station == null) {
+            return new ArrayList<>();
+        }
+
+        List<Building> buildings = getBuildingByStation(station);
+        return DTOMapperStation.buildingsToDTOList(buildings);
     }
 
     /**

@@ -3,6 +3,7 @@ package ui.console;
 import controller.BuyLocomotiveController;
 import domain.*;
 import domain.Map;
+import dto.LocomotiveDTO;
 
 import java.util.*;
 
@@ -47,9 +48,12 @@ public class BuyLocomotiveUI implements Runnable {
     }
 
     public void listLocomotives() {
-        List<Locomotive> locomotiveList = locomotiveController.getLocomotives(scenario);
-        for (Locomotive locomotive : locomotiveList) {
-            System.out.printf("Name: %-20s | Price: %-5s | TopSpeed: %-5s | Maintenance Cost per year: %-5s | Fuel Cost per year: %-5s%n", locomotive.getModelName(), locomotive.getPrice(), locomotive.getTopSpeed(), locomotive.getMaintenanceCost(), locomotive.getFuelCost());
+        List<LocomotiveDTO> locomotiveList = locomotiveController.getLocomotives(scenario);
+        for (LocomotiveDTO locomotive : locomotiveList) {
+            System.out.printf("Name: %-20s | Price: %-5s | TopSpeed: %-5s%n",
+                    locomotive.getModelName(),
+                    locomotive.getPrice(),
+                    locomotive.getTopSpeed());
         }
         System.out.println();
         System.out.println("Cancel");

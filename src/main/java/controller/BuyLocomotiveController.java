@@ -5,6 +5,8 @@ import domain.CurrentUser;
 import domain.Locomotive;
 import domain.Map;
 import domain.Scenario;
+import dto.LocomotiveDTO;
+import dto.DTOMapperLocomotive;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -87,9 +89,29 @@ public class BuyLocomotiveController {
     /**
      * Gets all locomotives available for a specific scenario based on time and technological restrictions
      * @param scenario The scenario to check locomotive availability against
-     * @return List of locomotives available for the given scenario
+     * @return List of LocomotiveDTO objects available for the given scenario
      */
-    public List<Locomotive> getLocomotives(Scenario scenario) {
+    public List<LocomotiveDTO> getLocomotives(Scenario scenario) {
+        Set<Locomotive> locomotives = locomotiveRepository.getLocomotives();
+        List<Locomotive> locomotivesList = new ArrayList<>();
+        for (Locomotive locomotive : locomotives) {
+            if(locomotive.getStartYearOfOperation() <= scenario.getTimeRestrictions()[0] && locomotive.getEndYearOfOperation() >= scenario.getTimeRestrictions()[0]) {
+                for (String techRestriction : scenario.getTechnologicalRestrictions()){
+                    if (techRestriction.equalsIgnoreCase(locomotive.getType())) {
+                        locomotivesList.add(locomotive);
+                    }
+                }
+            }
+        }
+        return DTOMapperLocomotive.toDTOList(locomotivesList);
+    }
+
+    /**
+     * Gets the original locomotive objects for internal operations
+     * @param scenario The scenario to check locomotive availability against
+     * @return List of Locomotive domain objects available for the given scenario
+     */
+    private List<Locomotive> getLocomotiveEntities(Scenario scenario) {
         Set<Locomotive> locomotives = locomotiveRepository.getLocomotives();
         List<Locomotive> locomotivesList = new ArrayList<>();
         for (Locomotive locomotive : locomotives) {
@@ -111,7 +133,7 @@ public class BuyLocomotiveController {
      * @return true if the locomotive can be purchased, false otherwise
      */
     public boolean canBuyLocomotive(String modelName, Scenario scenario) {
-        for (Locomotive locomotive : this.getLocomotives(scenario)){
+        for (Locomotive locomotive : this.getLocomotiveEntities(scenario)){
             if (locomotive.getModelName().equalsIgnoreCase(modelName)){
                 return true;
             }
@@ -128,6 +150,20 @@ public class BuyLocomotiveController {
     public boolean buyLocomotive(String modelName, Scenario scenario) {
         if (canBuyLocomotive(modelName, scenario)) {
             return locomotiveRepository.buyLocomotive(modelName, playerBudget);
+        }
+        return false;
+    }
+
+    /**
+     * Purchases a locomotive using DTO for the current player if available and affordable
+     * @param locomotiveDTO The LocomotiveDTO containing locomotive information
+     * @param scenario The current game scenario
+     * @param budget The budget to use for the purchase
+     * @return true if purchase was successful, false otherwise
+     */
+    public boolean buyLocomotiveDTO(LocomotiveDTO locomotiveDTO, Scenario scenario, Budget budget) {
+        if (canBuyLocomotive(locomotiveDTO.getModelName(), scenario)) {
+            return locomotiveRepository.buyLocomotive(locomotiveDTO.getModelName(), budget);
         }
         return false;
     }
@@ -171,7 +207,7 @@ public class BuyLocomotiveController {
         // Clear existing items first
         locomotiveList_cmb.getItems().clear();
 
-        for (Locomotive locomotive : getLocomotives(currentScenario)){
+        for (Locomotive locomotive : getLocomotiveEntities(currentScenario)){
             locomotiveList_cmb.getItems().add(locomotive);
         }
     }
@@ -198,11 +234,11 @@ public class BuyLocomotiveController {
     public void listLocomotiveDetails(ActionEvent event) {
         Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
         String txt = "Name: " + selectedLocomotive.getModelName() + "\n" +
-                    "topSpeed: " + selectedLocomotive.getTopSpeed() + "\n" +
-                    "Type: " + selectedLocomotive.getType() + "\n" +
-                    "Maintenance Cost: " + selectedLocomotive.getMaintenanceCost() + "\n" +
-                    "Fuel Cost: " + selectedLocomotive.getFuelCost() + "\n" +
-                    "Price: " + selectedLocomotive.getPrice() + "\n";
+                "topSpeed: " + selectedLocomotive.getTopSpeed() + "\n" +
+                "Type: " + selectedLocomotive.getType() + "\n" +
+                "Maintenance Cost: " + selectedLocomotive.getMaintenanceCost() + "\n" +
+                "Fuel Cost: " + selectedLocomotive.getFuelCost() + "\n" +
+                "Price: " + selectedLocomotive.getPrice() + "\n";
         locomotiveDetails_TxtA.setText(txt);
     }
 
