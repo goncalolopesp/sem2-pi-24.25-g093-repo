@@ -11,7 +11,7 @@ class CurrentUser{
     - usr : Map<String, User>
     + getInstance() : CurrentUser
     + getUser() : User
-    + setUSer(User user) : void
+    + setUser(User user) : void
     + doLogin(User user) : boolean
     + clear() : void
     + doLogout() : boolean
@@ -26,6 +26,7 @@ class Budget{
     + setBudget(int budget) : void
     + addBudget(int budget) : void
     + subtractBudget(int budget) : void
+    + deductAmount(int amount) : void
     + getMap() : Map
     + setMap(Map map) : void
     + getScenario() : Scenario
@@ -44,6 +45,7 @@ class Locomotive{
     - endYearOfOperation : int
     - topSpeed : int
     - available : boolean
+    - owner : User
     + getModelName() : String
     + setModelName(String modelName) : void
     + getPrice() : int
@@ -62,6 +64,8 @@ class Locomotive{
     + setTopSpeed(int topSpeed) : void
     + getAvailability() : boolean
     + setAvailability(boolean available) : void
+    + getOwner() : User
+    + setOwner(User owner) : void
 }
 
 class Scenario {
@@ -70,12 +74,15 @@ class Scenario {
     - timeRestrictions : int[]
     - technologicalRestrictions : List<String>
     - historicalRestrictions : List<String>
-    + getScenarioName(): String
-    + getSelectedMap(): String
-    + getTimeRestrictions(): int[]
-    + getTechnologicalRestrictions(): List<String>
-    + getHistoricalRestrictions(): List<String>
-    + toString(): String
+    - availableLocomotives : List<String>
+    + getScenarioName() : String
+    + getSelectedMap() : String
+    + getTimeRestrictions() : int[]
+    + getTechnologicalRestrictions() : List<String>
+    + getHistoricalRestrictions() : List<String>
+    + getAvailableLocomotives() : List<String>
+    + setAvailableLocomotives(List<String> locomotives) : void
+    + toString() : String
 }
 
 class User {
@@ -84,46 +91,69 @@ class User {
     - password : String
     - roleId : String
     - locomotives : List<Locomotive>
-    + getName(): String
-    + getEmail(): String
-    + getPassword(): String
-    + getRoleId(): String
-    + getBudgetValue(): int
-    + getLocomotives(): List<Locomotive>
-    + setName(): String
-    + setEmail(): String
-    + setPassword(): String
-    + setRoleId(): String
-    + setLocomotives(): List<Locomotive>
+    + getName() : String
+    + getEmail() : String
+    + getPassword() : String
+    + getRoleId() : String
+    + getBudgetValue() : int
+    + getLocomotives() : List<Locomotive>
+    + setName(String name) : void
+    + setEmail(String email) : void
+    + setPassword(String password) : void
+    + setRoleId(String roleId) : void
+    + setLocomotives(List<Locomotive> locomotives) : void
+    + addLocomotive(Locomotive locomotive) : void
+}
+
+'DTOs
+
+class LocomotiveDTO{
+    - modelName : String
+    - price : int
+    - type : String
+    - topSpeed : int
+    - available : boolean
+    + LocomotiveDTO(String modelName, int price, String type, int topSpeed, boolean available)
+    + fromEntity(Locomotive locomotive) : LocomotiveDTO
+    + getModelName() : String
+    + getPrice() : int
+    + getType() : String
+    + getTopSpeed() : int
+    + isAvailable() : boolean
+    + toString() : String
+}
+
+class DTOMapperLocomotive{
+    + toDTO(Locomotive locomotive) : LocomotiveDTO
+    + toDTOList(List<Locomotive> locomotives) : List<LocomotiveDTO>
 }
 
 'UI
 
 class BuyLocomotiveUI{
-    - scenario : Scenario
     - locomotiveController : BuyLocomotiveController
-    + buyLocomotive(String modelName) : boolean
-    + listLocomotives() : void
+    + run() : void
+    + getAvailableLocomotives() : List<LocomotiveDTO>
+    + displayLocomotives(List<LocomotiveDTO> locomotives) : void
+    + validateLocomotiveSelection(String selection) : boolean
+    + purchaseLocomotive(LocomotiveDTO locomotive) : boolean
 }
 
-class ListLocomotiveUI {
-
-}
-
-'interface
+'Interface
 interface Runnable <<interface>>{
-    +run(): void
+    + run() : void
 }
 
 'Controllers
 class BuyLocomotiveController{
     - locomotiveRepository : LocomotiveRepository
-    - session : CurrentUser
-    + createLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) : void
-    + getLocomotives(Scenario scenario) : List<Locomotive>
-    + getPlayerLocomotives() : List<Locomotive>
-    + canBuyLocomotive(String modelName, Scenario scenario) : boolean
-    + buyLocomotive(String modelName, Scenario scenario) : boolean
+    - scenarioRepository : ScenarioRepository
+    - budgetRepository : BudgetRepository
+    - repositories : Repositories
+    + getAvailableLocomotives() : List<LocomotiveDTO>
+    + purchaseLocomotive(LocomotiveDTO locomotive) : boolean
+    + validatePurchase(LocomotiveDTO locomotive, int budget) : boolean
+    + getLocomotivesByType(List<String> types) : List<LocomotiveDTO>
 }
 
 'Repositories
@@ -131,59 +161,76 @@ class Repositories {
     - instance : Repositories
     - locomotiveRepository : LocomotiveRepository
     - budgetRepository : BudgetRepository
+    - scenarioRepository : ScenarioRepository
     + getInstance() : Repositories
     + getLocomotiveRepository() : LocomotiveRepository
     + getBudgetRepository() : BudgetRepository
+    + getScenarioRepository() : ScenarioRepository
 }
 
 class LocomotiveRepository{
     - locomotives : Set<Locomotive>
-    - session : CurrentUser
     + addLocomotive(Locomotive locomotive) : boolean
-    + addLocomotive(String modelName, int price, String type, int fuelCost, int maintenanceCost, int startYearOfOperation, int endYearOfOperation, int topSpeed) : boolean
+    + addLocomotiveToPlayer(String modelName) : boolean
     + checkIfLocomotiveExists(Locomotive locomotive) : boolean
-    + buyLocomotive(Locomotive locomotive) : boolean
-    + buyLocomotive(String modelName) : boolean
-    + deleteLocomotive(Locomotive locomotive) : boolean
     + getLocomotive(String modelName) : Optional<Locomotive>
     + getLocomotives() : Set<Locomotive>
+    + getLocomotivesByType(List<String> types) : List<Locomotive>
+    + getPrice(String modelName) : int
+    + deleteLocomotive(Locomotive locomotive) : boolean
 }
 
 class BudgetRepository{
     - budgets : Set<Budget>
-    - session : CurrentUser
     + createBudget(Budget budget) : boolean
     + doesBudgetExist(Budget budget) : boolean
-    + getUserBudgetFromScenarioInMap(Scenario scenario, domain.Map map, User user) : Optional<Budget>
+    + getBudget() : int
+    + getUserBudgetFromScenarioInMap(Scenario scenario, Map map, User user) : Optional<Budget>
+    + deductAmount(int amount) : void
+}
+
+class ScenarioRepository{
+    - scenarios : Set<Scenario>
+    + addScenario(Scenario scenario) : boolean
+    + getScenario(String name) : Optional<Scenario>
+    + getScenarios() : Set<Scenario>
+    + getAvailableLocomotives() : List<String>
 }
 
 'Connections
 
-User ..> ListLocomotiveUI
 User ..> BuyLocomotiveUI
 
-ListLocomotiveUI ..|> Runnable
 BuyLocomotiveUI ..|> Runnable
 
-BuyLocomotiveUI .> BuyLocomotiveController
+BuyLocomotiveUI --> BuyLocomotiveController
+BuyLocomotiveUI ..> LocomotiveDTO
 
-BuyLocomotiveController ..> LocomotiveRepository : locomotiveRepository
+BuyLocomotiveController --> Repositories
+BuyLocomotiveController ..> LocomotiveRepository
+BuyLocomotiveController ..> BudgetRepository
+BuyLocomotiveController ..> ScenarioRepository
+BuyLocomotiveController ..> LocomotiveDTO
+BuyLocomotiveController ..> DTOMapperLocomotive
+
+DTOMapperLocomotive ..> Locomotive : converts
+DTOMapperLocomotive ..> LocomotiveDTO : creates
 
 Repositories -> Repositories : instance
 Repositories --> "1" LocomotiveRepository
+Repositories --> "1" BudgetRepository
+Repositories --> "1" ScenarioRepository
 
 CurrentUser -> CurrentUser : instance
+CurrentUser --> User : stores session
 
 LocomotiveRepository "1" ..> "*" Locomotive
-BudgetRepository "1"..>"*" Budget
-
+BudgetRepository "1" ..> "*" Budget
+ScenarioRepository "1" ..> "*" Scenario
 
 Budget --> Scenario
-Budget --> Map
 Budget --> User
-CurrentUser --> User : stores session
-Locomotive --> User : owned by
-Scenario --> User : created by
-Locomotive --> Scenario : belongs to
+Locomotive --> User
+Scenario --> User
 
 @enduml

@@ -5,116 +5,132 @@ skinparam shadowing false
 
 autonumber
 
-actor "Player" as Employee
+actor "Player" as Player
 participant ":BuyLocomotiveUI" as BuyLocomotiveUI
 
-activate Employee
+activate Player
 
-Employee -> BuyLocomotiveUI : asks to buy a locomotive
+Player -> BuyLocomotiveUI : asks to buy a locomotive
 activate BuyLocomotiveUI
 
 create ":BuyLocomotiveController" as BuyLocomotiveController
 
-BuyLocomotiveUI --> BuyLocomotiveController : create
-
-
-
-
 participant ":Repositories" as Repositories
-participant "repositories\n:Repositories" as Repo
-participant "locomotiveRepository\n:LocomotiveRepository" as locomotiveRepository
-participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
-participant "budgetRepository\n:BudgetRepository" as budgetRepository
+participant "repositories\n:Repositories" as repo
+participant "locomotiveRepository\n:LocomotiveRepository" as lrepo
+participant "scenarioRepository\n:ScenarioRepository" as srepo
+participant "budgetRepository\n:BudgetRepository" as brepo
+participant ":DTOMapperLocomotive" as DTOMapper
 
-BuyLocomotiveController --> Repositories : getInstance()
+BuyLocomotiveUI --> BuyLocomotiveController : create()
 activate BuyLocomotiveController
-activate Repositories
-
-Repositories --> BuyLocomotiveController : repositories
-
-deactivate Repositories
-
-BuyLocomotiveController --> Repo : getscenarioRepository()
-activate Repo
-
-Repo --> BuyLocomotiveController : scenarioRepository
-deactivate Repo
-
-
-BuyLocomotiveController --> scenarioRepository : asks for the list of available locomotives
-activate scenarioRepository
-scenarioRepository --> BuyLocomotiveController : lists
-deactivate scenarioRepository
 
 BuyLocomotiveController --> Repositories : getInstance()
 activate Repositories
+
 Repositories --> BuyLocomotiveController : repositories
 deactivate Repositories
 
-BuyLocomotiveController --> Repo : getlocomotiveRepository()
-activate Repo
-Repo --> BuyLocomotiveController : locomotiveRepository
-deactivate Repo
+BuyLocomotiveController --> repo : getScenarioRepository()
+activate repo
 
-BuyLocomotiveController --> locomotiveRepository : asks for the locomotives similar to the ones available in the scenario
-activate locomotiveRepository
-locomotiveRepository --> BuyLocomotiveController : lists
-deactivate locomotiveRepository
+repo --> BuyLocomotiveController : scenarioRepository
+deactivate repo
 
-BuyLocomotiveController --> BuyLocomotiveUI : lists
+BuyLocomotiveController --> repo : getLocomotiveRepository()
+activate repo
+
+repo --> BuyLocomotiveController : locomotiveRepository
+deactivate repo
+
+BuyLocomotiveController --> repo : getBudgetRepository()
+activate repo
+
+repo --> BuyLocomotiveController : budgetRepository
+deactivate repo
 
 deactivate BuyLocomotiveController
 
-BuyLocomotiveUI --> Employee : lists the available locomotives
-BuyLocomotiveUI --> Employee : asks the wished locomotive
-deactivate BuyLocomotiveUI
-
-Employee -> BuyLocomotiveUI : selects a locomotive from the list
-
-activate BuyLocomotiveUI
-
-BuyLocomotiveUI --> BuyLocomotiveUI : saveLocomotive()
-
-BuyLocomotiveUI --> BuyLocomotiveController : asks for the locomotive's price
+BuyLocomotiveUI --> BuyLocomotiveController : getAvailableLocomotives()
 activate BuyLocomotiveController
 
-BuyLocomotiveController --> Repositories : getInstance()
-activate Repositories
-Repositories --> BuyLocomotiveController : repositories
-deactivate Repositories
+BuyLocomotiveController --> srepo : getAvailableLocomotives()
+activate srepo
 
-BuyLocomotiveController --> Repo : getlocomotiveRepository()
-activate Repo
-Repo --> BuyLocomotiveController : locomotiveRepository
-deactivate Repo
+srepo --> BuyLocomotiveController : returns available locomotives list
+deactivate srepo
 
-BuyLocomotiveController --> Repo : getBudgetRepository()
-activate Repo
-Repo --> BuyLocomotiveController : budgetRepository
-deactivate Repo
+BuyLocomotiveController --> lrepo : getLocomotivesByType(availableTypes)
+activate lrepo
 
-BuyLocomotiveController --> budgetRepository : getBudget()
-activate budgetRepository
-budgetRepository --> BuyLocomotiveController : budget
-deactivate budgetRepository
+lrepo --> BuyLocomotiveController : returns List<Locomotive>
+deactivate lrepo
 
-BuyLocomotiveController --> locomotiveRepository : getPrice(locomotive)
-activate locomotiveRepository
-locomotiveRepository --> BuyLocomotiveController : price of the locomotive
-deactivate locomotiveRepository
+BuyLocomotiveController --> DTOMapper : toDTOList(locomotives)
+activate DTOMapper
 
-BuyLocomotiveController --> BuyLocomotiveUI : bought locomotive
+DTOMapper --> BuyLocomotiveController : returns List<LocomotiveDTO>
+deactivate DTOMapper
 
-BuyLocomotiveUI --> Employee : boughtLocomotive
-BuyLocomotiveUI --> Employee : Success Message
+BuyLocomotiveController --> BuyLocomotiveUI : returns List<LocomotiveDTO>
+deactivate BuyLocomotiveController
 
-alt Budget < price
-    BuyLocomotiveController --> BuyLocomotiveUI : Error Message "Not Enough Budget"
+alt available locomotives list is empty
+    BuyLocomotiveUI --> Player : outputs "No locomotives available for purchase."
+    BuyLocomotiveUI --> BuyLocomotiveUI : return
+end
+
+BuyLocomotiveUI --> Player : displays available locomotives
+BuyLocomotiveUI --> Player : asks for locomotive selection
+deactivate BuyLocomotiveUI
+
+Player -> BuyLocomotiveUI : selects a locomotive
+activate BuyLocomotiveUI
+
+loop while locomotive selection is invalid
+    BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+    BuyLocomotiveUI --> Player : outputs "Invalid selection. Try again."
+    deactivate BuyLocomotiveUI
+    
+    Player -> BuyLocomotiveUI : selects a locomotive
+    activate BuyLocomotiveUI
+end
+
+BuyLocomotiveUI --> BuyLocomotiveUI : validates locomotive selection
+BuyLocomotiveUI --> BuyLocomotiveController : purchaseLocomotive(locomotiveDTO)
+activate BuyLocomotiveController
+
+BuyLocomotiveController --> brepo : getBudget()
+activate brepo
+
+brepo --> BuyLocomotiveController : current budget
+deactivate brepo
+
+alt budget < locomotive price
+    BuyLocomotiveController --> BuyLocomotiveUI : returns "Error: Not enough budget"
     deactivate BuyLocomotiveController
-    BuyLocomotiveUI --> Employee : Error Message "Not Enough Budget"
+    BuyLocomotiveUI --> Player : outputs "Error: Not enough budget to purchase this locomotive."
+else budget >= locomotive price
+    BuyLocomotiveController --> brepo : deductAmount(locomotivePrice)
+    activate brepo
+    
+    brepo --> BuyLocomotiveController : updated budget
+    deactivate brepo
+    
+    BuyLocomotiveController --> lrepo : addLocomotiveToPlayer(locomotiveDTO.getModelName())
+    activate lrepo
+    
+    lrepo --> BuyLocomotiveController : purchased locomotive
+    deactivate lrepo
+    
+    BuyLocomotiveController --> BuyLocomotiveUI : returns purchase success
+    deactivate BuyLocomotiveController
+    
+    BuyLocomotiveUI --> Player : outputs "Success: Locomotive purchased successfully!"
 end
 
 deactivate BuyLocomotiveUI
 
+deactivate Player
 
 @enduml

@@ -9,59 +9,38 @@ skinparam classAttributeIconSize 0
 hide circle
 hide methods
 
-class Train{
-    locomotives
-    carriages
-    cargoType
-}
-
 class Locomotive{
+    requiredRail
+    price
+    startYearOfOperation
+    power
+    acceleration
+    topSpeed
     typeOfFuel
     locomotiveType
 }
 
 class SteamLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
+
 }
 
 class DieselLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
+
 }
 
 class ElectricLocomotive{
-    requiredRail
-    price
-    startYearOfOperation
-    power
-    acceleration
-    topSpeed
-}
 
-class Carriage{
-    typeOfCargo
 }
 
 class Player {
     username
     password
-    + buyTrain(carriage: Carriage, locomotive: Locomotive)
 }
 
-Player *-- Train
-Train *-- Locomotive
-Train o-- Carriage
-SteamLocomotive --|> Locomotive
-DieselLocomotive --|> Locomotive
-ElectricLocomotive --|> Locomotive
+SteamLocomotive *-- Locomotive
+ElectricLocomotive *-- Locomotive
+DieselLocomotive *-- Locomotive
+Locomotive o-- Cost
+Player o-- Locomotive
 
 @enduml
