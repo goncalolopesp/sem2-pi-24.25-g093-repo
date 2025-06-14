@@ -1,53 +1,161 @@
 @startuml
 actor User as "Editor"
 autonumber
-participant "CreateMapUI" as UI
-participant "CreateMapController" as Controller
-participant "MapRepository" as Repo
-participant "Map" as MapClass
+participant ":CreateMapUI" as UI
+participant ":CreateMapController" as Controller
+participant ":Repositories" as Repositories
+participant ":MapRepository" as Repo
+participant "Map\n:Map" as MapClass
 
 
 activate User
-User -> UI : Asks to create a new map
+User -> UI : asks to create a new map
 activate UI
 
 UI -> Controller** : create()
-UI --> User : requests map size
-User -> UI : types requested data
-UI --> User : requests map name
-User -> UI : types requested data
-UI -> Controller : checkNameUniqueness(name)
 activate Controller
-Controller -> Repo : checkNameUniqueness(name)
+
+Controller -> Repositories : getInstance()
+activate Repositories
+
+Repositories --> Controller : Repositories
+deactivate Repositories
+
+Controller -> Repositories : getMapRepository()
+activate Repositories
+
+Repositories -> Repo : getMapRepository()
 activate Repo
-Repo --> Controller : true/false
+
+Repo --> Repositories : mapRepository
 deactivate Repo
-Controller --> UI : true/false
+
+Repositories --> Controller : mapRepository
+deactivate Repositories
 deactivate Controller
 
-UI -> Controller : createMap(name, width, height)
+UI --> User : requests map name
+deactivate UI
+
+User -> UI : types map name
+activate UI
+
+loop while map name isn't unique/isn't a valid file name/is empty
+    UI -> Controller : checkNameUniqueness(name)
+    activate Controller
+
+    Controller -> Repo : checkNameUniqueness(name)
+    activate Repo
+
+    Repo --> Controller : true/false
+    deactivate Repo
+
+    Controller --> UI : true/false
+    deactivate Controller
+
+    alt name isn't unique
+        UI --> User : outputs "Name not unique. Try again: "
+    end
+
+    alt name isn't valid file name
+        UI --> User : outputs "Invalid name. Must contain only alphanumeric characters and spaces. Try again: "
+    end
+
+    alt name is empty
+        UI --> User : outputs "Name cannot be empty. Try again: "
+    end
+
+    UI --> User : requests new map name
+    deactivate UI
+
+    User --> UI : types new map name
+    activate UI
+end
+
+UI --> User : requests map width
+deactivate UI
+
+User -> UI : types map width
+activate UI
+
+loop while width isn't valid integer/is <= 0/is > 256
+    alt if width isn't valid integer
+        UI --> User: outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+    end
+
+    alt if width is <= 0 or > 256
+        UI --> User : outputs "Invalid width. Must be positive and below 256. Try again: "
+    end
+
+    UI --> User : requests new map width
+    deactivate UI
+
+    User -> UI : types new map width
+    activate UI
+end
+
+UI --> User : requests map height
+deactivate UI
+
+User -> UI : types map height
+activate UI
+
+loop while height isn't valid integer/is <= 0/is > 256
+    alt if height isn't valid integer
+        UI --> User: outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+    end
+
+    alt if height is <= 0 or > 256
+        UI --> User : outputs "Invalid height. Must be positive and below 256. Try again: "
+    end
+
+    UI --> User : requests new map height
+    deactivate UI
+
+    User -> UI : types new map height
+    activate UI
+end
+
+UI --> User : requests map scale
+deactivate UI
+
+User -> UI : types map scale
+activate UI
+
+loop while scale isn't valid integer/is <= 0/is > 256
+    alt if scale isn't valid integer
+        UI --> User: outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+    end
+
+    alt if scale is <= 0 or > 256
+        UI --> User : outputs "Invalid scale. Must be positive and below 256. Try again: "
+    end
+
+    UI --> User : requests new map scale
+    deactivate UI
+
+    User -> UI : types new map scale
+    activate UI
+end
+
+UI -> Controller : submitData()
 activate Controller
 
-Controller -> Repo : checkNameUniqueness(name)
-activate Repo
-Repo --> Controller : true
-deactivate Repo
-
-Controller -> MapClass : <<create>> new Map(name, width, height)
+Controller -> MapClass : <<create>> new Map(name, width, height, scale)
 activate MapClass
+
 MapClass --> Controller : Map
 deactivate MapClass
 
 Controller -> Repo : add(map)
 activate Repo
+
 Repo -> Repo : validateMap(map)
-Repo --> Controller : (void)
-deactivate Repo
 
 Controller --> UI : Map
+deactivate Repo
 deactivate Controller
 
 UI --> User : displays operation success
 deactivate UI
-deactivate User
 @enduml
