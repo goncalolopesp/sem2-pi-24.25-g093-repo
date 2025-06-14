@@ -151,11 +151,15 @@ Controller -> Repo : add(map)
 activate Repo
 
 Repo -> Repo : validateMap(map)
+deactivate Repo
 
 Controller --> UI : Map
-deactivate Repo
 deactivate Controller
 
-UI --> User : displays operation success
+alt Map is present
+    UI --> User : outputs "Map successfully created!"
+else
+    UI --> User : outputs "Map not created!"
+end
 deactivate UI
 @enduml
