@@ -841,11 +841,9 @@ public class SimulationController {
     private void updateStationCargo(Station station, Carriage.Type cargoType, int collectedAmount) {
         switch (cargoType) {
             case PEOPLE:
-                System.out.println("\nPeople stored: " + station.getPeopleStored());
                 station.setPeopleStored(Math.max(0, station.getPeopleStored() - collectedAmount));
                 break;
             case MAIL:
-                System.out.println("\nMail stored: " + station.getMailStored());
                 station.setMailStored(Math.max(0, station.getMailStored() - collectedAmount));
                 break;
             case COAL:
@@ -882,24 +880,15 @@ public class SimulationController {
                 .anyMatch(r -> r.equalsIgnoreCase(restriction));
     }
 
-    private void displayRouteComplete(CargoCollectionResult result, int totalEarnings) {
-        System.out.printf("\n[Route Complete] Total Cargo: %d (People: %d, Mail: %d, Steel: %d) - Earned: %d. Type your option: ",
-                result.getTotalCargo(), result.people, result.mail, result.steel, totalEarnings);
-    }
-
     private boolean isTrainFull(List<Carriage> carriages) {
         if (carriages == null || carriages.isEmpty()) {
             return true;
         }
 
-        int totalCapacity = 0;
-        int totalUsed = 0;
         boolean hasAvailableSpace = false;
 
         for (int i = 0; i < carriages.size(); i++) {
             Carriage c = carriages.get(i);
-            totalCapacity += c.getCapacity();
-            totalUsed += c.getCapacityOwned();
 
             if (c.getCapacityOwned() < c.getCapacity()) {
                 hasAvailableSpace = true;
@@ -1231,8 +1220,8 @@ public class SimulationController {
             case STEEL_MILL:
                 if (actualAddedCargo > 0) {
                     station.setSteelStored(station.getSteelStored() + actualAddedCargo);
-                    station.setIronStored(station.getIronStored() - 1);
-                    station.setCoalStored(station.getCoalStored() - 1);
+                    station.setIronStored(station.getIronStored() - station.getSteelStored());
+                    station.setCoalStored(station.getCoalStored() - station.getSteelStored());
                 }
                 break;
         }
@@ -1243,7 +1232,7 @@ public class SimulationController {
             case IRON_MINE: return ind.getGeneratedIron();
             case COAL_MINE: return ind.getGeneratedCoal();
             case STEEL_MILL:
-                if (ind.getStoredCoal() > 0 && ind.getStoredIron() > 0) return 1;
+                if (ind.getStoredCoal() > 0 && ind.getStoredIron() > 0) return Math.min(ind.getStoredCoal(), ind.getStoredIron());
                 return 0;
             default: return 0;
         }

@@ -24,8 +24,8 @@ public class Industry {
         this.mapName = mapName;
         this.type = type;
         this.location = new Location(positionX, positionY);
-        this.generatedIron = 6;
-        this.generatedCoal = 4;
+        this.generatedIron = 14;
+        this.generatedCoal = 16;
         this.storedIron = 0;
         this.storedCoal = 0;
         this.storedSteel = 0;
