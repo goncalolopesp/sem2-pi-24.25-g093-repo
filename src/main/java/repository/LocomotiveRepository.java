@@ -29,6 +29,10 @@ public class LocomotiveRepository implements Serializable {
      */
     private transient TrainRepository trainRepository;
 
+    /**
+     * gets the TrainRepository
+     * @return the TrainRepository
+     */
     private TrainRepository getTrainRepository() {
         if (trainRepository == null) {
             trainRepository = Repositories.getInstance().getTrainRepository();

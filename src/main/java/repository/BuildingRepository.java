@@ -26,6 +26,11 @@ public class BuildingRepository implements Serializable {
         }
     }
 
+    /**
+     * Removes a building.
+     * @param station the station to remove the building from
+     * @param buildingType the type of building to remove
+     */
     public void remove(Station station, String buildingType) {
         buildings.removeIf(b ->
                 b.getStation().equals(station) &&

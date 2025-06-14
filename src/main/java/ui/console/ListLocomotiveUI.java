@@ -5,6 +5,9 @@ import domain.Locomotive;
 import domain.User;
 
 public class ListLocomotiveUI implements Runnable {
+    /**
+     * Lists all the locomotives owned by the player.
+     */
     @Override public void run() {
         System.out.println("==========Locomotives List==========");
         CurrentUser session = CurrentUser.getInstance();

@@ -25,6 +25,9 @@ public class BuyLocomotiveGUI extends Application {
 
     }
 
+    /**
+     * Opens the Buy Locomotive GUI
+     */
     public static void launch(Stage parentStage, Map map, Scenario scenario, Budget budget) {
         try {
             FXMLLoader loader = new FXMLLoader(BuyLocomotiveGUI.class.getResource( "/javafx/buyLocomotive.fxml"));

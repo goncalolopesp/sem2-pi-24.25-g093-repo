@@ -24,6 +24,9 @@ public class ListLocomotivesGUI extends Application {
 
     }
 
+    /**
+     * Opens the List Locomotives GUI
+     */
     public static void launch(Stage parentStage, Map map, Scenario scenario, Budget budget) {
         try {
             FXMLLoader loader = new FXMLLoader(ListLocomotivesGUI.class.getResource( "/javafx/listLocomotives.fxml"));

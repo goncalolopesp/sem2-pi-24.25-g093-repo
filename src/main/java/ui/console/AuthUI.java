@@ -10,11 +10,17 @@ public class AuthUI implements Runnable {
     private final AuthController ctrl;
     private final int op;
 
+    /**
+     * Constructs a new AuthUI, initializing its controller.
+     */
     public AuthUI(int op){
         ctrl = new AuthController();
         this.op = op;
     }
 
+    /**
+     * Creates a new user.
+     */
     public void createUser(){
         System.out.println("\n\n--- REGISTRATION UI ---------------------------");
         boolean success;
@@ -35,6 +41,9 @@ public class AuthUI implements Runnable {
         System.out.println("User created successfully");
     }
 
+    /**
+     * Runs as soon as the AuthUI is launched.
+     */
     public void run() {
         switch(op){
             case 1:
@@ -50,6 +59,9 @@ public class AuthUI implements Runnable {
         }
     }
 
+    /**
+     * Loads the UI corresponding to the user's role.
+     */
     public void run1() throws Exception {
         boolean success = doLogin();
         if (success) {
@@ -65,6 +77,9 @@ public class AuthUI implements Runnable {
         this.logout();
     }
 
+    /**
+     * Logs in the user
+     */
     private boolean doLogin() {
         System.out.println("\n\n--- LOGIN UI ---------------------------");
 
@@ -88,6 +103,9 @@ public class AuthUI implements Runnable {
         return success;
     }
 
+    /**
+     * Logs out the user.
+     */
     private void logout() {
         ctrl.doLogout();
     }

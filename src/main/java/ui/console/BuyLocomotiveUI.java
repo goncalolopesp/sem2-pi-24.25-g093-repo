@@ -14,12 +14,21 @@ public class BuyLocomotiveUI implements Runnable {
     private final Budget budget;
     private final BuyLocomotiveController locomotiveController = new BuyLocomotiveController();
 
+    /**
+     * Initializes a new BuyLocomotiveUI instance.
+     * @param scenario the scenario associated with the operations
+     * @param map the map containing all stations and industries
+     * @param budget the budget available for locomotives to be bought
+     */
     public BuyLocomotiveUI(Scenario scenario, Map map, Budget budget) {
         this.scenario = scenario;
         this.map = map;
         this.budget = budget;
     }
 
+    /**
+     * Method ran when BuyLocomotiveUI is launched
+     */
     @Override public void run() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("==========Available locomotives==========");
@@ -38,6 +47,12 @@ public class BuyLocomotiveUI implements Runnable {
         }
     }
 
+    /**
+     * Buys a locomotive available in a specific scenario.
+     * @param modelName the name of the locomotive to be bought
+     * @param scenario the scenario associated with the operations
+     * @param map the map containing all stations and industries
+     */
     public void buyLocomotive(String modelName, Scenario scenario, Map map) {
         // Pass the budget directly instead of looking it up
         if (locomotiveController.buyLocomotiveWithBudget(modelName, scenario, budget)) {
@@ -47,6 +62,9 @@ public class BuyLocomotiveUI implements Runnable {
         }
     }
 
+    /**
+     * Lists all locomotives available in a scenario.
+     */
     public void listLocomotives() {
         List<LocomotiveDTO> locomotiveList = locomotiveController.getLocomotives(scenario);
         for (LocomotiveDTO locomotive : locomotiveList) {

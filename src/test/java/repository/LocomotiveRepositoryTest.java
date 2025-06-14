@@ -2,13 +2,18 @@ package repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import domain.Budget;
+import domain.CurrentUser;
 import domain.Locomotive;
+import domain.User;
 
 class LocomotiveRepositoryTest {
 
@@ -145,5 +150,51 @@ class LocomotiveRepositoryTest {
         }
 
         assertTrue(hasModel1 && hasModel2 && hasModel3);
+    }
+
+    @Test
+    void testBuyLocomotiveWithObject() {
+        CurrentUser session = CurrentUser.getInstance();
+        User user = new User("testuser", "test@email.com", "password", "ROLE_PLAYER");
+        session.setUser(user);
+
+        Locomotive locomotive = new Locomotive("Steam Engine", 5000, "Steam", 100, 200, 1900, 1950, 120);
+        Budget budget = new Budget(10000, null, null, user);
+        boolean result = repository.buyLocomotive(locomotive, budget);
+        assertTrue(result);
+        assertEquals(5000, budget.getBudget());
+        assertEquals(1, user.getLocomotives().size());
+        assertEquals(locomotive, user.getLocomotives().get(0));
+    }
+
+    @Test
+    void testBuyLocomotiveWithModelName() {
+        CurrentUser session = CurrentUser.getInstance();
+        User user = new User("testuser", "test@email.com", "password", "ROLE_PLAYER");
+        session.setUser(user);
+
+        repository.addLocomotive("Available Model", 6000, "Steam", 110, 190, 1920, 1960, 130);
+        Budget budget = new Budget(8000, null, null, user);
+        boolean result = repository.buyLocomotive("Available Model", budget);
+        assertTrue(result);
+        assertEquals(2000, budget.getBudget());
+        assertEquals(1, user.getLocomotives().size());
+    }
+
+    @Test
+    void testCopyFrom() {
+        LocomotiveRepository sourceRepo = new LocomotiveRepository();
+        sourceRepo.addLocomotive("Model A", 5000, "Steam", 100, 200, 1900, 1950, 120);
+        sourceRepo.addLocomotive("Model B", 6000, "Diesel", 150, 250, 1920, 1970, 150);
+
+        repository.addLocomotive("Existing Model", 8000, "Hybrid", 80, 180, 1980, 2020, 220);
+        assertEquals(1, repository.getLocomotives().size());
+
+        repository.copyFrom(sourceRepo);
+
+        assertEquals(2, repository.getLocomotives().size());
+        assertTrue(repository.getLocomotive("Model A").isPresent());
+        assertTrue(repository.getLocomotive("Model B").isPresent());
+        assertFalse(repository.getLocomotive("Existing Model").isPresent());
     }
 }

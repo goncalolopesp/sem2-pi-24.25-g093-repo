@@ -168,6 +168,13 @@ public class BuyLocomotiveController {
         return false;
     }
 
+    /**
+     * Buys a locomotive, taking the price of the locomotive from the user's budget in the current scenario.
+     * @param modelName The model name of the locomotive to buy
+     * @param scenario The current game scenario
+     * @param budget The budget to use for the purchase
+     * @return true if purchase was successful, false otherwise
+     */
     public boolean buyLocomotiveWithBudget(String modelName, Scenario scenario, Budget budget) {
         if (canBuyLocomotive(modelName, scenario)) {
             return locomotiveRepository.buyLocomotive(modelName, budget, scenario);
@@ -175,6 +182,10 @@ public class BuyLocomotiveController {
         return false;
     }
 
+    /**
+     * Method that buys the selected locomotive from a combobox in javafx
+     * @param event The event that triggered the method
+     */
     @FXML
     public void buySelectedLocomotive(ActionEvent event) {
         Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
@@ -198,6 +209,10 @@ public class BuyLocomotiveController {
         }
     }
 
+    /**
+     * Closes this GUI, sending the Player back to the menu.
+     * @param event The event that triggered the method
+     */
     @FXML
     public void returnToMenu(ActionEvent event) throws IOException {
         if (currentStage != null) {
@@ -205,6 +220,9 @@ public class BuyLocomotiveController {
         }
     }
 
+    /**
+     * Adds available locomotives to a combobox in javafx
+     */
     public void addLocomotivesToComboBox(){
         // Add null check as safety measure
         if (currentScenario == null) {
@@ -221,6 +239,9 @@ public class BuyLocomotiveController {
         }
     }
 
+    /**
+     * Adds the player's owned locomotives to a combobox in javafx.
+     */
     public void addOwnedLocomotivesToComboBox(){
         // Add null check as safety measure
         if (currentScenario == null) {
@@ -239,6 +260,10 @@ public class BuyLocomotiveController {
         }
     }
 
+    /**
+     * Shows the details of the selected locomotive in a text area in javafx.
+     * @param event The event that triggered the method.
+     */
     @FXML
     public void listLocomotiveDetails(ActionEvent event) {
         Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();
@@ -251,6 +276,13 @@ public class BuyLocomotiveController {
         locomotiveDetails_TxtA.setText(txt);
     }
 
+    /**
+     * Initializes some important data and decides which program to run, based on the button clicked by the player
+     * @param scenario The scenario to run
+     * @param budget The budget to use for purchases
+     * @param stage The stage to close when the player returns to the menu
+     * @param app The application to run (1 = Buy Locomotives, 2 = List Owned Locomotives)
+     */
     public void initData(Scenario scenario, Budget budget, Stage stage, int app) {
         this.currentScenario = scenario;
         this.playerBudget = budget;
@@ -265,12 +297,18 @@ public class BuyLocomotiveController {
         }
     }
 
+    /**
+     * Updates the label displaying the player's current budget.
+     */
     private void updateBudgetLabel() {
         if (playerBudget != null) {
             budgetLabel.setText("Current Budget: $" + playerBudget.getBudget());
         }
     }
 
+    /**
+     * Shows the details of the locomotive chosen in a combobox on a textarea, in javafx
+     */
     @FXML
     public void LocomotiveList_IndexChanged(){
         Locomotive selectedLocomotive = locomotiveList_cmb.getSelectionModel().getSelectedItem();

@@ -45,6 +45,10 @@ public class AuthController {
         }
     }
 
+    /**
+     * Saves users in the users.usr file
+     */
+
     public void saveUserToFile(){
         authRepo.saveUserToFile();
     }

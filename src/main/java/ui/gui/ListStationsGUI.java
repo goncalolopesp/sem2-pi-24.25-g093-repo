@@ -25,6 +25,9 @@ public class ListStationsGUI extends Application {
 
     }
 
+    /**
+     * Opens the List Stations GUI
+     */
     public static void launch(Stage parentStage, Map map, Scenario scenario, Budget budget) {
         try {
             FXMLLoader loader = new FXMLLoader(ListStationsGUI.class.getResource( "/javafx/ListStationsGUI.fxml"));

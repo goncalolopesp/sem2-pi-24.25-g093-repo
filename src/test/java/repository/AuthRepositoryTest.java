@@ -4,13 +4,12 @@ import domain.CurrentUser;
 import domain.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Optional;
+import java.io.*;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+class AuthRepositoryTest {
 
-public class AuthRepositoryTest {
     private AuthRepository authRepository;
     private User testUser;
     private User anotherUser;
@@ -26,6 +25,8 @@ public class AuthRepositoryTest {
     private final String anotherPassword = "password456";
     private final String anotherRole = "EDITOR";
 
+    private final String TEST_FILE = "test_users.usr";
+
     @BeforeEach
     void setUp() {
         CurrentUser.getInstance().doLogout();
@@ -34,6 +35,119 @@ public class AuthRepositoryTest {
         testUser = new User(userName, userEmail, userPassword, userRole);
         anotherUser = new User(anotherName, anotherEmail, anotherPassword, anotherRole);
         currentUser = CurrentUser.getInstance();
+
+        File testFile = new File(TEST_FILE);
+        if (testFile.exists()) {
+            testFile.delete();
+        }
+    }
+
+    @Test
+    void testIsPasswordUsable() {
+        assertFalse(authRepository.isPasswordUsable("Abc12"));
+        assertFalse(authRepository.isPasswordUsable(""));
+        assertFalse(authRepository.isPasswordUsable("ABCDEFGh"));
+        assertFalse(authRepository.isPasswordUsable("abcdefg12"));
+        assertFalse(authRepository.isPasswordUsable("ABC123def!"));
+        assertTrue(authRepository.isPasswordUsable("ABC123def"));
+        assertTrue(authRepository.isPasswordUsable("ABC12de"));
+    }
+
+    @Test
+    void testIsPasswordValid_UserDoesNotExist() {
+        assertFalse(authRepository.doLogin("nonexistent@email.com", "password"));
+        User testUserForPassword = new User("Test", "test@email.com", "correctPassword", "user");
+        authRepository.createNewUser(testUserForPassword);
+
+        assertTrue(authRepository.doesUserExist("test@email.com"));
+        assertEquals("correctPassword", authRepository.getUserByEmail("test@email.com").get().getPassword());
+    }
+
+    @Test
+    void testSaveUserToFile_Success() {
+        authRepository.createNewUser(testUser);
+        authRepository.createNewUser(anotherUser);
+
+        AuthRepository testRepo = new AuthRepository() {
+            @Override
+            public void saveUserToFile() {
+                File authFile = new File(TEST_FILE);
+                try (FileOutputStream fos = new FileOutputStream(authFile)){
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    oos.writeObject(users);
+                }catch(IOException e){
+                    System.err.println("Error saving Users");
+                }
+            }
+        };
+        testRepo.users = authRepository.users;
+
+        testRepo.saveUserToFile();
+
+        File testFile = new File(TEST_FILE);
+        assertTrue(testFile.exists());
+        assertTrue(testFile.length() > 0);
+
+        testFile.delete();
+    }
+
+    @Test
+    void testGetUsersFromFile_Success() throws IOException {
+        Set<User> originalUsers = new HashSet<>();
+        User user1 = new User("User1", "user1@test.com", "password1", "admin");
+        User user2 = new User("User2", "user2@test.com", "password2", "user");
+        originalUsers.add(user1);
+        originalUsers.add(user2);
+
+        File testFile = new File(TEST_FILE);
+        try (FileOutputStream fos = new FileOutputStream(testFile);
+             ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+            oos.writeObject(originalUsers);
+        }
+
+        AuthRepository testRepo = new AuthRepository() {
+            @Override
+            public Set<User> getUsersFromFile() {
+                Set<User> savedUsers = new HashSet<>();
+                File usersFile = new File(TEST_FILE);
+                if (usersFile.exists()) {
+                    try (FileInputStream fis = new FileInputStream(usersFile)) {
+                        ObjectInputStream ois = new ObjectInputStream(fis);
+                        Object obj = ois.readObject();
+                        if (obj instanceof Set<?>) {
+                            Set<?> loadedUsers = (Set<?>) obj;
+                            savedUsers.clear();
+                            for (Object loadedUser : loadedUsers) {
+                                if (loadedUser instanceof User) {
+                                    savedUsers.add((User) loadedUser);
+                                }
+                            }
+                        }
+                    } catch (IOException e) {
+                        System.err.println("Error loading Users");
+                    } catch (ClassNotFoundException e) {
+                        System.err.println("Error loading Users");
+                    }
+                }
+                return savedUsers;
+            }
+        };
+
+        Set<User> loadedUsers = testRepo.getUsersFromFile();
+
+        assertEquals(originalUsers.size(), loadedUsers.size());
+        assertEquals(originalUsers, loadedUsers);
+
+        testFile.delete();
+    }
+
+    @Test
+    void testIsEmailUsable_MultipleAtSymbols() {
+        assertFalse(authRepository.isEmailUsable("user@@domain.com"));
+        assertFalse(authRepository.isEmailUsable("user@domain@com"));
+        assertTrue(authRepository.isEmailUsable("user@domain.com"));
+        assertTrue(authRepository.isEmailUsable("test.user@example.org"));
+        assertTrue(authRepository.isEmailUsable(""));
     }
 
     @Test

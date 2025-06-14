@@ -32,6 +32,11 @@ public class AuthRepository {
         return false;
     }
 
+    /**
+     * Checks if a password is usable for a user account
+     * @param password The password to check for validity
+     * @return true if password is usable, false otherwise
+     */
     public boolean isPasswordUsable(String password) {
         int numOfNums = 0;
         int numOfCapitals = 0;
@@ -245,6 +250,9 @@ public class AuthRepository {
         return session.getUser().getEmail();
     }
 
+    /**
+     * Saves all users to a file called users.usr
+     */
     public void saveUserToFile(){
         File authFile = new File("users.usr");
         try (FileOutputStream fos = new FileOutputStream(authFile)){
@@ -255,6 +263,10 @@ public class AuthRepository {
         }
     }
 
+    /**
+     * Loads all users from a file called users.usr
+     * @return list of users from the file, or empty list if file does not exist
+     */
     public Set<User> getUsersFromFile(){
         Set<User> savedUsers = new HashSet<>();
         File usersFile = new File("users.usr");
@@ -283,7 +295,11 @@ public class AuthRepository {
         return savedUsers;
     }
 
-
+    /**
+     * Checks if an email is usable for a user account
+     * @param email The email to check for validity
+     * @return true if email is usable, false otherwise
+     */
     public boolean isEmailUsable(String email){
         if (email.split("@").length > 2) {
             return false;

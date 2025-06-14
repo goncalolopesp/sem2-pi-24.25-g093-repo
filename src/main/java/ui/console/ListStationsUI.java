@@ -13,10 +13,16 @@ public class ListStationsUI implements Runnable {
 
     ListStationController listStationController = new ListStationController();
 
+    /**
+     * Runs as soon as ListStationsUI is launched.
+     */
     public void run() {
         listStations();
     }
 
+    /**
+     * Lists the stations owned by the player.
+     */
     public void listStations() {
         System.out.println("=========Stations List=========");
         CurrentUser session = CurrentUser.getInstance();
@@ -81,6 +87,11 @@ public class ListStationsUI implements Runnable {
         }
     }
 
+
+    /**
+     * Displays the details of a station.
+     * @param stationDetail the station details to be displayed
+     */
     private void displayStationDetails(StationDetailDTO stationDetail) {
         System.out.println("Cargo: " + stationDetail.getCapacityOwned() + "/" + stationDetail.getCapacity());
 
