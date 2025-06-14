@@ -1,11 +1,12 @@
 package domain;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Represents a Carriage associated to a Train
  */
-public class Carriage {
+public class Carriage implements Serializable {
     /**
      * Represents the different types of carriage
      */

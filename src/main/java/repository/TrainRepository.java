@@ -1,6 +1,8 @@
 package repository;
 
 import domain.Train;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +14,7 @@ import java.util.Optional;
  * Provides methods to add trains, delete trains, find a specific train and retrieve all trains.
  * </p>
  */
-public class TrainRepository {
+public class TrainRepository implements Serializable {
     private final List<Train> trains = new ArrayList<>();
 
     /**
@@ -57,5 +59,16 @@ public class TrainRepository {
         return trains.stream()
                 .filter(t -> t.equals(train))
                 .findFirst();
+    }
+
+    /**
+     * Copies all trains from another TrainRepository into this repository, replacing any existing trains.
+     * Clears the current repository and adds all trains from the provided repository.
+     *
+     * @param other the TrainRepository to copy trains from
+     */
+    public void copyFrom(TrainRepository other) {
+        this.trains.clear();
+        this.trains.addAll(other.getTrains());
     }
 }
