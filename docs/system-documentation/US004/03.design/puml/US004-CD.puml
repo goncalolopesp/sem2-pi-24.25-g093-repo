@@ -28,8 +28,11 @@ class CreateScenarioUI {
     -scenarioName: String
     -selectedMap: String
     -timeRestrictions: int[]
+    -portBehavior: int
     -technologicalRestrictions: List<String>
     -historicalRestrictions: List<String>
+    -productionRate: double
+    -profitMultiplier: double
     +getScenarioController(): CreateScenarioController
     +run(): void
     +submitData(): void
@@ -37,9 +40,11 @@ class CreateScenarioUI {
     +requestScenarioName(): String
     +requestSelectedMap(): String
     +requestTimeRestrictions(): int[]
+    +requestPortBehavior(): int
     +requestTechnologicalRestrictions(): List<String>
     +requestHistoricalRestrictions(): List<String>
-
+    +requestProductionRate(): double
+    +requestProfitMultiplier(): double
 }
 
 interface Runnable <<interface>>{
@@ -49,7 +54,7 @@ interface Runnable <<interface>>{
 class CreateScenarioController {
     -scenarioRepository: ScenarioRepository
     +getScenarioRepository(): ScenarioRepository
-    +createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, List<String> technologicalRestrictions, List<String> historicalRestrictions): Scenario
+    +createScenario(String scenarioName, String selectedMap, int[] timeRestrictions, int portBehavior, List<String> technologicalRestrictions, List<String> historicalRestrictions, double productionRate, double profitMultiplier): Scenario
     +checkNameUniqueness(String name): boolean
     +getScenarios(): List<Scenario>
 }
@@ -83,8 +88,11 @@ class Scenario {
     -scenarioName: String
     -selectedMap: String
     -timeRestrictions: int[]
+    -portBehavior: int
     -technologicalRestrictions: List<String>
     -historicalRestrictions: List<String>
+    -productionRate: double
+    -profitMultiplier: double
     +getScenarioName(): String
     +getSelectedMap(): String
     +getTimeRestrictions(): int[]
