@@ -20,7 +20,7 @@ participant "repositories\n:Repositories" as Repo
 participant "mapRepository\n:MapRepository" as mapRepository
 participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
 
-CreateScenarioUI --> CreateScenarioUI : requestData()
+CreateScenarioUI -> CreateScenarioUI : requestData()
 
     CreateScenarioUI --> Employee : requestSelectedMap()
     CreateScenarioUI --> Employee : requests the map selection
@@ -30,13 +30,13 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
     activate CreateScenarioUI
 
     loop while selectedMap doesn't exist
-        CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
+        CreateScenarioUI -> CreateScenarioController : verifyIfMapExists(selectedMap)
         activate CreateScenarioController
 
-        CreateScenarioController --> mapRepository  : verifyIfMapExists(selectedMap)
+        CreateScenarioController -> mapRepository  : verifyIfMapExists(selectedMap)
         activate mapRepository
 
-        mapRepository --> mapRepository : verifyIfMapExists(selectedMap)
+        mapRepository -> mapRepository : verifyIfMapExists(selectedMap)
         mapRepository --> CreateScenarioController : return false
         deactivate mapRepository
 
@@ -46,22 +46,9 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         CreateScenarioUI --> Employee : requests the map selection
         deactivate CreateScenarioUI
 
-        Employee --> CreateScenarioUI : types new desired map's name
+        Employee -> CreateScenarioUI : types new desired map's name
         activate CreateScenarioUI
     end
-
-    CreateScenarioUI --> CreateScenarioController : verifyIfMapExists(selectedMap)
-    activate CreateScenarioController
-
-    CreateScenarioController --> mapRepository  : verifyIfMapExists(selectedMap)
-    activate mapRepository
-
-    mapRepository --> mapRepository : verifyIfMapExists(selectedMap)
-    mapRepository --> CreateScenarioController : return true
-    deactivate mapRepository
-
-    CreateScenarioController --> CreateScenarioUI : returns selectedMap
-    deactivate CreateScenarioController
 
     CreateScenarioUI --> Employee : requestScenarioName()
     CreateScenarioUI --> Employee : requests the scenario name
@@ -71,13 +58,13 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
     activate CreateScenarioUI
 
     loop while scenarioName isn't unique
-        CreateScenarioUI --> CreateScenarioController : checkNameUniqueness(selectedMap)
+        CreateScenarioUI -> CreateScenarioController : checkNameUniqueness(scenarioName)
         activate CreateScenarioController
 
-        CreateScenarioController --> scenarioRepository  : checkNameUniqueness(selectedMap)
+        CreateScenarioController -> scenarioRepository  : checkNameUniqueness(scenarioName)
         activate scenarioRepository
 
-        scenarioRepository --> scenarioRepository : checkNameUniqueness(selectedMap)
+        scenarioRepository -> scenarioRepository : checkNameUniqueness(scenarioName)
         scenarioRepository --> CreateScenarioController : return false
         deactivate scenarioRepository
 
@@ -87,22 +74,9 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         CreateScenarioUI --> Employee : requests the scenario name
         deactivate CreateScenarioUI
 
-        Employee --> CreateScenarioUI : types new desired scenario name
+        Employee -> CreateScenarioUI : types new desired scenario name
         activate CreateScenarioUI
     end
-
-    CreateScenarioUI --> CreateScenarioController : checkNameUniqueness(selectedMap)
-    activate CreateScenarioController
-
-    CreateScenarioController --> scenarioRepository  : checkNameUniqueness(selectedMap)
-    activate scenarioRepository
-
-    scenarioRepository --> scenarioRepository : checkNameUniqueness(selectedMap)
-    scenarioRepository --> CreateScenarioController : return true
-    deactivate scenarioRepository
-
-    CreateScenarioController --> CreateScenarioUI : returns trimmed scenario name
-    deactivate CreateScenarioController
 
     CreateScenarioUI --> Employee : requestTimeRestrictions()
     CreateScenarioUI --> Employee : requests the starting year
@@ -113,7 +87,7 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
 
     loop while startingYear is < 1804 or >= 2025
         alt Try block
-            CreateScenarioUI --> CreateScenarioUI : parseInt(startingYear) and add to timePeriod array
+            CreateScenarioUI -> CreateScenarioUI : parseInt(startingYear) and add to timePeriod array
         else Exception NumberFormatException e thrown
             CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
         end
@@ -125,7 +99,7 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         CreateScenarioUI --> Employee : requests the starting year
         deactivate CreateScenarioUI
 
-        Employee --> CreateScenarioUI : types the new starting year
+        Employee -> CreateScenarioUI : types the new starting year
         activate CreateScenarioUI
     end
 
@@ -137,7 +111,7 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
 
     loop while finalYear is <= startingYear or > 2025
         alt Try block
-            CreateScenarioUI --> CreateScenarioUI : parseInt(finalYear) and add to timePeriod array
+            CreateScenarioUI -> CreateScenarioUI : parseInt(finalYear) and add to timePeriod array
         else Exception NumberFormatException e thrown
             CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
         end
@@ -149,7 +123,138 @@ CreateScenarioUI --> CreateScenarioUI : requestData()
         CreateScenarioUI --> Employee : requests the final year
         deactivate CreateScenarioUI
 
-        Employee --> CreateScenarioUI : types the new final year
+        Employee -> CreateScenarioUI : types the new final year
         activate CreateScenarioUI
     end
+
+    CreateScenarioUI --> Employee : requestPortBehavior()
+        CreateScenarioUI --> Employee : requests the desired port
+        deactivate CreateScenarioUI
+
+        Employee -> CreateScenarioUI : types desired port
+        activate CreateScenarioUI
+
+        loop while port isn't valid
+            alt Try block
+                CreateScenarioUI -> CreateScenarioUI : parseInt(port)
+            else Exception NumberFormatException e thrown
+                CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+            end
+
+            alt port < 1 or port > 2
+                CreateScenarioUI --> Employee : outputs "Error: Chosen behavior must be included in the list. Try again: "
+            end
+
+            CreateScenarioUI --> Employee : requests new port
+            deactivate CreateScenarioUI
+
+            Employee -> CreateScenarioUI : types new port
+            activate CreateScenarioUI
+        end
+
+    CreateScenarioUI --> Employee : requestTechnologicalRestrictions()
+        CreateScenarioUI --> Employee : requests the available locomotive types
+        deactivate CreateScenarioUI
+
+        Employee -> CreateScenarioUI : types desired available locomotive types
+        activate CreateScenarioUI
+
+        loop while locomotive types aren't valid
+            CreateScenarioUI -> CreateScenarioController : validateLocomotiveTypes(locomotiveTypes)
+            activate CreateScenarioController
+
+            CreateScenarioController -> scenarioRepository  : validateLocomotiveTypes(locomotiveTypes)
+            activate scenarioRepository
+
+            scenarioRepository -> scenarioRepository : validateLocomotiveTypes(locomotiveTypes)
+            scenarioRepository --> CreateScenarioController : return false
+            deactivate scenarioRepository
+
+            CreateScenarioController --> CreateScenarioUI : outputs "Invalid input. Please enter only steam, diesel, and/or electric: "
+            deactivate CreateScenarioController
+
+            CreateScenarioUI --> Employee : requests the available locomotive types
+            deactivate CreateScenarioUI
+
+            Employee -> CreateScenarioUI : types desired available locomotive types
+            activate CreateScenarioUI
+        end
+
+    CreateScenarioUI --> Employee : requestHistoricalRestrictions()
+        CreateScenarioUI --> Employee : requests the historical restrictions
+        deactivate CreateScenarioUI
+
+        Employee -> CreateScenarioUI : types desired historical restrictions
+        activate CreateScenarioUI
+
+        loop while historical restrictions aren't valid
+            CreateScenarioUI -> CreateScenarioController : validateHistoricalRestrictions(historicalRestrictions)
+            activate CreateScenarioController
+
+            CreateScenarioController -> scenarioRepository  : validateHistoricalRestrictions(historicalRestrictions)
+            activate scenarioRepository
+
+            scenarioRepository -> scenarioRepository : validateHistoricalRestrictions(historicalRestrictions)
+            scenarioRepository --> CreateScenarioController : return false
+            deactivate scenarioRepository
+
+            CreateScenarioController --> CreateScenarioUI : outputs "Invalid input. Please enter only vaccination campaign and/or school program: "
+            deactivate CreateScenarioController
+
+            CreateScenarioUI --> Employee : requests the historical restrictions
+            deactivate CreateScenarioUI
+
+            Employee -> CreateScenarioUI : types desired historical restrictions
+            activate CreateScenarioUI
+        end
+
+    CreateScenarioUI --> Employee : requestProductionRate()
+            CreateScenarioUI --> Employee : requests the desired production rate
+            deactivate CreateScenarioUI
+
+            Employee -> CreateScenarioUI : types desired production rate
+            activate CreateScenarioUI
+
+            loop while rate isn't valid
+                alt Try block
+                    CreateScenarioUI -> CreateScenarioUI : parseDouble(rate)
+                else Exception NumberFormatException e thrown
+                    CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+                end
+
+                alt rate < 0.5 or rate > 2
+                    CreateScenarioUI --> Employee : outputs "Error: Production Rate must be between 0.5 and 2.0. Try again: "
+                end
+
+                CreateScenarioUI --> Employee : requests new rate
+                deactivate CreateScenarioUI
+
+                Employee -> CreateScenarioUI : types new rate
+                activate CreateScenarioUI
+            end
+
+    CreateScenarioUI --> Employee : requestProfitMultiplier()
+            CreateScenarioUI --> Employee : requests the desired profit multiplier
+            deactivate CreateScenarioUI
+
+            Employee -> CreateScenarioUI : types desired multiplier
+            activate CreateScenarioUI
+
+            loop while multiplier isn't valid
+                alt Try block
+                    CreateScenarioUI -> CreateScenarioUI : parseDouble(multiplier)
+                else Exception NumberFormatException e thrown
+                    CreateScenarioUI --> Employee : outputs "Error: '" + input + "' is not a valid integer. Please enter a number. "
+                end
+
+                alt multiplier < 0.5 or multiplier > 2
+                    CreateScenarioUI --> Employee : outputs "Error: Profit Multiplier must be between 0.5 and 2.0. Try again: "
+                end
+
+                CreateScenarioUI --> Employee : requests new multiplier
+                deactivate CreateScenarioUI
+
+                Employee -> CreateScenarioUI : types new multiplier
+                activate CreateScenarioUI
+            end
 @enduml

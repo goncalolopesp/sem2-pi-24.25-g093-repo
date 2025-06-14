@@ -15,20 +15,32 @@ activate CreateScenarioController
 participant ":Repositories" as Repositories
 participant "repositories\n:Repositories" as Repo
 
-CreateScenarioController --> Repositories : getInstance()
+CreateScenarioController -> Repositories : getInstance()
 activate Repositories
 
 Repositories --> CreateScenarioController : repositories
 deactivate Repositories
 
-CreateScenarioController --> Repo : getMapRepository()
+CreateScenarioController -> Repo : getMapRepository()
 activate Repo
+
+Repo -> mapRepository : getMapRepository()
+activate mapRepository
+
+mapRepository --> Repo : mapRepository
+deactivate mapRepository
 
 Repo --> CreateScenarioController : mapRepository
 deactivate Repo
 
-CreateScenarioController --> Repo : getScenarioRepository()
+CreateScenarioController -> Repo : getScenarioRepository()
 activate Repo
+
+Repo -> scenarioRepository : getScenarioRepository()
+activate scenarioRepository
+
+scenarioRepository --> Repo : scenarioRepository
+deactivate scenarioRepository
 
 Repo --> CreateScenarioController : scenarioRepository
 deactivate Repo

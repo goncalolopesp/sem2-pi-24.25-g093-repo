@@ -11,18 +11,26 @@ participant ":CreateScenarioController" as CreateScenarioController
 participant "scenarioRepository\n:ScenarioRepository" as scenarioRepository
 
 activate CreateScenarioUI
-CreateScenarioUI --> CreateScenarioUI : submitData()
-    CreateScenarioUI --> CreateScenarioController : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-    activate CreateScenarioController
 
-    CreateScenarioController --> scenarioRepository : createScenario(scenarioName, selectedMap, timePeriod, techRestriction, historicalRestriction)
-    activate scenarioRepository
+CreateScenarioUI -> CreateScenarioUI : submitData()
+    CreateScenarioUI -> CreateScenarioController : createScenario(scenarioName, selectedMap, timeRestrictions, port, technologicalRestrictions, historicalRestrictions, rate, multiplier)
+    activate CreateScenarioController
 
     create "scenario\n:Scenario" as Scenario
 
-    scenarioRepository --> Scenario : create()
-    scenarioRepository --> scenarioRepository : validateScenario(scenario)
-    scenarioRepository --> scenarioRepository : add(scenario)
+    CreateScenarioController -> Scenario : <<create>> new Scenario(scenarioName, selectedMap, timeRestrictions, port, technologicalRestrictions, historicalRestrictions, rate, multiplier)
+    activate Scenario
+
+    Scenario --> CreateScenarioController : Scenario
+    deactivate Scenario
+
+    CreateScenarioController -> scenarioRepository : add(Scenario)
+    activate scenarioRepository
+
+    scenarioRepository -> scenarioRepository : validateScenario(Scenario)
     deactivate scenarioRepository
+
+    CreateScenarioController --> CreateScenarioUI : Scenario
+    deactivate CreateScenarioController
 
 @enduml
