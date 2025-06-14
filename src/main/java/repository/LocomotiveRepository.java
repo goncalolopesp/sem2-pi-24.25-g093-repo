@@ -3,10 +3,7 @@ package repository;
 import java.io.Serializable;
 import java.util.*;
 
-import domain.Budget;
-import domain.CurrentUser;
-import domain.Locomotive;
-import domain.User;
+import domain.*;
 
 /**
  * Repository class responsible for managing locomotive data and operations.
@@ -20,6 +17,24 @@ public class LocomotiveRepository implements Serializable {
 
     /** Current user session for user-specific operations */
     CurrentUser session = CurrentUser.getInstance();
+
+    /**
+     * A transient field that holds a reference to a {@code TrainRepository} instance.
+     * Used for managing train-related storage and query operations.
+     *
+     * This field is marked as transient to avoid serialization, as the {@code TrainRepository}
+     * may involve runtime state or dependencies that are non-serializable.
+     * The {@code TrainRepository} provides functionalities such as saving, updating, deleting,
+     * and retrieving train objects.
+     */
+    private transient TrainRepository trainRepository;
+
+    private TrainRepository getTrainRepository() {
+        if (trainRepository == null) {
+            trainRepository = Repositories.getInstance().getTrainRepository();
+        }
+        return trainRepository;
+    }
 
     /**
      * Adds a locomotive to the repository if it doesn't already exist.
@@ -82,7 +97,7 @@ public class LocomotiveRepository implements Serializable {
      * @param money The budget to use for the purchase
      * @return true if the purchase was successful, false if insufficient funds
      */
-    public boolean buyLocomotive(Locomotive locomotive, Budget money) {
+    public boolean buyLocomotive(Locomotive locomotive, Budget money, Scenario scenario) {
         User user = session.getUser();
         // Check if user has enough money to buy the locomotive
         if (money.getBudget() < locomotive.getPrice()) {
@@ -94,20 +109,47 @@ public class LocomotiveRepository implements Serializable {
         user.setLocomotives(boughtLocomotives);
         // Deduct the price from the budget
         money.subtractBudget(locomotive.getPrice());
+
+        List<Carriage> carriages = new ArrayList<>();
+        carriages.add(new Carriage(Carriage.Type.PEOPLE));
+        carriages.add(new Carriage(Carriage.Type.MAIL));
+        carriages.add(new Carriage(Carriage.Type.COAL));
+        carriages.add(new Carriage(Carriage.Type.IRON));
+        carriages.add(new Carriage(Carriage.Type.STEEL));
+        Train train1 = new Train(locomotive,carriages,user.getEmail(),scenario);
+
+        List<Carriage> carriages2 = new ArrayList<>();
+        carriages2.add(new Carriage(Carriage.Type.PEOPLE));
+        carriages2.add(new Carriage(Carriage.Type.MAIL));
+        carriages2.add(new Carriage(Carriage.Type.COAL));
+        carriages2.add(new Carriage(Carriage.Type.IRON));
+        carriages2.add(new Carriage(Carriage.Type.STEEL));
+        carriages2.add(new Carriage(Carriage.Type.PEOPLE));
+        carriages2.add(new Carriage(Carriage.Type.MAIL));
+        carriages2.add(new Carriage(Carriage.Type.COAL));
+        carriages2.add(new Carriage(Carriage.Type.IRON));
+        carriages2.add(new Carriage(Carriage.Type.STEEL));
+
+        Train train2 = new Train(locomotive,carriages2,user.getEmail(),scenario);
+
+        getTrainRepository().save(train1);
+        getTrainRepository().save(train2);
         return true;
     }
 
     /**
-     * Overloaded method to purchase a locomotive by its model name.
-     * Finds the locomotive in the repository and attempts to purchase it.
+     * Attempts to purchase a locomotive with the given model name using the provided budget and scenario.
+     * Retrieves the locomotive by its model name, checks if the purchase is valid, and completes
+     * the transaction if possible.
      *
-     * @param modelName The model name of the locomotive to purchase
-     * @param money The budget to use for the purchase
-     * @return true if the purchase was successful, false if the locomotive wasn't found or if insufficient funds
+     * @param modelName The name or model of the locomotive to purchase
+     * @param money The budget available for the purchase
+     * @param scenario The current scenario in which the purchase is being made
+     * @return true if the locomotive was successfully purchased, false otherwise
      */
-    public boolean buyLocomotive(String modelName, Budget money){
+    public boolean buyLocomotive(String modelName, Budget money, Scenario scenario) {
         Optional<Locomotive> locomotive = getLocomotive(modelName);
-        return locomotive.filter(value -> buyLocomotive(value, money)).isPresent();
+        return locomotive.filter(value -> buyLocomotive(value, money, scenario)).isPresent();
     }
 
     /**
@@ -148,6 +190,12 @@ public class LocomotiveRepository implements Serializable {
         return locomotives;
     }
 
+    /**
+     * Copies all locomotives from another repository into the current repository.
+     * Clears the current repository's locomotives before copying.
+     *
+     * @param other The source repository from which to copy locomotives.
+     */
     public void copyFrom(LocomotiveRepository other) {
         this.locomotives.clear();
         this.locomotives.addAll(other.getLocomotives());

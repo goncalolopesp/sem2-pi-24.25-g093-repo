@@ -105,6 +105,12 @@ public class AssignTrainGUIController implements Initializable {
         var currentUser = CurrentUser.getInstance().getUser();
         String playerEmail = currentUser.getEmail();
 
+        userTrains = getPlayerTrains(playerEmail,selectedScenario);
+        if (userTrains.isEmpty()) {
+            showMessage("Error: You need at least 1 train to assign.", true);
+            assignButton.setVisible(false);
+            return;
+        }
         availableStations = getPlayerStationsOnMap(playerEmail);
         if (availableStations.size() < 2) {
             showMessage("Error: You need at least 2 stations on this map to assign a train.", true);
@@ -112,12 +118,7 @@ public class AssignTrainGUIController implements Initializable {
             return;
         }
 
-        userTrains = getPlayerTrains(playerEmail);
-        if (userTrains.isEmpty()) {
-            showMessage("Error: You need at least 1 train to assign.", true);
-            assignButton.setVisible(false);
-            return;
-        }
+
 
         populateTrainList();
         populateStationComboBox();
@@ -732,9 +733,9 @@ public class AssignTrainGUIController implements Initializable {
      * @param playerEmail the email of the player whose trains are to be retrieved
      * @return a list of Train objects belonging to the specified player
      */
-    private List<Train> getPlayerTrains(String playerEmail) {
+    private List<Train> getPlayerTrains(String playerEmail, Scenario selectedScenario) {
         return Repositories.getInstance().getTrainRepository().getTrains().stream()
-                .filter(train -> train.getUserEmail().equals(playerEmail))
+                .filter(train -> train.getUserEmail().equals(playerEmail)).filter(train -> train.getScenario().equals(selectedScenario))
                 .collect(Collectors.toList());
     }
 

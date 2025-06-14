@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 public class Bootstrap {
-    TrainRepository trainRepository = Repositories.getInstance().getTrainRepository();
     public void run() {
         addUsers();
         addMaps();
@@ -16,7 +15,6 @@ public class Bootstrap {
         addCities();
         loadScenarios();
         createLocomotives();
-        addTrains();
     }
 
     private void addUsers() {
@@ -152,34 +150,5 @@ public class Bootstrap {
         buyLocomotiveController.createLocomotive("Eurostar", 1600, "Electric", 96, 65, 1994, 99999, 175);
         buyLocomotiveController.createLocomotive("Brenner", 1250, "Electric", 69, 175, 1999, 99999, 140);
         buyLocomotiveController.createLocomotive("Mag-Lev TBX-1", 2500, "Electric", 306, 200, 2008, 99999, 280);
-    }
-
-    private void addTrains(){
-        String mail = "player@this.app";
-        Locomotive teste = new Locomotive("1-3 Bobo", 85, "Electric", 33, 6, 1895, 1935, 54);
-        List<Carriage> carriages = new ArrayList<>();
-        carriages.add(new Carriage(Carriage.Type.PEOPLE));
-        carriages.add(new Carriage(Carriage.Type.MAIL));
-        carriages.add(new Carriage(Carriage.Type.COAL));
-        carriages.add(new Carriage(Carriage.Type.IRON));
-        carriages.add(new Carriage(Carriage.Type.STEEL));
-       Train train1 = new Train(teste,carriages,mail);
-
-        List<Carriage> carriages2 = new ArrayList<>();
-        carriages2.add(new Carriage(Carriage.Type.PEOPLE));
-        carriages2.add(new Carriage(Carriage.Type.MAIL));
-        carriages2.add(new Carriage(Carriage.Type.COAL));
-        carriages2.add(new Carriage(Carriage.Type.IRON));
-        carriages2.add(new Carriage(Carriage.Type.STEEL));
-        carriages2.add(new Carriage(Carriage.Type.PEOPLE));
-        carriages2.add(new Carriage(Carriage.Type.MAIL));
-        carriages2.add(new Carriage(Carriage.Type.COAL));
-        carriages2.add(new Carriage(Carriage.Type.IRON));
-        carriages2.add(new Carriage(Carriage.Type.STEEL));
-
-        Train train2 = new Train(teste,carriages2,mail);
-
-        trainRepository.save(train1);
-        trainRepository.save(train2);
     }
 }

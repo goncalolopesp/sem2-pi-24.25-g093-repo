@@ -149,7 +149,7 @@ public class BuyLocomotiveController {
      */
     public boolean buyLocomotive(String modelName, Scenario scenario) {
         if (canBuyLocomotive(modelName, scenario)) {
-            return locomotiveRepository.buyLocomotive(modelName, playerBudget);
+            return locomotiveRepository.buyLocomotive(modelName, playerBudget, scenario);
         }
         return false;
     }
@@ -163,14 +163,14 @@ public class BuyLocomotiveController {
      */
     public boolean buyLocomotiveDTO(LocomotiveDTO locomotiveDTO, Scenario scenario, Budget budget) {
         if (canBuyLocomotive(locomotiveDTO.getModelName(), scenario)) {
-            return locomotiveRepository.buyLocomotive(locomotiveDTO.getModelName(), budget);
+            return locomotiveRepository.buyLocomotive(locomotiveDTO.getModelName(), budget, scenario);
         }
         return false;
     }
 
     public boolean buyLocomotiveWithBudget(String modelName, Scenario scenario, Budget budget) {
         if (canBuyLocomotive(modelName, scenario)) {
-            return locomotiveRepository.buyLocomotive(modelName, budget);
+            return locomotiveRepository.buyLocomotive(modelName, budget, scenario);
         }
         return false;
     }
@@ -184,8 +184,17 @@ public class BuyLocomotiveController {
                 currentStage.close();
             }
         }else{
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Not Enough Budget");
-            alert.show();
+            if (!canBuyLocomotive(selectedLocomotive.getModelName(), currentScenario)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Locomotive not available in this scenario.");
+                alert.show();
+            } else if (!buyLocomotive(selectedLocomotive.getModelName(), currentScenario)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR, "Purchase failed. Not enough budget or internal error.");
+                alert.show();
+            } else {
+                if (currentStage != null) {
+                    currentStage.close();
+                }
+            }
         }
     }
 

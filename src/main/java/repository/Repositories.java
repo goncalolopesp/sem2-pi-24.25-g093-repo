@@ -47,7 +47,8 @@ public class Repositories {
         routeRepository = new RouteRepository();
 
         SimulationFile simFile = new SimulationFile();
-        simFile.load(this.simulationRepository, this.stationRepository, this.buildingRepository, this.locomotiveRepository);
+        simFile.load(this.simulationRepository, this.stationRepository, this.buildingRepository, this.locomotiveRepository,this.trainRepository);
+
     }
 
 
