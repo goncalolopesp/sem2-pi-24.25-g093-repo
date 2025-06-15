@@ -1,0 +1,18 @@
+unnamed package
+controller
+domain
+dto
+pt.ipp.isep.dei
+pt.ipp.isep.dei.controller
+pt.ipp.isep.dei.domain
+pt.ipp.isep.dei.repository
+pt.ipp.isep.dei.ui.console
+pt.ipp.isep.dei.ui.console.authorization
+pt.ipp.isep.dei.ui.console.menu
+pt.ipp.isep.dei.ui.console.utils
+railway_connectivity
+repository
+ui.console
+ui.console.menu
+ui.console.utils
+ui.gui
