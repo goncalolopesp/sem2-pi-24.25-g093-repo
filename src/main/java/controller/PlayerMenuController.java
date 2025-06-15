@@ -474,6 +474,7 @@ public class PlayerMenuController implements Initializable {
     private void handlePause() {
         if (simulationUI != null) {
             simulationUI.pauseGame();
+            System.out.println("[Game paused - navigating away from menu]");
             gameRunning = false;
             wasRunningBeforeNavigation = false;
             updateButtonStates();
@@ -484,6 +485,7 @@ public class PlayerMenuController implements Initializable {
     private void handleResume() {
         if (simulationUI != null) {
             simulationUI.resumeGame();
+            System.out.println("[Game resumed - navigating back to menu]");
             gameRunning = true;
             wasRunningBeforeNavigation = true;
             updateButtonStates();
