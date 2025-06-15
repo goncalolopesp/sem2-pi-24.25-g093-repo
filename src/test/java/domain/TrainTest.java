@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,14 +23,17 @@ class TrainTest {
         carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
         carriages.add(new Carriage(Carriage.Type.MAIL));
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
 
-        train = new Train(locomotive, carriages, userEmail);
+        train = new Train(locomotive, carriages, userEmail,test);
     }
 
     @Test
     void constructorShouldThrowExceptionWhenLocomotiveIsNull() {
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Train(null, carriages, userEmail);
+            new Train(null, carriages, userEmail,test);
         });
         assertEquals("Locomotive cannot be null", exception.getMessage());
     }
@@ -37,15 +41,19 @@ class TrainTest {
     @Test
     void constructorShouldThrowExceptionWhenCarriagesIsNull() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Train(locomotive, null, userEmail);
+            Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+
+            new Train(locomotive, null, userEmail,test);
         });
         assertEquals("Train must have at least one carriage", exception.getMessage());
     }
 
     @Test
     void constructorShouldThrowExceptionWhenCarriagesIsEmpty() {
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            new Train(locomotive, new ArrayList<>(), userEmail);
+            new Train(locomotive, new ArrayList<>(), userEmail,test);
         });
         assertEquals("Train must have at least one carriage", exception.getMessage());
     }

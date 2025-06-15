@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,11 +19,12 @@ public class AssignTrainControllerTest {
         User testUser = new User("Test User", "test@example.com", "password", "player");
         CurrentUser.getInstance().setUser(testUser);
 
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
         Locomotive locomotive = new Locomotive("Test Locomotive", 500, "Steam", 100, 50, 1900, 2000, 120);
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
         carriages.add(new Carriage(Carriage.Type.MAIL));
-        Train train = new Train(locomotive, carriages, "test@example.com");
+        Train train = new Train(locomotive, carriages, "test@example.com",test);
 
         List<PointOfRoute> route = new ArrayList<>();
         Station depot = new Station(Station.Type.DEPOT, "Depot", "TestMap", "Normal Scenario", "test@example.com",
@@ -66,7 +68,8 @@ public class AssignTrainControllerTest {
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
         carriages.add(new Carriage(Carriage.Type.MAIL));
-        Train train = new Train(locomotive, carriages, "test@example.com");
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        Train train = new Train(locomotive, carriages, "test@example.com",test);
 
         List<PointOfRoute> route = new ArrayList<>();
         Station depot = new Station(Station.Type.DEPOT, "Depot", "TestMap", "Vaccination Scenario", "test@example.com",
@@ -109,7 +112,8 @@ public class AssignTrainControllerTest {
         Locomotive locomotive = new Locomotive("Test Locomotive", 500, "Steam", 100, 50, 1900, 2000, 120);
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
-        Train train = new Train(locomotive, carriages, "test@example.com");
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        Train train = new Train(locomotive, carriages, "test@example.com",test);
 
         List<PointOfRoute> route = new ArrayList<>();
         Station depot = new Station(Station.Type.DEPOT, "Depot", "TestMap", "Normal Scenario", "test@example.com",
@@ -153,7 +157,8 @@ public class AssignTrainControllerTest {
         Locomotive locomotive = new Locomotive("Test Locomotive", 500, "Steam", 100, 50, 1900, 2000, 120);
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.MAIL));
-        Train train = new Train(locomotive, carriages, "test@example.com");
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        Train train = new Train(locomotive, carriages, "test@example.com",test);
 
         List<PointOfRoute> route = new ArrayList<>();
         Station depot = new Station(Station.Type.DEPOT, "Depot", "TestMap", "Normal Scenario", "test@example.com",
@@ -197,7 +202,8 @@ public class AssignTrainControllerTest {
         Locomotive locomotive = new Locomotive("Test Locomotive", 500, "Steam", 100, 50, 1900, 2000, 120);
         List<Carriage> carriages = new ArrayList<>();
         carriages.add(new Carriage(Carriage.Type.PEOPLE));
-        Train train = new Train(locomotive, carriages, "test@example.com");
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        Train train = new Train(locomotive, carriages, "test@example.com",test);
         List<PointOfRoute> emptyRoute = new ArrayList<>();
 
         List<String> normalRestrictions = new ArrayList<>();

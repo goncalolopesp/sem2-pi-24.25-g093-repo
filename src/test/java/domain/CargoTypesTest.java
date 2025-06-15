@@ -97,4 +97,10 @@ class CargoTypesTest {
     void cleanup() {
         System.setOut(originalOut);
     }
+
+    @Test
+    void testToString() {
+        String expected = "PEOPLE";
+        assertEquals(expected, CargoTypes.PEOPLE.toString());
+    }
 }

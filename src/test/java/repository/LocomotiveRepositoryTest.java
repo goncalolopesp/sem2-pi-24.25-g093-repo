@@ -2,18 +2,11 @@ package repository;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
+import domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import domain.Budget;
-import domain.CurrentUser;
-import domain.Locomotive;
-import domain.User;
 
 class LocomotiveRepositoryTest {
 
@@ -160,7 +153,8 @@ class LocomotiveRepositoryTest {
 
         Locomotive locomotive = new Locomotive("Steam Engine", 5000, "Steam", 100, 200, 1900, 1950, 120);
         Budget budget = new Budget(10000, null, null, user);
-        boolean result = repository.buyLocomotive(locomotive, budget);
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        boolean result = repository.buyLocomotive(locomotive, budget,test);
         assertTrue(result);
         assertEquals(5000, budget.getBudget());
         assertEquals(1, user.getLocomotives().size());
@@ -175,7 +169,8 @@ class LocomotiveRepositoryTest {
 
         repository.addLocomotive("Available Model", 6000, "Steam", 110, 190, 1920, 1960, 130);
         Budget budget = new Budget(8000, null, null, user);
-        boolean result = repository.buyLocomotive("Available Model", budget);
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        boolean result = repository.buyLocomotive("Available Model", budget,test);
         assertTrue(result);
         assertEquals(2000, budget.getBudget());
         assertEquals(1, user.getLocomotives().size());

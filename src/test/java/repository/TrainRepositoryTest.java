@@ -2,12 +2,14 @@ package repository;
 
 import domain.Carriage;
 import domain.Locomotive;
+import domain.Scenario;
 import domain.Train;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,8 +39,9 @@ class TrainRepositoryTest {
         carriages2.add(new Carriage(Carriage.Type.PEOPLE));
         carriages2.add(new Carriage(Carriage.Type.PEOPLE));
         carriages2.add(new Carriage(Carriage.Type.MAIL));
-        train1 = new Train(locomotive1, carriages1, userEmail1);
-        train2 = new Train(locomotive2, carriages2, userEmail2);
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        train1 = new Train(locomotive1, carriages1, userEmail1,test);
+        train2 = new Train(locomotive2, carriages2, userEmail2,test);
     }
 
     @Test
@@ -132,10 +135,11 @@ class TrainRepositoryTest {
         assertFalse(repository.getTrains().contains(train1));
         assertTrue(repository.getTrains().contains(train2));
 
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
         Train train3 = new Train(
                 new Locomotive("John Bull", 23, "Steam", 9, 7, 1831, 1853, 25),
                 List.of(new Carriage(Carriage.Type.MAIL)),
-                "user3@example.com"
+                "user3@example.com",test
         );
         repository.save(train3);
 

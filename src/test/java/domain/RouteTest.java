@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -65,7 +66,8 @@ class RouteTest {
                 new Carriage(Carriage.Type.MAIL, 100),
                 new Carriage(Carriage.Type.PEOPLE, 100)
         );
-        train = new Train(locomotive, carriages, playerEmail);
+        Scenario test = new Scenario("TestScenario", "TestMap", new int[]{1870, 1880}, 1, Collections.singletonList("steam"), Collections.singletonList("none"), 1, 1);
+        train = new Train(locomotive, carriages, playerEmail,test);
     }
 
     @Test

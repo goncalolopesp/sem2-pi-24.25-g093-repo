@@ -54,4 +54,13 @@ class CarriageTest {
 
         assertEquals("Carriage[type=MAIL, capacity=0/30]", result);
     }
+
+    @Test
+    void getters() {
+        Carriage carriage = new Carriage(Carriage.Type.PEOPLE);
+        assertEquals(Carriage.Type.PEOPLE, carriage.getType());
+        assertEquals(70, carriage.getCapacity());
+        assertEquals(0, carriage.getCapacityOwned());
+
+    }
 }
