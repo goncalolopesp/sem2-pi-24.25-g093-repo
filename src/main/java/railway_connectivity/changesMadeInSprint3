@@ -1,2 +1,3 @@
 1. Made so that in US14, the player can choose between generating the full Graph, or select a partial part of the graph;
 2. On US13, the player can now create a partial graph.
+3. On US13, the problem with the reading of the csv has now been fixed.

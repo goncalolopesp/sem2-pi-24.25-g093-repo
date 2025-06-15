@@ -1347,8 +1347,6 @@ public class main {
     private static void generateShortestRouteVisualization(List<String> shortestPath, List<String[]> edges,
                                                            List<String> allStations, List<String> routeSequence) throws IOException {
         Map<String, MutableNode> nodeMap = new HashMap<>();
-
-        // Create nodes with different colors and shapes for different types of stations
         for (String station : shortestPath) {
             Color nodeColor = Color.BLACK;
             String shape = "circle";
@@ -1363,7 +1361,6 @@ public class main {
                 size = 1.5;
                 shape = "doublecircle";
             } else if (routeSequence.contains(station)) {
-                // Intermediate stations
                 nodeColor = Color.BLUE;
                 size = 1.3;
                 shape = "diamond";
@@ -1377,7 +1374,6 @@ public class main {
                     .add(attr("fontname", "Arial Bold")));
         }
 
-        // Create directed graph for better path visualization
         MutableGraph g = mutGraph("ShortestRouteVisualization").setDirected(true)
                 .graphAttrs().add(attr("layout", "dot"))
                 .graphAttrs().add(attr("rankdir", "TB"))
@@ -1388,21 +1384,18 @@ public class main {
                 .graphAttrs().add(attr("ranksep", "2.0"))
                 .add(nodeMap.values().toArray(new MutableNode[0]));
 
-        // Add edges with sequence numbers and directions
-        Map<String, Integer> edgeCount = new HashMap<>(); // Track multiple edges between same nodes
+        Map<String, Integer> edgeCount = new HashMap<>();
 
         for (int i = 0; i < shortestPath.size() - 1; i++) {
             String from = shortestPath.get(i);
             String to = shortestPath.get(i + 1);
 
-            // Create unique edge key for tracking multiple edges
             String edgeKey = from + "->" + to;
             int edgeNumber = edgeCount.getOrDefault(edgeKey, 0) + 1;
             edgeCount.put(edgeKey, edgeNumber);
 
-            // Find the corresponding edge in the original data to get type and weight
-            String edgeType = "0"; // default
-            String weight = "1";   // default
+            String edgeType = "0";
+            String weight = "1";
 
             for (String[] edge : edges) {
                 if ((edge[0].equals(from) && edge[1].equals(to)) ||
@@ -1413,13 +1406,10 @@ public class main {
                 }
             }
 
-            // Color based on electrification
-            Color edgeColor = edgeType.equals("1") ? Color.YELLOW : Color.RED;
+            Color edgeColor = Color.BLACK;
 
-            // Create label with step number and weight
             String edgeLabel = String.format("%d", i + 1);
 
-            // Add different styling if this is a repeated edge
             String penwidth = edgeNumber > 1 ? "4.0" : "3.0";
             String style = edgeNumber > 1 ? "dashed" : "solid";
 
