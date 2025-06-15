@@ -19,6 +19,37 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+/**
+ * The SimulationController class provides functionalities to manage and execute the simulation of train journeys,
+ * cargo distribution, yearly progressions, and related operations within a simulation environment.
+ * It manages various repositories and ensures accurate handling of scenarios, routes, and industry interactions.
+ *
+ * Fields:
+ * - Simulation constants including resource values (PEOPLE_VALUE, MAIL_VALUE, etc.).
+ * - Yearly financial metrics for the simulation (yearlyEarnings, yearlyMaintenanceCost, yearlyFuelCost, etc.).
+ * - Lists tracking simulation state such as active journeys, waiting trains, trains preserving cargo, etc.
+ * - Current user and various repository references (simulationRepo, mapRepo, industryRepo, etc.).
+ * - Demand manager for handling simulations of demands across the environment.
+ *
+ * Methods:
+ * - Public methods include route execution, cargo handling, locomotion maintenance, and simulation resetting.
+ * - A wide variety of private helper methods exist for detailed operations such as checking route validity,
+ *   updating station capacity, managing yearly progression, validating restrictions, and interacting with industries.
+ * - Train journey handling includes cargo loading and unloading, calculating arrival earnings, managing route distances,
+ *   and ensuring proper cargo distribution between entities.
+ * - Yearly time progression handles maintenance costs, locomotive updates, and game-end processes.
+ * - Data retrieval methods for accessing industries, cities, stations, and user-related details for simulations.
+ *
+ * Responsibilities:
+ * - Execute train routes and manage the entire lifecycle of these journeys based on selected maps and scenarios.
+ * - Calculate costs, earnings, and budget implications for each year of the simulation.
+ * - Track cargo distributions across stations, industries, and steel mills to manage simulation outcomes.
+ * - Monitor and enforce simulation rules related to locomotives, railways, and historical restrictions.
+ * - Reset and update simulation parameters to ensure a seamless user experience across runs.
+ *
+ * Superclass:
+ * - java.lang.Object
+ */
 public class SimulationController {
 
     private static final int PEOPLE_VALUE = 5;
@@ -53,12 +84,23 @@ public class SimulationController {
     private final RouteRepository routeRepo = Repositories.getInstance().getRouteRepository();
     private final RailwayLineRepository railwayRepo = Repositories.getInstance().getRailwayLineRepository();
 
+    /**
+     * Represents a train journey that manages the route, departure year,
+     * estimated arrival year, and completion status of a train during its journey.
+     */
     private static class TrainJourney {
         private final Route route;
         private final int departureYear;
         private final int estimatedArrivalYear;
         private boolean completed;
 
+        /**
+         * Constructs a new TrainJourney object, initializing with a route, the current simulation year,
+         * and calculating the estimated arrival year based on the given current year and the route's details.
+         *
+         * @param route the route associated with the train journey, containing information such as the stations and operations along the journey
+         * @param currentSimulationYear the current year in the simulation, used as the departure year for this train journey
+         */
         public TrainJourney(Route route, int currentSimulationYear) {
             this.route = route;
             this.departureYear = currentSimulationYear;
@@ -66,6 +108,18 @@ public class SimulationController {
             this.estimatedArrivalYear = calculateEstimatedArrivalYear(currentSimulationYear) + 1;
         }
 
+        /**
+         * Calculates the estimated year of arrival for a train journey based on the current year,
+         * the route's details, and the train's locomotive specifications.
+         *
+         * The calculation considers the total distance of the route, the locomotive's top speed,
+         * and a degradation factor impacting the locomotive's effective speed. If the route
+         * does not have sufficient points, or if the train or its locomotive is not defined,
+         * the method returns the current year as a fallback.
+         *
+         * @param currentYear the current simulation year used as the starting point for the journey calculation
+         * @return the estimated arrival year of the train journey based on the route and locomotive details
+         */
         private int calculateEstimatedArrivalYear(int currentYear) {
             if (route.getPoints().size() < 2 || route.getTrain() == null || route.getTrain().getLocomotive() == null) {
                 return currentYear;
@@ -95,6 +149,17 @@ public class SimulationController {
             return currentYear + yearsToTravel;
         }
 
+        /**
+         * Calculates the speed degradation of a train based on the number of carriages attached to it.
+         *
+         * The method first checks if the train or its carriages are null or empty. If either of these
+         * conditions is true, the method returns a degradation of 0.0. Otherwise, it calculates the
+         * degradation factor by multiplying the number of carriages by a constant (0.05). The result
+         * is capped at a maximum value of 0.30 to ensure the degradation does not exceed a predefined limit.
+         *
+         * @return the calculated speed degradation as a double value. Returns 0.0 if the train or
+         * its carriages are not defined, or the list of carriages is empty.
+         */
         private double calculateSpeedDegradation() {
             if (route.getTrain() == null || route.getTrain().getCarriages() == null) {
                 return 0.0;
@@ -109,6 +174,17 @@ public class SimulationController {
             return Math.min(totalDegradation, 0.30);
         }
 
+        /**
+         * Finds a railway line connecting the two specified stations, owned by the given owner.
+         * The method searches for a railway line where the starting and destination stations match
+         * the provided stations in either order, and the line's owner matches the provided owner.
+         * If no matching railway line is found, the method returns null.
+         *
+         * @param station1 the first station to be matched in the railway line
+         * @param station2 the second station to be matched in the railway line
+         * @param owner the email address of the owner of the railway line
+         * @return the matching RailwayLine instance if found, otherwise null
+         */
         private RailwayLine findRailwayLineBetweenStations(Station station1, Station station2, String owner) {
             return Repositories.getInstance().getRailwayLineRepository()
                     .getRailwayLines()
@@ -121,13 +197,46 @@ public class SimulationController {
                     .findFirst()
                     .orElse(null);
         }
+
+        /**
+         * Retrieves the route associated with the current train journey.
+         *
+         */
         public Route getRoute() { return route; }
+
+        /**
+         * Retrieves the departure year of the train journey.
+         *
+         * @return the departure year as an integer.
+         */
         public int getDepartureYear() { return departureYear; }
+
+        /**
+         * Retrieves the estimated year of arrival for the train journey.
+         *
+         * @return the estimated arrival year as an integer.
+         */
         public int getEstimatedArrivalYear() { return estimatedArrivalYear; }
+
+        /**
+         * Checks whether the train journey is completed.
+         *
+         * @return true if the train journey is completed, false otherwise
+         */
         public boolean isCompleted() { return completed; }
+
+        /**
+         * Updates the completion status of the train journey.
+         *
+         * @param completed a boolean value indicating whether the train journey is completed (true) or not (false)
+         */
         public void setCompleted(boolean completed) { this.completed = completed; }
     }
 
+    /**
+     * The DemandManager class is responsible for managing the yearly demand for different types of cargo including people, mail, coal, iron, and steel.
+     * It tracks delivery quantities, adjusts demand levels based on delivery performance, and incorporates modifications from historical scenarios.
+     */
     public class DemandManager {
         private static final int MIN_DEMAND = 1;
         private static final int MAX_DEMAND = 9;
@@ -148,12 +257,44 @@ public class SimulationController {
         private int yearlyIronDelivered = 0;
         private int yearlySteelDelivered = 0;
 
+        /**
+         * Retrieves the current*/
         public int getPeopleDemand() { return peopleDemand; }
+
+        /**
+         * Retrieves the current demand for mail.
+         *
+         * @return the current mail demand as an integer
+         */
         public int getMailDemand() { return mailDemand; }
+
+        /**
+         * Retrieves the current demand for coal.
+         *
+         * @return the current coal demand as an integer
+         */
         public int getCoalDemand() { return coalDemand; }
+
+        /**
+         * Retrieves the current demand for iron.
+         *
+         * @return the current iron demand as an integer
+         */
         public int getIronDemand() { return ironDemand; }
+
+        /**
+         * Retrieves the current steel demand.
+         *
+         * @return the current steel demand as an integer
+         */
         public int getSteelDemand() { return steelDemand; }
 
+        /**
+         * Records the delivery of a specific type of cargo and updates the yearly delivery count.
+         *
+         * @param cargoType the type of cargo being delivered, categorized as one of the defined types in {@link Carriage.Type}
+         * @param amount the amount of cargo delivered; must be a positive integer
+         */
         public void recordDelivery(Carriage.Type cargoType, int amount) {
             switch (cargoType) {
                 case PEOPLE:
@@ -174,6 +315,13 @@ public class SimulationController {
             }
         }
 
+        /**
+         * Updates the yearly demand for different types of commodities and applies scenario-specific modifications.
+         * The method recalculates demand values based on the yearly deliveries and adjusts them according to the rules defined
+         * in the scenario. It also resets the yearly delivery counts and displays a summary of the demand update.
+         *
+         * @param scenario the scenario used to determine modifications to demand based on historical restrictions
+         */
         public void updateYearlyDemand(Scenario scenario) {
             peopleDemand = calculateNewDemand(peopleDemand, yearlyPeopleDelivered);
             mailDemand = calculateNewDemand(mailDemand, yearlyMailDelivered);
@@ -188,6 +336,14 @@ public class SimulationController {
             displayDemandUpdate();
         }
 
+        /**
+         * Calculates the new demand for a resource based on the current demand, yearly delivered amount,
+         * and applies some randomness within defined constraints.
+         *
+         * @param currentDemand the current demand for the resource
+         * @param yearlyDelivered the total amount of the resource delivered in the year
+         * @return the updated demand after applying adjustments and randomness
+         */
         private int calculateNewDemand(int currentDemand, int yearlyDelivered) {
             int newDemand = currentDemand;
 
@@ -204,6 +360,18 @@ public class SimulationController {
             return Math.max(MIN_DEMAND, Math.min(MAX_DEMAND, newDemand));
         }
 
+        /**
+         * Applies scenario-specific modifications to the demand values, adjusting them based
+         * on various historical restrictions defined in the given scenario.
+         *
+         * The method checks for specific historical restrictions such as "industrial revolution",
+         * "vaccination campaign", "economic depression", and "war time", and modifies the
+         * associated demand variables accordingly. These modifications are constrained
+         * by the minimum and maximum demand limits.
+         *
+         * @param scenario the scenario containing historical restrictions that dictate
+         *                 adjustments to the demand values
+         */
         private void applyScenarioModifications(Scenario scenario) {
             if (hasHistoricalRestriction(scenario, "industrial revolution")) {
                 coalDemand = Math.min(MAX_DEMAND, coalDemand + 2);
@@ -227,11 +395,23 @@ public class SimulationController {
             }
         }
 
+        /**
+         * Checks if a specific historical restriction is present in the given scenario.
+         *
+         * @param scenario the scenario to check for the specified historical restriction
+         * @param restriction the historical restriction to search for
+         * @return true if the scenario contains the specified historical restriction, false otherwise
+         */
         private boolean hasHistoricalRestriction(Scenario scenario, String restriction) {
             return scenario.getHistoricalRestrictions().stream()
                     .anyMatch(r -> r.equalsIgnoreCase(restriction));
         }
 
+        /**
+         * Resets the yearly delivery counts for all tracked commodities to zero.
+         * This method is typically invoked at the end of a year to clear the accumulated
+         * delivery statistics in preparation for a new year's data.
+         */
         private void resetYearlyDeliveries() {
             yearlyPeopleDelivered = 0;
             yearlyMailDelivered = 0;
@@ -240,6 +420,14 @@ public class SimulationController {
             yearlySteelDelivered = 0;
         }
 
+        /**
+         * Displays a summary of the updated yearly demand for various commodities.
+         *
+         * This method outputs the updated demand levels for people, mail, coal, iron,
+         * and steel for the new year. It also serves as a simple log to indicate that
+         * the demand levels have been refreshed. This is typically called after
+         * recalculating the yearly demand values.
+         */
         private void displayDemandUpdate() {
             System.out.println("\n[Yearly Demand Update] Demand levels updated for the new year.");
             System.out.printf("People: %d, Mail: %d, Coal: %d, Iron: %d, Steel: %d%n",
@@ -249,6 +437,18 @@ public class SimulationController {
 
     private final DemandManager demandManager = new DemandManager();
 
+    /**
+     * Executes the routes for the current user in the simulation.
+     * This method processes user-defined routes, starts train journeys,
+     * and checks arriving trains based on the provided parameters.
+     *
+     * @param selectedMap           the map currently selected for the simulation
+     * @param selectedScenario      the scenario currently selected for the simulation
+     * @param budget                the budget object managing the user's funds
+     * @param running               an atomic boolean indicating if the simulation is running
+     * @param currentSimulationYear the current year in the simulation
+     * @return a Runnable to execute route-related operations
+     */
     public Runnable executeRoutes(Map selectedMap, Scenario selectedScenario, Budget budget,
                                   AtomicBoolean running, int currentSimulationYear) {
         return () -> {
@@ -278,6 +478,14 @@ public class SimulationController {
         };
     }
 
+    /**
+     * Validates the given Route to ensure it meets the necessary criteria for execution.
+     * Checks for the presence of a train, sufficient points along the route,
+     * and valid connections between stations.
+     *
+     * @param route the Route object to be validated
+     * @return true if the route is valid; false otherwise
+     */
     private boolean isRouteValid(Route route) {
         if (route == null) {
             System.out.println("Route is null");
@@ -309,6 +517,16 @@ public class SimulationController {
         return true;
     }
 
+    /**
+     * Starts a train journey for the given route and simulation year.
+     * This method initializes a new TrainJourney object, generates
+     * a unique route ID, and adds the journey to the collection of active journeys.
+     * It also prints departure information, including the starting station,
+     * departure year, and the estimated arrival year.
+     *
+     * @param route                the Route object representing the path of the train journey
+     * @param currentSimulationYear the current year in the simulation for the journey to start
+     */
     private void startTrainJourney(Route route, int currentSimulationYear) {
         TrainJourney journey = new TrainJourney(route, currentSimulationYear);
         String routeId = generateRouteId(route);
@@ -321,6 +539,16 @@ public class SimulationController {
                 journey.getEstimatedArrivalYear());
     }
 
+    /**
+     * Checks for and processes trains that have arrived at their destination in the simulation.
+     * This method evaluates each active train journey to determine if it has arrived,
+     * updates their status, and removes completed journeys from the list of active journeys.
+     *
+     * @param scenario             the scenario currently being used in the simulation
+     * @param budget               the budget object managing the user's funds
+     * @param selectedMap          the map currently selected for the simulation
+     * @param currentSimulationYear the current year in the simulation
+     */
     private void checkArrivingTrains(Scenario scenario, Budget budget, Map selectedMap, int currentSimulationYear) {
         List<String> completedJourneys = new ArrayList<>();
 
@@ -353,11 +581,33 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Displays information about the completion of a train route, including details about
+     * the year of arrival, cargo collected, and total earnings.
+     *
+     * @param result       the CargoCollectionResult object containing the quantities
+     *                     of each type of cargo collected during the route
+     * @param totalEarnings the total earnings generated from the completed route
+     * @param journey      the TrainJourney object representing the details of the journey,
+     *                     such as the departure year
+     * @param currentYear  the year in which the train completed its journey
+     */
     private void displayRouteCompleteWithYear(CargoCollectionResult result, int totalEarnings, TrainJourney journey, int currentYear) {
         System.out.printf("\n[Train Arrival] Train arrived in year %d (departed year %d). Total Cargo: %d (People: %d, Mail: %d, Iron: %d, Coal: %d, Steel: %d) - Earned: %d. Type your option: ",
                 currentYear, journey.getDepartureYear(), result.getTotalCargo(), result.people, result.mail, result.iron, result.coal, result.steel, totalEarnings);
     }
 
+    /**
+     * Calculates the total earnings based on the transported cargo and specific conditions, such as route distance,
+     * demand multipliers, and scenario constraints.
+     *
+     * @param result The cargo collection results containing quantities of people, mail, coal, iron, and steel.
+     * @param scenario The scenario defining specific constraints or multipliers, e.g., a vaccination campaign.
+     * @param route The route taken, used to calculate the distance multiplier for earnings.
+     * @param selectedMap The map data used to determine route details and related constraints.
+     * @param peopleEarningMultiplier An atomic reference to the multiplier applied to earnings derived from transporting people.
+     * @return The total calculated earnings as an integer value.
+     */
     private int calculateArrivalEarnings(CargoCollectionResult result, Scenario scenario, Route route, Map selectedMap, AtomicReference<Double> peopleEarningMultiplier) {
         boolean isVaccinationCampaign = hasHistoricalRestriction(scenario, "vaccination campaign");
         final float DEFAULT_DEMAND = 4f;
@@ -382,6 +632,15 @@ public class SimulationController {
         return peopleEarnings + mailEarnings + coalEarnings + ironEarnings + steelEarnings;
     }
 
+    /**
+     * Calculates the total distance of a given route based on the stations it includes.
+     * The calculation includes summing up distances between consecutive stations and adjusts
+     * the result using the scale property of the provided map.
+     *
+     * @param route the route for which the distance is to be calculated. Must include a list of points containing stations.
+     * @param selectedMap the map which provides a scale to adjust the total distance calculated.
+     * @return the total distance of the route adjusted by the map's scale. Returns 0.0 if the route has fewer than two points.
+     */
     private double calculateRouteDistance(Route route, Map selectedMap) {
         if (route.getPoints().size() < 2) return 0.0;
 
@@ -398,11 +657,26 @@ public class SimulationController {
         return totalDistance * selectedMap.getScale();
     }
 
+    /**
+     * Generates a unique identifier for a given Route object by combining
+     * certain properties of the Route such as map name, scenario name, player email,
+     * points hash code, and train hash code (if available).
+     *
+     * @param route The Route object for which the unique identifier is to be generated.
+     * @return A string representing the unique identifier for the given Route object.
+     */
     private String generateRouteId(Route route) {
         return route.getMapName() + "_" + route.getScenarioName() + "_" + route.getPlayerEmail() + "_" +
                 route.getPoints().hashCode() + "_" + (route.getTrain() != null ? route.getTrain().hashCode() : 0);
     }
 
+    /**
+     * Retrieves a list of routes associated with the current user based on the provided map and scenario.
+     *
+     * @param map the map object containing details about the map being used
+     * @param scenario the scenario object containing details about the scenario being used
+     * @return a list of routes linked to the current user, filtered by map and scenario
+     */
     private List<Route> getUserRoutes(Map map, Scenario scenario) {
         return routeRepo.getRoutes().stream()
                 .filter(r -> r.getPlayerEmail().equals(currentUser.getEmail())
@@ -411,6 +685,17 @@ public class SimulationController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Calculates the fuel cost required for a train to travel along a given route.
+     *
+     * @param route The route object containing the sequence of points (stations) to be traversed.
+     *              The route must have at least two points for the calculation to proceed.
+     * @param selectedMap A map object that determines the scale of the route.
+     *                    The scale is used to adjust the total distance for accurate cost computation.
+     * @return The calculated fuel cost for the entire route based on the train's locomotive fuel cost,
+     *         the total distance of the route, and the map scale. Returns 0 if the route is invalid,
+     *         or if the train or locomotive is not set.
+     */
     private int calculateRouteFuelCost(Route route, Map selectedMap) {
         if (route.getPoints().size() < 2) return 0;
 
@@ -436,6 +721,15 @@ public class SimulationController {
         return fuelCost;
     }
 
+    /**
+     * Finds a railway line connecting two specified stations owned by a particular owner.
+     *
+     * @param station1 the starting station of the railway line
+     * @param station2 the ending station of the railway line
+     * @param owner the owner of the railway line
+     * @return the RailwayLine object connecting the specified stations with the given owner,
+     *         or null if no such railway line exists
+     */
     private RailwayLine findRailwayLineBetweenStations(Station station1, Station station2, String owner) {
         return Repositories.getInstance().getRailwayLineRepository()
                 .getRailwayLines()
@@ -448,10 +742,23 @@ public class SimulationController {
                 .orElse(null);
     }
 
+    /**
+     * Resets the capacity of all carriages in the provided list to zero.
+     *
+     * @param carriages the list of Carriage objects whose capacities will be reset
+     */
     private void resetCarriageCapacity(List<Carriage> carriages) {
         carriages.forEach(c -> c.setCapacityOwned(0));
     }
 
+    /**
+     * Handles the delivery of cargo to steel mills based on the specified route,
+     * ensuring that the required resources are available in the provided result data.
+     *
+     * @param route The route specifying the map and other relevant routing information.
+     * @param carriages A list of carriages used to transport cargo to the steel mills.
+     * @param result The collection result containing the cargo payload to be delivered and their availability.
+     */
     private void deliverToSteelMills(Route route, List<Carriage> carriages, CargoCollectionResult result) {
         Map selectedMap = mapRepo.getMaps().stream()
                 .filter(map -> map.getMapName().equals(route.getMapName()))
@@ -476,6 +783,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Delivers iron and coal cargo from the given list of carriages to the specified steel mill.
+     * Updates the cargo collection result and steel mill's stored resources accordingly.
+     *
+     * @param carriages the list of carriages containing cargo to be delivered
+     * @param result an instance of CargoCollectionResult to track the remaining iron and coal
+     * @param steelMill the steel mill where the cargo is delivered
+     */
     private void deliverCargoToSteelMill(List<Carriage> carriages, CargoCollectionResult result, Industry steelMill) {
 
         int ironDelivered = removeCargoFromTrain(carriages, Carriage.Type.IRON);
@@ -493,6 +808,13 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Removes cargo of a specified type from the train carriages and calculates the total capacity removed.
+     *
+     * @param carriages a list of carriages from which the cargo will be removed
+     * @param cargoType the type of cargo to be removed from the carriages
+     * @return the total capacity of the removed cargo
+     */
     private int removeCargoFromTrain(List<Carriage> carriages, Carriage.Type cargoType) {
         int totalRemoved = 0;
         for (Carriage carriage : carriages) {
@@ -504,6 +826,14 @@ public class SimulationController {
         return totalRemoved;
     }
 
+    /**
+     * Collects cargo from a specified station based on the requested cargo types and updates the result and station data.
+     *
+     * @param route the route associated with the cargo collection
+     * @param station the station from which cargo is to be collected
+     * @param requestedTypes the list of cargo types requested to be collected
+     * @param result the result object to store details of the cargo collection
+     */
     private void collectCargoFromStation(Route route, Station station, List<Carriage.Type> requestedTypes,
                                          CargoCollectionResult result) {
 
@@ -524,6 +854,18 @@ public class SimulationController {
         updateStationCapacity(station);
     }
 
+    /**
+     * Processes cargo at a single station based on the cargo mode and specified capacities.
+     * Determines the target amount of cargo to be loaded or unloaded depending on the station's
+     * cargo mode, the train's current cargo load, and the available cargo at the station.
+     *
+     * @param route the train route, which contains the train and associated details
+     * @param stationPoint the specific point on the route where the processing is taking place
+     * @param maxCargoTypeCapacity the maximum capacity of the specified cargo type that the train can hold
+     * @param availableCargo the amount of the specified cargo type available at the station
+     * @param cargoType the type of cargo to be processed
+     * @return the amount of cargo that can be processed (either loaded or taken into account) at the station
+     */
     private int processCargoAtSingleStation(Route route, PointOfRoute stationPoint,
                                             int maxCargoTypeCapacity, int availableCargo, Carriage.Type cargoType) {
 
@@ -559,6 +901,15 @@ public class SimulationController {
         return Math.min(targetAmount, availableCargo);
     }
 
+    /**
+     * Calculates the required cargo capacity based on the specified cargo mode.
+     *
+     * @param cargoMode the mode of cargo operation, which determines the calculation method
+     * @param maxCargoTypeCapacity the maximum cargo capacity for the given type
+     * @param availableCargo the current available cargo capacity
+     * @return the calculated cargo capacity based on the specified cargo mode
+     * @throws IllegalArgumentException if an unknown cargo mode is provided
+     */
     private int calculateRequiredCargoForMode(CargoMode cargoMode, int maxCargoTypeCapacity, int availableCargo) {
         switch (cargoMode) {
             case FULL:
@@ -575,6 +926,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Determines if a train can depart from a station based on the cargo mode, available cargo,
+     * and the train's current cargo state.
+     *
+     * @param route the route that the train is following, containing the station information and train details.
+     * @param stationIndex the index of the station point in the route from which the train is attempting to depart.
+     * @return true if the train can depart from the station according to the station's cargo mode and requirements, false otherwise.
+     */
     private boolean canTrainDepartFromStation(Route route, int stationIndex) {
         PointOfRoute stationPoint = route.getPoints().get(stationIndex);
         Station station = stationPoint.getStation();
@@ -611,7 +970,15 @@ public class SimulationController {
         }
     }
 
-
+    /**
+     * Collects cargo of specified types from a station for a train waiting at the specified stop along its route.
+     * The method determines the amount of cargo to collect based on the station's cargo mode,
+     * available cargo, and the train's carrying capacity.
+     *
+     * @param route          The route of the train, containing relevant information about the train and its stops.
+     * @param station        The station from which the cargo is to be collected.
+     * @param requestedTypes The list of cargo types that need to be collected from the station.
+     */
     private void collectAvailableCargoForWaiting(Route route, Station station, List<Carriage.Type> requestedTypes) {
         Train train = route.getTrain();
 
@@ -659,7 +1026,13 @@ public class SimulationController {
         updateStationCapacity(station);
     }
 
-    // Helper method to get current cargo in train for a specific type
+    /**
+     * Calculates and retrieves the total capacity of cargo of a specific type currently in the train.
+     *
+     * @param train the train object containing the list of carriages
+     * @param cargoType the specific type of cargo to calculate the total capacity for
+     * @return the sum of capacities of the specified cargo type in the train
+     */
     private int getCurrentCargoInTrain(Train train, Carriage.Type cargoType) {
         return train.getCarriages().stream()
                 .filter(carriage -> carriage.getType() == cargoType)
@@ -667,6 +1040,13 @@ public class SimulationController {
                 .sum();
     }
 
+    /**
+     * Loads a specified amount of cargo into the provided carriages based on their type and available capacity.
+     *
+     * @param carriages   the list of carriages to load the cargo into
+     * @param cargoType   the type of cargo to be loaded
+     * @param amountToLoad the total amount of cargo to load into the carriages
+     */
     private void loadCargoIntoCarriages(List<Carriage> carriages, Carriage.Type cargoType, int amountToLoad) {
         int remaining = amountToLoad;
 
@@ -688,6 +1068,17 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Executes the arriving route for a given train, managing various operations such as fuel cost calculation,
+     * cargo collection, earnings calculation, and delivery of resources to specific destinations.
+     *
+     * @param route        The {@code Route} object representing the train's route, including points and train details.
+     * @param scenario     The {@code Scenario} object containing the current scenario details such as profit multipliers.
+     * @param budget       The {@code Budget} object used to manage the financial status of the train operations.
+     * @param selectedMap  A map object representing the selected configuration of the world the train operates in.
+     * @param journey      The {@code TrainJourney} instance related to the current operation of the train.
+     * @param currentYear  An integer representing the current year of operations, used for reporting and record purposes.
+     */
     private void executeArrivingRoute(Route route, Scenario scenario, Budget budget, Map selectedMap, TrainJourney journey, int currentYear) {
         Train train = route.getTrain();
         if (train == null) return;
@@ -771,6 +1162,14 @@ public class SimulationController {
         trainsPreservingCargo.remove(routeId);
     }
 
+    /**
+     * Adds the cargo capacity from the train's carriages to the provided CargoCollectionResult.
+     * The method iterates through each carriage in the train, identifying its type
+     * and updating the corresponding cargo count in the result.
+     *
+     * @param train the Train object containing carriages whose cargo capacities are to be summed
+     * @param result the CargoCollectionResult object where the aggregated cargo capacities will be added
+     */
     private void addTrainCargoToResult(Train train, CargoCollectionResult result) {
         for (Carriage carriage : train.getCarriages()) {
             switch (carriage.getType()) {
@@ -793,6 +1192,15 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Collects and processes cargo from a single station for a given route and train.
+     *
+     * @param route the route that the train is operating on; must not be null
+     * @param station the station from which cargo is to be collected
+     * @param availableCargo the amount of cargo available at the station
+     * @param cargoType the type of cargo to be collected
+     * @return the amount of cargo successfully collected from the station, or 0 if no cargo was collected
+     */
     private int collectCargoFromSingleStation(Route route, Station station, int availableCargo, Carriage.Type cargoType) {
         if (route == null) {
             return 0;
@@ -813,6 +1221,13 @@ public class SimulationController {
         return processCargoAtSingleStation(route, stationPoint, maxCargoTypeCapacity, availableCargo, cargoType);
     }
 
+    /**
+     * Finds and returns the PointOfRoute in the given route that corresponds to the specified target station.
+     *
+     * @param route the route to search within
+     * @param targetStation the station to find in the route
+     * @return the PointOfRoute corresponding to the target station, or null if the station is not found in the route
+     */
     private PointOfRoute findStationInRoute(Route route, Station targetStation) {
         return route.getPoints().stream()
                 .filter(point -> point.getStation().equals(targetStation))
@@ -820,6 +1235,13 @@ public class SimulationController {
                 .orElse(null);
     }
 
+    /**
+     * Calculates the total capacity of carriages of a specific cargo type in a given train.
+     *
+     * @param train the train containing the carriages to evaluate
+     * @param cargoType the type of cargo for which the capacity is to be calculated
+     * @return the total capacity of all carriages of the specified cargo type
+     */
     private int calculateCargoTypeCapacity(Train train, Carriage.Type cargoType) {
         return train.getCarriages().stream()
                 .filter(carriage -> carriage.getType() == cargoType)
@@ -827,6 +1249,13 @@ public class SimulationController {
                 .sum();
     }
 
+    /**
+     * Retrieves the amount of available cargo of the specified type at the given station.
+     *
+     * @param station the station from which cargo availability is to be retrieved
+     * @param cargoType the type of cargo to check for availability
+     * @return the amount of available cargo of the specified type at the station, or 0 if the cargo type is unrecognized
+     */
     private int getAvailableCargoAtStation(Station station, Carriage.Type cargoType) {
         switch (cargoType) {
             case PEOPLE: return station.getPeopleStored();
@@ -838,6 +1267,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Updates the cargo stored in a station by reducing the specified amount of the given cargo type.
+     *
+     * @param station the station where the cargo is being updated
+     * @param cargoType the type of cargo to be reduced (e.g., PEOPLE, MAIL, COAL, IRON, STEEL)
+     * @param collectedAmount the amount of cargo to be reduced from the station's storage.
+     *                        If the storage does not have enough cargo, the value will be set to zero.
+     */
     private void updateStationCargo(Station station, Carriage.Type cargoType, int collectedAmount) {
         switch (cargoType) {
             case PEOPLE:
@@ -858,6 +1295,11 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Updates the station's total capacity based on the sum of stored cargo across different types.
+     *
+     * @param station the station object whose capacity is to be updated
+     */
     private void updateStationCapacity(Station station) {
         // Calculate total stored cargo across all types
         int totalStored = station.getPeopleStored() + station.getMailStored() +
@@ -865,6 +1307,13 @@ public class SimulationController {
         station.setCapacityOwned(totalStored);
     }
 
+    /**
+     * Updates the CargoCollectionResult based on the specified cargo type and amount.
+     *
+     * @param result the CargoCollectionResult object to be updated
+     * @param cargoType the type of cargo to be added to the result
+     * @param amount the amount of the specified cargo type to be added
+     */
     private void updateCollectionResult(CargoCollectionResult result, Carriage.Type cargoType, int amount) {
         switch (cargoType) {
             case PEOPLE: result.people += amount; break;
@@ -875,11 +1324,25 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Checks if a given historical restriction exists in the specified scenario.
+     *
+     * @param scenario the Scenario object containing historical restrictions
+     * @param restriction the name of the restriction to check for
+     * @return true if the specified restriction exists in the historical restrictions of the scenario, false otherwise
+     */
     private boolean hasHistoricalRestriction(Scenario scenario, String restriction) {
         return scenario.getHistoricalRestrictions().stream()
                 .anyMatch(r -> r.equalsIgnoreCase(restriction));
     }
 
+    /**
+     * Determines if the train, represented by a list of carriages, is currently full.
+     * A train is considered full if all carriages have no available capacity.
+     *
+     * @param carriages the list of carriages to check; may be null or empty
+     * @return true if the train is full or the list of carriages is null or empty, false otherwise
+     */
     private boolean isTrainFull(List<Carriage> carriages) {
         if (carriages == null || carriages.isEmpty()) {
             return true;
@@ -898,6 +1361,11 @@ public class SimulationController {
         return !hasAvailableSpace;
     }
 
+    /**
+     * CargoCollectionResult is a utility class that holds counts of various categories
+     * of cargo, such as people, mail, coal, iron, and steel. It provides methods to compute
+     * the total cargo and to determine whether both iron and coal are present.
+     */
     private static class CargoCollectionResult {
         int people = 0;
         int mail = 0;
@@ -905,27 +1373,57 @@ public class SimulationController {
         int iron = 0;
         int steel = 0;
 
+        /**
+         * Computes the total cargo by summing the counts of people, mail, and steel.
+         *
+         * @return The total cargo count as an integer.
+         */
         int getTotalCargo() {
             return people + mail + steel;
         }
 
+        /**
+         * Determines if both iron and coal are present in the collection.
+         *
+         * @return true if the collection contains at least one unit of both iron and coal, false otherwise
+         */
         boolean hasIronAndCoal() {
             return iron > 0 && coal > 0;
         }
     }
 
+    /**
+     * Retrieves a list of industries associated with the given map.
+     *
+     * @param map the map for which industries need to be retrieved
+     * @return a list of industries that belong to the specified map
+     */
     public List<Industry> getIndustriesForMap(Map map) {
         return industryRepo.getIndustries().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a list of cities that match the given map's name.
+     *
+     * @param map the map object used to filter cities based on its name
+     * @return a list of cities associated with the specified map
+     */
     public List<City> getCitiesForMap(Map map) {
         return cityRepo.getCities().stream()
                 .filter(c -> c.getMapName().equals(map.getMapName()))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a list of stations associated with the current user based on the specified map and scenario.
+     *
+     * @param map the map containing the context for which stations need to be retrieved
+     * @param scenario the scenario context for filtering stations
+     * @return a list of stations that match the criteria of belonging to the specified map, scenario,
+     *         and being owned by the current user. Returns an empty list if the current user is null.
+     */
     public List<Station> getUserStations(Map map, Scenario scenario) {
         if (currentUser == null) return new ArrayList<>();
 
@@ -936,7 +1434,20 @@ public class SimulationController {
                 .collect(Collectors.toList());
     }
 
-    // Time management methods
+    /**
+     * Creates a runnable task that handles the progression of years in the simulation
+     * and performs appropriate actions based on the current year and scenario state.
+     *
+     * @param selectedScenario the selected scenario containing relevant simulation data
+     * @param timePeriod an atomic reference to an {@code AtomicIntegerArray} holding the current year and the end year
+     * @param running an atomic boolean indicating whether the simulation is running
+     * @param options a list of menu items representing user interaction options
+     * @param scheduler a {@code ScheduledExecutorService} for scheduling tasks during the simulation
+     * @param gameOver an atomic boolean indicating whether the simulation has ended
+     * @param budget the budget object related to the simulation
+     * @param sim the simulation instance that handles the core logic of the simulation
+     * @return a {@code Runnable} that can be executed to manage year progression within the simulation
+     */
     public Runnable passTime(Scenario selectedScenario, AtomicReference<AtomicIntegerArray> timePeriod,
                              AtomicBoolean running, List<MenuItem> options, ScheduledExecutorService scheduler,
                              AtomicBoolean gameOver, Budget budget, Simulation sim) {
@@ -958,6 +1469,22 @@ public class SimulationController {
         };
     }
 
+    /**
+     * Handles the progression of the game logic for a specific year, including calculating and managing
+     * maintenance costs, updating the budget, processing locomotive changes, and providing a summary of
+     * the year's events. If the budget is insufficient, the game will transition to an end state.
+     *
+     * @param year the current year in the simulation
+     * @param budget the budget instance representing the financial state of the user
+     * @param selectedScenario the scenario selected by the player
+     * @param map the map of the simulation, representing the current geographical scenario
+     * @param timePeriod an atomic reference to the array containing key time periods
+     * @param scheduler the scheduled executor service responsible for managing periodic tasks
+     * @param running an atomic boolean indicating whether the simulation is ongoing
+     * @param options a list of menu options available to the user
+     * @param gameOver an atomic boolean that is set to true if the game ends
+     * @param sim the simulation instance managing the core game logic
+     */
     private void handleYearProgression(int year, Budget budget, Scenario selectedScenario, Map map,
                                        AtomicReference<AtomicIntegerArray> timePeriod,
                                        ScheduledExecutorService scheduler, AtomicBoolean running,
@@ -1001,6 +1528,15 @@ public class SimulationController {
         yearlyTotalCost = 0;
     }
 
+    /**
+     * Calculates and processes the maintenance cost for tracks owned
+     * by the current user in the specified scenario and map. The
+     * calculated amount is deducted from the provided budget.
+     *
+     * @param selectedScenario the scenario in which the track ownership is being examined
+     * @param map the map where track ownership is derived
+     * @param budget the budget from which the maintenance cost is subtracted
+     */
     private void payTrackMaintenance(Scenario selectedScenario, Map map,Budget budget) {
         long ownedTracksAmount = railwayRepo.countByScenarioMapAndOwner(selectedScenario, map, currentUser.getEmail());
         int moneySpent = Math.toIntExact(AMOUNT_PER_LINE * ownedTracksAmount);
@@ -1008,6 +1544,13 @@ public class SimulationController {
         budget.subtractBudget(moneySpent);
     }
 
+    /**
+     * Displays the yearly financial statistics of the railway system.
+     * This includes summarized information about the total earnings,
+     * locomotive maintenance costs, track maintenance costs,
+     * and fuel costs for the year.
+     * The output is printed to the standard console.
+     */
     private void displayYearlyStatistics() {
         System.out.println("\n--- Financial Summary ---");
         System.out.printf("Total Earnings from Routes: $%d%n", yearlyEarnings);
@@ -1017,6 +1560,15 @@ public class SimulationController {
         System.out.println("\n------------------------");
     }
 
+    /**
+     * Resets all the yearly counters for the system to their default values.
+     *
+     * This method sets the following yearly metrics to zero:
+     * - yearlyEarnings: Tracks the total earnings for the year.
+     * - yearlyMaintenanceCost: Tracks the total maintenance costs for the year.
+     * - yearlyFuelCost: Tracks the total fuel expenditure for the year.
+     * - yearlyTrackMaintenanceCost: Tracks the total cost of maintaining tracks for the year.
+     */
     private void resetYearlyCounters() {
         yearlyEarnings = 0;
         yearlyMaintenanceCost = 0;
@@ -1025,12 +1577,29 @@ public class SimulationController {
 
     }
 
+    /**
+     * Announces the locomotives that have become available in the specified year.
+     *
+     * @param year the year to check for new locomotives starting operation
+     */
     private void announceNewLocomotives(int year) {
         Repositories.getInstance().getLocomotiveRepository().getLocomotives().stream()
                 .filter(l -> l.getStartYearOfOperation() == year)
                 .forEach(l -> System.out.println("Locomotive " + l.getModelName() + " has become available."));
     }
 
+    /**
+     * Handles the end of the game by terminating the scheduler, resetting the simulation year,
+     * updating the running and gameOver flags, and prompting the user to return to the menu.
+     *
+     * @param scenario          The current scenario containing the game configuration and time restrictions.
+     * @param timePeriod        A reference to the AtomicIntegerArray representing the time period boundaries.
+     * @param scheduler         The ScheduledExecutorService used to execute periodic tasks during the game.
+     * @param running           An AtomicBoolean flag indicating whether the game loop is running.
+     * @param options           The menu options available for user interaction.
+     * @param gameOver          An AtomicBoolean flag indicating whether the game has ended.
+     * @param sim        The simulation instance associated with the game, used to reset the current year.
+     */
     private void handleGameEnd(Scenario scenario, AtomicReference<AtomicIntegerArray> timePeriod,
                                ScheduledExecutorService scheduler, AtomicBoolean running,
                                List<MenuItem> options, AtomicBoolean gameOver, Simulation sim) {
@@ -1045,6 +1614,12 @@ public class SimulationController {
         System.out.print("\nGame Over. Please insert 0 to return to menu: ");
     }
 
+    /**
+     * Calculates the total maintenance cost for all locomotives owned by the current user.
+     * It iterates through the user's list of locomotives and sums up their individual maintenance costs.
+     *
+     * @return the total maintenance cost for all locomotives as an integer
+     */
     private int calculateLocomotiveMaintenanceCost() {
         List<Locomotive> allLocomotives = currentUser.getLocomotives();
         int totalMaintenanceCost = 0;
@@ -1056,6 +1631,17 @@ public class SimulationController {
         return totalMaintenanceCost;
     }
 
+    /**
+     * Generates cargo based on the selected map and scenario, and manages the scheduling and
+     * execution of the cargo generation process. This method is synchronized with the provided
+     * time period and will shut down the scheduler if the time period conditions are no longer met.
+     *
+     * @param selectedMap the map used for cargo generation
+     * @param selectedScenario the scenario used for determining the cargo generation parameters
+     * @param timePeriod a reference to an atomic integer array representing the start and end time of the generation
+     * @param running a flag indicating if cargo generation is currently active
+     * @param generationScheduler the scheduler responsible for managing asynchronous cargo generation tasks
+     */
     public void generateCargo(Map selectedMap, Scenario selectedScenario,
                               AtomicReference<AtomicIntegerArray> timePeriod, AtomicBoolean running,
                               ScheduledExecutorService generationScheduler) {
@@ -1067,6 +1653,12 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Adds cargo to the stations associated with the specified map and scenario.
+     *
+     * @param selectedMap       the map object containing details of the selected map
+     * @param selectedScenario  the scenario object representing the current scenario
+     */
     public void addCargoToStation(Map selectedMap, Scenario selectedScenario) {
         String mapName = selectedMap.getMapName();
         List<Station> stations = getUserStationsForMap(mapName, selectedScenario);
@@ -1076,6 +1668,14 @@ public class SimulationController {
         addIndustryCargo(stations, selectedScenario, maxCapacityStations, mapName);
     }
 
+    /**
+     * Retrieves a list of stations associated with the specified map and scenario
+     * that are owned by the current user.
+     *
+     * @param mapName the name of the map to filter stations
+     * @param scenario the scenario object used to filter stations by scenario name
+     * @return a list of stations matching the specified map and scenario that are owned by the current user
+     */
     private List<Station> getUserStationsForMap(String mapName, Scenario scenario) {
         return stationrepo.getStations().stream()
                 .filter(s -> s.getMapName().equals(mapName) &&
@@ -1084,6 +1684,13 @@ public class SimulationController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Distributes city cargo to the appropriate stations based on the provided scenario and capacity limits.
+     *
+     * @param stations the list of all stations to be considered for distributing city cargo
+     * @param selectedScenario the scenario that determines the production rate of city cargo
+     * @param maxCapacityStations a set of stations that have reached their maximum cargo capacity
+     */
     public void addCityCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations) {
         cityRepo.getCities().forEach(city -> {
             List<Station> cityStations = findStationsForCity(stations, city);
@@ -1096,12 +1703,28 @@ public class SimulationController {
         });
     }
 
+    /**
+     * Finds and returns a list of stations associated with the specified city.
+     *
+     * @param stations the list of all stations to filter from
+     * @param city the city for which stations are being searched
+     * @return a list of stations that are associated with the given city
+     */
     private List<Station> findStationsForCity(List<Station> stations, City city) {
         return stations.stream()
                 .filter(s -> s.getName().contains(city.getName()))
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Adds city cargo to the given station, adjusting the station's current stored capacity
+     * and ensuring the cargo is divided appropriately between people and mail until the
+     * station reaches its maximum capacity.
+     *
+     * @param station the station where the cargo is to be added
+     * @param totalCargo the total amount of cargo to be added to the station
+     * @param maxCapacityStations the set of stations that have already reached their maximum capacity
+     */
     private void addCityCargoToStation(Station station, int totalCargo, Set<Station> maxCapacityStations) {
         int currentCapacity = station.getCapacityOwned();
         int maxCapacity     = station.getCapacity();
@@ -1130,6 +1753,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Adds industry cargo to stations based on the selected scenario, map name, and station overlap with industries.
+     *
+     * @param stations The list of stations available for cargo generation.
+     * @param selectedScenario The scenario that influences production rates and behavior for cargo distribution.
+     * @param maxCapacityStations The set of stations that are operating at maximum capacity, used to determine cargo limits.
+     * @param mapName The name of the map used to filter industries for cargo assignment.
+     */
     public void addIndustryCargo(List<Station> stations, Scenario selectedScenario, Set<Station> maxCapacityStations, String mapName) {
         if(selectedScenario.getPortBehavior() == PORT_BEHAVIOUR) {
             if (stations.isEmpty()) {
@@ -1160,6 +1791,13 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Determines if a given station's bounds overlap with a given industry's area.
+     *
+     * @param station the station to check for overlap
+     * @param industry the industry whose area to check against the station
+     * @return true if the station and industry areas overlap, false otherwise
+     */
     private boolean hasStationIndustryOverlap(Station station, Industry industry) {
         double industryRadius = (double) industry.getArea() /2;
         int industryX = industry.getLocation().getX();
@@ -1172,6 +1810,14 @@ public class SimulationController {
                 bounds.minY > industryY + industryRadius);
     }
 
+    /**
+     * Calculates the bounding box for a given station based on its type and coordinates.
+     *
+     * @param station the station object for which the bounding box is to be calculated.
+     *                It must contain valid coordinates (x, y) and a station type.
+     * @return a StationBounds object representing the calculated bounding box.
+     *         The bounds are determined based on the station's type and its position.
+     */
     private StationBounds getStationBounds(Station station) {
         int w, h, minX, minY;
 
@@ -1198,6 +1844,14 @@ public class SimulationController {
         return new StationBounds(minX, minY, minX + w - 1, minY + h - 1);
     }
 
+    /**
+     * Represents the bounds of a station using a rectangular area defined by
+     * minimum and maximum x and y coordinates.
+     *
+     * This class is immutable and provides a way to encapsulate the boundary
+     * dimensions of a station. It includes four integer values: minimum x coordinate,
+     * minimum y coordinate, maximum x coordinate, and maximum y coordinate.
+     */
     private static class StationBounds {
         final int minX, minY, maxX, maxY;
 
@@ -1209,6 +1863,13 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Distributes the cargo from the given industry to the specified station based on industry type.
+     *
+     * @param station the station where the cargo will be distributed
+     * @param industry the industry producing the cargo
+     * @param actualAddedCargo the amount of cargo to be added to the station
+     */
     private void distributeIndustryCargo(Station station, Industry industry, int actualAddedCargo) {
         switch (industry.getType()) {
             case IRON_MINE:
@@ -1227,6 +1888,14 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Determines the amount of cargo generated or available for a specific industry
+     * based on the type of industry and its current resources.
+     *
+     * @param ind the industry for which the cargo amount is calculated
+     * @return the amount of cargo generated or available for the given industry,
+     *         or 0 if the industry type is not supported or has insufficient resources
+     */
     private int getCargoPerIndustry(Industry ind) {
         switch (ind.getType()) {
             case IRON_MINE: return ind.getGeneratedIron();
@@ -1238,6 +1907,16 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Adds cargo to the specified station up to its maximum capacity. If the station
+     * reaches its maximum capacity as a result of this operation, it is added to the set
+     * of stations that have reached maximum capacity.
+     *
+     * @param station the station to which the cargo is to be added
+     * @param cargoToAdd the amount of cargo to add to the station
+     * @param maxCapacityStations the set of stations that have reached maximum capacity
+     * @return the actual amount of cargo that was added to the station
+     */
     private int addCargoToStation(Station station, int cargoToAdd, Set<Station> maxCapacityStations) {
         int currentCapacity = station.getCapacityOwned();
         int maxCapacity = station.getCapacity();
@@ -1259,6 +1938,12 @@ public class SimulationController {
         return actualCargoAdded;
     }
 
+    /**
+     * Handles the maintenance and fuel payment for all locomotives associated with the current user.
+     * Each locomotive's maintenance is paid using the provided budget.
+     *
+     * @param budget The budget used to pay for the maintenance and fuel costs of the locomotives.
+     */
     public void payLocomotiveMaintenance(Budget budget) {
         List<Locomotive> allLocomotives = currentUser.getLocomotives();
         List<Locomotive> maintainedLocomotives = new ArrayList<>();
@@ -1269,7 +1954,13 @@ public class SimulationController {
         }
     }
 
-
+    /**
+     * Handles the payment for the maintenance and fuel costs of a locomotive.
+     * Updates the locomotive's availability based on the remaining budget.
+     *
+     * @param locomotive the locomotive for which maintenance and fuel costs need to be paid
+     * @param budget the budget from which the costs will be deducted
+     */
     private void payMaintenanceAndFuel(Locomotive locomotive, Budget budget) {
         budget.subtractBudget(locomotive.getMaintenanceCost());
         locomotive.setAvailability(locomotive.getFuelCost() <= budget.getBudget());
@@ -1279,6 +1970,13 @@ public class SimulationController {
         }
     }
 
+    /**
+     * Removes locomotives from the user's collection that are outdated based on the specified year.
+     * A locomotive is considered outdated if its end year of operation is less than
+     * or equal to the provided year.
+     *
+     * @param year the year used as the threshold to remove outdated locomotives
+     */
     public void removeOutdatedLocomotives(int year) {
         List<Locomotive> activeLocomotives = currentUser.getLocomotives().stream()
                 .filter(locomotive -> {
@@ -1294,14 +1992,36 @@ public class SimulationController {
         currentUser.setLocomotives(activeLocomotives);
     }
 
+    /**
+     * Retrieves a list of all simulations from the simulation repository.
+     *
+     * @return a list of Simulation objects available in the repository
+     */
     public List<Simulation> getSimulations() {
         return simulationRepo.getSimulations();
     }
 
+    /**
+     * Creates a new simulation by initializing it with the provided map, scenario,
+     * current year, and user budget, and then adds it to the simulation repository.
+     *
+     * @param selectedMap the map selected for the simulation
+     * @param selectedScenario the scenario chosen for the simulation
+     * @param currentYear the current year in the context of the simulation
+     * @param userBudget the budget assigned to the user for the simulation
+     * @return the newly created Simulation instance
+     */
     public Simulation createSimulation(Map selectedMap, Scenario selectedScenario, int currentYear, Budget userBudget) {
         return simulationRepo.add(new Simulation(selectedMap, selectedScenario, currentUser, currentYear, userBudget));
     }
 
+    /**
+     * Retrieves and allows the user to select a scenario from the available list of scenarios.
+     * If no scenarios are available or the user does not select an option, null is returned.
+     *
+     * @return the selected Scenario object if the user makes a valid selection,
+     *         or null if no scenarios are available or no valid selection is made.
+     */
     public Scenario getScenario() {
         List<Scenario> allScenarios = scenarioRepo.getScenarios();
 
@@ -1319,7 +2039,14 @@ public class SimulationController {
         return idx == -1 ? null : allScenarios.get(idx);
     }
 
-
+    /**
+     * Checks for an existing budget associated with the given map, scenario, and current user.
+     * If no such budget exists, creates a new budget with default values and saves it.
+     *
+     * @param selectedMap the map associated with the budget lookup or creation
+     * @param selectedScenario the scenario associated with the budget lookup or creation
+     * @return the existing budget if found, otherwise a newly created budget
+     */
     public Budget checkOrCreateBudget(Map selectedMap, Scenario selectedScenario) {
         Budget budget = null;
 
@@ -1337,10 +2064,26 @@ public class SimulationController {
         return budget;
     }
 
+    /**
+     * Updates the current simulation with the provided parameters.
+     *
+     * @param map the map configuration to be used for the simulation
+     * @param scenario the scenario settings to be applied to the simulation
+     * @param newYear the year to update the simulation to
+     * @param newBudget the new budget to be allocated for the simulation
+     */
     public void updateSimulation(Map map, Scenario scenario, int newYear, Budget newBudget) {
         simulationRepo.updateSimulation(map, scenario, currentUser, newYear, newBudget);
     }
 
+    /**
+     * Resets the game by initializing locomotives, setting the budget, and removing
+     * stations associated with the specified map, scenario, and user.
+     *
+     * @param selectedMap the map selected for the game
+     * @param selectedScenario the scenario selected for the game
+     * @param budget the budget object to be updated with a new value
+     */
     public void resetGame(Map selectedMap, Scenario selectedScenario, Budget budget) {
         List<Locomotive> l = new ArrayList<>();
         currentUser.setLocomotives(l);
@@ -1352,6 +2095,13 @@ public class SimulationController {
         );
     }
 
+    /**
+     * Finds a simulation by the provided map and scenario.
+     *
+     * @param map a map containing relevant data for the simulation
+     * @param scenario the scenario to be used for finding the simulation
+     * @return an Optional containing the found Simulation, or an empty Optional if no simulation is found
+     */
     public Optional<Simulation> findBy(Map map, Scenario scenario) {
         return simulationRepo.findBy(map, scenario, currentUser);
     }
