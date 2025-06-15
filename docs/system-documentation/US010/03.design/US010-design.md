@@ -65,10 +65,6 @@ It uses Interaction Occurrence (a.k.a. Interaction Use).
 
 ![Sequence Diagram - Partial - Assign Train](svg/US010-Partial-SD-assignTrain.svg)
 
-**Get Output Partial SD**
-
-![Sequence Diagram - Partial - Get Output](svg/US010-Partial-SD-output.svg)
-
 ## 3.3. Class Diagram (CD)
 
 _In this section, it is suggested to present an UML static view representing the main related software classes that are involved in fulfilling the requirements as well as their relations, attributes and methods._

@@ -6,7 +6,7 @@ skinparam shadowing false
 autonumber
 
 actor "Player" as Player
-participant "AssignTrainUI" as atui
+participant ":AssignTrainUI" as atui
 
 activate Player
 
@@ -18,40 +18,87 @@ create ":AssignTrainController" as atc
 participant ":Repositories" as repositories
 participant "repositories\n:Repositories" as repo
 participant "stationRepository\n:StationRepository" as srepo
+participant "locomotiveRepository\n:LocomotiveRepository" as lrepo
 participant "trainRepository\n:TrainRepository" as trepo
+participant "railwayLineRepository\n:RailwayLineRepository" as rlrepo
+participant "routeRepository\n:RouteRepository" as rrepo
+participant ":RailwayLine" as rl
+participant ":Route" as route
 
-atui --> atc : create()
+atui -> atc : create()
 activate atc
 
-atc --> repositories : getInstance()
+atc -> repositories : getInstance()
 activate repositories
 
 repositories --> atc : repositories
 deactivate repositories
 
-atc --> repositories : getStationRepository()
-activate repositories
+atc -> repo : getStationRepository()
+activate repo
 
-repositories --> atc : stationRepository
-deactivate repositories
+repo -> srepo : getStationRepository()
+activate srepo
 
-atc --> repositories : getCarriageRepository()
-activate repositories
+srepo --> repo : stationRepository
+deactivate srepo
 
-repositories --> atc : carriageRepository
-deactivate repositories
+repo --> atc : stationRepository
+deactivate repo
 
-atc --> repositories : getTrainRepository()
-activate repositories
+atc -> repo : getLocomotiveRepository()
+activate repo
 
-repositories --> atc : trainRepository
-deactivate repositories
+repo -> lrepo : getLocomotiveRepository()
+activate lrepo
+
+lrepo --> repo : locomotiveRepository
+deactivate lrepo
+
+repo --> atc : locomotiveRepository
+deactivate repo
+
+atc -> repo : getTrainRepository()
+activate repo
+
+repo -> trepo : getTrainRepository()
+activate trepo
+
+trepo --> repo : trainRepository
+deactivate trepo
+
+repo --> atc : trainRepository
+deactivate repo
+
+atc -> repo : getRailwayLineRepository()
+activate repo
+
+repo -> rlrepo : getRailwayLineRepository()
+activate rlrepo
+
+rlrepo --> repo : railwayLineRepository
+deactivate rlrepo
+
+repo --> atc : railwayLineRepository
+deactivate repo
+
+atc -> repo : getRouteRepository()
+activate repo
+
+repo -> rrepo : getRouteRepository()
+activate rrepo
+
+rrepo --> repo : routeRepository
+deactivate rrepo
+
+repo --> atc : routeRepository
+deactivate repo
 deactivate atc
 
-atui --> atc : requests the list of stations owned by the player in the selected map
+atui -> atc : requests the list of stations owned by the player in the selected map
 activate atc
 
-atc --> srepo : requests the list of stations owned by the player in the selected map
+atc -> srepo : requests the list of stations owned by the player in the selected map
 activate srepo
 
 srepo --> atc : returns list of stations owned by the player in the selected map
@@ -62,14 +109,26 @@ deactivate atc
 
 alt stations owned by the player in the selected map is lower than 2
     atui --> Player : outputs "Error: You need at least 2 stations on this map to assign a train."
-    atui --> atui : return
+    atui -> atui : return
 end
 
-atui --> Player : gets the list of locomotives owned by the player
+atui -> atc : requests the list of locomotives owned by the player
+activate atc
+
+atc -> lrepo : requests the list of locomotives owned by the player
+activate lrepo
+
+lrepo --> atc : returns the list of locomotives owned by the player
+deactivate lrepo
+
+atc --> atui : returns the list of locomotives owned by the player
+deactivate atc
+
+atui --> Player : displays the list of locomotives owned by the player
 
 alt player doesn't own locomotives
     atui --> Player : outputs "Error: You need at least 1 locomotive to assign a train."
-    atui --> atui : return
+    atui -> atui : return
 end
 
 atui --> Player : requests locomotive selection
@@ -79,113 +138,77 @@ Player -> atui : selects locomotive
 activate atui
 
 loop while locomotive selection is invalid
-    atui --> atui : validates locomotive selection
+    atui -> atui : validates locomotive selection
     atui --> Player : outputs "Invalid selection. Try again."
-    deactivate atui
 end
 
-Player -> atui : selects locomotive
-activate atui
-
-atui --> atui : validates locomotive
-atui --> Player : requests the route: start and end
+atui --> Player : requests the route: start and end with respective cargo to be collected and pick-up modes
 deactivate atui
 
-Player -> atui : selects start and end of route
+Player -> atui : selects start and end of route with respective cargo to be collected and pick-up modes
 activate atui
 
 loop while invalid start and end of route
-    atui --> atui : validates start and end of route
+    atui -> atui : validates start and end of route
     atui --> Player : outputs "Invalid selection. Try again."
+    atui --> Player : requests the route: start and end with respective cargo to be collected and pick-up modes
     deactivate atui
+
+    Player -> atui : selects start and end of route with respective cargo to be collected and pick-up modes
+    activate atui
 end
 
-Player -> atui : selects start and end of route
-activate atui
-
-atui --> atui : validates start and end of route
-atui --> Player : asks if Player wants to add optional intermediates
-deactivate atui
+atui --> Player : asks if Player wants to add optional intermediates with respective cargo to be collected and pick-up modes
 
 alt if Player says yes
-    Player --> atui : accepts to add optional intermediates
-    activate atui
 
-    atui --> Player : requests the optional intermediates
+    atui --> Player : requests the optional intermediates with respective cargo to be collected and pick-up modes
     deactivate atui
 
-    Player --> atui : selects optional intermediates
+    Player -> atui : selects optional intermediates with respective cargo to be collected and pick-up modes
     activate atui
 
     loop while invalid optional intermediates
-        atui --> atui : validates optional intermediates
+        atui -> atui : validates optional intermediates
         atui --> Player : outputs "Invalid selection. Try again."
+        atui --> Player : requests the optional intermediates with respective cargo to be collected and pick-up modes
         deactivate atui
+
+        Player -> atui : selects optional intermediates with respective cargo to be collected and pick-up modes
+        activate atui
     end
-
-    Player --> atui : selects optional intermediates
-    activate atui
-
-    atui --> atui : validates optional intermediates
 end
 
-atui --> Player : requests the cargo type to be collected
-deactivate atui
-
-Player --> atui : selects cargo type
-activate atui
-
-loop while invalid cargo type
-    atui --> atui : validates cargo type
-    atui --> Player : outputs "Invalid selection. Try again."
-    deactivate atui
-end
-
-Player --> atui : selects cargo type
-activate atui
-
-atui --> atui : validates cargo type
-atui --> Player : requests the amount of carriages
-deactivate atui
-
-Player --> atui : selects amount of carriages
-activate atui
-
-loop while invalid amount of carriages
-    atui --> atui : validates amount of carriages
-    atui --> Player : outputs "Invalid number. Must be > 0."
-    deactivate atui
-end
-
-Player --> atui : selects amount of carriages
-activate atui
-
-atui --> atui : validates amount of carriages
-atui --> atui : new Train(locomotive, carriages, playerEmail)
-
-create "train\n:Train" as train
-
-atui --> train : create()
-atui --> atc : add(train)
+atui --> atc : assigns train to route
 activate atc
 
-atc --> trepo : add(train)
-activate trepo
+atc -> rl** : <<create>> new RailwayLine(pointsOfRoute, type, distance, user, scenario, map)
+activate rl
 
-trepo --> atc : returns train
-deactivate trepo
+rl --> atc : RailwayLine
+deactivate rl
 
-atc --> atui : returns train
+atc -> rlrepo : save(RailwayLine)
+activate rlrepo
+
+rlrepo --> atc : (void)
+deactivate rlrepo
+
+atc -> route** : <<create>> new Route(pointsOfRoute, train, user, scenario, map)
+activate route
+
+route --> atc : Route
+deactivate route
+
+atc -> rrepo : save(Route)
+activate rrepo
+
+rrepo --> atc : (void)
+deactivate rrepo
+
+atc --> atui : (void)
 deactivate atc
 
-atui --> atui : creates route with the selected inputs
-atui --> atc : assignTrainToRoute(train, route, cargo)
-activate atc
-
-atc --> atc : runs train route
-atc --> atui : returns train route summary
-deactivate atc
-
-atui --> Player : outputs "Success: Train created with " + carriages.size() + " carriages and assigned to route with " + completeRoute.size() + " stations."
+atui --> Player : outputs "Existing train assigned to route successfully!"
 deactivate atui
 @enduml
