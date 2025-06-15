@@ -41,7 +41,7 @@ public class ScenarioRepositoryTest {
     @Test
     void getScenarios() {
         List<Scenario> scenarios = repo.getScenarios();
-        assertEquals(2, scenarios.size());
+        assertEquals(3, scenarios.size());
         assertEquals("TestScenario", scenarios.get(0).getScenarioName());
         assertEquals("TestScenario2", scenarios.get(1).getScenarioName());
         assertThrows(UnsupportedOperationException.class, () -> scenarios.add(null));

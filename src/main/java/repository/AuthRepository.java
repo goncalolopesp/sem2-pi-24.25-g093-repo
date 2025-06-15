@@ -154,7 +154,7 @@ public class AuthRepository {
 
             usr.ifPresent(user -> users.remove(user));
 
-            if (usr.isPresent() && session.getUser().equals(usr.get())) {
+            if (usr.isPresent() && session.getUser() != null && session.getUser().equals(usr.get())) {
                 doLogout();
             }
             return true;
@@ -170,7 +170,7 @@ public class AuthRepository {
     public boolean deleteUser(User user) {
         if (doesUserExist(user.getEmail())) {
             users.remove(user);
-            if (session.getUser().equals(user)) {
+            if (session.getUser() != null && session.getUser().equals(user)) {
                 doLogout();
             }
             return true;
