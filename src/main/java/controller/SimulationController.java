@@ -556,7 +556,11 @@ public class SimulationController {
             TrainJourney journey = entry.getValue();
             String routeId = entry.getKey();
 
+            // If train is waiting at a station, try to collect more cargo and check if it can depart
             if (waitingTrainsAtStation.containsKey(routeId)) {
+                // Continue collecting cargo while waiting
+                continueCollectingAtWaitingStation(journey.getRoute(), routeId);
+
                 executeArrivingRoute(journey.getRoute(), scenario, budget, selectedMap, journey, currentSimulationYear);
                 if (!waitingTrainsAtStation.containsKey(routeId)) {
                     journey.setCompleted(true);
@@ -578,6 +582,28 @@ public class SimulationController {
             activeJourneys.remove(completedId);
             waitingTrainsAtStation.remove(completedId);
             trainsPreservingCargo.remove(completedId);
+        }
+    }
+
+    /**
+     * Continues collecting cargo at a station where a train is currently waiting.
+     * This method is called each simulation cycle to allow trains to gradually
+     * collect cargo until their departure requirements are met.
+     *
+     * @param route the route of the waiting train
+     * @param routeId the unique identifier of the route
+     */
+    private void continueCollectingAtWaitingStation(Route route, String routeId) {
+        int stationIndex = waitingTrainsAtStation.get(routeId);
+        PointOfRoute stationPoint = route.getPoints().get(stationIndex);
+        Station station = stationPoint.getStation();
+        List<Carriage.Type> requestedTypes = stationPoint.getCargoTypes();
+
+        // Only collect if station has available cargo
+        if (station.getCapacityOwned() > 0) {
+            collectAvailableCargoForWaiting(route, station, requestedTypes);
+            System.out.printf("\n[Continuing Collection] Train continuing to collect at %s. Station capacity: %d. Type your option: ",
+                    station.getName(), station.getCapacityOwned());
         }
     }
 
@@ -928,7 +954,7 @@ public class SimulationController {
 
     /**
      * Determines if a train can depart from a station based on the cargo mode, available cargo,
-     * and the train's current cargo state.
+     * and the train's current cargo state. Only collects cargo if requirements can be met.
      *
      * @param route the route that the train is following, containing the station information and train details.
      * @param stationIndex the index of the station point in the route from which the train is attempting to depart.
@@ -943,27 +969,59 @@ public class SimulationController {
 
         switch (cargoMode) {
             case AVAILABLE:
+                // For AVAILABLE mode, always collect what's available and allow departure
                 collectAvailableCargoForWaiting(route, station, requestedTypes);
                 return true;
 
             case HALF:
-                collectAvailableCargoForWaiting(route, station, requestedTypes);
-                return requestedTypes.stream()
+                // Check if station has enough cargo to meet HALF requirements
+                boolean canMeetHalfRequirements = requestedTypes.stream()
                         .allMatch(type -> {
                             int maxCapacityForType = calculateCargoTypeCapacity(train, type);
                             int halfCapacity = (int) Math.ceil(maxCapacityForType * 0.5);
                             int currentCargoInTrain = getCurrentCargoInTrain(train, type);
-                            return currentCargoInTrain >= halfCapacity;
+                            int needed = halfCapacity - currentCargoInTrain;
+                            int available = getAvailableCargoAtStation(station, type);
+                            return needed <= 0 || available >= needed; // Already has enough OR station has enough
                         });
 
+                if (canMeetHalfRequirements) {
+                    collectAvailableCargoForWaiting(route, station, requestedTypes);
+
+                    // Verify the train now meets HALF requirements
+                    return requestedTypes.stream()
+                            .allMatch(type -> {
+                                int maxCapacityForType = calculateCargoTypeCapacity(train, type);
+                                int halfCapacity = (int) Math.ceil(maxCapacityForType * 0.5);
+                                int currentCargoInTrain = getCurrentCargoInTrain(train, type);
+                                return currentCargoInTrain >= halfCapacity;
+                            });
+                }
+                return false; // Can't meet requirements, don't collect cargo
+
             case FULL:
-                collectAvailableCargoForWaiting(route, station, requestedTypes);
-                return requestedTypes.stream()
+                // Check if station has enough cargo to meet FULL requirements
+                boolean canMeetFullRequirements = requestedTypes.stream()
                         .allMatch(type -> {
                             int maxCapacityForType = calculateCargoTypeCapacity(train, type);
                             int currentCargoInTrain = getCurrentCargoInTrain(train, type);
-                            return currentCargoInTrain >= maxCapacityForType;
+                            int needed = maxCapacityForType - currentCargoInTrain;
+                            int available = getAvailableCargoAtStation(station, type);
+                            return needed <= 0 || available >= needed; // Already full OR station has enough
                         });
+
+                if (canMeetFullRequirements) {
+                    collectAvailableCargoForWaiting(route, station, requestedTypes);
+
+                    // Verify the train now meets FULL requirements
+                    return requestedTypes.stream()
+                            .allMatch(type -> {
+                                int maxCapacityForType = calculateCargoTypeCapacity(train, type);
+                                int currentCargoInTrain = getCurrentCargoInTrain(train, type);
+                                return currentCargoInTrain >= maxCapacityForType;
+                            });
+                }
+                return false; // Can't meet requirements, don't collect cargo
 
             default:
                 return false;
@@ -993,6 +1051,8 @@ public class SimulationController {
 
         for (Carriage.Type cargoType : requestedTypes) {
             int availableCargo = getAvailableCargoAtStation(station, cargoType);
+            if (availableCargo <= 0) continue;
+
             int maxCargoTypeCapacity = calculateCargoTypeCapacity(train, cargoType);
             int currentCargoInTrain = getCurrentCargoInTrain(train, cargoType);
 
@@ -1001,25 +1061,28 @@ public class SimulationController {
                 case HALF:
                     targetCapacity = (int) Math.ceil(maxCargoTypeCapacity * 0.5);
                     break;
-                case AVAILABLE:
-                    targetCapacity = currentCargoInTrain + Math.min(availableCargo, maxCargoTypeCapacity - currentCargoInTrain);
-                    break;
-                default:
+                case FULL:
                     targetCapacity = maxCargoTypeCapacity;
+                    break;
+                case AVAILABLE:
+                default:
+                    targetCapacity = currentCargoInTrain + Math.min(availableCargo, maxCargoTypeCapacity - currentCargoInTrain);
                     break;
             }
 
             int remainingCapacity = targetCapacity - currentCargoInTrain;
-
-            if (availableCargo > 0 && remainingCapacity > 0) {
+            if (remainingCapacity > 0) {
                 int toCollect = Math.min(availableCargo, remainingCapacity);
 
-                loadCargoIntoCarriages(train.getCarriages(), cargoType, toCollect);
+                if (toCollect > 0) {
+                    loadCargoIntoCarriages(train.getCarriages(), cargoType, toCollect);
+                    updateStationCargo(station, cargoType, toCollect);
 
-                updateStationCargo(station, cargoType, toCollect);
-
-                System.out.println("\n[Partial Cargo Collection] " + toCollect + " " + cargoType + " cargo collected while waiting at " + station.getName() +
-                        " (Mode: " + cargoMode + ", Target: " + targetCapacity + ", Current: " + (currentCargoInTrain + toCollect) + ")");
+                    System.out.println("\n[Cargo Collection While Waiting] " + toCollect + " " + cargoType +
+                            " cargo collected at " + station.getName() +
+                            " (Mode: " + cargoMode + ", Target: " + targetCapacity +
+                            ", Current: " + (currentCargoInTrain + toCollect) + "/" + maxCargoTypeCapacity + ")");
+                }
             }
         }
 

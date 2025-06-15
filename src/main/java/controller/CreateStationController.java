@@ -20,9 +20,9 @@ public class CreateStationController {
     private final StationRepository stationRepo = Repositories.getInstance().getStationRepository();
     private final IndustryRepository indRepo = Repositories.getInstance().getIndustryRepository();
 
-    private static final int COST_DEPOT = 50, CAP_DEPOT = 100;
-    private static final int COST_STATION = 100, CAP_STATION = 200;
-    private static final int COST_TERMINAL = 200, CAP_TERMINAL = 400;
+    private static final int COST_DEPOT = 50, CAP_DEPOT = 225;
+    private static final int COST_STATION = 100, CAP_STATION = 350;
+    private static final int COST_TERMINAL = 200, CAP_TERMINAL = 575;
 
     /**
      * Method responsible to build a station on the given map.

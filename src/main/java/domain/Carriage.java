@@ -11,11 +11,11 @@ public class Carriage implements Serializable {
      * Represents the different types of carriage
      */
     public enum Type {
-        PEOPLE(70),
-        MAIL(30),
-        COAL(50),
-        IRON(40),
-        STEEL(35);
+        PEOPLE(45),
+        MAIL(20),
+        COAL(30),
+        IRON(25),
+        STEEL(15);
 
         private final int defaultCapacity;
 
