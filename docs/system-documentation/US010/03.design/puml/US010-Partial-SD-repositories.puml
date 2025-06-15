@@ -5,37 +5,81 @@ skinparam shadowing false
 
 autonumber
 
-activate atui
-
-create ":AssignTrainController" as atc
-
-participant ":Repositories" as repositories
-
-atui --> atc : create()
+participant ":AssignTrainController" as atc
 activate atc
 
-atc --> repositories : getInstance()
+participant ":Repositories" as repositories
+participant "repositories\n:Repositories" as repo
+participant "stationRepository\n:StationRepository" as srepo
+participant "locomotiveRepository\n:LocomotiveRepository" as lrepo
+participant "trainRepository\n:TrainRepository" as trepo
+participant "railwayLineRepository\n:RailwayLineRepository" as rlrepo
+participant "routeRepository\n:RouteRepository" as rrepo
+
+atc -> repositories : getInstance()
 activate repositories
 
 repositories --> atc : repositories
 deactivate repositories
 
-atc --> repositories : getStationRepository()
-activate repositories
+atc -> repo : getStationRepository()
+activate repo
 
-repositories --> atc : stationRepository
-deactivate repositories
+repo -> srepo : getStationRepository()
+activate srepo
 
-atc --> repositories : getCarriageRepository()
-activate repositories
+srepo --> repo : stationRepository
+deactivate srepo
 
-repositories --> atc : carriageRepository
-deactivate repositories
+repo --> atc : stationRepository
+deactivate repo
 
-atc --> repositories : getTrainRepository()
-activate repositories
+atc -> repo : getLocomotiveRepository()
+activate repo
 
-repositories --> atc : trainRepository
-deactivate repositories
+repo -> lrepo : getLocomotiveRepository()
+activate lrepo
+
+lrepo --> repo : locomotiveRepository
+deactivate lrepo
+
+repo --> atc : locomotiveRepository
+deactivate repo
+
+atc -> repo : getTrainRepository()
+activate repo
+
+repo -> trepo : getTrainRepository()
+activate trepo
+
+trepo --> repo : trainRepository
+deactivate trepo
+
+repo --> atc : trainRepository
+deactivate repo
+
+atc -> repo : getRailwayLineRepository()
+activate repo
+
+repo -> rlrepo : getRailwayLineRepository()
+activate rlrepo
+
+rlrepo --> repo : railwayLineRepository
+deactivate rlrepo
+
+repo --> atc : railwayLineRepository
+deactivate repo
+
+atc -> repo : getRouteRepository()
+activate repo
+
+repo -> rrepo : getRouteRepository()
+activate rrepo
+
+rrepo --> repo : routeRepository
+deactivate rrepo
+
+repo --> atc : routeRepository
+deactivate repo
 deactivate atc
 @enduml

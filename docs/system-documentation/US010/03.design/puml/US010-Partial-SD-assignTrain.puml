@@ -5,35 +5,49 @@ skinparam shadowing false
 
 autonumber
 
-participant "AssignTrainUI" as atui
+actor "Player" as Player
+activate Player
 
+participant ":AssignTrainUI" as atui
 activate atui
 
-create ":AssignTrainController" as atc
+participant ":AssignTrainController" as atc
 
-participant "trainRepository\n:TrainRepository" as trepo
+participant "railwayLineRepository\n:RailwayLineRepository" as rlrepo
+participant "routeRepository\n:RouteRepository" as rrepo
+participant ":RailwayLine" as rl
+participant ":Route" as route
 
-atui --> atc : create()
-atui --> atui : new Train(locomotive, carriages, playerEmail)
-
-create "train\n:Train" as train
-
-atui --> train : create()
-atui --> atc : add(train)
+atui --> atc : assigns train to route
 activate atc
 
-atc --> trepo : add(train)
-activate trepo
+atc -> rl** : <<create>> new RailwayLine(pointsOfRoute, type, distance, user, scenario, map)
+activate rl
 
-trepo --> atc : returns train
-deactivate trepo
+rl --> atc : RailwayLine
+deactivate rl
 
-atc --> atui : returns train
+atc -> rlrepo : save(RailwayLine)
+activate rlrepo
+
+rlrepo --> atc : (void)
+deactivate rlrepo
+
+atc -> route** : <<create>> new Route(pointsOfRoute, train, user, scenario, map)
+activate route
+
+route --> atc : Route
+deactivate route
+
+atc -> rrepo : save(Route)
+activate rrepo
+
+rrepo --> atc : (void)
+deactivate rrepo
+
+atc --> atui : (void)
 deactivate atc
 
-atui --> atui : creates route with the selected inputs
-atui --> atc : assignTrainToRoute(train, route, cargo)
-activate atc
-
-atc --> atc : runs train route
+atui --> Player : outputs "Existing train assigned to route successfully!"
+deactivate atui
 @enduml
