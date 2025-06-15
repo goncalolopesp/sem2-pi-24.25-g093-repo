@@ -1451,9 +1451,12 @@ public class main {
 
         if (scf.hasNextLine()) {
             String line = scf.nextLine().trim();
-            String[] stationArray = line.split(";");
+            String[] stationArray = line.split("[,;]");
             for (String station : stationArray) {
-                stations.add(station.trim());
+                String trimmed = station.trim();
+                if (!trimmed.isEmpty()) {  // Skip empty strings
+                    stations.add(trimmed);
+                }
             }
         }
 
