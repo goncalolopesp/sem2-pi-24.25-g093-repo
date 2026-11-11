@@ -1,82 +1,84 @@
-# Project Template
+# Projeto Integrador — 2.º Semestre LEI 2024/25 (G093)
 
-This project template contains didactic artifacts relevant to the Integrative Project to be developed during the second semester of the [Degree in Informatics Engineering (LEI)](https://www.isep.ipp.pt/Course/Course/26) from the [School of Engineering – Polytechnic of Porto (ISEP)](https://www.isep.ipp.pt).
+Este é o Projeto Integrador do 2.º semestre da Licenciatura em Engenharia Informática do ISEP. É um **simulador de redes ferroviárias**: os editores criam mapas e cenários, e os jogadores constroem estações, compram locomotivas e atribuem comboios a rotas. Ao mesmo tempo, o simulador vai gerando carga nas estações conforme as cidades e as indústrias que a rede serve.
 
-In particular, it has:
+Equipa: Diogo Silva (1241229), Gonçalo Pinto (1241232), Gonçalo Tavares (1241234) e João Sousa (1222123).
 
-* The [Team Members and Task Distribution](docs/TeamMembersAndTasks.md) during sprints;
-* [Templates](docs/(template-files)) to capture and systematize evidence of proper application of the Software Development Process, namely regarding the activities of Requirements Engineering, OO Analysis and Design;
-* [Sample documentation](docs/outsourcing-tasks-example) and [source code](src) available as a starting point;
-* General description of how the provided application works (and it is structured).
+## Funcionalidades (User Stories)
 
+| US | Ator | Descrição |
+|---|---|---|
+| US01 | Editor | Criar um mapa com nome e dimensão |
+| US02 | Editor | Adicionar uma indústria ao mapa |
+| US03 | Editor | Adicionar uma cidade ao mapa |
+| US04 | Editor | Criar um cenário para um mapa |
+| US05 | Jogador | Construir uma estação (Depot, Station ou Terminal) |
+| US06 | Jogador | Melhorar uma estação com um edifício |
+| US07 | Jogador | Listar as estações e ver os seus detalhes |
+| US09 | Jogador | Comprar uma locomotiva |
+| US10 | Jogador | Atribuir um comboio a uma rota |
+| US12 | Product Owner | Simulador que gera carga nas estações (start/pause) |
+| US13–US14, US26–US29 | — | Conectividade da rede ferroviária e análise de desempenho (grafos) |
+| US30–US31 | — | Análise de dados das estações ([README_MATCP](README_MATCP.md)) |
 
-## Maven goals
+Cada US tem a sua documentação (requisitos, análise, design e testes) em [`docs/system-documentation`](docs/system-documentation). O manual do utilizador está em [`user-manual/G093_UserManual.pdf`](user-manual/G093_UserManual.pdf).
 
-### Run the unit tests
-```
-mvn clean test
-```
-
-### Generate javadoc for the source code
-```
-mvn javadoc:javadoc
-```
-
-### Generate javadoc for the test code
-```
-mvn javadoc:test-javadoc
-```
-
-### Generate Jacoco source code coverage report
-```
-mvn test jacoco:report
-```
-
-### Check if thresholds limits are achieved
-```
-mvn test jacoco:check
-```
-
-## How to generate a Jar package for the project
-
-Place the following plugin on the appropriate place of the pom.xml file.
-
-```xml
-<plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-assembly-plugin</artifactId>
-    <version>3.6.0</version>
-    <executions>
-        <execution>
-            <phase>package</phase>
-            <goals>
-                <goal>single</goal>
-            </goals>
-            <configuration>
-                <archive>
-                    <manifest>
-                        <mainClass>pt.ipp.isep.dei.esoft.project.ui.Main</mainClass>
-                    </manifest>
-                </archive>
-                <descriptorRefs>
-                    <descriptorRef>jar-with-dependencies</descriptorRef>
-                </descriptorRefs>
-            </configuration>
-        </execution>
-    </executions>
-</plugin>
-```
-
-Run the following command on the project root folder. You can use IntelliJ to run the command or the command line of your computer if you hav Maven installed.
+## Estrutura
 
 ```
-mvn package
+src/main/java/
+  Main.java, Bootstrap.java   ponto de entrada da aplicação (consola)
+  domain/ controller/ dto/ repository/   camadas da aplicação
+  ui/console/                 interface de consola
+  ui/gui/                     interface gráfica JavaFX
+  railway_connectivity/       ferramenta de conectividade/grafos (US13, US14, US26–US29)
+src/test/java/                testes unitários (JUnit 5)
+docs/                         documentação de engenharia (US, modelo de domínio, glossário)
+scenario*_lines.csv / scenario*_stations.csv   cenários para a ferramenta de conectividade
+users.usr                     utilizadores guardados (carregados no arranque)
 ```
 
-## How to run the project from the generated Jar Package
+## Compilar e executar pelo terminal
 
-Run the following command on the project root folder. You can use IntelliJ to run the command or the command line of your computer if you hav Maven installed.
+Requisitos: **JDK 11 ou superior** e **Maven 3**. Todos os comandos correm a partir da raiz do repositório. Na primeira build, o Maven descarrega as dependências (incluindo a `AuthLib` do repositório Repsy do ISEP), por isso é preciso ligação à internet.
 
+### 1. Compilar e gerar o JAR
+
+```bash
+mvn clean package -DskipTests
 ```
-java -jar target/project-template-1.0-SNAPSHOT-jar-with-dependencies.jar
+
+Este comando gera `target/project-template-1.0-SNAPSHOT-jar-with-dependencies.jar`.
+
+### 2. Executar a aplicação (consola)
+
+```bash
+java -cp target/project-template-1.0-SNAPSHOT-jar-with-dependencies.jar Main
+```
+
+No menu inicial podes fazer login ou criar um utilizador novo (opção 2).
+
+> O `java -jar` sobre o mesmo ficheiro arranca a classe `pt.ipp.isep.dei.Main`, que é a aplicação de exemplo do template original. Para correr o projeto, usa o comando acima com a classe `Main`.
+
+### 3. Executar a interface gráfica (JavaFX)
+
+```bash
+mvn javafx:run
+```
+
+### 4. Ferramenta de conectividade ferroviária
+
+Esta ferramenta lê um par de CSV (estações e linhas) da pasta indicada e pergunta quais usar:
+
+```bash
+java -cp target/project-template-1.0-SNAPSHOT-jar-with-dependencies.jar railway_connectivity.main .
+```
+
+### Testes, Javadoc e cobertura
+
+```bash
+mvn clean test               # testes unitários
+mvn javadoc:javadoc          # Javadoc do código
+mvn test jacoco:report       # relatório de cobertura (target/site/jacoco)
+mvn test jacoco:check        # verifica os limites de cobertura
 ```
